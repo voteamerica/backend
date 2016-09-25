@@ -28,6 +28,9 @@
     "type": "",
     "url": ""
   },
+  "engines" : { 
+    "node" : "6.6.x" 
+  },
   "license": "UNLICENSED",
   "description": "carpoolBack"
 }
