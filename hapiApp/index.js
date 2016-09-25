@@ -9,7 +9,30 @@ var pool = new Pool(config);
 
 const server = new Hapi.Server();
 
-server.connection({ port: 8000 });
+const DEFAULT_PORT = 8000;
+const SCHEMA_NAME = '"NOV2016"';
+const DRIVER_TABLE = '"DRIVER"';
+
+if (process.env.NODE_ENV !== undefined) {
+  console.error("NODE_ENV exists");
+
+  if (process.env.NODE_ENV === "production") {
+    console.error("NODE_ENV = production");
+
+    appPort = process.env.PORT;
+  }
+  else if (process.env.NODE_ENV === "development") {
+    console.error("NODE_ENV = development");
+  }
+  else {
+    console.error("NODE_ENV = other");
+  }
+}
+else {
+  console.error("no NODE_ENV found");
+}
+
+server.connection({ port: DEFAULT_PORT });
 
 var rowId = 8;
 
@@ -20,7 +43,7 @@ server.route({
 
     console.log(req.payload);
 
-    pool.query('SELECT * from "NOV2016"."DRIVER"', (err, result) => {
+    pool.query('SELECT * FROM ' + SCHEMA_NAME + '.' + DRIVER_TABLE, (err, result) => {
       result.rows.forEach( val => console.log(val));
 
       reply('get received at carpool' + JSON.stringify(result.rows[0]));
@@ -54,11 +77,9 @@ server.route({
     // values: [4, 'George', '602-481-6000', 'testing2@ericanderson.com', '0', '2016-09-01T00:00:00.000Z', '12:00:00+00', '13:00:00+00', 'IL', 'CHICAGO', 'THE L2', 'THE POLLS', 'TBD', 4, '1',
     //          'Notes on driver', '1', '2016-09-21T00:48:32.055Z', 'SYSTEM', '2016-09-21T00:48:32.055Z', 'SYSTEM']
 
-    text: 'INSERT INTO "NOV2016"."DRIVER" values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)',
+    text: 'INSERT INTO ' + SCHEMA_NAME + '.' + DRIVER_TABLE + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)',
     values: [rowId++, 'George', '602-481-6000', 'testing2@ericanderson.com', '0', '2016-09-01T00:00:00.000Z', '12:00:00+00', '13:00:00+00', 'IL', 'CHICAGO', 'THE L2', 'THE POLLS', 'TBD', 4, '1',
              'Notes on driver', '1', '2016-09-21T00:48:32.055Z', 'SYSTEM', '2016-09-21T00:48:32.055Z', 'SYSTEM']
-
-
 
 //  DriverID: 2,
 //   Name: 'John Smith',
