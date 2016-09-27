@@ -1,5 +1,4 @@
-// var remoteUrl = "http://localhost:8000";
-var remoteUrl = "http://carpoolpg-env.us-west-2.elasticbeanstalk.com";
+var remoteUrl = "http://localhost:8000";
 
 function sendDriverForm() {
   var formData  = new FormData();
