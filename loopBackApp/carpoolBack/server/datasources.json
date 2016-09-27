@@ -1,0 +1,16 @@
+{
+  "db": {
+    "name": "db",
+    "connector": "memory"
+  },
+  "carpoolDb": {
+    "host": "host",
+    "port": 5432,
+    "url": "",
+    "database": "db",
+    "password": "pwd",
+    "name": "carpoolDb",
+    "user": "user",
+    "connector": "postgresql"
+  }
+}

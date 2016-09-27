@@ -1,0 +1,14 @@
+{
+  "name": "carpool",
+  "version": "0.0.1",
+  "description": "basic api to insert rows",
+  "main": "connect.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jkbits1",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^6.1.0"
+  }
+}
