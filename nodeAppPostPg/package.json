@@ -1,0 +1,25 @@
+{
+  "name": "carpool-service",
+  "version": "0.0.1",
+  "description": "basic service for inserting to postgres",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jkbits1/backend.git"
+  },
+  "author": "jkbits1",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jkbits1/backend/issues"
+  },
+  "homepage": "https://github.com/jkbits1/backend#readme",
+  "dependencies": {
+    "hapi": "^15.0.3",
+    "moment": "^2.15.1",
+    "pg": "^6.1.0"
+  }
+}
