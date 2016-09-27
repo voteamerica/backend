@@ -85,7 +85,7 @@ COMMENT ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" in
 
 
 --
--- Name: distance(double precision, double precision, double precision, double precision); Type: FUNCTION; Schema: NOV2016; Owner: eric
+-- Name: distance(double precision, double precision, double precision, double precision); Type: FUNCTION; Schema: NOV2016; Owner: carpool_admins
 --
 
 CREATE FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) RETURNS double precision
@@ -102,12 +102,12 @@ END
 $$;
 
 
-ALTER FUNCTION "NOV2016".distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) OWNER TO eric;
+ALTER FUNCTION "NOV2016".distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) OWNER TO carpool_admins;
 
 SET search_path = public, pg_catalog;
 
 --
--- Name: distance(double precision, double precision, double precision, double precision); Type: FUNCTION; Schema: public; Owner: eric
+-- Name: distance(double precision, double precision, double precision, double precision); Type: FUNCTION; Schema: public; Owner: carpool_admins
 --
 
 CREATE FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) RETURNS double precision
@@ -122,7 +122,7 @@ END
 $$;
 
 
-ALTER FUNCTION public.distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) OWNER TO eric;
+ALTER FUNCTION public.distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) OWNER TO carpool_admins;
 
 SET search_path = "NOV2016", pg_catalog;
 
