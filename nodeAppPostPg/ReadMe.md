@@ -20,14 +20,14 @@ STEPS TO INSTALL ON LINUX
 
 ENV VARS REQUIRED (will change for carpool_web account, using for now)
 
-db env vars
+// db env vars
 export PGHOST=ip
 export PGUSER=username
 export PGDATABASE=dbname
 export PGPASSWORD=pwd
 export PGPORT=5432
 
-node env var
+// node env var
 export PORT=3000
 
 cd /usr/local (or wherever we put our apps)
@@ -36,13 +36,20 @@ git clone https://github.com/voteamerica/backend
 
 cd /voteamerica/backend/nodeAppPostPg
 
-npm install -- (installs dependencies)
+npm install // (installs dependencies)
 
-// start app - basic
+// start app - for basic test, ctrl-c to exit
 npm start
 
-// start app - managed
-pm2 start
+// start app - managed, auto-restart, resource monitoring etc. 
+// see these pages for more info
+// https://www.npmjs.com/package/pm2
+// http://pm2.keymetrics.io/
 
+pm2 start index.js
 
+//stop app 
+pm2 stop all // only one app, so this is ok - better to use app id, though
 
+monitor app 
+pm2 list
