@@ -15,11 +15,17 @@ config.port       = process.env.PGPORT;
 const pool = new Pool(config);
 const server = new Hapi.Server();
 
-const DEFAULT_PORT  = process.env.PORT || 8000;
+const DEFAULT_PORT  = process.env.PORT || 3000;
 
-const SCHEMA_NAME   = '"STAGE"';
-const DRIVER_TABLE  = '"WEBSUBMISSION_DRIVER"';
-const RIDER_TABLE   = '"WEBSUBMISSION_RIDER"';
+// for db carpool.UPPERCASE
+const UPPERCASE_SCHEMA_NAME   = '"STAGE"';
+const UPPERCASE_DRIVER_TABLE  = '"WEBSUBMISSION_DRIVER"';
+const UPPERCASE_RIDER_TABLE   = '"WEBSUBMISSION_RIDER"';
+
+// for db carpool
+const SCHEMA_NAME   = 'stage';
+const DRIVER_TABLE  = 'websubmission_driver';
+const RIDER_TABLE   = 'websubmission_rider';
 
 const DRIVER_ROUTE  = 'driver';
 const RIDER_ROUTE  = 'rider';
