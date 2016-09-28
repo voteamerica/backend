@@ -14,10 +14,35 @@ Use testPage.html (and linked testPageScript.js) to test app
 
       (change ip-address depending on app location)
 
-ENV VARS REQUIRED:
+#########################
+STEPS TO INSTALL ON LINUX
+#########################  
 
+ENV VARS REQUIRED (will change for carpool_web account, using for now)
+
+db env vars
 export PGHOST=ip
 export PGUSER=username
 export PGDATABASE=dbname
 export PGPASSWORD=pwd
 export PGPORT=5432
+
+node env var
+export PORT=3000
+
+cd /usr/local (or wherever we put our apps)
+
+git clone https://github.com/voteamerica/backend
+
+cd /voteamerica/backend/nodeAppPostPg
+
+npm install -- (installs dependencies)
+
+// start app - basic
+npm start
+
+// start app - managed
+pm2 start
+
+
+
