@@ -85,7 +85,7 @@ COMMENT ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" in
 
 
 --
--- Name: distance(double precision, double precision, double precision, double precision); Type: FUNCTION; Schema: nov2016; Owner: eric
+-- Name: distance(double precision, double precision, double precision, double precision); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
 --
 
 CREATE FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) RETURNS double precision
@@ -102,12 +102,12 @@ END
 $$;
 
 
-ALTER FUNCTION nov2016.distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) OWNER TO eric;
+ALTER FUNCTION nov2016.distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) OWNER TO carpool_admins;
 
 SET search_path = public, pg_catalog;
 
 --
--- Name: distance(double precision, double precision, double precision, double precision); Type: FUNCTION; Schema: public; Owner: eric
+-- Name: distance(double precision, double precision, double precision, double precision); Type: FUNCTION; Schema: public; Owner: carpool_admins
 --
 
 CREATE FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) RETURNS double precision
@@ -122,7 +122,7 @@ END
 $$;
 
 
-ALTER FUNCTION public.distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) OWNER TO eric;
+ALTER FUNCTION public.distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) OWNER TO carpool_admins;
 
 SET search_path = nov2016, pg_catalog;
 
@@ -333,6 +333,16 @@ CREATE TABLE bordering_state (
 
 
 ALTER TABLE bordering_state OWNER TO carpool_admins;
+
+--
+-- Name: helper; Type: TABLE; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE TABLE helper (
+);
+
+
+ALTER TABLE helper OWNER TO carpool_admins;
 
 --
 -- Name: match_status; Type: TABLE; Schema: nov2016; Owner: carpool_admins
@@ -691,6 +701,28 @@ GRANT ALL ON SCHEMA stage TO carpool_admins;
 
 
 --
+-- Name: cancel_ride_by_rider(integer, integer); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) FROM PUBLIC;
+REVOKE ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) FROM carpool_admins;
+GRANT ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) TO carpool_admins;
+GRANT ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) TO PUBLIC;
+GRANT ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) TO carpool_role;
+
+
+--
+-- Name: distance(double precision, double precision, double precision, double precision); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) FROM PUBLIC;
+REVOKE ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) FROM carpool_admins;
+GRANT ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) TO carpool_admins;
+GRANT ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) TO PUBLIC;
+GRANT ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) TO carpool_role;
+
+
+--
 -- Name: driver; Type: ACL; Schema: nov2016; Owner: carpool_admins
 --
 
@@ -768,6 +800,16 @@ REVOKE ALL ON SEQUENCE "RIDER_RiderID_seq" FROM PUBLIC;
 REVOKE ALL ON SEQUENCE "RIDER_RiderID_seq" FROM carpool_admins;
 GRANT ALL ON SEQUENCE "RIDER_RiderID_seq" TO carpool_admins;
 GRANT ALL ON SEQUENCE "RIDER_RiderID_seq" TO carpool_role;
+
+
+--
+-- Name: helper; Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE helper FROM PUBLIC;
+REVOKE ALL ON TABLE helper FROM carpool_admins;
+GRANT ALL ON TABLE helper TO carpool_admins;
+GRANT ALL ON TABLE helper TO carpool_role;
 
 
 --
