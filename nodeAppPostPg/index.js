@@ -1,10 +1,13 @@
 'use strict';
 
-const Hapi    = require('hapi');
-const moment  = require('moment');
-var   Pool    = require('pg').Pool;
+const Hapi        = require('hapi');
+const moment      = require('moment');
+const Pool        = require('pg').Pool;
+const Good        = require('good');
+const GoodFile    = require('good-file');
 
-const config  = require('./dbInfo.js');
+const config      = require('./dbInfo.js');
+const logOptions  = require('./logInfo.js');
 
 config.user       = process.env.PGUSER;
 config.database   = process.env.PGDATABASE;
@@ -12,9 +15,12 @@ config.password   = process.env.PGPASSWORD;
 config.host       = process.env.PGHOST;
 config.port       = process.env.PGPORT;
 
-const pool = new Pool(config);
+// const pool = new Pool(config);
+// not passing config causes Client() to search for env vars
+const pool = new Pool();
 const server = new Hapi.Server();
 
+const OPS_INTERVAL  = 300000; // 5 mins
 const DEFAULT_PORT  = process.env.PORT || 3000;
 
 // for db carpool.UPPERCASE
@@ -32,6 +38,8 @@ const RIDER_ROUTE  = 'rider';
 
 var appPort = DEFAULT_PORT;
 
+logOptions.ops.interval = OPS_INTERVAL;
+
 server.connection({ 
   port: appPort, 
   routes: { 
@@ -44,11 +52,13 @@ server.route({
   path: '/',
   handler: (req, reply) => {
 
+    req.log();
+
     pool.query(dbGetQueryString(), (err, result) => {
       var firstRowAsString = "";
 
       if (err) {
-        return reply("error: " + err);
+        return reply("GET error: " + err);
       }
 
       if (result !== undefined && result.rows !== undefined) {
@@ -68,7 +78,9 @@ server.route({
   handler: (req, reply) => {
     var payload = req.payload;
 
-    console.log("payload: " + payload);
+    req.log();
+
+    console.log("driver payload: " + JSON.stringify(payload, null, 4));
     console.log("driver zip: " + payload.DriverCollectionZIP);
 
     dbInsertData(payload, pool, dbGetInsertDriverString, getDriverPayloadAsArray);
@@ -83,7 +95,9 @@ server.route({
   handler: (req, reply) => {
     var payload = req.payload;
 
-    console.log("payload: " + payload);
+    req.log();
+
+    console.log("rider payload: " + JSON.stringify(payload, null, 4));
     console.log("rider zip: " + payload.RiderCollectionZIP);
 
     dbInsertData(payload, pool, dbGetInsertRiderString, getRiderPayloadAsArray);
@@ -92,12 +106,52 @@ server.route({
   }
 });
 
-server.start(err => {
-  if (err) {
-      throw err;
+server.register({
+    register: Good,
+    options:  logOptions
+  }
+  ,
+  err => {
+    if (err) {
+      return console.error(err);
+    }
+
+    server.start(err => {
+      if (err) {
+          throw err;
+      }
+
+      console.log(`Server running at: ${server.info.uri} \n`);
+
+      console.log("driver ins: " + dbGetInsertDriverString());
+      console.log("rider ins: " + dbGetInsertRiderString());
+      console.log("ops interval:" + logOptions.ops.interval);
+    });
+  }
+);
+
+server.on('request', function (request, event, tags) {
+
+  // Include the Requestor's IP Address on every log
+  if( !event.remoteAddress ) {
+    event.remoteAddress = request.headers['x-forwarded-for'] || request.info.remoteAddress;
   }
 
-  console.log(`Server running at: ${server.info.uri}`);
+  // Put the first part of the URL into the tags
+  if(request && request.url && event && event.tags) {
+    event.tags.push(request.url.path.split('/')[1]);
+  }
+
+  console.log('server req: %j', event) ;
+});
+
+server.on('response', function (request) {
+    console.log(
+        "server resp: " 
+      + request.info.remoteAddress 
+      + ': ' + request.method.toUpperCase() 
+      + ' ' + request.url.path 
+      + ' --> ' + request.response.statusCode);
 });
 
 pool.on('error', (err, client) => {
@@ -107,26 +161,28 @@ pool.on('error', (err, client) => {
 });
 
 function dbInsertData(payload, pool, fnInsertString, fnPayloadArray) {
-    pool.query(
-      fnInsertString(),
-      fnPayloadArray(payload)
-    )
-    .then(result => {
-      if (result !== undefined) {
-        console.log('insert: ', result)
-      }
-      else {
-        console.error('insert made')
-      }
-    })
-    .catch(e => {
-      if (e !== undefined && e.message !== undefined && e.stack !== undefined) {
-        console.error('query error', e.message, e.stack)
-      }
-      else {
-        console.error('query error.')
-      }
-    });
+  var insertString = fnInsertString();
+
+  pool.query(
+    insertString,
+    fnPayloadArray(payload)
+  )
+  .then(result => {
+    if (result !== undefined) {
+      console.log('insert: ', result)
+    }
+    else {
+      console.error('insert made')
+    }
+  })
+  .catch(e => {
+    if (e !== undefined && e.message !== undefined && e.stack !== undefined) {
+      console.error('query error', e.message, e.stack)
+    }
+    else {
+      console.error('query error.')
+    }
+  });
 }
 
 function dbGetQueryString () {
@@ -139,7 +195,7 @@ function dbGetInsertClause (tableName) {
 
 function dbGetInsertDriverString() {
   return dbGetInsertClause(DRIVER_TABLE)
-    + ' (' // "TimeStamp",  
+    + ' ('   
     + '  "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", "AvailableDriveTimesJSON"' 
     + ', "DriverCanLoadRiderWithWheelchair", "SeatCount", "DriverHasInsurance", "DriverInsuranceProviderName", "DriverInsurancePolicyNumber"'
     + ', "DriverLicenseState", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", "PermissionCanRunBackgroundCheck"'
@@ -149,12 +205,12 @@ function dbGetInsertDriverString() {
     + ')'
 
     + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, ' 
-    + '        $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)' //-- $26
+    + '        $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)' 
 }
 
 function dbGetInsertRiderString() {
   return dbGetInsertClause(RIDER_TABLE)
-    + ' (' // "CreatedTimeStamp",    
+    + ' ('     
     + '  "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail"'       
     + ', "RiderPhone", "RiderAreaCode", "RiderEmailValidated", "RiderPhoneValidated", "RiderVotingState"'
     + ', "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesJSON", "WheelchairCount", "NonWheelchairCount"'
@@ -162,7 +218,7 @@ function dbGetInsertRiderString() {
     + ', "RiderWillNotTalkPolitics", "ReadyToMatch", "PleaseStayInTouch"' 
     + ')'
     + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, ' 
-    + '        $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)' // , $23 
+    + '        $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)'  
 }
 
 function getRiderPayloadAsArray(payload) {
@@ -177,47 +233,11 @@ function getRiderPayloadAsArray(payload) {
 
 function getDriverPayloadAsArray(payload) {
   return [
-      payload.IPAddress, payload.DriverCollectionZIP, payload.DriverCollectionRadius, payload.AvailableDriveTimesJSON
-      , 
-      //   "TimeStamp" timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now()),
-      //   "IPAddress" character varying(20),
-      //   "DriverCollectionZIP" character varying(5) NOT NULL,
-      //   "DriverCollectionRadius" integer NOT NULL,
-      //   "AvailableDriveTimesJSON" character varying(2000),
-      // false, 2, false, 'ill. ins', '1234'
-      payload.DriverCanLoadRiderWithWheelchair, payload.SeatCount, payload.DriverHasInsurance, payload.DriverInsuranceProviderName, payload.DriverInsurancePolicyNumber
-      , 
-      //   "DriverCanLoadRiderWithWheelchair" boolean NOT NULL DEFAULT false,
-      //   "SeatCount" integer DEFAULT 1,
-      //   "DriverHasInsurance" boolean NOT NULL DEFAULT false,
-      //   "DriverInsuranceProviderName" character varying(255),
-      //   "DriverInsurancePolicyNumber" character varying(50),
-      // 'IL', '1234', 'fred', 'smith', false
-      payload.DriverLicenseState, payload.DriverLicenseNumber, payload.DriverFirstName, payload.DriverLastName, payload.PermissionCanRunBackgroundCheck
-      ,
-      //   "DriverLicenseState" character(2),
-      //   "DriverLicenseNumber" character varying(50),
-      //   "DriverFirstName" character varying(255) NOT NULL,
-      //   "DriverLastName" character varying(255) NOT NULL,
-      //   "PermissionCanRunBackgroundCheck" boolean NOT NULL DEFAULT false,
-      // 'f@gmail.xxx', '555-123-4567', 555, false, false
-      payload.DriverEmail, payload.DriverPhone, payload.DriverAreaCode, payload.DriverEmailValidated, payload.DriverPhoneValidated
-      , 
-      //   "DriverEmail" character varying(255),
-      //   "DriverPhone" character varying(20),
-      //   "DriverAreaCode" integer,
-      //   "DriverEmailValidated" boolean NOT NULL DEFAULT false,
-      //   "DriverPhoneValidated" boolean NOT NULL DEFAULT false,
-      // false, 'misc', false, false, false
-      payload.DrivingOnBehalfOfOrganization, payload.DrivingOBOOrganizationName, payload.RidersCanSeeDriverDetails, payload.DriverWillNotTalkPolitics, payload.ReadyToMatch
-      , 
-      //   "DrivingOnBehalfOfOrganization" boolean NOT NULL DEFAULT false,
-      //   "DrivingOBOOrganizationName" character varying(255),
-      //   "RidersCanSeeDriverDetails" boolean NOT NULL DEFAULT false,
-      //   "DriverWillNotTalkPolitics" boolean NOT NULL DEFAULT false,
-      //   "ReadyToMatch" boolean NOT NULL DEFAULT false,
-      // false
-      payload.PleaseStayInTouch
-      //   "PleaseStayInTouch" boolean NOT NULL DEFAULT false
+        payload.IPAddress, payload.DriverCollectionZIP, payload.DriverCollectionRadius, payload.AvailableDriveTimesJSON
+      , payload.DriverCanLoadRiderWithWheelchair, payload.SeatCount, payload.DriverHasInsurance, payload.DriverInsuranceProviderName, payload.DriverInsurancePolicyNumber
+      , payload.DriverLicenseState, payload.DriverLicenseNumber, payload.DriverFirstName, payload.DriverLastName, payload.PermissionCanRunBackgroundCheck
+      , payload.DriverEmail, payload.DriverPhone, payload.DriverAreaCode, payload.DriverEmailValidated, payload.DriverPhoneValidated
+      , payload.DrivingOnBehalfOfOrganization, payload.DrivingOBOOrganizationName, payload.RidersCanSeeDriverDetails, payload.DriverWillNotTalkPolitics, payload.ReadyToMatch
+      , payload.PleaseStayInTouch
     ]
 }
