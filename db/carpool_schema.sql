@@ -421,22 +421,6 @@ CREATE TABLE zipcode_dist (
 
 ALTER TABLE zipcode_dist OWNER TO carpool_admins;
 
---
--- Name: zipcode_geo; Type: TABLE; Schema: nov2016; Owner: carpool_admins
---
-
-CREATE TABLE zipcode_geo (
-    "ZIPCODE" character(5) NOT NULL,
-    "CITY" character varying(255) NOT NULL,
-    "STATE" character(2) NOT NULL,
-    "GEO_LAT" double precision NOT NULL,
-    "GET_LONG" double precision NOT NULL,
-    "GEO_POINT" point
-);
-
-
-ALTER TABLE zipcode_geo OWNER TO carpool_admins;
-
 SET search_path = stage, pg_catalog;
 
 --
@@ -602,14 +586,6 @@ ALTER TABLE ONLY usstate
 
 ALTER TABLE ONLY zipcode_dist
     ADD CONSTRAINT "ZIPCODE_DIST_pkey" PRIMARY KEY ("ZIPCODE_FROM", "ZIPCODE_TO");
-
-
---
--- Name: ZIPCODE_GEO_pkey; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
---
-
-ALTER TABLE ONLY zipcode_geo
-    ADD CONSTRAINT "ZIPCODE_GEO_pkey" PRIMARY KEY ("ZIPCODE");
 
 
 --
@@ -850,16 +826,6 @@ REVOKE ALL ON TABLE zipcode_dist FROM PUBLIC;
 REVOKE ALL ON TABLE zipcode_dist FROM carpool_admins;
 GRANT ALL ON TABLE zipcode_dist TO carpool_admins;
 GRANT ALL ON TABLE zipcode_dist TO carpool_role;
-
-
---
--- Name: zipcode_geo; Type: ACL; Schema: nov2016; Owner: carpool_admins
---
-
-REVOKE ALL ON TABLE zipcode_geo FROM PUBLIC;
-REVOKE ALL ON TABLE zipcode_geo FROM carpool_admins;
-GRANT ALL ON TABLE zipcode_geo TO carpool_admins;
-GRANT ALL ON TABLE zipcode_geo TO carpool_role;
 
 
 SET search_path = stage, pg_catalog;
