@@ -1,1 +1,1 @@
-#/usr/bin/pytho3.5
+#!/usr/bin/python3.5
