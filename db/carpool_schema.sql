@@ -421,23 +421,19 @@ CREATE TABLE zipcode_dist (
 
 ALTER TABLE zipcode_dist OWNER TO carpool_admins;
 
+SET search_path = stage, pg_catalog;
+
 --
--- Name: zipcode_geo; Type: TABLE; Schema: nov2016; Owner: carpool_admins
+-- Name: sweep_status; Type: TABLE; Schema: stage; Owner: carpool_admins
 --
 
-CREATE TABLE zipcode_geo (
-    "ZIPCODE" character(5) NOT NULL,
-    "CITY" character varying(255) NOT NULL,
-    "STATE" character(2) NOT NULL,
-    "GEO_LAT" double precision NOT NULL,
-    "GET_LONG" double precision NOT NULL,
-    "GEO_POINT" point
+CREATE TABLE sweep_status (
+    id integer NOT NULL,
+    status character varying(50)
 );
 
 
-ALTER TABLE zipcode_geo OWNER TO carpool_admins;
-
-SET search_path = stage, pg_catalog;
+ALTER TABLE sweep_status OWNER TO carpool_admins;
 
 --
 -- Name: websubmission_driver; Type: TABLE; Schema: stage; Owner: carpool_admins
@@ -480,7 +476,11 @@ ALTER TABLE websubmission_driver OWNER TO carpool_admins;
 --
 
 CREATE TABLE websubmission_helper (
-    "timestamp" timestamp without time zone NOT NULL
+    "timestamp" timestamp without time zone NOT NULL,
+    helpername character varying(100) NOT NULL,
+    helperemail character varying(250) NOT NULL,
+    helpercapability character varying(50)[],
+    sweep_status_id integer DEFAULT '-1'::integer NOT NULL
 );
 
 
@@ -504,8 +504,6 @@ CREATE TABLE websubmission_rider (
     "RiderCollectionZIP" character varying(5) NOT NULL,
     "RiderDropOffZIP" character varying(5) NOT NULL,
     "AvailableRideTimesJSON" character varying(2000),
-    "WheelchairCount" integer,
-    "NonWheelchairCount" integer,
     "TotalPartySize" integer,
     "TwoWayTripNeeded" boolean DEFAULT false NOT NULL,
     "RiderPreferredContactMethod" integer,
@@ -513,7 +511,8 @@ CREATE TABLE websubmission_rider (
     "DriverCanContactRider" boolean DEFAULT false NOT NULL,
     "RiderWillNotTalkPolitics" boolean DEFAULT false NOT NULL,
     "ReadyToMatch" boolean DEFAULT false NOT NULL,
-    "PleaseStayInTouch" boolean DEFAULT false NOT NULL
+    "PleaseStayInTouch" boolean DEFAULT false NOT NULL,
+    "NeedWheelchair" boolean DEFAULT false NOT NULL
 );
 
 
@@ -605,14 +604,6 @@ ALTER TABLE ONLY zipcode_dist
 
 
 --
--- Name: ZIPCODE_GEO_pkey; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
---
-
-ALTER TABLE ONLY zipcode_geo
-    ADD CONSTRAINT "ZIPCODE_GEO_pkey" PRIMARY KEY ("ZIPCODE");
-
-
---
 -- Name: ZIP_CODES_pkey; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
 --
 
@@ -627,6 +618,18 @@ ALTER TABLE ONLY zip_codes
 ALTER TABLE ONLY match_status
     ADD CONSTRAINT match_status_pkey PRIMARY KEY ("MatchStatusID");
 
+
+SET search_path = stage, pg_catalog;
+
+--
+-- Name: sweep_status_pkey; Type: CONSTRAINT; Schema: stage; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY sweep_status
+    ADD CONSTRAINT sweep_status_pkey PRIMARY KEY (id);
+
+
+SET search_path = nov2016, pg_catalog;
 
 --
 -- Name: PROPOSED_MATCH_DriverID_fkey; Type: FK CONSTRAINT; Schema: nov2016; Owner: carpool_admins
@@ -668,6 +671,16 @@ ALTER TABLE ONLY requested_ride
     ADD CONSTRAINT "REQUESTED_RIDE_RiderID_fkey" FOREIGN KEY ("RiderID") REFERENCES rider("RiderID");
 
 
+SET search_path = stage, pg_catalog;
+
+--
+-- Name: websubmission_helper_sweep_status_id_fkey; Type: FK CONSTRAINT; Schema: stage; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY websubmission_helper
+    ADD CONSTRAINT websubmission_helper_sweep_status_id_fkey FOREIGN KEY (sweep_status_id) REFERENCES sweep_status(id);
+
+
 --
 -- Name: nov2016; Type: ACL; Schema: -; Owner: postgres
 --
@@ -698,6 +711,30 @@ REVOKE ALL ON SCHEMA stage FROM postgres;
 GRANT ALL ON SCHEMA stage TO postgres;
 GRANT USAGE ON SCHEMA stage TO carpool_web_role;
 GRANT ALL ON SCHEMA stage TO carpool_admins;
+
+
+SET search_path = nov2016, pg_catalog;
+
+--
+-- Name: cancel_ride_by_rider(integer, integer); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) FROM PUBLIC;
+REVOKE ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) FROM carpool_admins;
+GRANT ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) TO carpool_admins;
+GRANT ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) TO PUBLIC;
+GRANT ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) TO carpool_role;
+
+
+--
+-- Name: distance(double precision, double precision, double precision, double precision); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) FROM PUBLIC;
+REVOKE ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) FROM carpool_admins;
+GRANT ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) TO carpool_admins;
+GRANT ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) TO PUBLIC;
+GRANT ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) TO carpool_role;
 
 
 --
@@ -852,17 +889,17 @@ GRANT ALL ON TABLE zipcode_dist TO carpool_admins;
 GRANT ALL ON TABLE zipcode_dist TO carpool_role;
 
 
---
--- Name: zipcode_geo; Type: ACL; Schema: nov2016; Owner: carpool_admins
---
-
-REVOKE ALL ON TABLE zipcode_geo FROM PUBLIC;
-REVOKE ALL ON TABLE zipcode_geo FROM carpool_admins;
-GRANT ALL ON TABLE zipcode_geo TO carpool_admins;
-GRANT ALL ON TABLE zipcode_geo TO carpool_role;
-
-
 SET search_path = stage, pg_catalog;
+
+--
+-- Name: sweep_status; Type: ACL; Schema: stage; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE sweep_status FROM PUBLIC;
+REVOKE ALL ON TABLE sweep_status FROM carpool_admins;
+GRANT ALL ON TABLE sweep_status TO carpool_admins;
+GRANT ALL ON TABLE sweep_status TO carpool_role;
+
 
 --
 -- Name: websubmission_driver; Type: ACL; Schema: stage; Owner: carpool_admins
