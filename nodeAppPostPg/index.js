@@ -242,21 +242,21 @@ function dbGetInsertRiderString() {
     + ' ('     
     + '  "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail"'       
     + ', "RiderPhone", "RiderAreaCode", "RiderEmailValidated", "RiderPhoneValidated", "RiderVotingState"'
-    + ', "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesJSON", "WheelchairCount", "NonWheelchairCount"'
+    + ', "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesJSON"'
     + ', "TotalPartySize", "TwoWayTripNeeded", "RiderPreferredContactMethod", "RiderIsVulnerable", "DriverCanContactRider"'
-    + ', "RiderWillNotTalkPolitics", "ReadyToMatch", "PleaseStayInTouch"' 
+    + ', "RiderWillNotTalkPolitics", "ReadyToMatch", "PleaseStayInTouch", "NeedWheelchair"' 
     + ')'
     + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, ' 
-    + '        $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)'  
+    + '        $13, $14, $15, $16, $17, $18, $19, $20, $21)' // , $22 
 }
 
 function getRiderPayloadAsArray(payload) {
   return [      
         payload.IPAddress, payload.RiderFirstName, payload.RiderLastName, payload.RiderEmail
       , payload.RiderPhone, payload.RiderAreaCode, payload.RiderEmailValidated, payload.RiderPhoneValidated, payload.RiderVotingState
-      , payload.RiderCollectionZIP, payload.RiderDropOffZIP, payload.AvailableRideTimesJSON, payload.WheelchairCount, payload.NonWheelchairCount
+      , payload.RiderCollectionZIP, payload.RiderDropOffZIP, payload.AvailableRideTimesJSON
       , payload.TotalPartySize, payload.TwoWayTripNeeded, payload.RiderPreferredContactMethod, payload.RiderIsVulnerable, payload.DriverCanContactRider
-      , payload.RiderWillNotTalkPolitics, payload.ReadyToMatch, payload.PleaseStayInTouch 
+      , payload.RiderWillNotTalkPolitics, payload.ReadyToMatch, payload.PleaseStayInTouch, payload.NeedWheelchair
     ]
 }
 
