@@ -21,9 +21,13 @@ export PGPASSWORD=pwd
 export PGPORT=5432
 
 // db env vars - socket
-// export PGHOST=/tmp
-// export PGDATABASE=carpool
-// export PGUSER=carpool
+export PGHOST=/tmp
+export PGDATABASE=carpool
+// NOTE may need new login role for carpool
+export PGUSER=carpool
+
+// 30 seconds delay between sweeps
+export CP_DELAY=30000
 
 // go to preferred temporary area for install process
 cd /tmp
