@@ -23,18 +23,15 @@ const server = new Hapi.Server();
 const OPS_INTERVAL  = 300000; // 5 mins
 const DEFAULT_PORT  = process.env.PORT || 3000;
 
-// for db carpool.UPPERCASE
-const UPPERCASE_SCHEMA_NAME   = '"STAGE"';
-const UPPERCASE_DRIVER_TABLE  = '"WEBSUBMISSION_DRIVER"';
-const UPPERCASE_RIDER_TABLE   = '"WEBSUBMISSION_RIDER"';
-
 // for db carpool
 const SCHEMA_NAME   = 'stage';
 const DRIVER_TABLE  = 'websubmission_driver';
 const RIDER_TABLE   = 'websubmission_rider';
+const HELPER_TABLE  = 'websubmission_helper';
 
 const DRIVER_ROUTE  = 'driver';
-const RIDER_ROUTE  = 'rider';
+const RIDER_ROUTE   = 'rider';
+const HELPER_ROUTE  = 'helper';
 
 var appPort = DEFAULT_PORT;
 
@@ -88,7 +85,7 @@ server.route({
 
     dbInsertData(payload, pool, dbGetInsertDriverString, 
                   getDriverPayloadAsArray,
-                  reply, results);
+                  req, reply, results);
   }
 });
 
@@ -106,7 +103,25 @@ server.route({
 
     dbInsertData(payload, pool, dbGetInsertRiderString, 
                   getRiderPayloadAsArray,
-                  reply, results);
+                  req, reply, results);
+  }
+});
+
+server.route({
+  method: 'POST',
+  path: '/' + HELPER_ROUTE,
+  handler: (req, reply) => {
+    var payload = req.payload;
+    var results = getResultStrings(HELPER_ROUTE);
+
+    req.log();
+
+    console.log("helper payload: " + JSON.stringify(payload, null, 4));
+    console.log("helper zip: " + payload.helpername);
+
+    dbInsertData(payload, pool, dbGetInsertHelperString, 
+                  getHelperPayloadAsArray,
+                  req, reply, results);
   }
 });
 
@@ -190,12 +205,12 @@ function dbGetData(pool, fnGetString, reply, results) {
 }
 
 function dbInsertData(payload, pool, fnInsertString, fnPayloadArray,
-                        reply, results) {
+                        req, reply, results) {
   var insertString = fnInsertString();
 
   pool.query(
     insertString,
-    fnPayloadArray(payload)
+    fnPayloadArray(req, payload)
   )
   .then(result => {
     var displayResult = result || '';
@@ -250,9 +265,24 @@ function dbGetInsertRiderString() {
     + '        $13, $14, $15, $16, $17, $18, $19, $20, $21)' // , $22 
 }
 
-function getRiderPayloadAsArray(payload) {
+function dbGetInsertHelperString() {
+  return dbGetInsertClause(HELPER_TABLE)
+    + ' ('     
+    + '  "helpername", "helperemail", "helpercapability", "sweep_status_id", "timestamp" '       
+    + ' )'
+    + ' values($1, $2, $3, $4, $5) '  
+}
+
+function getHelperPayloadAsArray(req, payload) {
   return [      
-        payload.IPAddress, payload.RiderFirstName, payload.RiderLastName, payload.RiderEmail
+        payload.helpername, payload.helperemail, payload.helpercapability,
+        1, moment().toISOString()
+    ]
+}
+
+function getRiderPayloadAsArray(req, payload) {
+  return [      
+        req.info.remoteAddress, payload.RiderFirstName, payload.RiderLastName, payload.RiderEmail
       , payload.RiderPhone, payload.RiderAreaCode, payload.RiderEmailValidated, payload.RiderPhoneValidated, payload.RiderVotingState
       , payload.RiderCollectionZIP, payload.RiderDropOffZIP, payload.AvailableRideTimesJSON
       , payload.TotalPartySize, payload.TwoWayTripNeeded, payload.RiderPreferredContactMethod, payload.RiderIsVulnerable, payload.DriverCanContactRider
@@ -260,9 +290,9 @@ function getRiderPayloadAsArray(payload) {
     ]
 }
 
-function getDriverPayloadAsArray(payload) {
+function getDriverPayloadAsArray(req, payload) {
   return [
-        payload.IPAddress, payload.DriverCollectionZIP, payload.DriverCollectionRadius, payload.AvailableDriveTimesJSON
+        req.info.remoteAddress, payload.DriverCollectionZIP, payload.DriverCollectionRadius, payload.AvailableDriveTimesJSON
       , payload.DriverCanLoadRiderWithWheelchair, payload.SeatCount, payload.DriverHasInsurance, payload.DriverInsuranceProviderName, payload.DriverInsurancePolicyNumber
       , payload.DriverLicenseState, payload.DriverLicenseNumber, payload.DriverFirstName, payload.DriverLastName, payload.PermissionCanRunBackgroundCheck
       , payload.DriverEmail, payload.DriverPhone, payload.DriverAreaCode, payload.DriverEmailValidated, payload.DriverPhoneValidated
