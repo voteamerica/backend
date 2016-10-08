@@ -1,19 +1,41 @@
 'use strict';
+
 var DELAY = process.env.CP_DELAY || 10000;
+
 var Pool = require('pg').Pool;
 var pool = new Pool({
     idleTimeoutMillis: 2000 //close idle clients after 1 second
 });
+
 var SCHEMA_NAME = 'stage';
-var SWEEPER_FUNCTION = 'create_riders()';
+var SWEEPER_RIDERS_FUNCTION = 'create_riders()';
+var SWEEPER_DRIVERS_FUNCTION = 'create_drivers()';
+
+var currentFunction = 0;
+
 setInterval(function () {
-    dbGetData(pool, dbGetNewItemsQueryString);
+    dbGetData(pool, [dbExecuteRidersFunctionString,
+        dbExecuteDriversFunctionString
+    ]);
 }, DELAY);
-function dbGetNewItemsQueryString() {
-    return 'select ' + SCHEMA_NAME + '.' + SWEEPER_FUNCTION;
+
+function dbExecuteRidersFunctionString() {
+    return 'select ' + SCHEMA_NAME + '.' + SWEEPER_RIDERS_FUNCTION;
 }
-function dbGetData(pool, fnGetString) {
-    var queryString = fnGetString();
+
+function dbExecuteDriversFunctionString() {
+    return 'select ' + SCHEMA_NAME + '.' + SWEEPER_DRIVERS_FUNCTION;
+}
+
+function dbGetData(pool, executeFunctionArray) {
+    var fnExecuteFunction = executeFunctionArray[currentFunction++];
+    if (currentFunction >= executeFunctionArray.length) {
+        currentFunction = 0;
+    }
+    console.log("array len : " + executeFunctionArray.length);
+    console.log("fn index: " + currentFunction);
+    var queryString = fnExecuteFunction();
+    console.log("queryString: " + queryString);
     pool.query(queryString)
         .then(function (result) {
         var firstRowAsString = "";
@@ -34,4 +56,3 @@ function dbGetData(pool, fnGetString) {
         // reply(results.failure + message).code(500);
     });
 }
-//# sourceMappingURL=index.js.map
