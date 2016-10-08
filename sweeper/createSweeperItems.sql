@@ -7,10 +7,10 @@ CREATE TABLE stage.status_rider
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE stage.websubmission_rider
+ALTER TABLE stage.status_rider
   OWNER TO carpool_admins;
-GRANT ALL ON TABLE stage.websubmission_rider TO carpool_admins;
-GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE stage.websubmission_rider TO carpool_role;
+GRANT ALL ON TABLE stage.status_rider TO carpool_admins;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE stage.status_rider TO carpool_role;
 
 CREATE TABLE stage.status_driver
 ( 
@@ -21,10 +21,10 @@ CREATE TABLE stage.status_driver
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE stage.websubmission_rider
+ALTER TABLE stage.status_driver
   OWNER TO carpool_admins;
-GRANT ALL ON TABLE stage.websubmission_rider TO carpool_admins;
-GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE stage.websubmission_rider TO carpool_role;
+GRANT ALL ON TABLE stage.status_driver TO carpool_admins;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE stage.status_driver TO carpool_role;
 
 -- NOTE: All code in a function exists in a transaction.
 --       Either it all succeeds or it is all rolled back
@@ -192,5 +192,5 @@ WITH (
 );
 ALTER TABLE nov2016.driver_available_times
   OWNER TO carpool_admins;
-GRANT ALL ON TABLE nov2016.driver TO carpool_admins;
-GRANT ALL ON TABLE nov2016.driver TO carpool_role;
+GRANT ALL ON TABLE nov2016.driver_available_times TO carpool_admins;
+GRANT ALL ON TABLE nov2016.driver_available_times TO carpool_role;
