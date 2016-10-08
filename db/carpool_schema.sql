@@ -562,7 +562,8 @@ CREATE TABLE websubmission_driver (
     "RidersCanSeeDriverDetails" boolean DEFAULT false NOT NULL,
     "DriverWillNotTalkPolitics" boolean DEFAULT false NOT NULL,
     "ReadyToMatch" boolean DEFAULT false NOT NULL,
-    "PleaseStayInTouch" boolean DEFAULT false NOT NULL
+    "PleaseStayInTouch" boolean DEFAULT false NOT NULL,
+    "VehicleRegistrationNumber" character varying(255)
 );
 
 
@@ -603,13 +604,15 @@ CREATE TABLE websubmission_rider (
     "AvailableRideTimesJSON" character varying(2000),
     "TotalPartySize" integer,
     "TwoWayTripNeeded" boolean DEFAULT false NOT NULL,
-    "RiderPreferredContactMethod" integer,
     "RiderIsVulnerable" boolean DEFAULT false NOT NULL,
     "DriverCanContactRider" boolean DEFAULT false NOT NULL,
     "RiderWillNotTalkPolitics" boolean DEFAULT false NOT NULL,
-    "ReadyToMatch" boolean DEFAULT false NOT NULL,
     "PleaseStayInTouch" boolean DEFAULT false NOT NULL,
-    "NeedWheelchair" boolean DEFAULT false NOT NULL
+    "NeedWheelchair" boolean DEFAULT false NOT NULL,
+    "RiderPreferredContactMethod" character varying(20),
+    "RiderAccommodationNotes" character varying(1000),
+    "RiderLegalConsent" boolean,
+    "ReadyToMatch" boolean
 );
 
 
