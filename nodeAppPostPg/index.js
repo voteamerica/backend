@@ -117,7 +117,6 @@ server.route({
     req.log();
 
     console.log("helper payload: " + JSON.stringify(payload, null, 4));
-    console.log("helper zip: " + payload.helpername);
 
     dbInsertData(payload, pool, dbGetInsertHelperString, 
                   getHelperPayloadAsArray,
@@ -241,28 +240,29 @@ function dbGetInsertDriverString() {
   return dbGetInsertClause(DRIVER_TABLE)
     + ' ('   
     + '  "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", "AvailableDriveTimesJSON"' 
-    + ', "DriverCanLoadRiderWithWheelchair", "SeatCount", "DriverHasInsurance", "DriverInsuranceProviderName", "DriverInsurancePolicyNumber"'
-    + ', "DriverLicenseState", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", "PermissionCanRunBackgroundCheck"'
-    + ', "DriverEmail", "DriverPhone", "DriverAreaCode", "DriverEmailValidated", "DriverPhoneValidated"'
-    + ', "DrivingOnBehalfOfOrganization", "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics", "ReadyToMatch"'
-    + ', "PleaseStayInTouch"'  
+    + ', "DriverCanLoadRiderWithWheelchair", "SeatCount", "DriverHasInsurance"'
+    + ', "DriverFirstName", "DriverLastName"'
+    + ', "DriverEmail", "DriverPhone"'
+    + ', "DrivingOnBehalfOfOrganization", "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics"'
+    + ', "PleaseStayInTouch", "VehicleRegistrationNumber" '
     + ')'
 
     + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, ' 
-    + '        $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)' 
+    + '        $13, $14, $15, $16, $17 )' 
 }
 
 function dbGetInsertRiderString() {
   return dbGetInsertClause(RIDER_TABLE)
     + ' ('     
     + '  "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail"'       
-    + ', "RiderPhone", "RiderAreaCode", "RiderEmailValidated", "RiderPhoneValidated", "RiderVotingState"'
+    + ', "RiderPhone", "RiderVotingState"'
     + ', "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesJSON"'
-    + ', "TotalPartySize", "TwoWayTripNeeded", "RiderPreferredContactMethod", "RiderIsVulnerable", "DriverCanContactRider"'
-    + ', "RiderWillNotTalkPolitics", "ReadyToMatch", "PleaseStayInTouch", "NeedWheelchair"' 
+    + ', "TotalPartySize", "TwoWayTripNeeded", "RiderPreferredContactMethod", "RiderIsVulnerable" '
+    + ', "RiderWillNotTalkPolitics", "PleaseStayInTouch", "NeedWheelchair", "RiderAccommodationNotes"'
+    + ', "RiderLegalConsent"'
     + ')'
     + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, ' 
-    + '        $13, $14, $15, $16, $17, $18, $19, $20, $21)' // , $22 
+    + '        $13, $14, $15, $16, $17, $18 )'
 }
 
 function dbGetInsertHelperString() {
@@ -275,7 +275,7 @@ function dbGetInsertHelperString() {
 
 function getHelperPayloadAsArray(req, payload) {
   return [      
-        payload.helpername, payload.helperemail, payload.helpercapability,
+        payload.Name, payload.Email, payload.Capability,
         1, moment().toISOString()
     ]
 }
@@ -283,20 +283,21 @@ function getHelperPayloadAsArray(req, payload) {
 function getRiderPayloadAsArray(req, payload) {
   return [      
         req.info.remoteAddress, payload.RiderFirstName, payload.RiderLastName, payload.RiderEmail
-      , payload.RiderPhone, payload.RiderAreaCode, payload.RiderEmailValidated, payload.RiderPhoneValidated, payload.RiderVotingState
+      , payload.RiderPhone, payload.RiderVotingState
       , payload.RiderCollectionZIP, payload.RiderDropOffZIP, payload.AvailableRideTimesJSON
-      , payload.TotalPartySize, payload.TwoWayTripNeeded, payload.RiderPreferredContactMethod, payload.RiderIsVulnerable, payload.DriverCanContactRider
-      , payload.RiderWillNotTalkPolitics, payload.ReadyToMatch, payload.PleaseStayInTouch, payload.NeedWheelchair
+      , payload.TotalPartySize, payload.TwoWayTripNeeded, payload.RiderPreferredContactMethod, payload.RiderIsVulnerable
+      , payload.RiderWillNotTalkPolitics, payload.PleaseStayInTouch, payload.NeedWheelchair, payload.RiderAccommodationNotes
+      , payload.RiderLegalConsent
     ]
 }
 
 function getDriverPayloadAsArray(req, payload) {
   return [
         req.info.remoteAddress, payload.DriverCollectionZIP, payload.DriverCollectionRadius, payload.AvailableDriveTimesJSON
-      , payload.DriverCanLoadRiderWithWheelchair, payload.SeatCount, payload.DriverHasInsurance, payload.DriverInsuranceProviderName, payload.DriverInsurancePolicyNumber
-      , payload.DriverLicenseState, payload.DriverLicenseNumber, payload.DriverFirstName, payload.DriverLastName, payload.PermissionCanRunBackgroundCheck
-      , payload.DriverEmail, payload.DriverPhone, payload.DriverAreaCode, payload.DriverEmailValidated, payload.DriverPhoneValidated
-      , payload.DrivingOnBehalfOfOrganization, payload.DrivingOBOOrganizationName, payload.RidersCanSeeDriverDetails, payload.DriverWillNotTalkPolitics, payload.ReadyToMatch
-      , payload.PleaseStayInTouch
+      , payload.DriverCanLoadRiderWithWheelchair, payload.SeatCount, payload.DriverHasInsurance
+      , payload.DriverFirstName, payload.DriverLastName
+      , payload.DriverEmail, payload.DriverPhone
+      , payload.DrivingOnBehalfOfOrganization, payload.DrivingOBOOrganizationName, payload.RidersCanSeeDriverDetails, payload.DriverWillNotTalkPolitics
+      , payload.PleaseStayInTouch, payload.VehicleRegistrationNumber
     ]
 }

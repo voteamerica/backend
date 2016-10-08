@@ -8,30 +8,23 @@ import csv
 # For testing purposes, setup your own node.js in your home directory and use a different port
 BASE_URL = 'http://127.0.0.1:2000'
 
-driverValues = {'IPAddress' : '0.0.0.0',
+driverValues = {
       'DriverCollectionZIP' : 0,
       'DriverCollectionRadius' : 0,
       'AvailableDriveTimesJSON' : [],
       'DriverCanLoadRiderWithWheelchair' : False,
       'SeatCount' : 0,
       'DriverHasInsurance' : True,
-      'DriverInsuranceProviderName' : 'AllInsurance',
-      'DriverInsurancePolicyNumber' : '1234567890',
-      'DriverLicenseState' : 'MO',
-      'DriverLicenseNumber' : '5678',
+      'VehicleRegistrationNumber' : 'VEHREG123',
       'DriverFirstName' : 'FIRST',
       'DriverLastName' : 'DRIVER',
       'PermissionCanRunBackgroundCheck' : True,
       'DriverEmail' : 'driver@email.com',
       'DriverPhone' : '555-555-5555',
-      'DriverAreaCode' : 555,
-      'DriverEmailValidated' : False,
-      'DriverPhoneValidated' : True,
       'DrivingOnBehalfOfOrganization' : False,
       'DrivingOBOOrganizationName' : 'none',
       'RidersCanSeeDriverDetails' : False,
       'DriverWillNotTalkPolitics' : True,
-      'ReadyToMatch' : False,
       'PleaseStayInTouch' : True
       }
 
@@ -62,26 +55,24 @@ with open('carpool_test_databank_driver.csv', newline='\n') as csvfile:
         row_idx += 1
 
 
-riderValues = {'IPAddress' : '0.0.0.0',
+riderValues = {
       'RiderFirstName' : 'FIRST',
       'RiderLastName' : 'RIDER',
       'RiderEmail' : 'rider@email.com',
       'RiderPhone' : '555-555-5555',
-      'RiderAreaCode' : 555,
-      'RiderEmailValidated' : False,
-      'RiderPhoneValidated' : True,
       'RiderVotingState' : 'DC',
       'RiderCollectionZIP' : 0,
       'RiderDropOffZIP' : 0,
       'AvailableRideTimesJSON' : [],
       'NeedWheelchair' : False,
+      'RiderAccommodationNotes' : '',
       'TotalPartySize' : 0,
       'TwoWayTripNeeded' : False,
-      'RiderPreferredContactMethod' : 0,
+      'RiderPreferredContactMethod' : 'Email',
       'RiderIsVulnerable' : False,
       'DriverCanContactRider' : False,
-      'RiderWillNotTalkPolitics' : True,      
-      'ReadyToMatch' : False,
+      'RiderWillNotTalkPolitics' : True,
+      'RiderLegalConsent' : True, 
       'PleaseStayInTouch' : True
       }
 
