@@ -52,6 +52,20 @@ CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
+--
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
+
+
 SET search_path = nov2016, pg_catalog;
 
 --
@@ -563,7 +577,8 @@ CREATE TABLE websubmission_driver (
     "DriverWillNotTalkPolitics" boolean DEFAULT false NOT NULL,
     "ReadyToMatch" boolean DEFAULT false NOT NULL,
     "PleaseStayInTouch" boolean DEFAULT false NOT NULL,
-    "VehicleRegistrationNumber" character varying(255)
+    "VehicleRegistrationNumber" character varying(255),
+    "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL
 );
 
 
@@ -577,8 +592,9 @@ CREATE TABLE websubmission_helper (
     "timestamp" timestamp without time zone NOT NULL,
     helpername character varying(100) NOT NULL,
     helperemail character varying(250) NOT NULL,
-    helpercapability character varying(50)[],
-    sweep_status_id integer DEFAULT '-1'::integer NOT NULL
+    helpercapability character varying(500)[],
+    sweep_status_id integer DEFAULT '-1'::integer NOT NULL,
+    "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL
 );
 
 
@@ -612,7 +628,8 @@ CREATE TABLE websubmission_rider (
     "RiderPreferredContactMethod" character varying(20),
     "RiderAccommodationNotes" character varying(1000),
     "RiderLegalConsent" boolean,
-    "ReadyToMatch" boolean
+    "ReadyToMatch" boolean,
+    "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL
 );
 
 
@@ -722,6 +739,30 @@ ALTER TABLE ONLY match_status
 SET search_path = stage, pg_catalog;
 
 --
+-- Name: driver_pk; Type: CONSTRAINT; Schema: stage; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY websubmission_driver
+    ADD CONSTRAINT driver_pk PRIMARY KEY ("UUID");
+
+
+--
+-- Name: helper_pk; Type: CONSTRAINT; Schema: stage; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY websubmission_helper
+    ADD CONSTRAINT helper_pk PRIMARY KEY ("UUID");
+
+
+--
+-- Name: rider_pk; Type: CONSTRAINT; Schema: stage; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY websubmission_rider
+    ADD CONSTRAINT rider_pk PRIMARY KEY ("UUID");
+
+
+--
 -- Name: sweep_status_pkey; Type: CONSTRAINT; Schema: stage; Owner: carpool_admins
 --
 
@@ -771,16 +812,6 @@ ALTER TABLE ONLY requested_ride
     ADD CONSTRAINT "REQUESTED_RIDE_RiderID_fkey" FOREIGN KEY ("RiderID") REFERENCES rider("RiderID");
 
 
-SET search_path = stage, pg_catalog;
-
---
--- Name: websubmission_helper_sweep_status_id_fkey; Type: FK CONSTRAINT; Schema: stage; Owner: carpool_admins
---
-
-ALTER TABLE ONLY websubmission_helper
-    ADD CONSTRAINT websubmission_helper_sweep_status_id_fkey FOREIGN KEY (sweep_status_id) REFERENCES sweep_status(id);
-
-
 --
 -- Name: nov2016; Type: ACL; Schema: -; Owner: postgres
 --
@@ -812,8 +843,6 @@ GRANT ALL ON SCHEMA stage TO postgres;
 GRANT USAGE ON SCHEMA stage TO carpool_web_role;
 GRANT ALL ON SCHEMA stage TO carpool_admins;
 
-
-SET search_path = nov2016, pg_catalog;
 
 --
 -- Name: cancel_ride_by_rider(integer, integer); Type: ACL; Schema: nov2016; Owner: carpool_admins
@@ -1011,6 +1040,17 @@ REVOKE ALL ON TABLE websubmission_driver FROM carpool_admins;
 GRANT ALL ON TABLE websubmission_driver TO carpool_admins;
 GRANT INSERT ON TABLE websubmission_driver TO carpool_web_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE websubmission_driver TO carpool_role;
+
+
+--
+-- Name: websubmission_helper; Type: ACL; Schema: stage; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE websubmission_helper FROM PUBLIC;
+REVOKE ALL ON TABLE websubmission_helper FROM carpool_admins;
+GRANT ALL ON TABLE websubmission_helper TO carpool_admins;
+GRANT INSERT ON TABLE websubmission_helper TO carpool_web_role;
+GRANT ALL ON TABLE websubmission_helper TO carpool_role;
 
 
 --
