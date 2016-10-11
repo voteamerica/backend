@@ -213,10 +213,20 @@ function dbInsertData(payload, pool, fnInsertString, fnPayloadArray,
   )
   .then(result => {
     var displayResult = result || '';
+    var uuid = "";
 
-    console.log('insert: ', displayResult);
+    try {
+      displayResult = JSON.stringify(result);
+      uuid = result.rows[0].UUID;
+      console.error('row: ' + JSON.stringify(result.rows[0]) );
+    }
+    catch (err) {
+      console.error('no uuid returned');
+    }
 
-    reply(results.success);
+    console.log('insert: ', uuid + ' ' + displayResult);
+
+    reply(results.success + ': ' + uuid);
   })
   .catch(e => {
     var message = e.message || '';
@@ -249,6 +259,7 @@ function dbGetInsertDriverString() {
 
     + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, ' 
     + '        $13, $14, $15, $16, $17 )' 
+    + ' returning "UUID" ' 
 }
 
 function dbGetInsertRiderString() {
@@ -263,6 +274,7 @@ function dbGetInsertRiderString() {
     + ')'
     + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, ' 
     + '        $13, $14, $15, $16, $17, $18 )'
+    + ' returning "UUID" ' 
 }
 
 function dbGetInsertHelperString() {
