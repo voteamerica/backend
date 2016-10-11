@@ -1,9 +1,14 @@
+    -- // get uuid and last Name
+    -- // from uuid, get timestamp then riderId from statusRider
+    -- // execute nov2016 cancel_ride_by_rider 
+
 CREATE FUNCTION stage.cancel_ride("rider_UUID" character varying(50)) 
   RETURNS integer AS $$
 DECLARE
     retVal integer := -1;
+    riderID integer := -1; 
 BEGIN
-    RAISE NOTICE 'tstamp here is %', tstamp; 
+    -- RAISE NOTICE 'retVal here is %', retVal; 
 
     -- get timestamp of unprocessed riders 
     IF EXISTS (
@@ -19,69 +24,26 @@ BEGIN
     )
     THEN
       -- select MAX("CreatedTimeStamp") into tstamp from stage.status_rider;
-      retVal := 1;      
+      SELECT stage.status_rider."RiderID" 
+      INTO 
+        riderID
+      FROM stage.status_rider  
+        INNER JOIN 
+          stage.websubmission_rider 
+        ON 
+          (stage.websubmission_rider."CreatedTimeStamp" = stage.status_rider."CreatedTimeStamp") 
+      WHERE 
+        stage.websubmission_rider."UUID" = "rider_UUID";
+
+      retVal := 2;      
     ELSE 
       RETURN retVal;
-      -- tstamp := '2010-01-01';
     END IF;
 
-    -- create intermediate table of timestamps, processed flag and riderId
-    -- INSERT INTO 
-    --   stage.status_rider ("CreatedTimeStamp")     
-    -- SELECT 
-    --   "CreatedTimeStamp" FROM stage.websubmission_rider 
-    -- WHERE 
-    --   "CreatedTimeStamp" > tstamp;
+    -- RAISE NOTICE 'riderID here is %', riderID; 
 
-    -- create riders in nov2016 db
-    -- only insert riders in intermediate tables, and with status == 1
-    -- ?? timestamp to be creation of nov2016 row, or original submission ??
-    -- INSERT INTO 
-    --   nov2016.rider 
-    --     (
-    --     "RiderID", "Name", "Phone", "Email", "EmailValidated",
-    --     "State", "City", "Notes", "DataEntryPoint", "VulnerablePopulation",
-    --     "NeedsWheelChair", "Active"
-    --     )     
-    -- SELECT
-    --   stage.status_rider."RiderID",
-    --   concat_ws(' ', 
-    --             stage.websubmission_rider."RiderFirstName"::text, 
-    --             stage.websubmission_rider."RiderLastName"::text) 
-    --   ,
-    --   stage.websubmission_rider."RiderPhone",
-    --   stage.websubmission_rider."RiderEmail",
-    --   stage.websubmission_rider."RiderEmailValidated"::int::bit,
-
-    --   stage.websubmission_rider."RiderVotingState",
-    --   'city?',
-    --   'notes?',
-    --   'entry?',
-    --   stage.websubmission_rider."RiderIsVulnerable"::int::bit,
-
-    --   stage.websubmission_rider."NeedWheelchair"::int::bit,
-    --   true::int::bit
-    -- FROM 
-    --   stage.websubmission_rider
-    -- INNER JOIN 
-    --   stage.status_rider 
-    -- ON 
-    --   (stage.websubmission_rider."CreatedTimeStamp" = stage.status_rider."CreatedTimeStamp") 
-    -- WHERE 
-    --       stage.websubmission_rider."CreatedTimeStamp" > tstamp 
-    --   AND stage.status_rider.status = 1;
+    SELECT nov2016.cancel_ride_by_rider(riderID) INTO retVal;
     
-    -- UPDATE 
-    --   stage.status_rider
-    -- SET
-    --   status = 100
-    -- WHERE
-    --       stage.status_rider."CreatedTimeStamp" > tstamp 
-    --   AND stage.status_rider.status = 1;
-
-    -- RAISE EXCEPTION 'Nonexistent ID --> %', user_id
-    --   USING HINT = 'Please check your user ID';
-
     RETURN retVal;
 END;
 $$ LANGUAGE plpgsql;
@@ -90,3 +52,5 @@ GRANT ALL ON FUNCTION stage.cancel_ride("rider_UUID" character varying(50)) TO c
 GRANT EXECUTE ON FUNCTION stage.cancel_ride("rider_UUID" character varying(50)) TO carpool_web_role;
 GRANT EXECUTE ON FUNCTION stage.cancel_ride("rider_UUID" character varying(50)) TO carpool_role;
 
+-- select stage.cancel_ride('2fbbd358-c1e8-45fc-bd00-3bf3fd3d7c64')
+  --      "rider_UUID";

@@ -29,9 +29,13 @@ const DRIVER_TABLE  = 'websubmission_driver';
 const RIDER_TABLE   = 'websubmission_rider';
 const HELPER_TABLE  = 'websubmission_helper';
 
+var CANCEL_RIDE_FUNCTION = 'stage.cancel_ride($1)';
+
+// app routes (api paths)
 const DRIVER_ROUTE  = 'driver';
 const RIDER_ROUTE   = 'rider';
 const HELPER_ROUTE  = 'helper';
+const DELETE_ROUTE  = 'rider';
 
 var appPort = DEFAULT_PORT;
 
@@ -121,6 +125,27 @@ server.route({
     dbInsertData(payload, pool, dbGetInsertHelperString, 
                   getHelperPayloadAsArray,
                   req, reply, results);
+  }
+});
+
+server.route({
+  method: 'DELETE',
+  path: '/' + DELETE_ROUTE,
+  handler: (req, reply) => {
+    var payload = req.payload;
+    var results = getResultStrings('delete: ');
+
+    req.log();
+
+    console.log("delete payload: " + JSON.stringify(payload, null, 4));
+
+    // get uuid and last Name
+    // from uuid, get timestamp then riderId from statusRider
+    // execute nov2016 cancel_ride_by_rider 
+
+    dbExecuteFunction(payload, pool, dbCancelRideFunctionString, 
+                      [payload.UUID],
+                      req, reply, results);
   }
 });
 
@@ -236,6 +261,38 @@ function dbInsertData(payload, pool, fnInsertString, fnPayloadArray,
 
     reply(results.failure + ': ' + message).code(500);
   });
+}
+
+function dbExecuteFunction(payload, pool, fnExecuteFunctionString, fnPayloadArray,
+                        req, reply, results) {
+    var queryString = fnExecuteFunction();
+
+    console.log("executeFunctionString: " + queryString);
+    pool.query(queryString)
+        .then(function (result) {
+        var firstRowAsString = "";
+        if (result !== undefined && result.rows !== undefined) {
+            // result.rows.forEach( val => console.log(val));
+            result.rows.forEach(function (val) { return console.log("exec fn: " + JSON.stringify(val)); });
+            firstRowAsString = JSON.stringify(result.rows[0]);
+        }
+        console.error("executed fn: " + firstRowAsString);
+
+        reply(results.success + firstRowAsString);
+    })
+        .catch(function (e) {
+        var message = e.message || '';
+        var stack = e.stack || '';
+        console.error(
+        // results.failure, 
+        message, stack);
+
+        reply(results.failure + message).code(500);
+    });
+}
+
+function dbCancelRideFunctionString() {
+    return 'select ' + SCHEMA_NAME + '.' + CANCEL_RIDE_FUNCTION;
 }
 
 function dbGetQueryString () {
