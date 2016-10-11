@@ -1043,6 +1043,15 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE websubmission_driver TO carpool_role;
 
 
 --
+-- Name: websubmission_driver.UUID; Type: ACL; Schema: stage; Owner: carpool_admins
+--
+
+REVOKE ALL("UUID") ON TABLE websubmission_driver FROM PUBLIC;
+REVOKE ALL("UUID") ON TABLE websubmission_driver FROM carpool_admins;
+GRANT SELECT("UUID") ON TABLE websubmission_driver TO carpool_web;
+
+
+--
 -- Name: websubmission_helper; Type: ACL; Schema: stage; Owner: carpool_admins
 --
 
@@ -1062,6 +1071,15 @@ REVOKE ALL ON TABLE websubmission_rider FROM carpool_admins;
 GRANT ALL ON TABLE websubmission_rider TO carpool_admins;
 GRANT INSERT ON TABLE websubmission_rider TO carpool_web_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE websubmission_rider TO carpool_role;
+
+
+--
+-- Name: websubmission_rider.UUID; Type: ACL; Schema: stage; Owner: carpool_admins
+--
+
+REVOKE ALL("UUID") ON TABLE websubmission_rider FROM PUBLIC;
+REVOKE ALL("UUID") ON TABLE websubmission_rider FROM carpool_admins;
+GRANT SELECT("UUID") ON TABLE websubmission_rider TO carpool_web;
 
 
 --
