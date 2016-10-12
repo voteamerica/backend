@@ -4,8 +4,8 @@ DECLARE
 
 RADIUS_MAX_ALLOWED integer := 100;
 
-drive_offer_row dev.drive_offer%ROWTYPE;
-ride_request_row dev.ride_request%ROWTYPE;
+drive_offer_row stage.websubmission_driver%ROWTYPE;
+ride_request_row stage.websubmission_rider%ROWTYPE;
 cnt integer;
 match_points integer;
 time_criteria_points integer;
@@ -31,7 +31,7 @@ distance_origin_dropoff double precision; -- From driver origin to rider drop of
 BEGIN
 
     cnt := 0;
-    FOR ride_request_row in SELECT * from dev.ride_request r
+    FOR ride_request_row in SELECT * from stage.websubmission_rider r
         WHERE r.state='Pending'
         AND length(r."AvailableRideTimesJSON") > 0
     LOOP
@@ -45,7 +45,7 @@ BEGIN
         -- split AvailableRideTimesJSON in individual time intervals
         ride_times_rider := string_to_array(ride_request_row."AvailableRideTimesJSON", '|');
         
-        FOR drive_offer_row in SELECT * from dev.drive_offer d
+        FOR drive_offer_row in SELECT * from stage.websubmission_driver d
             WHERE state='Pending'
             AND ((ride_request_row."NeedWheelchair"=true AND d."DriverCanLoadRiderWithWheelchair" = true) -- driver must be able to transport wheelchair if rider needs it
                 OR ride_request_row."NeedWheelchair"=false)   -- but a driver equipped for wheelchair may drive someone who does not need one
@@ -157,36 +157,44 @@ BEGIN
                         IF match_points + time_criteria_points >= 300
                         THEN
                         
-                        RAISE NOTICE '% %, DT=%, RT=% SCORE=%', 
-                            drive_offer_row."DriverLastName", 
-                            ride_request_row."RiderLastName", 
-                            driver_time,
-                            rider_time,
-                            match_points + time_criteria_points;
+                        --RAISE NOTICE '% %, DT=%, RT=% SCORE=%', 
+                         --   drive_offer_row."DriverLastName", 
+                         --   ride_request_row."RiderLastName", 
+                         --   driver_time,
+                         --   rider_time,
+                         --   match_points + time_criteria_points;
+                        
+                            BEGIN
+                                INSERT INTO nov2016.match (uuid_rider, uuid_driver, score, state)
+                                    VALUES (
+                                        ride_request_row."UUID",               --pkey
+                                        drive_offer_row."UUID",                --pkey 
+                                        match_points + time_criteria_points,   --pkey
+                                        'Proposed'
+                                    );
+                                UPDATE stage.websubmission_rider r
+                                SET state='Proposed'
+                                WHERE r."UUID" = ride_request_row."UUID";
+                            EXCEPTION WHEN unique_violation
+                            THEN
+                                -- ignore
+                                -- don't insert duplicate match
+                            END;                 
+                         
                         END IF;
-                        cnt := cnt +1;
                         
                     END LOOP;
-                    
+                
                     
                 END LOOP;
 
             END IF;
           
-
-          
-            
-            
-            -- We retain only matches with 300 points or more
-            --IF match_points >= 300
-            --THEN
-            
-            --END IF;
         END LOOP;
     
     END LOOP;
 
-RAISE NOTICE 'Count=%', cnt;
+
 
 END;
 $$
