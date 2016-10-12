@@ -1,6 +1,7 @@
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 import csv
+import json
 
 # This will HTTP POST to the node.js app
 
@@ -42,11 +43,13 @@ with open('carpool_test_databank_driver.csv', newline='\n') as csvfile:
                 driverValues['DriverCanLoadRiderWithWheelchair']=True
             else:
                 driverValues['DriverCanLoadRiderWithWheelchair']=False
-            ride_times = row[5].split('|')
-            driverValues['AvailableDriveTimesJSON'] = []
-            for a_time in ride_times:
-                driverValues['AvailableDriveTimesJSON'].append(a_time)
+            driverValues['AvailableDriveTimesJSON'] = row[5]
+            #ride_times = row[5].split('|')
+            #times_arr = []
+            #for a_time in ride_times:
+            #    times_arr.append(a_time)
 
+            #driverValues['AvailableDriveTimesJSON'] = json.dumps(times_arr)
             data = urlencode(driverValues).encode("utf-8")
             req = Request(url, data)
             response = urlopen(req)
@@ -91,11 +94,12 @@ with open('carpool_test_databank_rider.csv', newline='\n') as csvfile:
                 riderValues['NeedWheelchair']=True
             else:
                 riderValues['NeedWheelchair']=False
-            ride_times = row[5].split('|')
-            riderValues['AvailableRideTimesJSON'] = []
-            for a_time in ride_times:
-                riderValues['AvailableRideTimesJSON'].append(a_time)
-
+            #ride_times = row[5].split('|')
+            #times_arr = []
+            #for a_time in ride_times:
+            #    times_arr.append(a_time)
+            #riderValues['AvailableRideTimesJSON'] = json.dumps(times_arr)
+            riderValues['AvailableRideTimesJSON'] = row[5]
             data = urlencode(riderValues).encode("utf-8")
             req = Request(url, data)
             response = urlopen(req)
