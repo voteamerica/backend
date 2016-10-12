@@ -51,41 +51,44 @@ server.route({
   method: 'GET',
   path: '/',
   handler: (req, reply) => {
+    var results = {
+      success: 'GET carpool: ',
+      failure: 'GET error: ' 
+    };
 
     req.log();
 
-    pool.query(dbGetQueryString(), (err, result) => {
-      var firstRowAsString = "";
-
-      if (err) {
-        return reply("GET error: " + err);
-      }
-
-      if (result !== undefined && result.rows !== undefined) {
-
-        // result.rows.forEach( val => console.log(val));
-        firstRowAsString = JSON.stringify(result.rows[0]);
-      }
-
-      reply('get received at carpool' + firstRowAsString);
-    });
+    dbGetData(pool, dbGetQueryString, reply, results);
   }
 });
+
+function getResultStrings(tableName) {
+    var resultStrings = {
+      success: ' row inserted',
+      failure: ' row insert failed' 
+    }
+
+    resultStrings.success = tableName + resultStrings.success; 
+    resultStrings.failure = tableName + resultStrings.failure; 
+
+    return resultStrings;
+}
 
 server.route({
   method: 'POST',
   path: '/' + DRIVER_ROUTE,
   handler: (req, reply) => {
     var payload = req.payload;
+    var results = getResultStrings(DRIVER_ROUTE);
 
     req.log();
 
     console.log("driver payload: " + JSON.stringify(payload, null, 4));
     console.log("driver zip: " + payload.DriverCollectionZIP);
 
-    dbInsertData(payload, pool, dbGetInsertDriverString, getDriverPayloadAsArray);
-
-    reply('driver row inserted');
+    dbInsertData(payload, pool, dbGetInsertDriverString, 
+                  getDriverPayloadAsArray,
+                  reply, results);
   }
 });
 
@@ -94,15 +97,16 @@ server.route({
   path: '/' + RIDER_ROUTE,
   handler: (req, reply) => {
     var payload = req.payload;
+    var results = getResultStrings(RIDER_ROUTE);
 
     req.log();
 
     console.log("rider payload: " + JSON.stringify(payload, null, 4));
     console.log("rider zip: " + payload.RiderCollectionZIP);
 
-    dbInsertData(payload, pool, dbGetInsertRiderString, getRiderPayloadAsArray);
-
-    reply('rider row inserted');
+    dbInsertData(payload, pool, dbGetInsertRiderString, 
+                  getRiderPayloadAsArray,
+                  reply, results);
   }
 });
 
@@ -130,7 +134,7 @@ server.register({
   }
 );
 
-server.on('request', function (request, event, tags) {
+server.on('request', (request, event, tags) => {
 
   // Include the Requestor's IP Address on every log
   if( !event.remoteAddress ) {
@@ -145,22 +149,48 @@ server.on('request', function (request, event, tags) {
   console.log('server req: %j', event) ;
 });
 
-server.on('response', function (request) {
-    console.log(
-        "server resp: " 
-      + request.info.remoteAddress 
-      + ': ' + request.method.toUpperCase() 
-      + ' ' + request.url.path 
-      + ' --> ' + request.response.statusCode);
+server.on('response', (request) => {  
+  console.log(
+      "server resp: " 
+    + request.info.remoteAddress 
+    + ': ' + request.method.toUpperCase() 
+    + ' ' + request.url.path 
+    + ' --> ' + request.response.statusCode);
 });
 
 pool.on('error', (err, client) => {
   if (err) {
-    console.error("db err" + err);
+    console.error("db err: " + err);
   } 
 });
 
-function dbInsertData(payload, pool, fnInsertString, fnPayloadArray) {
+function dbGetData(pool, fnGetString, reply, results) {
+    var queryString =  fnGetString();
+
+    pool.query( queryString )
+    .then(result => {
+      var firstRowAsString = "";
+
+      if (result !== undefined && result.rows !== undefined) {
+
+        // result.rows.forEach( val => console.log(val));
+        firstRowAsString = JSON.stringify(result.rows[0]);
+      }
+
+      reply(results.success + firstRowAsString);
+    })
+    .catch(e => {
+      var message = e.message || '';
+      var stack   = e.stack   || '';
+
+      console.error(results.failure, message, stack);
+
+      reply(results.failure + message).code(500);
+    });
+}
+
+function dbInsertData(payload, pool, fnInsertString, fnPayloadArray,
+                        reply, results) {
   var insertString = fnInsertString();
 
   pool.query(
@@ -168,20 +198,19 @@ function dbInsertData(payload, pool, fnInsertString, fnPayloadArray) {
     fnPayloadArray(payload)
   )
   .then(result => {
-    if (result !== undefined) {
-      console.log('insert: ', result)
-    }
-    else {
-      console.error('insert made')
-    }
+    var displayResult = result || '';
+
+    console.log('insert: ', displayResult);
+
+    reply(results.success);
   })
   .catch(e => {
-    if (e !== undefined && e.message !== undefined && e.stack !== undefined) {
-      console.error('query error', e.message, e.stack)
-    }
-    else {
-      console.error('query error.')
-    }
+    var message = e.message || '';
+    var stack   = e.stack   || '';
+
+    console.error('query error: ', message, stack);
+
+    reply(results.failure + ': ' + message).code(500);
   });
 }
 
@@ -213,21 +242,21 @@ function dbGetInsertRiderString() {
     + ' ('     
     + '  "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail"'       
     + ', "RiderPhone", "RiderAreaCode", "RiderEmailValidated", "RiderPhoneValidated", "RiderVotingState"'
-    + ', "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesJSON", "WheelchairCount", "NonWheelchairCount"'
+    + ', "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesJSON"'
     + ', "TotalPartySize", "TwoWayTripNeeded", "RiderPreferredContactMethod", "RiderIsVulnerable", "DriverCanContactRider"'
-    + ', "RiderWillNotTalkPolitics", "ReadyToMatch", "PleaseStayInTouch"' 
+    + ', "RiderWillNotTalkPolitics", "ReadyToMatch", "PleaseStayInTouch", "NeedWheelchair"' 
     + ')'
     + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, ' 
-    + '        $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)'  
+    + '        $13, $14, $15, $16, $17, $18, $19, $20, $21)' // , $22 
 }
 
 function getRiderPayloadAsArray(payload) {
   return [      
         payload.IPAddress, payload.RiderFirstName, payload.RiderLastName, payload.RiderEmail
       , payload.RiderPhone, payload.RiderAreaCode, payload.RiderEmailValidated, payload.RiderPhoneValidated, payload.RiderVotingState
-      , payload.RiderCollectionZIP, payload.RiderDropOffZIP, payload.AvailableRideTimesJSON, payload.WheelchairCount, payload.NonWheelchairCount
+      , payload.RiderCollectionZIP, payload.RiderDropOffZIP, payload.AvailableRideTimesJSON
       , payload.TotalPartySize, payload.TwoWayTripNeeded, payload.RiderPreferredContactMethod, payload.RiderIsVulnerable, payload.DriverCanContactRider
-      , payload.RiderWillNotTalkPolitics, payload.ReadyToMatch, payload.PleaseStayInTouch 
+      , payload.RiderWillNotTalkPolitics, payload.ReadyToMatch, payload.PleaseStayInTouch, payload.NeedWheelchair
     ]
 }
 
