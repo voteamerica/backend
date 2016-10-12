@@ -1,3 +1,10 @@
+GRANT SELECT ON TABLE stage.status_rider TO carpool_web_role;
+GRANT SELECT ON TABLE stage.websubmission_rider TO carpool_web_role;
+
+GRANT USAGE ON SCHEMA nov2016 TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION nov2016.cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) TO carpool_web_role;
+GRANT ALL ON TABLE nov2016.requested_ride TO carpool_web_role;
+
     -- // get uuid and last Name
     -- // from uuid, get timestamp then riderId from statusRider
     -- // execute nov2016 cancel_ride_by_rider 
@@ -33,14 +40,14 @@ BEGIN
         ON 
           (stage.websubmission_rider."CreatedTimeStamp" = stage.status_rider."CreatedTimeStamp") 
       WHERE 
-        stage.websubmission_rider."UUID" = "rider_UUID";
+        stage.websubmission_rider."UUID" = $1;
 
       retVal := 2;      
     ELSE 
-      RETURN retVal;
+      -- RETURN retVal;
+      RAISE EXCEPTION 'UUID not found %', $1; 
     END IF;
 
-    -- RAISE NOTICE 'riderID here is %', riderID; 
 
     SELECT nov2016.cancel_ride_by_rider(riderID) INTO retVal;
     

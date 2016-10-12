@@ -29,7 +29,7 @@ const DRIVER_TABLE  = 'websubmission_driver';
 const RIDER_TABLE   = 'websubmission_rider';
 const HELPER_TABLE  = 'websubmission_helper';
 
-var CANCEL_RIDE_FUNCTION = 'stage.cancel_ride($1)';
+var CANCEL_RIDE_FUNCTION = 'cancel_ride($1)';
 
 // app routes (api paths)
 const DRIVER_ROUTE  = 'driver';
@@ -67,6 +67,18 @@ function getResultStrings(tableName) {
     var resultStrings = {
       success: ' row inserted',
       failure: ' row insert failed' 
+    }
+
+    resultStrings.success = tableName + resultStrings.success; 
+    resultStrings.failure = tableName + resultStrings.failure; 
+
+    return resultStrings;
+}
+
+function getExecResultStrings(tableName) {
+    var resultStrings = {
+      success: ' fn called: ',
+      failure: ' fn call failed: ' 
     }
 
     resultStrings.success = tableName + resultStrings.success; 
@@ -133,7 +145,7 @@ server.route({
   path: '/' + DELETE_ROUTE,
   handler: (req, reply) => {
     var payload = req.payload;
-    var results = getResultStrings('delete: ');
+    var results = getExecResultStrings('cancel ride: ');
 
     req.log();
 
@@ -144,7 +156,7 @@ server.route({
     // execute nov2016 cancel_ride_by_rider 
 
     dbExecuteFunction(payload, pool, dbCancelRideFunctionString, 
-                      [payload.UUID],
+                      getCancelRidePayloadAsArray,
                       req, reply, results);
   }
 });
@@ -168,6 +180,7 @@ server.register({
 
       console.log("driver ins: " + dbGetInsertDriverString());
       console.log("rider ins: " + dbGetInsertRiderString());
+      console.log("cancel ride fn: " + dbCancelRideFunctionString());
       console.log("ops interval:" + logOptions.ops.interval);
     });
   }
@@ -265,30 +278,35 @@ function dbInsertData(payload, pool, fnInsertString, fnPayloadArray,
 
 function dbExecuteFunction(payload, pool, fnExecuteFunctionString, fnPayloadArray,
                         req, reply, results) {
-    var queryString = fnExecuteFunction();
+  var queryString = fnExecuteFunctionString();
 
-    console.log("executeFunctionString: " + queryString);
-    pool.query(queryString)
-        .then(function (result) {
-        var firstRowAsString = "";
-        if (result !== undefined && result.rows !== undefined) {
-            // result.rows.forEach( val => console.log(val));
-            result.rows.forEach(function (val) { return console.log("exec fn: " + JSON.stringify(val)); });
-            firstRowAsString = JSON.stringify(result.rows[0]);
-        }
-        console.error("executed fn: " + firstRowAsString);
+  console.log("executeFunctionString: " + queryString);
+  pool.query(
+    queryString, 
+    fnPayloadArray(req, payload)
+    )
+    .then(function (result) {
+    var firstRowAsString = "";
 
-        reply(results.success + firstRowAsString);
-    })
-        .catch(function (e) {
-        var message = e.message || '';
-        var stack = e.stack || '';
-        console.error(
-        // results.failure, 
-        message, stack);
+    if (result !== undefined && result.rows !== undefined) {
+        // result.rows.forEach( val => console.log(val));
+        result.rows.forEach(function (val) { return console.log("exec fn: " + JSON.stringify(val)); });
+        firstRowAsString = JSON.stringify(result.rows[0]);
+    }
+    console.error("executed fn: " + firstRowAsString);
 
-        reply(results.failure + message).code(500);
-    });
+    reply(results.success + firstRowAsString);
+  })
+  .catch(function (e) {
+    var message = e.message || '';
+    var stack = e.stack || '';
+
+    console.error(
+    // results.failure, 
+    message, stack);
+
+    reply(results.failure + message).code(500);
+  });
 }
 
 function dbCancelRideFunctionString() {
@@ -346,6 +364,12 @@ function getHelperPayloadAsArray(req, payload) {
   return [      
         payload.Name, payload.Email, payload.Capability,
         1, moment().toISOString()
+    ]
+}
+
+function getCancelRidePayloadAsArray(req, payload) {
+  return [      
+        payload.UUID
     ]
 }
 
