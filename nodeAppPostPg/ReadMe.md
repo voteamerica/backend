@@ -18,6 +18,10 @@ Use testPage.html (and linked testPageScript.js) to test app
 STEPS TO INSTALL ON LINUX
 #########################  
 
+DATABASE 
+Run stage.sql
+
+
 ENV VARS REQUIRED 
 
 // db env vars - tcp
