@@ -196,6 +196,7 @@ server.register({
       console.log("driver ins: " + dbGetInsertDriverString());
       console.log("rider ins: " + dbGetInsertRiderString());
       console.log("cancel ride fn: " + dbCancelRideFunctionString());
+      console.log("reject ride fn: " + dbRejectRideFunctionString());
       console.log("ops interval:" + logOptions.ops.interval);
     });
   }
