@@ -443,6 +443,29 @@ CREATE TABLE helper (
 ALTER TABLE helper OWNER TO carpool_admins;
 
 --
+-- Name: match; Type: TABLE; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE TABLE match (
+    state character varying(30) DEFAULT 'Proposed'::character varying NOT NULL,
+    uuid_driver character varying(50) NOT NULL,
+    uuid_rider character varying(50) NOT NULL,
+    score smallint DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE match OWNER TO carpool_admins;
+
+--
+-- Name: COLUMN match.state; Type: COMMENT; Schema: nov2016; Owner: carpool_admins
+--
+
+COMMENT ON COLUMN match.state IS '- Proposed
+- Accepted
+- Rejected';
+
+
+--
 -- Name: match_status; Type: TABLE; Schema: nov2016; Owner: carpool_admins
 --
 
@@ -578,7 +601,8 @@ CREATE TABLE websubmission_driver (
     "ReadyToMatch" boolean DEFAULT false NOT NULL,
     "PleaseStayInTouch" boolean DEFAULT false NOT NULL,
     "VehicleRegistrationNumber" character varying(255),
-    "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL
+    "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL,
+    state character varying(30) DEFAULT 'Pending'::character varying NOT NULL
 );
 
 
@@ -629,7 +653,8 @@ CREATE TABLE websubmission_rider (
     "RiderAccommodationNotes" character varying(1000),
     "RiderLegalConsent" boolean,
     "ReadyToMatch" boolean,
-    "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL
+    "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL,
+    state character varying(30) DEFAULT 'Pending'::character varying NOT NULL
 );
 
 
@@ -726,6 +751,14 @@ ALTER TABLE ONLY zipcode_dist
 
 ALTER TABLE ONLY zip_codes
     ADD CONSTRAINT "ZIP_CODES_pkey" PRIMARY KEY (zip);
+
+
+--
+-- Name: match_pk; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY match
+    ADD CONSTRAINT match_pk PRIMARY KEY (uuid_driver, uuid_rider);
 
 
 --
@@ -967,6 +1000,17 @@ REVOKE ALL ON TABLE helper FROM PUBLIC;
 REVOKE ALL ON TABLE helper FROM carpool_admins;
 GRANT ALL ON TABLE helper TO carpool_admins;
 GRANT ALL ON TABLE helper TO carpool_role;
+
+
+--
+-- Name: match; Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE match FROM PUBLIC;
+REVOKE ALL ON TABLE match FROM carpool_admins;
+GRANT ALL ON TABLE match TO carpool_admins;
+GRANT ALL ON TABLE match TO carpool_role;
+GRANT SELECT ON TABLE match TO carpool_web_role;
 
 
 --

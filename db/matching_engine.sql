@@ -175,6 +175,10 @@ BEGIN
                                 UPDATE stage.websubmission_rider r
                                 SET state='Proposed'
                                 WHERE r."UUID" = ride_request_row."UUID";
+
+
+                                RAISE NOTICE 'Proposed Match, Rider=%, Driver=%, Score=%',
+                                             ride_request_row."UUID", drive_offer_row."UUID", match_points + time_criteria_points;
                             EXCEPTION WHEN unique_violation
                             THEN
                                 -- ignore
