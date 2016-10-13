@@ -406,19 +406,31 @@ function getRiderPayloadAsArray(req, payload) {
         req.info.remoteAddress, payload.RiderFirstName, payload.RiderLastName, payload.RiderEmail
       , payload.RiderPhone, payload.RiderVotingState
       , payload.RiderCollectionZIP, payload.RiderDropOffZIP, payload.AvailableRideTimesJSON
-      , payload.TotalPartySize, payload.TwoWayTripNeeded, payload.RiderPreferredContactMethod, payload.RiderIsVulnerable
-      , payload.RiderWillNotTalkPolitics, payload.PleaseStayInTouch, payload.NeedWheelchair, payload.RiderAccommodationNotes
-      , payload.RiderLegalConsent
+      , payload.TotalPartySize
+      , (payload.TwoWayTripNeeded ? 'true' : 'false')
+      , payload.RiderPreferredContactMethod
+      , (payload.RiderIsVulnerable ? 'true' : 'false')
+      , (payload.RiderWillNotTalkPolitics ? 'true' : 'false')
+      , (payload.PleaseStayInTouch ? 'true' : 'false')
+      , (payload.NeedWheelchair ? 'true' : 'false')
+      , payload.RiderAccommodationNotes
+      , (payload.RiderLegalConsent ? 'true' : 'false')
     ]
 }
 
 function getDriverPayloadAsArray(req, payload) {
   return [
         req.info.remoteAddress, payload.DriverCollectionZIP, payload.DriverCollectionRadius, payload.AvailableDriveTimesJSON
-      , payload.DriverCanLoadRiderWithWheelchair, payload.SeatCount, payload.DriverHasInsurance
+      , (payload.DriverCanLoadRiderWithWheelchair ? 'true'  : 'false')
+      , payload.SeatCount
+      , (payload.DriverHasInsurance ? 'true' : 'false')
       , payload.DriverFirstName, payload.DriverLastName
       , payload.DriverEmail, payload.DriverPhone
-      , payload.DrivingOnBehalfOfOrganization, payload.DrivingOBOOrganizationName, payload.RidersCanSeeDriverDetails, payload.DriverWillNotTalkPolitics
-      , payload.PleaseStayInTouch, payload.VehicleRegistrationNumber
+      , (payload.DrivingOnBehalfOfOrganization ? 'true' : 'false')
+      , payload.DrivingOBOOrganizationName 
+      , (payload.RidersCanSeeDriverDetails ? 'true' : 'false')
+      , (payload.DriverWillNotTalkPolitics ? 'true' : 'false')
+      , (payload.PleaseStayInTouch ? 'true' : 'false')
+      , payload.VehicleRegistrationNumber
     ]
 }
