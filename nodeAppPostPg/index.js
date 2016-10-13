@@ -226,7 +226,9 @@ function dbInsertData(payload, pool, fnInsertString, fnPayloadArray,
 
     console.log('insert: ', uuid + ' ' + displayResult);
 
-    reply(results.success + ': ' + uuid);
+    reply.redirect(payload._redirect + '?uuid=' + uuid.toString());
+
+    // reply(results.success + ': ' + uuid);
   })
   .catch(e => {
     var message = e.message || '';
