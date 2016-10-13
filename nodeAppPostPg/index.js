@@ -90,7 +90,9 @@ function getExecResultStrings(tableName) {
 }
 
 function sanitiseDriver(payload) {
-  if (payload.DriverCollectionRadius === undefined) {
+  if (payload.DriverCollectionRadius === undefined ||
+      payload.DriverCollectionRadius === "") {
+    // console.log("santising...");
     payload.DriverCollectionRadius = 0;
   }    
 }
@@ -102,7 +104,10 @@ server.route({
     var payload = req.payload;
     var results = getResultStrings(DRIVER_ROUTE);
 
+    console.log("driver radius1 : " + payload.DriverCollectionRadius);
     sanitiseDriver(payload);
+    console.log("driver radius2 : " + payload.DriverCollectionRadius);
+
     req.log();
 
     console.log("driver payload: " + JSON.stringify(payload, null, 4));
