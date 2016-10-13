@@ -30,12 +30,14 @@ const RIDER_TABLE   = 'websubmission_rider';
 const HELPER_TABLE  = 'websubmission_helper';
 
 var CANCEL_RIDE_FUNCTION = 'cancel_ride($1)';
+var REJECT_RIDE_FUNCTION = 'reject_ride($1)';
 
 // app routes (api paths)
 const DRIVER_ROUTE  = 'driver';
 const RIDER_ROUTE   = 'rider';
 const HELPER_ROUTE  = 'helper';
 const DELETE_ROUTE  = 'rider';
+const PUT_ROUTE     = 'rider';
 
 var appPort = DEFAULT_PORT;
 
@@ -151,12 +153,25 @@ server.route({
 
     console.log("delete payload: " + JSON.stringify(payload, null, 4));
 
-    // get uuid and last Name
-    // from uuid, get timestamp then riderId from statusRider
-    // execute nov2016 cancel_ride_by_rider 
-
     dbExecuteFunction(payload, pool, dbCancelRideFunctionString, 
                       getCancelRidePayloadAsArray,
+                      req, reply, results);
+  }
+});
+
+server.route({
+  method: 'PUT',
+  path: '/' + PUT_ROUTE,
+  handler: (req, reply) => {
+    var payload = req.payload;
+    var results = getExecResultStrings('reject ride: ');
+
+    req.log();
+
+    console.log("reject payload: " + JSON.stringify(payload, null, 4));
+
+    dbExecuteFunction(payload, pool, dbRejectRideFunctionString, 
+                      getRejectRidePayloadAsArray,
                       req, reply, results);
   }
 });
@@ -181,6 +196,7 @@ server.register({
       console.log("driver ins: " + dbGetInsertDriverString());
       console.log("rider ins: " + dbGetInsertRiderString());
       console.log("cancel ride fn: " + dbCancelRideFunctionString());
+      console.log("reject ride fn: " + dbRejectRideFunctionString());
       console.log("ops interval:" + logOptions.ops.interval);
     });
   }
@@ -309,6 +325,10 @@ function dbExecuteFunction(payload, pool, fnExecuteFunctionString, fnPayloadArra
   });
 }
 
+function dbRejectRideFunctionString() {
+    return 'select ' + SCHEMA_NAME + '.' + REJECT_RIDE_FUNCTION;
+}
+
 function dbCancelRideFunctionString() {
     return 'select ' + SCHEMA_NAME + '.' + CANCEL_RIDE_FUNCTION;
 }
@@ -364,6 +384,12 @@ function getHelperPayloadAsArray(req, payload) {
   return [      
         payload.Name, payload.Email, payload.Capability,
         1, moment().toISOString()
+    ]
+}
+
+function getRejectRidePayloadAsArray(req, payload) {
+  return [
+        payload.UUID
     ]
 }
 
