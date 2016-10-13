@@ -89,12 +89,24 @@ function getExecResultStrings(tableName) {
     return resultStrings;
 }
 
+function sanitiseDriver(payload) {
+  if (payload.DriverCollectionRadius === undefined ||
+      payload.DriverCollectionRadius === "") {
+    // console.log("santising...");
+    payload.DriverCollectionRadius = 0;
+  }    
+}
+
 server.route({
   method: 'POST',
   path: '/' + DRIVER_ROUTE,
   handler: (req, reply) => {
     var payload = req.payload;
     var results = getResultStrings(DRIVER_ROUTE);
+
+    console.log("driver radius1 : " + payload.DriverCollectionRadius);
+    sanitiseDriver(payload);
+    console.log("driver radius2 : " + payload.DriverCollectionRadius);
 
     req.log();
 
@@ -107,12 +119,23 @@ server.route({
   }
 });
 
+function sanitiseRider(payload) {
+
+  if (payload.RiderVotingState === undefined) {
+    payload.RiderVotingState = "MO";
+  }
+}
+
 server.route({
   method: 'POST',
   path: '/' + RIDER_ROUTE,
   handler: (req, reply) => {
     var payload = req.payload;
     var results = getResultStrings(RIDER_ROUTE);
+
+    console.log("rider state1 : " + payload.RiderVotingState);
+    sanitiseRider(payload);
+    console.log("rider state2 : " + payload.RiderVotingState);
 
     req.log();
 
