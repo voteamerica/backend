@@ -89,6 +89,12 @@ function getExecResultStrings(tableName) {
     return resultStrings;
 }
 
+function sanitiseDriver(payload) {
+  if (payload.DriverCollectionRadius === undefined) {
+    payload.DriverCollectionRadius = 0;
+  }    
+}
+
 server.route({
   method: 'POST',
   path: '/' + DRIVER_ROUTE,
@@ -96,6 +102,7 @@ server.route({
     var payload = req.payload;
     var results = getResultStrings(DRIVER_ROUTE);
 
+    sanitiseDriver(payload);
     req.log();
 
     console.log("driver payload: " + JSON.stringify(payload, null, 4));
@@ -108,30 +115,10 @@ server.route({
 });
 
 function sanitiseRider(payload) {
-  
+
   if (payload.RiderVotingState === undefined) {
     payload.RiderVotingState = "MO";
   }
-
-  if (payload.TwoWayTripNeeded === undefined) {
-    payload.TwoWayTripNeeded = false;
-  }
-  
-  if (payload.RiderIsVulnerable === undefined) {
-    payload.RiderIsVulnerable = false;
-  }
-  
-  if (payload.RiderWillNotTalkPolitics === undefined) {
-    payload.RiderWillNotTalkPolitics = false;
-  }
-
-  if (payload.NeedWheelchair === undefined) {
-    payload.NeedWheelchair = false;
-  }
-
-  if (payload.PleaseStayInTouch === undefined) {
-    payload.PleaseStayInTouch = false;
-  }  
 }
 
 server.route({
