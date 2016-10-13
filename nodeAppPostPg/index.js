@@ -107,12 +107,43 @@ server.route({
   }
 });
 
+function sanitiseRider(payload) {
+  
+  if (payload.RiderVotingState === undefined) {
+    payload.RiderVotingState = "MO";
+  }
+
+  if (payload.TwoWayTripNeeded === undefined) {
+    payload.TwoWayTripNeeded = false;
+  }
+  
+  if (payload.RiderIsVulnerable === undefined) {
+    payload.RiderIsVulnerable = false;
+  }
+  
+  if (payload.RiderWillNotTalkPolitics === undefined) {
+    payload.RiderWillNotTalkPolitics = false;
+  }
+
+  if (payload.NeedWheelchair === undefined) {
+    payload.NeedWheelchair = false;
+  }
+
+  if (payload.PleaseStayInTouch === undefined) {
+    payload.PleaseStayInTouch = false;
+  }  
+}
+
 server.route({
   method: 'POST',
   path: '/' + RIDER_ROUTE,
   handler: (req, reply) => {
     var payload = req.payload;
     var results = getResultStrings(RIDER_ROUTE);
+
+    console.log("rider state1 : " + payload.RiderVotingState);
+    sanitiseRider(payload);
+    console.log("rider state2 : " + payload.RiderVotingState);
 
     req.log();
 
