@@ -638,7 +638,7 @@ CREATE TABLE websubmission_rider (
     "RiderAreaCode" integer,
     "RiderEmailValidated" boolean DEFAULT false NOT NULL,
     "RiderPhoneValidated" boolean DEFAULT false NOT NULL,
-    "RiderVotingState" character(2) NOT NULL,
+    "RiderVotingState" character(2),
     "RiderCollectionZIP" character varying(5) NOT NULL,
     "RiderDropOffZIP" character varying(5) NOT NULL,
     "AvailableRideTimesJSON" character varying(2000),
@@ -854,6 +854,7 @@ REVOKE ALL ON SCHEMA nov2016 FROM postgres;
 GRANT ALL ON SCHEMA nov2016 TO postgres;
 GRANT USAGE ON SCHEMA nov2016 TO carpool_role;
 GRANT ALL ON SCHEMA nov2016 TO carpool_admins;
+GRANT USAGE ON SCHEMA nov2016 TO carpool_web_role;
 
 
 --
@@ -1082,7 +1083,7 @@ GRANT ALL ON TABLE sweep_status TO carpool_role;
 REVOKE ALL ON TABLE websubmission_driver FROM PUBLIC;
 REVOKE ALL ON TABLE websubmission_driver FROM carpool_admins;
 GRANT ALL ON TABLE websubmission_driver TO carpool_admins;
-GRANT INSERT ON TABLE websubmission_driver TO carpool_web_role;
+GRANT SELECT,INSERT ON TABLE websubmission_driver TO carpool_web_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE websubmission_driver TO carpool_role;
 
 
@@ -1113,7 +1114,7 @@ GRANT ALL ON TABLE websubmission_helper TO carpool_role;
 REVOKE ALL ON TABLE websubmission_rider FROM PUBLIC;
 REVOKE ALL ON TABLE websubmission_rider FROM carpool_admins;
 GRANT ALL ON TABLE websubmission_rider TO carpool_admins;
-GRANT INSERT ON TABLE websubmission_rider TO carpool_web_role;
+GRANT SELECT,INSERT ON TABLE websubmission_rider TO carpool_web_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE websubmission_rider TO carpool_role;
 
 
