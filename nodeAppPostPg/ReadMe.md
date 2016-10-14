@@ -19,7 +19,7 @@ STEPS TO INSTALL ON LINUX
 #########################  
 
 DATABASE 
-Run stage.sql
+Run matches.sql
 
 
 ENV VARS REQUIRED 
