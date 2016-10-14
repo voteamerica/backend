@@ -1,4 +1,7 @@
+--- /v2.0
 
+/riders?state=[Pending|Proposed|
+Returns JSON-formatted data with UUID of riders in Pending state, along with 
 
 
 
@@ -6,6 +9,9 @@
 
 --- /v1.1/
 INTERNAL PORT : 3001
+
+POST /driver
+
 
                                                            Table "stage.websubmission_driver"
               Column              |            Type             |                   Modifiers                   |          USER FORM FIELD
@@ -21,8 +27,8 @@ INTERNAL PORT : 3001
  DriverInsuranceProviderName      | character varying(255)      |                                               | --- to be removed from websubmission_driver ?---
  DriverInsurancePolicyNumber      | character varying(50)       |                                               | --- to be removed from websubmission_driver ?---
  DriverLicenseState               | character(2)                |                                               | --- to be removed from websubmission_driver ?---
- DriverLicenseNumber              | character varying(50)       |                                               | --- to be removed from websubmission_driver ?---
- VehicleRegistrationNumber        | character varying(255)      |                                               | VehicleRegistrationNumber
+ DriverLicenseNumber              | character varying(50)       |                                               | DriverLicenceNumber (notice the different spelling)
+ VehicleRegistrationNumber        | character varying(255)      |                                               | --- to be removed from websubmission_driver ?---
  DriverFirstName                  | character varying(255)      | not null                                      | DriverFirstName
  DriverLastName                   | character varying(255)      | not null                                      | DriverLastName
  PermissionCanRunBackgroundCheck  | boolean                     | not null default false                        | --- to be removed from websubmission_driver ?---
@@ -39,6 +45,7 @@ INTERNAL PORT : 3001
  PleaseStayInTouch                | boolean                     | not null default false                        | PleaseStayInTouch
 
 
+POST /rider
                                                         Table "stage.websubmission_rider"
            Column            |            Type             |                   Modifiers                   |          USER FORM FIELD 
 -----------------------------+-----------------------------+-----------------------------------------------+-------------------------------------
@@ -51,7 +58,7 @@ INTERNAL PORT : 3001
  RiderAreaCode               | integer                     |                                               | --- to be removed from websubmission_rider ?---
  RiderEmailValidated         | boolean                     | not null default false                        | --- to be removed from websubmission_rider ?---
  RiderPhoneValidated         | boolean                     | not null default false                        | --- to be removed from websubmission_rider ?---
- RiderVotingState            | character(2)                | not null                                      | RiderVotingState
+ RiderVotingState            | character(2)                | not null                                      | --- to be removed from websubmission_rider ?---
  RiderCollectionZIP          | character varying(5)        | not null                                      | RiderCollectionZIP
  RiderDropOffZIP             | character varying(5)        | not null                                      | RiderDropOffZIP
  AvailableRideTimesJSON      | character varying(2000)     |                                               | AvailableRideTimesJSON
@@ -68,6 +75,8 @@ INTERNAL PORT : 3001
  RiderAccommodationNotes     | character varying(1000)     |                                               | RiderAccommodationNotes
 
 
+POST /helper
+
                                            Table "stage.websubmission_helper"
       Column      |            Type             |           Modifiers            |          USER FORM FIELD  
 ------------------+-----------------------------+--------------------------------+-------------------------------------
@@ -77,8 +86,10 @@ INTERNAL PORT : 3001
  helpercapability | character varying(50)[]     |                                | Capability
  sweep_status_id  | integer                     | not null default '-1'::integer | 
 
-
-
+--- Experimental implementations
+ GET /matches                Returns list of matches
+ GET /match-driver/<UUID>    Returns matched driver information
+ GET /match-rider/<UUID>     Returns matched rider information
 
 
 --- API /v1.0/
