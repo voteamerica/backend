@@ -24,10 +24,13 @@ const OPS_INTERVAL  = 300000; // 5 mins
 const DEFAULT_PORT  = process.env.PORT || 3000;
 
 // for db carpool
-const SCHEMA_NAME   = 'stage';
+const SCHEMA_NAME           = 'stage';
+const SCHEMA_NOV2016_NAME   = 'nov2016';
+
 const DRIVER_TABLE  = 'websubmission_driver';
 const RIDER_TABLE   = 'websubmission_rider';
 const HELPER_TABLE  = 'websubmission_helper';
+const MATCH_TABLE   = 'match';
 
 var CANCEL_RIDE_FUNCTION = 'cancel_ride($1)';
 var REJECT_RIDE_FUNCTION = 'reject_ride($1)';
@@ -62,6 +65,53 @@ server.route({
     req.log();
 
     dbGetData(pool, dbGetQueryString, reply, results);
+  }
+});
+
+server.route({
+  method: 'GET',
+  path: '/matches',
+  handler: (req, reply) => {
+    var results = {
+      success: 'GET matches: ',
+      failure: 'GET matches: ' 
+    };
+
+    req.log();
+
+    dbGetMatchesData(pool, dbGetMatchesQueryString, reply, results);
+  }
+});
+
+server.route({
+  method: 'GET',
+  path: '/match-rider/{uuid}',
+  handler: (req, reply) => {
+    var results = {
+      success: 'GET match-rider: ',
+      failure: 'GET match-rider: ' 
+    };
+
+    req.log();
+
+    dbGetMatchSpecificData(pool, dbGetMatchRiderQueryString, 
+                            req.params.uuid, reply, results);
+  }
+});
+
+server.route({
+  method: 'GET',
+  path: '/match-driver/{uuid}',
+  handler: (req, reply) => {
+    var results = {
+      success: 'GET match-driver: ',
+      failure: 'GET match-driver: ' 
+    };
+
+    req.log();
+
+    dbGetMatchSpecificData(pool, dbGetMatchDriverQueryString, 
+                            req.params.uuid, reply, results);
   }
 });
 
@@ -280,6 +330,66 @@ function dbGetData(pool, fnGetString, reply, results) {
     });
 }
 
+function dbGetMatchesData(pool, fnGetString, reply, results) {
+    var queryString =  fnGetString();
+
+    pool.query( queryString )
+    .then(result => {
+      var firstRowAsString = "";
+
+      if (result !== undefined && result.rows !== undefined) {
+
+        result.rows.forEach( val => {
+          
+          firstRowAsString += JSON.stringify(val);
+        });
+
+        console.log(JSON.stringify(result.rows[0]));        
+      }
+
+      reply(results.success + firstRowAsString);
+    })
+    .catch(e => {
+      var message = e.message || '';
+      var stack   = e.stack   || '';
+
+      console.error(results.failure, message, stack);
+
+      reply(results.failure + message).code(500);
+    });
+}
+
+function dbGetMatchSpecificData(pool, fnGetString, uuid, reply, results) {
+    var queryString =  fnGetString(uuid);
+
+    console.log('match rider query: ' + queryString);
+
+    pool.query( queryString )
+    .then(result => {
+      var firstRowAsString = "";
+
+      if (result !== undefined && result.rows !== undefined) {
+
+        result.rows.forEach( val => {
+          
+          firstRowAsString += JSON.stringify(val);
+        });
+
+        console.log(JSON.stringify(result.rows[0]));        
+      }
+
+      reply(results.success + firstRowAsString);
+    })
+    .catch(e => {
+      var message = e.message || '';
+      var stack   = e.stack   || '';
+
+      console.error(results.failure, message, stack);
+
+      reply(results.failure + message).code(500);
+    });
+}
+
 function dbInsertData(payload, pool, fnInsertString, fnPayloadArray,
                         req, reply, results) {
   var insertString = fnInsertString();
@@ -360,6 +470,26 @@ function dbRejectRideFunctionString() {
 
 function dbCancelRideFunctionString() {
     return 'select ' + SCHEMA_NAME + '.' + CANCEL_RIDE_FUNCTION;
+}
+
+function dbGetMatchRiderQueryString (rider_uuid) {
+  return 'SELECT * FROM nov2016.match inner join stage.websubmission_rider ' +
+    'on (nov2016.match.uuid_rider = stage.websubmission_rider."UUID") ' +
+    'inner join stage.websubmission_driver ' + 
+    'on (nov2016.match.uuid_driver = stage.websubmission_driver."UUID") ' +
+    'where nov2016.match.uuid_rider = ' + " '" + rider_uuid + "' ";
+}
+
+function dbGetMatchDriverQueryString (driver_uuid) {
+  return 'SELECT * FROM nov2016.match inner join stage.websubmission_rider ' +
+    'on (nov2016.match.uuid_rider = stage.websubmission_rider."UUID") ' +
+    'inner join stage.websubmission_driver ' + 
+    'on (nov2016.match.uuid_driver = stage.websubmission_driver."UUID") ' +
+    'where nov2016.match.uuid_driver = ' + " '" + driver_uuid + "' ";
+}
+
+function dbGetMatchesQueryString () {
+  return 'SELECT * FROM ' + SCHEMA_NOV2016_NAME + '.' + MATCH_TABLE;
 }
 
 function dbGetQueryString () {
