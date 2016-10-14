@@ -378,11 +378,11 @@ function dbGetInsertDriverString() {
     + ', "DriverFirstName", "DriverLastName"'
     + ', "DriverEmail", "DriverPhone"'
     + ', "DrivingOnBehalfOfOrganization", "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics"'
-    + ', "PleaseStayInTouch", "VehicleRegistrationNumber" '
+    + ', "PleaseStayInTouch", "VehicleRegistrationNumber", "DriverLicenseNumber" '
     + ')'
 
     + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, ' 
-    + '        $13, $14, $15, $16, $17 )' 
+    + '        $13, $14, $15, $16, $17, $18 )' 
     + ' returning "UUID" ' 
 }
 
@@ -459,5 +459,6 @@ function getDriverPayloadAsArray(req, payload) {
       , (payload.DriverWillNotTalkPolitics ? 'true' : 'false')
       , (payload.PleaseStayInTouch ? 'true' : 'false')
       , payload.VehicleRegistrationNumber
+      , payload.DriverLicenceNumber 
     ]
 }
