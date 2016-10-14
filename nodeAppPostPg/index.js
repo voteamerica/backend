@@ -303,9 +303,13 @@ function dbInsertData(payload, pool, fnInsertString, fnPayloadArray,
 
     console.log('insert: ', uuid + ' ' + displayResult);
 
-    reply.redirect(payload._redirect + '?uuid=' + uuid.toString());
+    if (payload._redirect) {
 
-    // reply(results.success + ': ' + uuid);
+      reply.redirect(payload._redirect + '?uuid=' + uuid.toString());
+    } 
+    else {
+      reply(results.success + ': ' + uuid);
+    }
   })
   .catch(e => {
     var message = e.message || '';
