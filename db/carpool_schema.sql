@@ -118,6 +118,48 @@ $$;
 
 ALTER FUNCTION nov2016.distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) OWNER TO carpool_admins;
 
+--
+-- Name: fct_modified_column(); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE FUNCTION fct_modified_column() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    NEW.last_update_ts = now();
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION nov2016.fct_modified_column() OWNER TO carpool_admins;
+
+--
+-- Name: zip_distance(integer, integer); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE FUNCTION zip_distance(zip_from integer, zip_to integer) RETURNS double precision
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE 
+zip_from_row nov2016.zip_codes%ROWTYPE;
+zip_to_row   nov2016.zip_codes%ROWTYPE;
+BEGIN
+    SELECT * INTO zip_from_row FROM nov2016.zip_codes WHERE zip=zip_from::character varying;
+    SELECT * INTO zip_to_row   FROM nov2016.zip_codes WHERE zip=zip_to::character varying;
+    RETURN nov2016.distance(
+                        zip_from_row.latitude_numeric,
+                        zip_from_row.longitude_numeric,
+                        zip_to_row.latitude_numeric,
+                        zip_to_row.longitude_numeric);
+END  
+
+$$;
+
+
+ALTER FUNCTION nov2016.zip_distance(zip_from integer, zip_to integer) OWNER TO carpool_admins;
+
 SET search_path = public, pg_catalog;
 
 --
@@ -221,6 +263,22 @@ $$;
 
 
 ALTER FUNCTION stage.create_riders() OWNER TO carpool_admins;
+
+--
+-- Name: fct_modified_column(); Type: FUNCTION; Schema: stage; Owner: carpool_admins
+--
+
+CREATE FUNCTION fct_modified_column() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    NEW.last_update_ts = now();
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION stage.fct_modified_column() OWNER TO carpool_admins;
 
 SET search_path = nov2016, pg_catalog;
 
@@ -450,7 +508,9 @@ CREATE TABLE match (
     state character varying(30) DEFAULT 'Proposed'::character varying NOT NULL,
     uuid_driver character varying(50) NOT NULL,
     uuid_rider character varying(50) NOT NULL,
-    score smallint DEFAULT 0 NOT NULL
+    score smallint DEFAULT 0 NOT NULL,
+    created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 
@@ -460,9 +520,12 @@ ALTER TABLE match OWNER TO carpool_admins;
 -- Name: COLUMN match.state; Type: COMMENT; Schema: nov2016; Owner: carpool_admins
 --
 
-COMMENT ON COLUMN match.state IS '- Proposed
-- Accepted
-- Rejected';
+COMMENT ON COLUMN match.state IS '- MatchProposed
+- MatchConfirmed
+- Rejected,
+- Canceled
+- Rejected
+- Expired';
 
 
 --
@@ -496,6 +559,83 @@ ALTER TABLE "match_status_MatchStatusID_seq" OWNER TO carpool_admins;
 --
 
 ALTER SEQUENCE "match_status_MatchStatusID_seq" OWNED BY match_status."MatchStatusID";
+
+
+--
+-- Name: outgoing_email; Type: TABLE; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE TABLE outgoing_email (
+    id integer NOT NULL,
+    created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    state character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
+    recipient character varying(255) NOT NULL,
+    subject character varying(255) NOT NULL,
+    body text NOT NULL,
+    emission_info text
+);
+
+
+ALTER TABLE outgoing_email OWNER TO carpool_admins;
+
+--
+-- Name: outgoing_email_id_seq; Type: SEQUENCE; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE SEQUENCE outgoing_email_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE outgoing_email_id_seq OWNER TO carpool_admins;
+
+--
+-- Name: outgoing_email_id_seq; Type: SEQUENCE OWNED BY; Schema: nov2016; Owner: carpool_admins
+--
+
+ALTER SEQUENCE outgoing_email_id_seq OWNED BY outgoing_email.id;
+
+
+--
+-- Name: outgoing_sms; Type: TABLE; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE TABLE outgoing_sms (
+    id integer NOT NULL,
+    created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    state character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
+    recipient character varying(15) NOT NULL,
+    body text NOT NULL,
+    emission_info text
+);
+
+
+ALTER TABLE outgoing_sms OWNER TO carpool_admins;
+
+--
+-- Name: outgoing_sms_id_seq; Type: SEQUENCE; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE SEQUENCE outgoing_sms_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE outgoing_sms_id_seq OWNER TO carpool_admins;
+
+--
+-- Name: outgoing_sms_id_seq; Type: SEQUENCE OWNED BY; Schema: nov2016; Owner: carpool_admins
+--
+
+ALTER SEQUENCE outgoing_sms_id_seq OWNED BY outgoing_sms.id;
 
 
 --
@@ -574,7 +714,7 @@ ALTER TABLE sweep_status OWNER TO carpool_admins;
 --
 
 CREATE TABLE websubmission_driver (
-    "TimeStamp" timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL,
     "IPAddress" character varying(20),
     "DriverCollectionZIP" character varying(5) NOT NULL,
     "DriverCollectionRadius" integer NOT NULL,
@@ -601,35 +741,40 @@ CREATE TABLE websubmission_driver (
     "ReadyToMatch" boolean DEFAULT false NOT NULL,
     "PleaseStayInTouch" boolean DEFAULT false NOT NULL,
     "VehicleRegistrationNumber" character varying(255),
-    "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL,
-    state character varying(30) DEFAULT 'Pending'::character varying NOT NULL
+    state character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
+    created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 
 ALTER TABLE websubmission_driver OWNER TO carpool_admins;
 
 --
--- Name: websubmission_helper; Type: TABLE; Schema: stage; Owner: carpool_admins
+-- Name: vw_drive_offer; Type: VIEW; Schema: stage; Owner: carpool_admins
 --
 
-CREATE TABLE websubmission_helper (
-    "timestamp" timestamp without time zone NOT NULL,
-    helpername character varying(100) NOT NULL,
-    helperemail character varying(250) NOT NULL,
-    helpercapability character varying(500)[],
-    sweep_status_id integer DEFAULT '-1'::integer NOT NULL,
-    "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL
-);
+CREATE VIEW vw_drive_offer AS
+ SELECT websubmission_driver."UUID" AS uuid,
+    websubmission_driver.state,
+    websubmission_driver.created_ts,
+    websubmission_driver.last_updated_ts,
+    websubmission_driver."DriverCollectionZIP" AS zip,
+    websubmission_driver."DriverCollectionRadius" AS radius,
+    websubmission_driver."DriverCanLoadRiderWithWheelchair" AS wheelchair,
+    websubmission_driver."SeatCount" AS seats,
+    websubmission_driver."DrivingOnBehalfOfOrganization" AS official,
+    websubmission_driver."AvailableDriveTimesJSON" AS drive_times
+   FROM websubmission_driver;
 
 
-ALTER TABLE websubmission_helper OWNER TO carpool_admins;
+ALTER TABLE vw_drive_offer OWNER TO carpool_admins;
 
 --
 -- Name: websubmission_rider; Type: TABLE; Schema: stage; Owner: carpool_admins
 --
 
 CREATE TABLE websubmission_rider (
-    "CreatedTimeStamp" timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL,
     "IPAddress" character varying(20),
     "RiderFirstName" character varying(255) NOT NULL,
     "RiderLastName" character varying(255) NOT NULL,
@@ -653,12 +798,49 @@ CREATE TABLE websubmission_rider (
     "RiderAccommodationNotes" character varying(1000),
     "RiderLegalConsent" boolean,
     "ReadyToMatch" boolean,
-    "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL,
-    state character varying(30) DEFAULT 'Pending'::character varying NOT NULL
+    state character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
+    created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 
 ALTER TABLE websubmission_rider OWNER TO carpool_admins;
+
+--
+-- Name: vw_ride_request; Type: VIEW; Schema: stage; Owner: carpool_admins
+--
+
+CREATE VIEW vw_ride_request AS
+ SELECT websubmission_rider."UUID" AS uuid,
+    websubmission_rider.state,
+    websubmission_rider.created_ts,
+    websubmission_rider.last_updated_ts,
+    websubmission_rider."RiderCollectionZIP" AS from_zip,
+    websubmission_rider."RiderDropOffZIP" AS to_zip,
+    websubmission_rider."TotalPartySize" AS party_size,
+    websubmission_rider."RiderIsVulnerable" AS vulnerable,
+    websubmission_rider."NeedWheelchair" AS wheelchair,
+    websubmission_rider."AvailableRideTimesJSON" AS ride_times
+   FROM websubmission_rider;
+
+
+ALTER TABLE vw_ride_request OWNER TO carpool_admins;
+
+--
+-- Name: websubmission_helper; Type: TABLE; Schema: stage; Owner: carpool_admins
+--
+
+CREATE TABLE websubmission_helper (
+    "timestamp" timestamp without time zone NOT NULL,
+    helpername character varying(100) NOT NULL,
+    helperemail character varying(250) NOT NULL,
+    helpercapability character varying(500)[],
+    sweep_status_id integer DEFAULT '-1'::integer NOT NULL,
+    "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL
+);
+
+
+ALTER TABLE websubmission_helper OWNER TO carpool_admins;
 
 SET search_path = nov2016, pg_catalog;
 
@@ -674,6 +856,20 @@ ALTER TABLE ONLY driver ALTER COLUMN "DriverID" SET DEFAULT nextval('"DRIVER_Dri
 --
 
 ALTER TABLE ONLY match_status ALTER COLUMN "MatchStatusID" SET DEFAULT nextval('"match_status_MatchStatusID_seq"'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: nov2016; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY outgoing_email ALTER COLUMN id SET DEFAULT nextval('outgoing_email_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: nov2016; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY outgoing_sms ALTER COLUMN id SET DEFAULT nextval('outgoing_sms_id_seq'::regclass);
 
 
 --
@@ -754,11 +950,11 @@ ALTER TABLE ONLY zip_codes
 
 
 --
--- Name: match_pk; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
+-- Name: match_pkey; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
 --
 
 ALTER TABLE ONLY match
-    ADD CONSTRAINT match_pk PRIMARY KEY (uuid_driver, uuid_rider);
+    ADD CONSTRAINT match_pkey PRIMARY KEY (uuid_driver, uuid_rider, score);
 
 
 --
@@ -767,6 +963,22 @@ ALTER TABLE ONLY match
 
 ALTER TABLE ONLY match_status
     ADD CONSTRAINT match_status_pkey PRIMARY KEY ("MatchStatusID");
+
+
+--
+-- Name: outgoing_email_pk; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY outgoing_email
+    ADD CONSTRAINT outgoing_email_pk PRIMARY KEY (id);
+
+
+--
+-- Name: outgoing_sms_pk; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY outgoing_sms
+    ADD CONSTRAINT outgoing_sms_pk PRIMARY KEY (id);
 
 
 SET search_path = stage, pg_catalog;
@@ -801,6 +1013,45 @@ ALTER TABLE ONLY websubmission_rider
 
 ALTER TABLE ONLY sweep_status
     ADD CONSTRAINT sweep_status_pkey PRIMARY KEY (id);
+
+
+SET search_path = nov2016, pg_catalog;
+
+--
+-- Name: trg_update_match; Type: TRIGGER; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE TRIGGER trg_update_match BEFORE UPDATE OF state ON match FOR EACH ROW EXECUTE PROCEDURE fct_modified_column();
+
+
+--
+-- Name: trg_update_outgoing_email; Type: TRIGGER; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE TRIGGER trg_update_outgoing_email BEFORE UPDATE OF state ON outgoing_email FOR EACH ROW EXECUTE PROCEDURE fct_modified_column();
+
+
+--
+-- Name: trg_update_outgoing_sms; Type: TRIGGER; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE TRIGGER trg_update_outgoing_sms BEFORE UPDATE OF state ON outgoing_sms FOR EACH ROW EXECUTE PROCEDURE fct_modified_column();
+
+
+SET search_path = stage, pg_catalog;
+
+--
+-- Name: trg_update_websub_driver; Type: TRIGGER; Schema: stage; Owner: carpool_admins
+--
+
+CREATE TRIGGER trg_update_websub_driver BEFORE UPDATE OF state ON websubmission_driver FOR EACH ROW EXECUTE PROCEDURE fct_modified_column();
+
+
+--
+-- Name: trg_update_websub_rider; Type: TRIGGER; Schema: stage; Owner: carpool_admins
+--
+
+CREATE TRIGGER trg_update_websub_rider BEFORE UPDATE OF state ON websubmission_rider FOR EACH ROW EXECUTE PROCEDURE fct_modified_column();
 
 
 SET search_path = nov2016, pg_catalog;
@@ -899,6 +1150,29 @@ GRANT ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat
 GRANT ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) TO carpool_role;
 
 
+--
+-- Name: fct_modified_column(); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION fct_modified_column() FROM PUBLIC;
+REVOKE ALL ON FUNCTION fct_modified_column() FROM carpool_admins;
+GRANT ALL ON FUNCTION fct_modified_column() TO carpool_admins;
+GRANT ALL ON FUNCTION fct_modified_column() TO carpool_role;
+GRANT ALL ON FUNCTION fct_modified_column() TO carpool_web_role;
+
+
+--
+-- Name: zip_distance(integer, integer); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION zip_distance(zip_from integer, zip_to integer) FROM PUBLIC;
+REVOKE ALL ON FUNCTION zip_distance(zip_from integer, zip_to integer) FROM carpool_admins;
+GRANT ALL ON FUNCTION zip_distance(zip_from integer, zip_to integer) TO carpool_admins;
+GRANT ALL ON FUNCTION zip_distance(zip_from integer, zip_to integer) TO PUBLIC;
+GRANT ALL ON FUNCTION zip_distance(zip_from integer, zip_to integer) TO carpool_role;
+GRANT ALL ON FUNCTION zip_distance(zip_from integer, zip_to integer) TO carpool_web_role;
+
+
 SET search_path = stage, pg_catalog;
 
 --
@@ -909,6 +1183,17 @@ REVOKE ALL ON FUNCTION create_riders() FROM PUBLIC;
 REVOKE ALL ON FUNCTION create_riders() FROM carpool_admins;
 GRANT ALL ON FUNCTION create_riders() TO carpool_admins;
 GRANT ALL ON FUNCTION create_riders() TO carpool_role;
+
+
+--
+-- Name: fct_modified_column(); Type: ACL; Schema: stage; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION fct_modified_column() FROM PUBLIC;
+REVOKE ALL ON FUNCTION fct_modified_column() FROM carpool_admins;
+GRANT ALL ON FUNCTION fct_modified_column() TO carpool_admins;
+GRANT ALL ON FUNCTION fct_modified_column() TO carpool_role;
+GRANT ALL ON FUNCTION fct_modified_column() TO carpool_web_role;
 
 
 SET search_path = nov2016, pg_catalog;
@@ -1035,6 +1320,26 @@ GRANT ALL ON SEQUENCE "match_status_MatchStatusID_seq" TO carpool_role;
 
 
 --
+-- Name: outgoing_email; Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE outgoing_email FROM PUBLIC;
+REVOKE ALL ON TABLE outgoing_email FROM carpool_admins;
+GRANT ALL ON TABLE outgoing_email TO carpool_admins;
+GRANT ALL ON TABLE outgoing_email TO carpool_role;
+
+
+--
+-- Name: outgoing_sms; Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE outgoing_sms FROM PUBLIC;
+REVOKE ALL ON TABLE outgoing_sms FROM carpool_admins;
+GRANT ALL ON TABLE outgoing_sms TO carpool_admins;
+GRANT ALL ON TABLE outgoing_sms TO carpool_role;
+
+
+--
 -- Name: zip_codes; Type: ACL; Schema: nov2016; Owner: carpool_admins
 --
 
@@ -1097,14 +1402,13 @@ GRANT SELECT("UUID") ON TABLE websubmission_driver TO carpool_web;
 
 
 --
--- Name: websubmission_helper; Type: ACL; Schema: stage; Owner: carpool_admins
+-- Name: vw_drive_offer; Type: ACL; Schema: stage; Owner: carpool_admins
 --
 
-REVOKE ALL ON TABLE websubmission_helper FROM PUBLIC;
-REVOKE ALL ON TABLE websubmission_helper FROM carpool_admins;
-GRANT ALL ON TABLE websubmission_helper TO carpool_admins;
-GRANT INSERT ON TABLE websubmission_helper TO carpool_web_role;
-GRANT ALL ON TABLE websubmission_helper TO carpool_role;
+REVOKE ALL ON TABLE vw_drive_offer FROM PUBLIC;
+REVOKE ALL ON TABLE vw_drive_offer FROM carpool_admins;
+GRANT ALL ON TABLE vw_drive_offer TO carpool_admins;
+GRANT SELECT ON TABLE vw_drive_offer TO carpool_role;
 
 
 --
@@ -1125,6 +1429,27 @@ GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE websubmission_rider TO carpool_role;
 REVOKE ALL("UUID") ON TABLE websubmission_rider FROM PUBLIC;
 REVOKE ALL("UUID") ON TABLE websubmission_rider FROM carpool_admins;
 GRANT SELECT("UUID") ON TABLE websubmission_rider TO carpool_web;
+
+
+--
+-- Name: vw_ride_request; Type: ACL; Schema: stage; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE vw_ride_request FROM PUBLIC;
+REVOKE ALL ON TABLE vw_ride_request FROM carpool_admins;
+GRANT ALL ON TABLE vw_ride_request TO carpool_admins;
+GRANT SELECT ON TABLE vw_ride_request TO carpool_role;
+
+
+--
+-- Name: websubmission_helper; Type: ACL; Schema: stage; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE websubmission_helper FROM PUBLIC;
+REVOKE ALL ON TABLE websubmission_helper FROM carpool_admins;
+GRANT ALL ON TABLE websubmission_helper TO carpool_admins;
+GRANT INSERT ON TABLE websubmission_helper TO carpool_web_role;
+GRANT ALL ON TABLE websubmission_helper TO carpool_role;
 
 
 --
