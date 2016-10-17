@@ -45,13 +45,13 @@ distance_origin_dropoff double precision; -- From driver origin to rider drop of
 BEGIN
 
 	run_now := true;
-	BEGIN
-		INSERT INTO nov2016.match_engine_scheduler VALUES(true);
-	EXCEPTION WHEN OTHERS
-	THEN
+	--BEGIN
+	--	INSERT INTO nov2016.match_engine_scheduler VALUES(true);
+	--EXCEPTION WHEN OTHERS
+	--THEN
 		-- ignore
-	END;
-	SELECT need_run_flag INTO run_now from nov2016.match_engine_scheduler LIMIT 1;
+	--END;
+	--SELECT need_run_flag INTO run_now from nov2016.match_engine_scheduler LIMIT 1;
 	IF run_now
 	THEN
 
