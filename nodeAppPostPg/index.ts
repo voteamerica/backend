@@ -9,10 +9,10 @@ const GoodFile    = require('good-file');
 const config      = require('./dbInfo.js');
 const logOptions  = require('./logInfo.js');
 
+const dbDefs      = require('./dbDefs.js');
 const dbQueries   = require('./dbQueries.js')
 const logging     = require('./logging.js');
 const postgresQueries = require('./postgresQueries.js');
-const dbDefs      = require('./dbDefs.js');
 
 config.user       = process.env.PGUSER;
 config.database   = process.env.PGDATABASE;

@@ -26,5 +26,8 @@
     "hapi": "^15.0.3",
     "moment": "^2.15.1",
     "pg": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^6.0.45"
   }
 }
