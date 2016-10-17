@@ -9,13 +9,6 @@ const MATCH_TABLE   = 'match';
 var CANCEL_RIDE_FUNCTION = 'cancel_ride($1)';
 var REJECT_RIDE_FUNCTION = 'reject_ride($1)';
 
-// app routes (api paths)
-const DRIVER_ROUTE  = 'driver';
-const RIDER_ROUTE   = 'rider';
-const HELPER_ROUTE  = 'helper';
-const DELETE_ROUTE  = 'rider';
-const PUT_ROUTE     = 'rider';
-
 // for db carpool
 module.exports = {
   SCHEMA_NAME:          SCHEMA_NAME,
@@ -28,12 +21,5 @@ module.exports = {
 
   CANCEL_RIDE_FUNCTION: CANCEL_RIDE_FUNCTION,
   REJECT_RIDE_FUNCTION: REJECT_RIDE_FUNCTION,
-
-  // app routes (api paths)
-  DRIVER_ROUTE: DRIVER_ROUTE,
-  RIDER_ROUTE:  RIDER_ROUTE,
-  HELPER_ROUTE: HELPER_ROUTE,
-  DELETE_ROUTE: DELETE_ROUTE,
-  PUT_ROUTE   : PUT_ROUTE
 }
 
