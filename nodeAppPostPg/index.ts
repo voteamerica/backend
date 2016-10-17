@@ -104,18 +104,6 @@ server.route({
   }
 });
 
-function getExecResultStrings(tableName) {
-    var resultStrings = {
-      success: ' fn called: ',
-      failure: ' fn call failed: ' 
-    }
-
-    resultStrings.success = tableName + resultStrings.success; 
-    resultStrings.failure = tableName + resultStrings.failure; 
-
-    return resultStrings;
-}
-
 server.route({
   method: 'POST',
   path: '/' + routeFns.DRIVER_ROUTE,
@@ -137,35 +125,13 @@ server.route({
 server.route({
   method: 'DELETE',
   path: '/' + routeFns.DELETE_ROUTE,
-  handler: (req, reply) => {
-    var payload = req.payload;
-    var results = getExecResultStrings('cancel ride: ');
-
-    req.log();
-
-    console.log("delete payload: " + JSON.stringify(payload, null, 4));
-
-    postgresQueries.dbExecuteFunction(payload, pool, dbQueries.dbCancelRideFunctionString, 
-                      getCancelRidePayloadAsArray,
-                      req, reply, results);
-  }
+  handler: routeFns.cancelRider
 });
 
 server.route({
   method: 'PUT',
   path: '/' + routeFns.PUT_ROUTE,
-  handler: (req, reply) => {
-    var payload = req.payload;
-    var results = getExecResultStrings('reject ride: ');
-
-    req.log();
-
-    console.log("reject payload: " + JSON.stringify(payload, null, 4));
-
-    postgresQueries.dbExecuteFunction(payload, pool, dbQueries.dbRejectRideFunctionString, 
-                      getRejectRidePayloadAsArray,
-                      req, reply, results);
-  }
+  handler: routeFns.rejectRide
 });
 
 server.register({
@@ -195,16 +161,3 @@ server.register({
 );
 
 logging.logReqResp(server, pool);
-
-function getRejectRidePayloadAsArray(req, payload) {
-  return [
-        payload.UUID
-    ]
-}
-
-function getCancelRidePayloadAsArray(req, payload) {
-  return [      
-        payload.UUID
-    ]
-}
-

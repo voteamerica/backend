@@ -13,6 +13,8 @@ module.exports = {
   postDriver: postDriver,
   postRider: postRider,
   postHelper: postHelper,
+  cancelRider: cancelRider,
+  rejectRide: rejectRide,
   DRIVER_ROUTE: DRIVER_ROUTE,
   RIDER_ROUTE: RIDER_ROUTE,
   HELPER_ROUTE: HELPER_ROUTE,
@@ -72,12 +74,50 @@ function postHelper (req, reply) {
     postgresQueries.dbInsertData(payload, rfPool, dbQueries.dbGetInsertHelperString, 
                   getHelperPayloadAsArray,
                   req, reply, results);
-  }
+}
+
+function cancelRider (req, reply) {
+    var payload = req.payload;
+    var results = getExecResultStrings('cancel ride: ');
+
+    req.log();
+
+    console.log("delete payload: " + JSON.stringify(payload, null, 4));
+
+    postgresQueries.dbExecuteFunction(payload, pool, dbQueries.dbCancelRideFunctionString, 
+                      getCancelRidePayloadAsArray,
+                      req, reply, results);
+}
+
+function rejectRide (req, reply) {
+    var payload = req.payload;
+    var results = getExecResultStrings('reject ride: ');
+
+    req.log();
+
+    console.log("reject payload: " + JSON.stringify(payload, null, 4));
+
+    postgresQueries.dbExecuteFunction(payload, pool, dbQueries.dbRejectRideFunctionString, 
+                      getRejectRidePayloadAsArray,
+                      req, reply, results);
+}
 
 function getResultStrings(tableName) {
     var resultStrings = {
       success: ' row inserted',
       failure: ' row insert failed' 
+    }
+
+    resultStrings.success = tableName + resultStrings.success; 
+    resultStrings.failure = tableName + resultStrings.failure; 
+
+    return resultStrings;
+}
+
+function getExecResultStrings(tableName) {
+    var resultStrings = {
+      success: ' fn called: ',
+      failure: ' fn call failed: ' 
     }
 
     resultStrings.success = tableName + resultStrings.success; 
@@ -124,6 +164,18 @@ function getDriverPayloadAsArray(req, payload) {
       , (payload.DriverWillNotTalkPolitics ? 'true' : 'false')
       , (payload.PleaseStayInTouch ? 'true' : 'false')
       , payload.DriverLicenceNumber 
+    ]
+}
+
+function getRejectRidePayloadAsArray(req, payload) {
+  return [
+        payload.UUID
+    ]
+}
+
+function getCancelRidePayloadAsArray(req, payload) {
+  return [      
+        payload.UUID
     ]
 }
 
