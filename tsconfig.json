@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "sourceMap": true
+    },
+    "exclude": [
+        "bunny",
+        "ETL",
+        "nginx",
+        "nodeAppPostPg/node_modules",
+        "sweeper/node_modules",
+        "sweeper/typings"
+    ]
+}
