@@ -135,7 +135,7 @@ $$;
 ALTER FUNCTION nov2016.fct_modified_column() OWNER TO carpool_admins;
 
 --
--- Name: queue_email_notif(); Type: FUNCTION; Schema: nov2016; Owner: dmilet
+-- Name: queue_email_notif(); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
 --
 
 CREATE FUNCTION queue_email_notif() RETURNS trigger
@@ -190,7 +190,7 @@ END;
 $$;
 
 
-ALTER FUNCTION nov2016.queue_email_notif() OWNER TO dmilet;
+ALTER FUNCTION nov2016.queue_email_notif() OWNER TO carpool_admins;
 
 --
 -- Name: zip_distance(integer, integer); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins

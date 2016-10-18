@@ -11,10 +11,10 @@ v_proposed_count nov2016.match_engine_activity_log.proposed_count%TYPE;
 v_error_count nov2016.match_engine_activity_log.error_count%TYPE;
 v_expired_count nov2016.match_engine_activity_log.expired_count%TYPE;
 
-b_rider_all_times_expired  boolean := True;
-b_rider_validated boolean := True;
-b_driver_all_times_expired boolean := True;
-b_driver_validated boolean := True;
+b_rider_all_times_expired  boolean := TRUE;
+b_rider_validated boolean := TRUE;
+b_driver_all_times_expired boolean := TRUE;
+b_driver_validated boolean := TRUE;
 
 RADIUS_MAX_ALLOWED integer := 100;
 
@@ -74,7 +74,7 @@ BEGIN
 				SET state='Failed', state_info='Invalid AvailableRideTimes'
 				WHERE "UUID"=ride_request_row."UUID";
 				
-				b_rider_validated := False;
+				b_rider_validated := FALSE;
 			END IF;
 			
 
@@ -91,7 +91,7 @@ BEGIN
 				SET state='Failed', state_info='Unknown/Invalid RiderCollectionZIP or RiderDropOffZIP'
 				WHERE "UUID"=ride_request_row."UUID";
 				
-				b_rider_validated := False;
+				b_rider_validated := FALSE;
 			END;
 			
 			IF ride_request_row."TotalPartySize" = 0
@@ -100,33 +100,43 @@ BEGIN
 				SET state='Failed', state_info='Invalid TotalPartySize'
 				WHERE "UUID"=ride_request_row."UUID";
 				
-				b_rider_validated := False;
+				b_rider_validated := FALSE;
 			END IF;
 	
 	
 			-- split AvailableRideTimesJSON in individual time intervals
 			ride_times_rider := string_to_array(ride_request_row."AvailableRideTimesJSON", '|');
+			b_rider_all_times_expired := TRUE;  -- Assumes all expired
 			FOREACH rider_time IN ARRAY ride_times_rider
 			LOOP
-				v_evaluated_pairs := v_evaluated_pairs +1;					
 				BEGIN
 					-- each time interval is in ISO8601 format
 					-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
 					start_ride_time := substr(rider_time, 1, 24)::timestamp with time zone;
 					end_ride_time := substr(rider_time, 26, 24)::timestamp with time zone;
 					
-					IF end_ride_time < now()
+					IF start_ride_time > end_ride_time
 					THEN
-						b_rider_all_times_expired := False;
-					END IF;
+						UPDATE stage.websubmission_rider 
+						SET state='Failed', state_info='Invalid value in AvailableRideTimes:' || rider_time
+						WHERE "UUID"=ride_request_row."UUID";
+				
+						b_rider_validated := FALSE;
+					ELSE
 					
+						IF end_ride_time > now()   ----   --[NOW]--[S]--[E]   : not expired
+						THEN                       ----   --[S]---[NOW]--[E]  : not expired
+													      --[S]--[E]----[NOW] : expired
+							b_rider_all_times_expired := FALSE;
+						END IF;
+					END IF;
 				EXCEPTION WHEN OTHERS
 				THEN				
 					UPDATE stage.websubmission_rider
 					SET state='Failed', state_info='Invalid value in AvailableRideTimes:' || rider_time
 					WHERE "UUID"=ride_request_row."UUID";
 
-					b_rider_validated := False;
+					b_rider_validated := FALSE;
 				END;
 				
 				IF b_rider_all_times_expired
@@ -137,7 +147,7 @@ BEGIN
 
 					v_expired_count := v_expired_count +1;
 					
-					b_rider_validated := False;
+					b_rider_validated := FALSE;
 				END IF;
 				
 			END LOOP;
@@ -170,7 +180,7 @@ BEGIN
  						SET state='Failed', state_info='Invalid DriverCollectionZIP'
  						WHERE "UUID"=drive_offer_row."UUID";
  					
- 						b_driver_validated := False;
+ 						b_driver_validated := FALSE;
  					END;
  					
  					
@@ -179,6 +189,7 @@ BEGIN
  					-- FORMAT should be like this 
  					-- 2016-10-01T08:00:00-0500/2016-10-01T10:00:00-0500|2016-10-01T10:00:00-0500/2016-10-01T22:00:00-0500|2016-10-01T22:00:00-0500/2016-10-01T23:00:00-0500
  					ride_times_driver := string_to_array(drive_offer_row."AvailableDriveTimesJSON", '|');
+					b_driver_all_times_expired := TRUE;
  					FOREACH driver_time IN ARRAY ride_times_driver
 					LOOP
 						BEGIN
@@ -187,9 +198,20 @@ BEGIN
 							start_drive_time := substr(driver_time, 1, 24)::timestamp with time zone;
 							end_drive_time := substr(driver_time, 26, 24)::timestamp with time zone;
 							
-							IF end_drive_time < now()
+							IF start_drive_time > end_drive_time
 							THEN
-								b_rider_all_times_expired := False;
+								UPDATE stage.websubmission_driver 
+								SET state='Failed', state_info='Invalid value in AvailableDriveTimes:' || driver_time
+								WHERE "UUID"=drive_offer_row."UUID";
+				
+								b_driver_validated := FALSE;
+							ELSE
+							
+								IF end_drive_time > now()   ----   --[NOW]--[S]--[E]   : not expired
+								THEN                       ----   --[S]---[NOW]--[E]  : not expired
+													      --[S]--[E]----[NOW] : expired
+									b_driver_all_times_expired := FALSE;
+								END IF;
 							END IF;
 							
 						EXCEPTION WHEN OTHERS
@@ -198,11 +220,11 @@ BEGIN
 							SET state='Failed', state_info='Invalid value in AvailableDriveTimes :' || driver_time
 							WHERE "UUID"=drive_offer_row."UUID";
 
-							b_driver_validated := False;
+							b_driver_validated := FALSE;
 						END;
 		
 		
-						IF b_rider_all_times_expired
+						IF b_driver_all_times_expired
 						THEN
 							UPDATE stage.websubmission_driver
 							SET state='Expired', state_info='All AvailableDriveTimes are expired'
@@ -210,7 +232,7 @@ BEGIN
 
 							v_expired_count := v_expired_count +1;
 					
-							b_driver_validated := False;
+							b_driver_validated := FALSE;
 						END IF;
 				
 					END LOOP;		
@@ -232,16 +254,26 @@ BEGIN
 									zip_dropoff.latitude_numeric,
 									zip_dropoff.longitude_numeric);
 
+						RAISE NOTICE 'distance_origin_pickup=%', distance_origin_pickup;
+						RAISE NOTICE 'distance_origin_dropoff=%', distance_origin_pickup;
+						
 						IF distance_origin_pickup < RADIUS_MAX_ALLOWED AND distance_origin_dropoff < RADIUS_MAX_ALLOWED
 						THEN
 
 							-- driver/rider distance ranking
-							IF distance_origin_pickup < drive_offer_row."DriverCollectionRadius" 
-								AND distance_origin_dropoff < drive_offer_row."DriverCollectionRadius"
+							IF distance_origin_pickup <= drive_offer_row."DriverCollectionRadius" 
+								AND distance_origin_dropoff <= drive_offer_row."DriverCollectionRadius"
 							THEN
-								match_points := match_points + 100;   -- 100 point if the radius criteria is met
-								match_points := match_points + RADIUS_MAX_ALLOWED - distance_origin_pickup; -- closest distance gets more points
+								match_points := match_points + 200 
+									- distance_origin_pickup -- closest distance gets more points 
+									- distance_origin_dropoff ;
 							END IF; 
+							
+							RAISE NOTICE 'D-%, R-%, distance ranking Score=%', 
+										drive_offer_row."UUID", 
+										ride_request_row."UUID", 
+										match_points;
+			
 							
 							-- vulnerable rider matching
 							IF ride_request_row."RiderIsVulnerable" = false
@@ -253,6 +285,10 @@ BEGIN
 								match_points := match_points + 200;
 							END IF;
 					
+							RAISE NOTICE 'D-%, R-%, vulnerable ranking Score=%', 
+										drive_offer_row."UUID", 
+										ride_request_row."UUID", 
+										match_points;
 			
 							-- time matching
 							-- Each combination of rider time and driver time can give a potential match
@@ -298,34 +334,31 @@ BEGIN
 											time_criteria_points := 0; 
 										END IF;
 										
-									ELSIF start_drive_time < start_ride_time  -- [ddd[rdrdrdrdrd]ddd] 
-										AND end_drive_time > end_ride_time
-									THEN
-										-- perfect! we're in the interval
-									ELSIF start_drive_time < start_ride_time  -- [ddddddd[rdrdrd]rrrr]
-										AND start_ride_time < end_drive_time
-									THEN
-										-- We're at least partially in the interval
-									ELSIF  start_ride_time < start_drive_time -- [rrrrr[rdrdrd]ddddd]
-										AND start_drive_time < end_ride_time
-									THEN
-										-- We're at least partially in the interval
-									ELSIF start_ride_time < start_drive_time  -- [rrr[rdrdrdrdrd]rrrrr]
-										AND end_drive_time < end_ride_time
-									THEN
-										-- We're completely in the interval
+									-- ELSIF start_drive_time < start_ride_time  -- [ddd[rdrdrdrdrd]ddd] 
+										-- AND end_drive_time > end_ride_time
+									-- THEN
+										-- -- perfect! we're in the interval
+									-- ELSIF start_drive_time < start_ride_time  -- [ddddddd[rdrdrd]rrrr]
+										-- AND start_ride_time < end_drive_time
+									-- THEN
+										-- -- We're at least partially in the interval
+									-- ELSIF  start_ride_time < start_drive_time -- [rrrrr[rdrdrd]ddddd]
+										-- AND start_drive_time < end_ride_time
+									-- THEN
+										-- -- We're at least partially in the interval
+									-- ELSIF start_ride_time < start_drive_time  -- [rrr[rdrdrdrdrd]rrrrr]
+										-- AND end_drive_time < end_ride_time
+									-- THEN
+										-- -- We're completely in the interval
 									END IF;
 									
+									RAISE NOTICE 'D-%, R-%, time ranking ranking Score=%', 
+										drive_offer_row."UUID", 
+										ride_request_row."UUID", 
+										match_points+time_criteria_points;
 									
 									IF match_points + time_criteria_points >= 300
 									THEN
-									
-									--RAISE NOTICE '% %, DT=%, RT=% SCORE=%', 
-									 --   drive_offer_row."DriverLastName", 
-									 --   ride_request_row."RiderLastName", 
-									 --   driver_time,
-									 --   rider_time,
-									 --   match_points + time_criteria_points;
 									
 										BEGIN
 											INSERT INTO nov2016.match (uuid_rider, uuid_driver, score, state)
