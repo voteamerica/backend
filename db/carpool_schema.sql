@@ -126,13 +126,71 @@ CREATE FUNCTION fct_modified_column() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-    NEW.last_update_ts = now();
+    NEW.last_updated_ts = now();
     RETURN NEW;
 END;
 $$;
 
 
 ALTER FUNCTION nov2016.fct_modified_column() OWNER TO carpool_admins;
+
+--
+-- Name: queue_email_notif(); Type: FUNCTION; Schema: nov2016; Owner: dmilet
+--
+
+CREATE FUNCTION queue_email_notif() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$                                                                                                                  
+DECLARE                                                                                                                    
+                                                                                                                           
+ v_subject nov2016.outgoing_email.subject%TYPE;                                                                            
+ v_body nov2016.outgoing_email.body%TYPE;                                                                                  
+                                                                                                                           
+BEGIN                                                                                                                      
+                                                                                                                           
+    -- triggered by submitting a drive offer form                                                                          
+    IF TG_TABLE_NAME = 'websubmission_driver' and TG_TABLE_SCHEMA='stage'                                                  
+    THEN                                                                                                                   
+                                                                                                                           
+        IF NEW."DriverEmail" IS NOT NULL                                                                                   
+        THEN                                                                                                               
+                                                                                                                           
+            v_subject := 'Thank you for submitting a Drive Offer';                                                         
+            v_body := 'Your reference is : ' || NEW."UUID"                                                                 
+                    || '\n Please retain the this reference for future interaction with our system'                        
+                    || '\n In order to manage this Driver Offer, and to accept '                                           
+                    || 'a proposed ride request, please use this link : '                                                  
+                    || '\n https://api.carpoolvote.com/v2.0/driver?UUID=' || NEW."UUID" || '&DriverPhone=' || NEW."DriverPhone";
+                                                                                                                           
+            INSERT INTO nov2016.outgoing_email (recipient, subject, body)                                             
+            VALUES (NEW."DriverEmail", v_subject, v_body);                                                                 
+        END IF;                                                                                                            
+                                                                                                                           
+    -- triggered by submitting a ride request form                                                                         
+    ELSIF TG_TABLE_NAME = 'websubmission_rider' and TG_TABLE_SCHEMA='stage'                                                
+    THEN                                                                                                                   
+        IF NEW."RiderEmail" IS NOT NULL                                                                                    
+        THEN                                                                                                               
+                                                                                                                           
+            v_subject := 'Thank you for submitting a Ride Request';                                                        
+                                                                                                                           
+            v_body := 'Your reference is : ' || NEW."UUID"                                                                 
+                    || '\n Please retain the this reference for future interaction with our system'                        
+                    || '\n In order to manage this Ride Request, '                                                         
+                    || 'please use this link : '                                                                           
+                    || '\n https://api.carpoolvote.com/v2.0/rider?UUID=' || NEW."UUID" || '&RiderPhone=' || NEW."RiderPhone";
+                                                                                                                           
+            INSERT INTO nov2016.outgoing_email (recipient, subject, body)                                             
+            VALUES (NEW."RiderEmail", v_subject, v_body);                                                                  
+        END IF;                                                                                                            
+    END IF;                                                                                                                
+                                                                                                                           
+    RETURN NEW;                                                                                                            
+END;    
+$$;
+
+
+ALTER FUNCTION nov2016.queue_email_notif() OWNER TO dmilet;
 
 --
 -- Name: zip_distance(integer, integer); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
@@ -263,22 +321,6 @@ $$;
 
 
 ALTER FUNCTION stage.create_riders() OWNER TO carpool_admins;
-
---
--- Name: fct_modified_column(); Type: FUNCTION; Schema: stage; Owner: carpool_admins
---
-
-CREATE FUNCTION fct_modified_column() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    NEW.last_update_ts = now();
-    RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION stage.fct_modified_column() OWNER TO carpool_admins;
 
 SET search_path = nov2016, pg_catalog;
 
@@ -529,36 +571,38 @@ COMMENT ON COLUMN match.state IS '- MatchProposed
 
 
 --
--- Name: match_status; Type: TABLE; Schema: nov2016; Owner: carpool_admins
+-- Name: match_engine_activity_log; Type: TABLE; Schema: nov2016; Owner: carpool_admins
 --
 
-CREATE TABLE match_status (
-    "MatchStatusID" integer NOT NULL,
-    "MatchStatusName" character varying(255) NOT NULL
+CREATE TABLE match_engine_activity_log (
+    start_ts timestamp without time zone NOT NULL,
+    end_ts timestamp without time zone NOT NULL,
+    evaluated_pairs integer NOT NULL,
+    proposed_count integer NOT NULL,
+    error_count integer NOT NULL,
+    expired_count integer NOT NULL
 );
 
 
-ALTER TABLE match_status OWNER TO carpool_admins;
+ALTER TABLE match_engine_activity_log OWNER TO carpool_admins;
 
 --
--- Name: match_status_MatchStatusID_seq; Type: SEQUENCE; Schema: nov2016; Owner: carpool_admins
+-- Name: match_engine_scheduler; Type: TABLE; Schema: nov2016; Owner: carpool_admins
 --
 
-CREATE SEQUENCE "match_status_MatchStatusID_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+CREATE TABLE match_engine_scheduler (
+    need_run_flag boolean
+);
 
 
-ALTER TABLE "match_status_MatchStatusID_seq" OWNER TO carpool_admins;
+ALTER TABLE match_engine_scheduler OWNER TO carpool_admins;
 
 --
--- Name: match_status_MatchStatusID_seq; Type: SEQUENCE OWNED BY; Schema: nov2016; Owner: carpool_admins
+-- Name: COLUMN match_engine_scheduler.need_run_flag; Type: COMMENT; Schema: nov2016; Owner: carpool_admins
 --
 
-ALTER SEQUENCE "match_status_MatchStatusID_seq" OWNED BY match_status."MatchStatusID";
+COMMENT ON COLUMN match_engine_scheduler.need_run_flag IS 'the matching engine will process records only when need_run_flag is True
+The matching engine resets the flag at the end of its execution';
 
 
 --
@@ -743,7 +787,8 @@ CREATE TABLE websubmission_driver (
     "VehicleRegistrationNumber" character varying(255),
     state character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+    last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    state_info text
 );
 
 
@@ -800,7 +845,8 @@ CREATE TABLE websubmission_rider (
     "ReadyToMatch" boolean,
     state character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+    last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    state_info text
 );
 
 
@@ -827,6 +873,28 @@ CREATE VIEW vw_ride_request AS
 ALTER TABLE vw_ride_request OWNER TO carpool_admins;
 
 --
+-- Name: vw_unmatched_riders; Type: TABLE; Schema: stage; Owner: carpool_admins
+--
+
+CREATE TABLE vw_unmatched_riders (
+    count bigint,
+    zip character varying(5),
+    state character(2),
+    latitude character varying(10),
+    longitude character varying(10),
+    city character varying(50),
+    full_state character varying(50),
+    latitude_numeric real,
+    longitude_numeric real,
+    latlong point
+);
+
+ALTER TABLE ONLY vw_unmatched_riders REPLICA IDENTITY NOTHING;
+
+
+ALTER TABLE vw_unmatched_riders OWNER TO carpool_admins;
+
+--
 -- Name: websubmission_helper; Type: TABLE; Schema: stage; Owner: carpool_admins
 --
 
@@ -849,13 +917,6 @@ SET search_path = nov2016, pg_catalog;
 --
 
 ALTER TABLE ONLY driver ALTER COLUMN "DriverID" SET DEFAULT nextval('"DRIVER_DriverID_seq"'::regclass);
-
-
---
--- Name: MatchStatusID; Type: DEFAULT; Schema: nov2016; Owner: carpool_admins
---
-
-ALTER TABLE ONLY match_status ALTER COLUMN "MatchStatusID" SET DEFAULT nextval('"match_status_MatchStatusID_seq"'::regclass);
 
 
 --
@@ -950,19 +1011,19 @@ ALTER TABLE ONLY zip_codes
 
 
 --
+-- Name: match_engine_activity_pk; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY match_engine_activity_log
+    ADD CONSTRAINT match_engine_activity_pk PRIMARY KEY (start_ts);
+
+
+--
 -- Name: match_pkey; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
 --
 
 ALTER TABLE ONLY match
     ADD CONSTRAINT match_pkey PRIMARY KEY (uuid_driver, uuid_rider, score);
-
-
---
--- Name: match_status_pkey; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
---
-
-ALTER TABLE ONLY match_status
-    ADD CONSTRAINT match_status_pkey PRIMARY KEY ("MatchStatusID");
 
 
 --
@@ -1015,6 +1076,27 @@ ALTER TABLE ONLY sweep_status
     ADD CONSTRAINT sweep_status_pkey PRIMARY KEY (id);
 
 
+--
+-- Name: _RETURN; Type: RULE; Schema: stage; Owner: carpool_admins
+--
+
+CREATE RULE "_RETURN" AS
+    ON SELECT TO vw_unmatched_riders DO INSTEAD  SELECT count(*) AS count,
+    zip_codes.zip,
+    zip_codes.state,
+    zip_codes.latitude,
+    zip_codes.longitude,
+    zip_codes.city,
+    zip_codes.full_state,
+    zip_codes.latitude_numeric,
+    zip_codes.longitude_numeric,
+    zip_codes.latlong
+   FROM websubmission_rider rider,
+    nov2016.zip_codes zip_codes
+  WHERE (((rider.state)::text = ANY ((ARRAY['Pending'::character varying, 'MatchProposed'::character varying])::text[])) AND ((rider."RiderCollectionZIP")::text = (zip_codes.zip)::text))
+  GROUP BY zip_codes.zip;
+
+
 SET search_path = nov2016, pg_catalog;
 
 --
@@ -1041,17 +1123,31 @@ CREATE TRIGGER trg_update_outgoing_sms BEFORE UPDATE OF state ON outgoing_sms FO
 SET search_path = stage, pg_catalog;
 
 --
+-- Name: send_email_notif_ins_driver_trg; Type: TRIGGER; Schema: stage; Owner: carpool_admins
+--
+
+CREATE TRIGGER send_email_notif_ins_driver_trg AFTER INSERT ON websubmission_driver FOR EACH ROW EXECUTE PROCEDURE nov2016.queue_email_notif();
+
+
+--
+-- Name: send_email_notif_ins_rider_trg; Type: TRIGGER; Schema: stage; Owner: carpool_admins
+--
+
+CREATE TRIGGER send_email_notif_ins_rider_trg AFTER INSERT ON websubmission_rider FOR EACH ROW EXECUTE PROCEDURE nov2016.queue_email_notif();
+
+
+--
 -- Name: trg_update_websub_driver; Type: TRIGGER; Schema: stage; Owner: carpool_admins
 --
 
-CREATE TRIGGER trg_update_websub_driver BEFORE UPDATE OF state ON websubmission_driver FOR EACH ROW EXECUTE PROCEDURE fct_modified_column();
+CREATE TRIGGER trg_update_websub_driver BEFORE UPDATE OF state ON websubmission_driver FOR EACH ROW EXECUTE PROCEDURE nov2016.fct_modified_column();
 
 
 --
 -- Name: trg_update_websub_rider; Type: TRIGGER; Schema: stage; Owner: carpool_admins
 --
 
-CREATE TRIGGER trg_update_websub_rider BEFORE UPDATE OF state ON websubmission_rider FOR EACH ROW EXECUTE PROCEDURE fct_modified_column();
+CREATE TRIGGER trg_update_websub_rider BEFORE UPDATE OF state ON websubmission_rider FOR EACH ROW EXECUTE PROCEDURE nov2016.fct_modified_column();
 
 
 SET search_path = nov2016, pg_catalog;
@@ -1185,17 +1281,6 @@ GRANT ALL ON FUNCTION create_riders() TO carpool_admins;
 GRANT ALL ON FUNCTION create_riders() TO carpool_role;
 
 
---
--- Name: fct_modified_column(); Type: ACL; Schema: stage; Owner: carpool_admins
---
-
-REVOKE ALL ON FUNCTION fct_modified_column() FROM PUBLIC;
-REVOKE ALL ON FUNCTION fct_modified_column() FROM carpool_admins;
-GRANT ALL ON FUNCTION fct_modified_column() TO carpool_admins;
-GRANT ALL ON FUNCTION fct_modified_column() TO carpool_role;
-GRANT ALL ON FUNCTION fct_modified_column() TO carpool_web_role;
-
-
 SET search_path = nov2016, pg_catalog;
 
 --
@@ -1300,23 +1385,25 @@ GRANT SELECT ON TABLE match TO carpool_web_role;
 
 
 --
--- Name: match_status; Type: ACL; Schema: nov2016; Owner: carpool_admins
+-- Name: match_engine_activity_log; Type: ACL; Schema: nov2016; Owner: carpool_admins
 --
 
-REVOKE ALL ON TABLE match_status FROM PUBLIC;
-REVOKE ALL ON TABLE match_status FROM carpool_admins;
-GRANT ALL ON TABLE match_status TO carpool_admins;
-GRANT ALL ON TABLE match_status TO carpool_role;
+REVOKE ALL ON TABLE match_engine_activity_log FROM PUBLIC;
+REVOKE ALL ON TABLE match_engine_activity_log FROM carpool_admins;
+GRANT ALL ON TABLE match_engine_activity_log TO carpool_admins;
+GRANT INSERT ON TABLE match_engine_activity_log TO carpool_role;
+GRANT SELECT ON TABLE match_engine_activity_log TO carpool_web_role;
 
 
 --
--- Name: match_status_MatchStatusID_seq; Type: ACL; Schema: nov2016; Owner: carpool_admins
+-- Name: match_engine_scheduler; Type: ACL; Schema: nov2016; Owner: carpool_admins
 --
 
-REVOKE ALL ON SEQUENCE "match_status_MatchStatusID_seq" FROM PUBLIC;
-REVOKE ALL ON SEQUENCE "match_status_MatchStatusID_seq" FROM carpool_admins;
-GRANT ALL ON SEQUENCE "match_status_MatchStatusID_seq" TO carpool_admins;
-GRANT ALL ON SEQUENCE "match_status_MatchStatusID_seq" TO carpool_role;
+REVOKE ALL ON TABLE match_engine_scheduler FROM PUBLIC;
+REVOKE ALL ON TABLE match_engine_scheduler FROM carpool_admins;
+GRANT ALL ON TABLE match_engine_scheduler TO carpool_admins;
+GRANT SELECT,INSERT,UPDATE ON TABLE match_engine_scheduler TO carpool_role;
+GRANT UPDATE ON TABLE match_engine_scheduler TO carpool_web_role;
 
 
 --
@@ -1327,6 +1414,17 @@ REVOKE ALL ON TABLE outgoing_email FROM PUBLIC;
 REVOKE ALL ON TABLE outgoing_email FROM carpool_admins;
 GRANT ALL ON TABLE outgoing_email TO carpool_admins;
 GRANT ALL ON TABLE outgoing_email TO carpool_role;
+GRANT INSERT ON TABLE outgoing_email TO carpool_web;
+
+
+--
+-- Name: outgoing_email_id_seq; Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON SEQUENCE outgoing_email_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE outgoing_email_id_seq FROM carpool_admins;
+GRANT ALL ON SEQUENCE outgoing_email_id_seq TO carpool_admins;
+GRANT SELECT,USAGE ON SEQUENCE outgoing_email_id_seq TO carpool_web;
 
 
 --
@@ -1337,6 +1435,7 @@ REVOKE ALL ON TABLE outgoing_sms FROM PUBLIC;
 REVOKE ALL ON TABLE outgoing_sms FROM carpool_admins;
 GRANT ALL ON TABLE outgoing_sms TO carpool_admins;
 GRANT ALL ON TABLE outgoing_sms TO carpool_role;
+GRANT INSERT ON TABLE outgoing_sms TO carpool_web;
 
 
 --
@@ -1439,6 +1538,17 @@ REVOKE ALL ON TABLE vw_ride_request FROM PUBLIC;
 REVOKE ALL ON TABLE vw_ride_request FROM carpool_admins;
 GRANT ALL ON TABLE vw_ride_request TO carpool_admins;
 GRANT SELECT ON TABLE vw_ride_request TO carpool_role;
+
+
+--
+-- Name: vw_unmatched_riders; Type: ACL; Schema: stage; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE vw_unmatched_riders FROM PUBLIC;
+REVOKE ALL ON TABLE vw_unmatched_riders FROM carpool_admins;
+GRANT ALL ON TABLE vw_unmatched_riders TO carpool_admins;
+GRANT SELECT ON TABLE vw_unmatched_riders TO carpool_web_role;
+GRANT SELECT ON TABLE vw_unmatched_riders TO carpool_role;
 
 
 --
