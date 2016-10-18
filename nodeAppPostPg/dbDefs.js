@@ -1,0 +1,26 @@
+var SCHEMA_NAME = 'stage';
+var SCHEMA_NOV2016_NAME = 'nov2016';
+var DRIVER_TABLE = 'websubmission_driver';
+var RIDER_TABLE = 'websubmission_rider';
+var HELPER_TABLE = 'websubmission_helper';
+var MATCH_TABLE = 'match';
+var UNMATCHED_DRIVERS_VIEW = 'vw_unmatched_riders';
+var CANCEL_RIDE_FUNCTION = 'cancel_ride($1, $2)';
+var CANCEL_RIDE_OFFER_FUNCTION = 'cancel_ride_offer($1, $2)';
+var REJECT_RIDE_FUNCTION = 'reject_ride($1, $2)';
+var CONFIRM_RIDE_FUNCTION = 'confirm_ride($1, $2)';
+// for db carpool
+module.exports = {
+    SCHEMA_NAME: SCHEMA_NAME,
+    SCHEMA_NOV2016_NAME: SCHEMA_NOV2016_NAME,
+    UNMATCHED_DRIVERS_VIEW: UNMATCHED_DRIVERS_VIEW,
+    DRIVER_TABLE: DRIVER_TABLE,
+    RIDER_TABLE: RIDER_TABLE,
+    HELPER_TABLE: HELPER_TABLE,
+    MATCH_TABLE: MATCH_TABLE,
+    CANCEL_RIDE_FUNCTION: CANCEL_RIDE_FUNCTION,
+    CANCEL_RIDE_OFFER_FUNCTION: CANCEL_RIDE_OFFER_FUNCTION,
+    REJECT_RIDE_FUNCTION: REJECT_RIDE_FUNCTION,
+    CONFIRM_RIDE_FUNCTION: CONFIRM_RIDE_FUNCTION
+};
+//# sourceMappingURL=dbDefs.js.map
