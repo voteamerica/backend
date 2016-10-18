@@ -1,5 +1,6 @@
 module.exports = {
   dbGetData:              dbGetData,
+  dbGetUnmatchedDrivers:  dbGetUnmatchedDrivers,
   dbGetMatchesData:       dbGetMatchesData,
   dbGetMatchSpecificData: dbGetMatchSpecificData,
   dbInsertData:           dbInsertData,
@@ -20,6 +21,35 @@ function dbGetData(pool, fnGetString, reply, results) {
       }
 
       reply(results.success + firstRowAsString);
+    })
+    .catch(e => {
+      var message = e.message || '';
+      var stack   = e.stack   || '';
+
+      console.error(results.failure, message, stack);
+
+      reply(results.failure + message).code(500);
+    });
+}
+
+function dbGetUnmatchedDrivers(pool, fnGetString, reply, results) {
+    var queryString =  fnGetString();
+
+    pool.query( queryString )
+    .then(result => {
+      var firstRowAsString = "";
+      var rowsToSend = [];
+
+      if (result !== undefined && result.rows !== undefined) {
+
+        result.rows.forEach( val => {          
+          rowsToSend.push(JSON.stringify(val));
+        });
+
+        // firstRowAsString = JSON.stringify(result.rows[0]);
+      }
+
+      reply(results.success + rowsToSend);
     })
     .catch(e => {
       var message = e.message || '';

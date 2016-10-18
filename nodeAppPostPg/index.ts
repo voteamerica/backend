@@ -10,8 +10,8 @@ const config      = require('./dbInfo.js');
 const logOptions  = require('./logInfo.js');
 
 const dbQueries   = require('./dbQueries.js');
-const logging     = require('./logging.js');
 const postgresQueries = require('./postgresQueries.js');
+const logging     = require('./logging.js');
 
 const routeFns = require('./routeFunctions.js');
 
@@ -54,6 +54,21 @@ server.route({
     req.log();
 
     postgresQueries.dbGetData(pool, dbQueries.dbGetQueryString, reply, results);
+  }
+});
+
+server.route({
+  method: 'GET',
+  path: '/' + routeFns.UNMATCHED_DRIVERS_ROUTE,
+  handler: (req, reply) => {
+    var results = {
+      success: 'GET unmatched drivers: ',
+      failure: 'GET unmatched drivers error: ' 
+    };
+
+    req.log();
+
+    postgresQueries.dbGetUnmatchedDrivers(pool, dbQueries.dbGetUnmatchedDriversQueryString, reply, results);
   }
 });
 

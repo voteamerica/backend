@@ -1,13 +1,14 @@
 const postgresQueries = require('./postgresQueries.js');
 const dbQueries   = require('./dbQueries.js');
 
-const DRIVER_ROUTE        = 'driver';
-const RIDER_ROUTE         = 'rider';
-const HELPER_ROUTE        = 'helper';
-const DELETE_RIDER_ROUTE  = 'rider';
-const DELETE_DRIVER_ROUTE = 'driver';
-const PUT_RIDER_ROUTE     = 'rider';
-const PUT_DRIVER_ROUTE    = 'driver';
+const UNMATCHED_DRIVERS_ROUTE = 'unmatched-drivers';
+const DRIVER_ROUTE            = 'driver';
+const RIDER_ROUTE             = 'rider';
+const HELPER_ROUTE            = 'helper';
+const DELETE_RIDER_ROUTE      = 'rider';
+const DELETE_DRIVER_ROUTE     = 'driver';
+const PUT_RIDER_ROUTE         = 'rider';
+const PUT_DRIVER_ROUTE        = 'driver';
 
 var rfPool = undefined;
 
@@ -16,7 +17,10 @@ module.exports = {
   postRider: postRider,
   postHelper: postHelper,
   cancelRider: cancelRider,
+  cancelRideOffer: cancelRideOffer,
   rejectRide: rejectRide,
+  confirmRide: confirmRide,
+  UNMATCHED_DRIVERS_ROUTE: UNMATCHED_DRIVERS_ROUTE,
   DRIVER_ROUTE: DRIVER_ROUTE,
   RIDER_ROUTE: RIDER_ROUTE,
   HELPER_ROUTE: HELPER_ROUTE,

@@ -1,5 +1,6 @@
 var postgresQueries = require('./postgresQueries.js');
 var dbQueries = require('./dbQueries.js');
+var UNMATCHED_DRIVERS_ROUTE = 'unmatched-drivers';
 var DRIVER_ROUTE = 'driver';
 var RIDER_ROUTE = 'rider';
 var HELPER_ROUTE = 'helper';
@@ -13,7 +14,10 @@ module.exports = {
     postRider: postRider,
     postHelper: postHelper,
     cancelRider: cancelRider,
+    cancelRideOffer: cancelRideOffer,
     rejectRide: rejectRide,
+    confirmRide: confirmRide,
+    UNMATCHED_DRIVERS_ROUTE: UNMATCHED_DRIVERS_ROUTE,
     DRIVER_ROUTE: DRIVER_ROUTE,
     RIDER_ROUTE: RIDER_ROUTE,
     HELPER_ROUTE: HELPER_ROUTE,

@@ -7,8 +7,8 @@ var GoodFile = require('good-file');
 var config = require('./dbInfo.js');
 var logOptions = require('./logInfo.js');
 var dbQueries = require('./dbQueries.js');
-var logging = require('./logging.js');
 var postgresQueries = require('./postgresQueries.js');
+var logging = require('./logging.js');
 var routeFns = require('./routeFunctions.js');
 config.user = process.env.PGUSER;
 config.database = process.env.PGDATABASE;
@@ -40,6 +40,18 @@ server.route({
         };
         req.log();
         postgresQueries.dbGetData(pool, dbQueries.dbGetQueryString, reply, results);
+    }
+});
+server.route({
+    method: 'GET',
+    path: '/' + routeFns.UNMATCHED_DRIVERS_ROUTE,
+    handler: function (req, reply) {
+        var results = {
+            success: 'GET unmatched drivers: ',
+            failure: 'GET unmatched drivers error: '
+        };
+        req.log();
+        postgresQueries.dbGetUnmatchedDrivers(pool, dbQueries.dbGetUnmatchedDriversQueryString, reply, results);
     }
 });
 server.route({

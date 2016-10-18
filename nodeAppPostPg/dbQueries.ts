@@ -5,6 +5,7 @@ module.exports = {
   dbGetMatchDriverQueryString:  dbGetMatchDriverQueryString,
   dbGetMatchesQueryString:      dbGetMatchesQueryString,
   dbGetQueryString:             dbGetQueryString,
+  dbGetUnmatchedDriversQueryString: dbGetMatchDriverQueryString,
   dbGetInsertClause:            dbGetInsertClause,
   dbGetInsertDriverString:      dbGetInsertDriverString,
   dbGetInsertRiderString:       dbGetInsertRiderString,
@@ -51,6 +52,10 @@ function dbGetMatchesQueryString () {
 
 function dbGetQueryString () {
   return 'SELECT * FROM ' + dbDefs.SCHEMA_NAME + '.' + dbDefs.DRIVER_TABLE;
+}
+
+function dbGetUnmatchedDriversQueryString () {
+  return 'SELECT * FROM ' + dbDefs.SCHEMA_NAME + '.' + dbDefs.UNMATCHED_DRIVERS_VIEW;
 }
 
 function dbGetInsertClause (tableName) {
