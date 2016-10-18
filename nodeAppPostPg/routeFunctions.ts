@@ -1,11 +1,13 @@
 const postgresQueries = require('./postgresQueries.js');
 const dbQueries   = require('./dbQueries.js');
 
-const DRIVER_ROUTE  = 'driver';
-const RIDER_ROUTE   = 'rider';
-const HELPER_ROUTE  = 'helper';
-const DELETE_ROUTE  = 'rider';
-const PUT_ROUTE     = 'rider';
+const DRIVER_ROUTE        = 'driver';
+const RIDER_ROUTE         = 'rider';
+const HELPER_ROUTE        = 'helper';
+const DELETE_RIDER_ROUTE  = 'rider';
+const DELETE_DRIVER_ROUTE = 'driver';
+const PUT_RIDER_ROUTE     = 'rider';
+const PUT_DRIVER_ROUTE    = 'driver';
 
 var rfPool = undefined;
 
@@ -18,8 +20,10 @@ module.exports = {
   DRIVER_ROUTE: DRIVER_ROUTE,
   RIDER_ROUTE: RIDER_ROUTE,
   HELPER_ROUTE: HELPER_ROUTE,
-  DELETE_ROUTE: DELETE_ROUTE,
-  PUT_ROUTE: PUT_ROUTE,
+  DELETE_RIDER_ROUTE: DELETE_RIDER_ROUTE,
+  DELETE_DRIVER_ROUTE: DELETE_DRIVER_ROUTE,
+  PUT_RIDER_ROUTE: PUT_RIDER_ROUTE,
+  PUT_DRIVER_ROUTE: PUT_DRIVER_ROUTE,
   setPool: setPool
 }
 
@@ -89,6 +93,19 @@ function cancelRider (req, reply) {
                       req, reply, results);
 }
 
+function cancelRideOffer (req, reply) {
+    var payload = req.payload;
+    var results = getExecResultStrings('cancel ride offer: ');
+
+    req.log();
+
+    console.log("delete payload: " + JSON.stringify(payload, null, 4));
+
+    postgresQueries.dbExecuteFunction(payload, pool, dbQueries.dbCancelRideOfferFunctionString, 
+                      getCancelRideOfferPayloadAsArray,
+                      req, reply, results);
+}
+
 function rejectRide (req, reply) {
     var payload = req.payload;
     var results = getExecResultStrings('reject ride: ');
@@ -99,6 +116,19 @@ function rejectRide (req, reply) {
 
     postgresQueries.dbExecuteFunction(payload, pool, dbQueries.dbRejectRideFunctionString, 
                       getRejectRidePayloadAsArray,
+                      req, reply, results);
+}
+
+function confirmRide (req, reply) {
+    var payload = req.payload;
+    var results = getExecResultStrings('confirm ride: ');
+
+    req.log();
+
+    console.log("confirm payload: " + JSON.stringify(payload, null, 4));
+
+    postgresQueries.dbExecuteFunction(payload, pool, dbQueries.dbConfirmRideFunctionString, 
+                      getConfirmRidePayloadAsArray,
                       req, reply, results);
 }
 
@@ -169,13 +199,25 @@ function getDriverPayloadAsArray(req, payload) {
 
 function getRejectRidePayloadAsArray(req, payload) {
   return [
-        payload.UUID
+        payload.UUID, payload.RiderPhone
+    ]
+}
+
+function getConfirmRidePayloadAsArray(req, payload) {
+  return [
+        payload.UUID, payload.RiderPhone
     ]
 }
 
 function getCancelRidePayloadAsArray(req, payload) {
   return [      
-        payload.UUID
+        payload.UUID, payload.RiderPhone
+    ]
+}
+
+function getCancelRideOfferPayloadAsArray(req, payload) {
+  return [
+        payload.UUID, payload.DriverPhone
     ]
 }
 

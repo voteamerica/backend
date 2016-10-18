@@ -124,14 +124,26 @@ server.route({
 
 server.route({
   method: 'DELETE',
-  path: '/' + routeFns.DELETE_ROUTE,
+  path: '/' + routeFns.DELETE_RIDER_ROUTE,
   handler: routeFns.cancelRider
 });
 
 server.route({
+  method: 'DELETE',
+  path: '/' + routeFns.DELETE_DRIVER_ROUTE,
+  handler: routeFns.cancelRideOffer
+});
+
+server.route({
   method: 'PUT',
-  path: '/' + routeFns.PUT_ROUTE,
+  path: '/' + routeFns.PUT_RIDER_ROUTE,
   handler: routeFns.rejectRide
+});
+
+server.route({
+  method: 'PUT',
+  path: '/' + routeFns.PUT_DRIVER_ROUTE,
+  handler: routeFns.confirmRide
 });
 
 server.register({

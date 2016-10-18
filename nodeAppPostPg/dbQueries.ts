@@ -17,8 +17,16 @@ function dbRejectRideFunctionString() {
     return 'select ' + dbDefs.SCHEMA_NAME + '.' + dbDefs.REJECT_RIDE_FUNCTION;
 }
 
+function dbConfirmRideFunctionString() {
+    return 'select ' + dbDefs.SCHEMA_NAME + '.' + dbDefs.CONFIRM_RIDE_FUNCTION;
+}
+
 function dbCancelRideFunctionString() {
     return 'select ' + dbDefs.SCHEMA_NAME + '.' + dbDefs.CANCEL_RIDE_FUNCTION;
+}
+
+function dbCancelRideOfferFunctionString() {
+    return 'select ' + dbDefs.SCHEMA_NAME + '.' + dbDefs.CANCEL_RIDE_OFFER_FUNCTION;
 }
 
 function dbGetMatchRiderQueryString (rider_uuid) {
