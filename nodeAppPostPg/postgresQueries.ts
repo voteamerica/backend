@@ -43,13 +43,13 @@ function dbGetUnmatchedDrivers(pool, fnGetString, reply, results) {
       if (result !== undefined && result.rows !== undefined) {
 
         result.rows.forEach( val => {          
-          rowsToSend.push(JSON.stringify(val));
+          rowsToSend.push(val);
         });
-
-        // firstRowAsString = JSON.stringify(result.rows[0]);
       }
 
-      reply(results.success + rowsToSend);
+      console.log("unmatched drivers: ", rowsToSend);
+
+      reply(rowsToSend);
     })
     .catch(e => {
       var message = e.message || '';

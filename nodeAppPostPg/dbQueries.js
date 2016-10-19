@@ -5,7 +5,7 @@ module.exports = {
     dbGetMatchDriverQueryString: dbGetMatchDriverQueryString,
     dbGetMatchesQueryString: dbGetMatchesQueryString,
     dbGetQueryString: dbGetQueryString,
-    dbGetUnmatchedDriversQueryString: dbGetMatchDriverQueryString,
+    dbGetUnmatchedDriversQueryString: dbGetUnmatchedDriversQueryString,
     dbGetInsertClause: dbGetInsertClause,
     dbGetInsertDriverString: dbGetInsertDriverString,
     dbGetInsertRiderString: dbGetInsertRiderString,
