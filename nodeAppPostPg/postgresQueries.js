@@ -32,10 +32,11 @@ function dbGetUnmatchedDrivers(pool, fnGetString, reply, results) {
         var rowsToSend = [];
         if (result !== undefined && result.rows !== undefined) {
             result.rows.forEach(function (val) {
-                rowsToSend.push(JSON.stringify(val));
+                rowsToSend.push(val);
             });
         }
-        reply(results.success + rowsToSend);
+        console.log("unmatched drivers: ", rowsToSend);
+        reply(rowsToSend);
     })
         .catch(function (e) {
         var message = e.message || '';

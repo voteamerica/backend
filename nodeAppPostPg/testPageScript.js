@@ -110,3 +110,33 @@ function sendHelperForm() {
   request.open("POST", url);
   request.send(formData);
 }
+
+function getUnmatchedDrivers () {
+  var xhr = new XMLHttpRequest();
+
+  xhr.open("GET", "http://localhost:8000/unmatched-drivers", true);
+
+  xhr.onload = function (e) {
+    if (xhr.readyState === 4) {
+
+      if (xhr.status === 200) {
+        var codes = JSON.parse(xhr.responseText);       
+        console.log(xhr.responseText);
+
+        codes.forEach(function (val) {
+          var code = val;
+
+          console.log(code);
+        });
+      } else {
+        console.error(xhr.statusText);
+      }
+    }
+  };
+
+  xhr.onerror = function (e) {
+    console.error(xhr.statusText);
+  };
+
+  xhr.send(null);
+}
