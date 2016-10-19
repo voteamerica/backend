@@ -254,8 +254,8 @@ BEGIN
 									zip_dropoff.latitude_numeric,
 									zip_dropoff.longitude_numeric);
 
-						RAISE NOTICE 'distance_origin_pickup=%', distance_origin_pickup;
-						RAISE NOTICE 'distance_origin_dropoff=%', distance_origin_pickup;
+						--RAISE NOTICE 'distance_origin_pickup=%', distance_origin_pickup;
+						--RAISE NOTICE 'distance_origin_dropoff=%', distance_origin_pickup;
 						
 						IF distance_origin_pickup < RADIUS_MAX_ALLOWED AND distance_origin_dropoff < RADIUS_MAX_ALLOWED
 						THEN
@@ -269,10 +269,10 @@ BEGIN
 									- distance_origin_dropoff ;
 							END IF; 
 							
-							RAISE NOTICE 'D-%, R-%, distance ranking Score=%', 
-										drive_offer_row."UUID", 
-										ride_request_row."UUID", 
-										match_points;
+							--RAISE NOTICE 'D-%, R-%, distance ranking Score=%', 
+							--			drive_offer_row."UUID", 
+							--			ride_request_row."UUID", 
+							--			match_points;
 			
 							
 							-- vulnerable rider matching
@@ -285,10 +285,10 @@ BEGIN
 								match_points := match_points + 200;
 							END IF;
 					
-							RAISE NOTICE 'D-%, R-%, vulnerable ranking Score=%', 
-										drive_offer_row."UUID", 
-										ride_request_row."UUID", 
-										match_points;
+							--RAISE NOTICE 'D-%, R-%, vulnerable ranking Score=%', 
+							--			drive_offer_row."UUID", 
+							--			ride_request_row."UUID", 
+							--			match_points;
 			
 							-- time matching
 							-- Each combination of rider time and driver time can give a potential match
@@ -352,10 +352,10 @@ BEGIN
 										-- -- We're completely in the interval
 									END IF;
 									
-									RAISE NOTICE 'D-%, R-%, time ranking ranking Score=%', 
-										drive_offer_row."UUID", 
-										ride_request_row."UUID", 
-										match_points+time_criteria_points;
+									--RAISE NOTICE 'D-%, R-%, time ranking ranking Score=%', 
+									--	drive_offer_row."UUID", 
+									--	ride_request_row."UUID", 
+									--	match_points+time_criteria_points;
 									
 									IF match_points + time_criteria_points >= 300
 									THEN
