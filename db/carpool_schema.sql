@@ -69,36 +69,6 @@ COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 SET search_path = nov2016, pg_catalog;
 
 --
--- Name: cancel_ride_by_rider(integer, integer); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
---
-
-CREATE FUNCTION cancel_ride_by_rider("RiderID" integer DEFAULT '-1'::integer, "RequestedRideID" integer DEFAULT '-1'::integer) RETURNS integer
-    LANGUAGE sql
-    AS $_$
-
-UPDATE nov2016.requested_ride
-   SET  "Active" = '0'::bit(1)
-       ,"ModifiedTimestamp" = now() at time zone 'utc'
-       ,"ModifiedBy" = 'CancelRider'
- WHERE requested_ride."RiderID" = $1
- ;
- 
- SELECT 1;
- 
-
-$_$;
-
-
-ALTER FUNCTION nov2016.cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) OWNER TO carpool_admins;
-
---
--- Name: FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer); Type: COMMENT; Schema: nov2016; Owner: carpool_admins
---
-
-COMMENT ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) IS 'Performs actions necessary to ensure that the appropriate parties know that the need for the scheduled ride has evaporated.';
-
-
---
 -- Name: distance(double precision, double precision, double precision, double precision); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
 --
 
@@ -117,6 +87,262 @@ $$;
 
 
 ALTER FUNCTION nov2016.distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) OWNER TO carpool_admins;
+
+--
+-- Name: driver_cancel_confirmed_match(character varying, character varying, smallint, character varying); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE                                                   
+    ride_request_row stage.websubmission_rider%ROWTYPE;
+	drive_offer_row stage.websubmission_driver%ROWTYPE;
+	match_row nov2016.match%ROWTYPE;
+	v_step character varying(200);
+	v_return_text character varying(200);
+BEGIN 
+	-- input validation
+	IF NOT EXISTS (
+	SELECT 1 
+	FROM nov2016.match m, stage.websubmission_driver r
+	WHERE m.uuid_driver = a_UUID_driver
+	AND m.uuid_rider = a_UUID_rider
+	AND m.state = 'MatchConfirmed'   -- We can confirmed only a 
+	AND m.uuid_driver = r."UUID"
+	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
+		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
+			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	)
+	THEN
+		return 'No Confirmed Match found for those parameters.';
+	END IF;
+
+	BEGIN
+		v_step := 'S0';
+		UPDATE nov2016.match
+		SET state='Canceled'
+		WHERE uuid_rider = a_UUID_rider
+		AND uuid_driver = a_UUID_driver
+		AND score = a_score;
+	
+		v_step := 'S1';
+		SELECT * INTO ride_request_row
+		FROM stage.websubmission_rider
+		WHERE "UUID" = a_UUID_rider;	
+		
+		v_step := 'S2';
+		INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+		VALUES (ride_request_row."RiderEmail", 
+		'Cancellation Notice', 
+		'Confirmed match was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+
+		v_step := 'S3';
+		v_return_text := nov2016.update_drive_offer_state(a_UUID_driver);
+		IF  v_return_text != ''
+		THEN
+			v_step := v_step || ' ' || v_return_text;
+			RAISE EXCEPTION '%', v_return_text;
+		END IF;
+	
+		v_step := 'S4';
+		v_return_text := nov2016.update_ride_request_state(a_UUID_rider);
+		IF  v_return_text != ''
+		THEN
+			v_step := v_step || ' ' || v_return_text;
+			RAISE EXCEPTION '%', v_return_text;
+		END IF;
+		
+		return '';
+	
+	EXCEPTION WHEN OTHERS 
+	THEN
+		RETURN 'Exception occurred during processing: driver_cancel_confirmed_match,' || v_step;
+	END;
+
+END  
+
+$$;
+
+
+ALTER FUNCTION nov2016.driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) OWNER TO carpool_admins;
+
+--
+-- Name: driver_cancel_drive_offer(character varying, character varying); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE                                                   
+	ride_request_row stage.websubmission_rider%ROWTYPE;
+	drive_offer_row stage.websubmission_driver%ROWTYPE;
+	match_row nov2016.match%ROWTYPE;
+	v_step character varying(200);
+	v_return_text character varying(200);
+BEGIN 
+
+
+	-- input validation
+	IF NOT EXISTS (
+	SELECT 1 
+	FROM stage.websubmission_driver r
+	WHERE r."UUID" = a_UUID
+	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
+		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
+			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	)
+	THEN
+		return 'No Drive Offer found for those parameters';
+	END IF;
+
+	BEGIN
+
+		v_step := 'S1';
+		FOR match_row IN SELECT * FROM nov2016.match
+			WHERE uuid_driver = a_UUID
+			AND state = 'MatchConfirmed'
+		
+		LOOP
+		
+			v_step := 'S2';
+			SELECT * INTO ride_request_row
+			FROM stage.websubmission_rider
+			WHERE "UUID" = match_row.uuid_rider;	
+		
+			v_step := 'S3';
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (ride_request_row."DriverEmail", 
+			'Cancellation Notice', 
+			'Confirmed match was canceled by rider: ' || match_row.uuid_rider || ', ' || match_row.uuid_driver);
+
+			v_step := 'S4';
+			UPDATE nov2016.match
+			SET state = 'Canceled'
+			WHERE uuid_rider = match_row.uuid_rider
+			AND uuid_driver = match_row.uuid_driver;
+			
+			v_step := 'S5';
+			v_return_text := nov2016.update_ride_request_state(match_row.uuid_rider);
+			IF  v_return_text != ''
+			THEN
+				v_step := v_step || ' ' || v_return_text;
+				RAISE EXCEPTION '%', v_return_text;
+			END IF;
+		
+		END LOOP;
+		
+		v_step := 'S6';
+		UPDATE nov2016.match
+		SET state = 'Canceled'
+		WHERE uuid_driver = a_UUID;
+		
+		v_step := 'S7';
+		-- Update Drive Offer to Canceled
+		UPDATE stage.websubmission_driver
+		SET state='Canceled'
+		WHERE "UUID" = a_UUID;
+		
+		return '';
+    	
+	EXCEPTION WHEN OTHERS 
+	THEN
+		RETURN 'Exception occurred during processing: driver_cancel_drive_offer,' || v_step;
+	END;
+
+END  
+
+$$;
+
+
+ALTER FUNCTION nov2016.driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) OWNER TO carpool_admins;
+
+--
+-- Name: driver_confirm_match(character varying, character varying, smallint, character varying); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE                                                   
+    ride_request_row stage.websubmission_rider%ROWTYPE;
+	drive_offer_row stage.websubmission_driver%ROWTYPE;
+	match_row nov2016.match%ROWTYPE;
+	v_step character varying(200); 
+	v_return_text character varying(200);	
+BEGIN 
+
+	-- input validation
+	IF NOT EXISTS (
+	SELECT 1 
+	FROM nov2016.match m, stage.websubmission_driver r
+	WHERE m.uuid_driver = a_UUID_driver
+	AND m.uuid_rider = a_UUID_rider
+	AND m.score = a_score
+	AND m.state = 'MatchProposed'   -- We can confirmed only a 
+	AND m.uuid_driver = r."UUID"
+	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
+		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
+			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	)
+	THEN
+		return 'No Match can be confirmed with for those parameters';
+	END IF;
+
+	BEGIN
+		v_step := 'S0';
+		UPDATE nov2016.match
+		SET state='MatchConfirmed'
+		WHERE uuid_rider = a_UUID_rider
+		AND uuid_driver = a_UUID_driver
+		AND score = a_score;
+	
+		v_step := 'S1';
+		SELECT * INTO ride_request_row
+		FROM stage.websubmission_rider
+		WHERE "UUID" = a_UUID_rider;	
+		
+		v_step := 'S2';
+		INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+		VALUES (ride_request_row."RiderEmail", 
+		'Confirmation Notice', 
+		'Match was confirmed by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+
+		v_step := 'S3, ' || a_UUID_driver;
+		v_return_text := nov2016.update_drive_offer_state(a_UUID_driver);
+		IF  v_return_text != ''
+		THEN
+			v_step := v_step || ' ' || v_return_text;
+			RAISE NOTICE '%', v_return_text;
+			RAISE EXCEPTION '%', v_return_text;
+		END IF;
+	
+		v_step := 'S4';
+		v_return_text := nov2016.update_ride_request_state(a_UUID_rider);
+		IF  v_return_text != ''
+		THEN
+			v_step := v_step || ' ' || v_return_text;
+			RAISE NOTICE '%', v_return_text;
+			RAISE EXCEPTION '%', v_return_text;
+		END IF;
+		
+		return '';
+	
+	EXCEPTION WHEN OTHERS 
+	THEN
+		RETURN 'Exception occurred during processing: driver_confirm_match,' || v_step;
+	END;
+
+
+    END  
+
+$$;
+
+
+ALTER FUNCTION nov2016.driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) OWNER TO carpool_admins;
 
 --
 -- Name: fct_modified_column(); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
@@ -191,6 +417,301 @@ $$;
 
 
 ALTER FUNCTION nov2016.queue_email_notif() OWNER TO carpool_admins;
+
+--
+-- Name: rider_cancel_confirmed_match(character varying, character varying, smallint, character varying); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE                                                   
+	ride_request_row stage.websubmission_rider%ROWTYPE;
+	drive_offer_row stage.websubmission_driver%ROWTYPE;
+	match_row nov2016.match%ROWTYPE;
+	v_step character varying(200);
+	v_return_text character varying(200);
+BEGIN 
+
+	-- input validation
+	IF NOT EXISTS (
+	SELECT 1 
+	FROM nov2016.match m, stage.websubmission_rider r
+	WHERE m.uuid_driver = a_UUID_driver
+	AND m.uuid_rider = a_UUID_rider
+	AND m.score = a_score
+	AND m.state = 'MatchConfirmed'   -- We can cancel only a Confirmed match
+	AND m.uuid_rider = r."UUID"
+	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
+		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
+			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	)
+	THEN
+		return 'No Confirmed Match found for those parameters.';
+	END IF;
+
+	BEGIN
+		v_step := 'S0';
+		UPDATE nov2016.match
+		SET state='Canceled'
+		WHERE uuid_rider = a_UUID_rider
+		AND uuid_driver = a_UUID_driver
+		AND score = a_score;
+	
+		v_step := 'S1';
+		SELECT * INTO drive_offer_row
+		FROM stage.websubmission_driver
+		WHERE "UUID" = a_UUID_driver;	
+		
+		v_step := 'S2';
+		INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+		VALUES (drive_offer_row."DriverEmail", 
+		'Cancellation Notice', 
+		'Confirmed match was canceled by rider: ' || a_UUID_driver || ', ' || a_UUID_rider);
+
+		v_step := 'S3';
+		v_return_text := nov2016.update_drive_offer_state(a_UUID_driver);
+		IF  v_return_text != ''
+		THEN
+			v_step := v_step || ' ' || v_return_text;
+			RAISE EXCEPTION '%', v_return_text;
+		END IF;
+	
+		v_step := 'S4';
+		v_return_text := nov2016.update_ride_request_state(a_UUID_rider);
+		IF  v_return_text != ''
+		THEN
+			v_step := v_step || ' ' || v_return_text;
+			RAISE EXCEPTION '%', v_return_text;
+		END IF;
+		
+		return '';
+	
+	EXCEPTION WHEN OTHERS 
+	THEN
+		RETURN 'Exception occurred during processing: rider_cancel_confirmed_match,' || v_step;
+	END;
+	
+END  
+
+$$;
+
+
+ALTER FUNCTION nov2016.rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) OWNER TO carpool_admins;
+
+--
+-- Name: rider_cancel_ride_request(character varying, character varying); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE                                                   
+	ride_request_row stage.websubmission_rider%ROWTYPE;
+	drive_offer_row stage.websubmission_driver%ROWTYPE;
+	match_row nov2016.match%ROWTYPE;
+	v_step character varying(200);
+	v_return_text character varying(200);
+BEGIN 
+
+	-- input validation
+	IF NOT EXISTS (
+	SELECT 1 
+	FROM stage.websubmission_rider r
+	WHERE r."UUID" = a_UUID
+	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
+		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
+			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	)
+	THEN
+		return 'No Ride Request found for those parameters';
+	END IF;
+
+	
+	BEGIN
+
+		v_step := 'S1';
+		FOR match_row IN SELECT * FROM nov2016.match
+			WHERE uuid_rider = a_UUID
+			AND state = 'MatchConfirmed'
+		
+		LOOP
+		
+			v_step := 'S2';
+			SELECT * INTO drive_offer_row
+			FROM stage.websubmission_driver
+			WHERE "UUID" = match_row.uuid_driver;	
+		
+			v_step := 'S3';
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (drive_offer_row."DriverEmail", 
+			'Cancellation Notice', 
+			'Confirmed match was canceled by rider: ' || match_row.uuid_driver || ', ' || match_row.uuid_rider);
+
+			v_step := 'S4';
+			UPDATE nov2016.match
+			SET state = 'Canceled'
+			WHERE uuid_rider = match_row.uuid_rider
+			AND uuid_driver = match_row.uuid_driver;
+			
+			v_step := 'S5';
+			v_return_text := nov2016.update_drive_offer_state(match_row.uuid_driver);
+			IF  v_return_text != ''
+			THEN
+				v_step := v_step || ' ' || v_return_text;
+				RAISE EXCEPTION '%', v_return_text;
+			END IF;
+		
+		END LOOP;
+		
+		v_step := 'S6';
+		UPDATE nov2016.match
+		SET state = 'Canceled'
+		WHERE uuid_rider = a_UUID;
+		
+		v_step := 'S7';
+		-- Update Ride Request to Canceled
+		UPDATE stage.websubmission_rider
+		SET state='Canceled'
+		WHERE "UUID" = a_UUID;
+		
+		return '';
+    
+	EXCEPTION WHEN OTHERS 
+	THEN
+		RETURN 'Exception occurred during processing: rider_cancel_ride_request,' || v_step;
+	END;
+	
+END  
+
+$$;
+
+
+ALTER FUNCTION nov2016.rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) OWNER TO carpool_admins;
+
+--
+-- Name: update_drive_offer_state(character varying); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE FUNCTION update_drive_offer_state(a_uuid character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+	v_step character varying(200);
+BEGIN	
+
+	BEGIN
+	v_step := 'S1';
+	
+	-- If there is at least one match in MatchConfirmed state -> MatchConfirmed
+	IF EXISTS ( 
+		SELECT 1
+		FROM nov2016.match
+		WHERE uuid_driver = a_UUID
+		AND state='MatchConfirmed'
+	)
+	THEN	
+		v_step := 'S2';
+		UPDATE stage.websubmission_driver
+		SET state='MatchConfirmed'
+		WHERE "UUID" = a_UUID;
+	ELSIF EXISTS (   -- If there is at least one match in MatchProposed or MatchConfirmed -> MatchProposed
+		SELECT 1
+		FROM nov2016.match
+		WHERE uuid_driver = a_UUID
+		AND state = 'MatchProposed'
+	)
+	THEN
+		v_step := 'S3';
+		UPDATE stage.websubmission_driver
+		SET state='MatchProposed'
+		WHERE "UUID" = a_UUID;
+	
+	ELSE               -- default, is Pending
+		v_step := 'S4';
+		UPDATE stage.websubmission_driver
+		SET state='Pending'
+		WHERE "UUID" = a_UUID;
+		
+	END IF;
+		
+	RETURN '';
+	
+	EXCEPTION WHEN OTHERS
+	THEN
+		RAISE NOTICE 'Exception occurred during processing: update_drive_offer_state,%', v_step;
+		return 'Exception occurred during processing: update_drive_offer_state,' || v_step;
+	END;
+			
+END  
+
+$$;
+
+
+ALTER FUNCTION nov2016.update_drive_offer_state(a_uuid character varying) OWNER TO carpool_admins;
+
+--
+-- Name: update_ride_request_state(character varying); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE FUNCTION update_ride_request_state(a_uuid character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+	v_step character varying(200);
+BEGIN	
+
+	BEGIN
+	v_step := 'S1';
+	
+	-- If there is at least one match in MatchConfirmed state -> MatchConfirmed
+	IF EXISTS ( 
+		SELECT 1
+		FROM nov2016.match
+		WHERE uuid_rider = a_UUID
+		AND state='MatchConfirmed'
+	)
+	THEN	
+		v_step := 'S2';
+		UPDATE stage.websubmission_rider
+		SET state='MatchConfirmed'
+		WHERE "UUID" = a_UUID;
+	ELSIF EXISTS (   -- If there is at least one match in MatchProposed or MatchConfirmed -> MatchProposed
+		SELECT 1
+		FROM nov2016.match
+		WHERE uuid_rider = a_UUID
+		AND state = 'MatchProposed'
+	)
+	THEN
+		v_step := 'S3';
+		UPDATE stage.websubmission_rider
+		SET state='MatchProposed'
+		WHERE "UUID" = a_UUID;
+	
+	ELSE               -- default, is Pending
+		v_step := 'S4';
+		UPDATE stage.websubmission_rider
+		SET state='Pending'
+		WHERE "UUID" = a_UUID;
+		
+	END IF;
+		
+	RETURN '';
+	
+	EXCEPTION WHEN OTHERS
+	THEN
+		RAISE NOTICE 'Exception occurred during processing: update_ride_request_state,%', v_step;
+		return 'Exception occurred during processing: update_ride_request_state,' || v_step;
+	END;
+			
+END  
+
+$$;
+
+
+ALTER FUNCTION nov2016.update_ride_request_state(a_uuid character varying) OWNER TO carpool_admins;
 
 --
 -- Name: zip_distance(integer, integer); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
@@ -765,30 +1286,23 @@ CREATE TABLE websubmission_driver (
     "AvailableDriveTimesJSON" character varying(2000),
     "DriverCanLoadRiderWithWheelchair" boolean DEFAULT false NOT NULL,
     "SeatCount" integer DEFAULT 1,
-    "DriverHasInsurance" boolean DEFAULT false NOT NULL,
-    "DriverInsuranceProviderName" character varying(255),
-    "DriverInsurancePolicyNumber" character varying(50),
-    "DriverLicenseState" character(2),
     "DriverLicenseNumber" character varying(50),
     "DriverFirstName" character varying(255) NOT NULL,
     "DriverLastName" character varying(255) NOT NULL,
     "PermissionCanRunBackgroundCheck" boolean DEFAULT false NOT NULL,
     "DriverEmail" character varying(255),
     "DriverPhone" character varying(20),
-    "DriverAreaCode" integer,
-    "DriverEmailValidated" boolean DEFAULT false NOT NULL,
-    "DriverPhoneValidated" boolean DEFAULT false NOT NULL,
     "DrivingOnBehalfOfOrganization" boolean DEFAULT false NOT NULL,
     "DrivingOBOOrganizationName" character varying(255),
     "RidersCanSeeDriverDetails" boolean DEFAULT false NOT NULL,
     "DriverWillNotTalkPolitics" boolean DEFAULT false NOT NULL,
     "ReadyToMatch" boolean DEFAULT false NOT NULL,
     "PleaseStayInTouch" boolean DEFAULT false NOT NULL,
-    "VehicleRegistrationNumber" character varying(255),
     state character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    state_info text
+    state_info text,
+    "DriverPreferredContactMethod" character varying(50)
 );
 
 
@@ -799,16 +1313,18 @@ ALTER TABLE websubmission_driver OWNER TO carpool_admins;
 --
 
 CREATE VIEW vw_drive_offer AS
- SELECT websubmission_driver."UUID" AS uuid,
+ SELECT websubmission_driver."UUID",
+    websubmission_driver."DriverLastName",
+    websubmission_driver."DriverPhone",
     websubmission_driver.state,
     websubmission_driver.created_ts,
     websubmission_driver.last_updated_ts,
-    websubmission_driver."DriverCollectionZIP" AS zip,
-    websubmission_driver."DriverCollectionRadius" AS radius,
-    websubmission_driver."DriverCanLoadRiderWithWheelchair" AS wheelchair,
-    websubmission_driver."SeatCount" AS seats,
-    websubmission_driver."DrivingOnBehalfOfOrganization" AS official,
-    websubmission_driver."AvailableDriveTimesJSON" AS drive_times
+    websubmission_driver."DriverCollectionZIP",
+    websubmission_driver."DriverCollectionRadius",
+    websubmission_driver."DriverCanLoadRiderWithWheelchair",
+    websubmission_driver."SeatCount",
+    websubmission_driver."DrivingOnBehalfOfOrganization",
+    websubmission_driver."AvailableDriveTimesJSON"
    FROM websubmission_driver;
 
 
@@ -825,9 +1341,6 @@ CREATE TABLE websubmission_rider (
     "RiderLastName" character varying(255) NOT NULL,
     "RiderEmail" character varying(255),
     "RiderPhone" character varying(20),
-    "RiderAreaCode" integer,
-    "RiderEmailValidated" boolean DEFAULT false NOT NULL,
-    "RiderPhoneValidated" boolean DEFAULT false NOT NULL,
     "RiderVotingState" character(2),
     "RiderCollectionZIP" character varying(5) NOT NULL,
     "RiderDropOffZIP" character varying(5) NOT NULL,
@@ -835,11 +1348,10 @@ CREATE TABLE websubmission_rider (
     "TotalPartySize" integer,
     "TwoWayTripNeeded" boolean DEFAULT false NOT NULL,
     "RiderIsVulnerable" boolean DEFAULT false NOT NULL,
-    "DriverCanContactRider" boolean DEFAULT false NOT NULL,
     "RiderWillNotTalkPolitics" boolean DEFAULT false NOT NULL,
     "PleaseStayInTouch" boolean DEFAULT false NOT NULL,
     "NeedWheelchair" boolean DEFAULT false NOT NULL,
-    "RiderPreferredContactMethod" character varying(20),
+    "RiderPreferredContactMethod" character varying(50),
     "RiderAccommodationNotes" character varying(1000),
     "RiderLegalConsent" boolean,
     "ReadyToMatch" boolean,
@@ -858,15 +1370,17 @@ ALTER TABLE websubmission_rider OWNER TO carpool_admins;
 
 CREATE VIEW vw_ride_request AS
  SELECT websubmission_rider."UUID" AS uuid,
+    websubmission_rider."RiderLastName",
+    websubmission_rider."RiderPhone",
     websubmission_rider.state,
     websubmission_rider.created_ts,
     websubmission_rider.last_updated_ts,
-    websubmission_rider."RiderCollectionZIP" AS from_zip,
-    websubmission_rider."RiderDropOffZIP" AS to_zip,
-    websubmission_rider."TotalPartySize" AS party_size,
-    websubmission_rider."RiderIsVulnerable" AS vulnerable,
-    websubmission_rider."NeedWheelchair" AS wheelchair,
-    websubmission_rider."AvailableRideTimesJSON" AS ride_times
+    websubmission_rider."RiderCollectionZIP",
+    websubmission_rider."RiderDropOffZIP",
+    websubmission_rider."TotalPartySize",
+    websubmission_rider."RiderIsVulnerable",
+    websubmission_rider."NeedWheelchair",
+    websubmission_rider."AvailableRideTimesJSON"
    FROM websubmission_rider;
 
 
@@ -1226,16 +1740,6 @@ GRANT ALL ON SCHEMA stage TO carpool_admins;
 
 
 --
--- Name: cancel_ride_by_rider(integer, integer); Type: ACL; Schema: nov2016; Owner: carpool_admins
---
-
-REVOKE ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) FROM PUBLIC;
-REVOKE ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) FROM carpool_admins;
-GRANT ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) TO carpool_admins;
-GRANT ALL ON FUNCTION cancel_ride_by_rider("RiderID" integer, "RequestedRideID" integer) TO carpool_role;
-
-
---
 -- Name: distance(double precision, double precision, double precision, double precision); Type: ACL; Schema: nov2016; Owner: carpool_admins
 --
 
@@ -1247,6 +1751,42 @@ GRANT ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat
 
 
 --
+-- Name: driver_cancel_confirmed_match(character varying, character varying, smallint, character varying); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
+
+
+--
+-- Name: driver_cancel_drive_offer(character varying, character varying); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+
+
+--
+-- Name: driver_confirm_match(character varying, character varying, smallint, character varying); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
+
+
+--
 -- Name: fct_modified_column(); Type: ACL; Schema: nov2016; Owner: carpool_admins
 --
 
@@ -1255,6 +1795,54 @@ REVOKE ALL ON FUNCTION fct_modified_column() FROM carpool_admins;
 GRANT ALL ON FUNCTION fct_modified_column() TO carpool_admins;
 GRANT ALL ON FUNCTION fct_modified_column() TO carpool_role;
 GRANT ALL ON FUNCTION fct_modified_column() TO carpool_web_role;
+
+
+--
+-- Name: rider_cancel_confirmed_match(character varying, character varying, smallint, character varying); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
+
+
+--
+-- Name: rider_cancel_ride_request(character varying, character varying); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+
+
+--
+-- Name: update_drive_offer_state(character varying); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION update_drive_offer_state(a_uuid character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION update_drive_offer_state(a_uuid character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION update_drive_offer_state(a_uuid character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION update_drive_offer_state(a_uuid character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION update_drive_offer_state(a_uuid character varying) TO carpool_web;
+GRANT ALL ON FUNCTION update_drive_offer_state(a_uuid character varying) TO carpool_role;
+
+
+--
+-- Name: update_ride_request_state(character varying); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION update_ride_request_state(a_uuid character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION update_ride_request_state(a_uuid character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION update_ride_request_state(a_uuid character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION update_ride_request_state(a_uuid character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION update_ride_request_state(a_uuid character varying) TO carpool_web;
+GRANT ALL ON FUNCTION update_ride_request_state(a_uuid character varying) TO carpool_role;
 
 
 --
@@ -1381,7 +1969,7 @@ REVOKE ALL ON TABLE match FROM PUBLIC;
 REVOKE ALL ON TABLE match FROM carpool_admins;
 GRANT ALL ON TABLE match TO carpool_admins;
 GRANT ALL ON TABLE match TO carpool_role;
-GRANT SELECT ON TABLE match TO carpool_web_role;
+GRANT SELECT,UPDATE ON TABLE match TO carpool_web_role;
 
 
 --
@@ -1487,7 +2075,7 @@ GRANT ALL ON TABLE sweep_status TO carpool_role;
 REVOKE ALL ON TABLE websubmission_driver FROM PUBLIC;
 REVOKE ALL ON TABLE websubmission_driver FROM carpool_admins;
 GRANT ALL ON TABLE websubmission_driver TO carpool_admins;
-GRANT SELECT,INSERT ON TABLE websubmission_driver TO carpool_web_role;
+GRANT SELECT,INSERT,UPDATE ON TABLE websubmission_driver TO carpool_web_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE websubmission_driver TO carpool_role;
 
 
@@ -1517,7 +2105,7 @@ GRANT SELECT ON TABLE vw_drive_offer TO carpool_role;
 REVOKE ALL ON TABLE websubmission_rider FROM PUBLIC;
 REVOKE ALL ON TABLE websubmission_rider FROM carpool_admins;
 GRANT ALL ON TABLE websubmission_rider TO carpool_admins;
-GRANT SELECT,INSERT ON TABLE websubmission_rider TO carpool_web_role;
+GRANT SELECT,INSERT,UPDATE ON TABLE websubmission_rider TO carpool_web_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE websubmission_rider TO carpool_role;
 
 
