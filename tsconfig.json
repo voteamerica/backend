@@ -8,6 +8,7 @@
         "bunny",
         "ETL",
         "nginx",
+        "typings",
         "nodeAppPostPg/node_modules",
         "smsHandler",
         "sweeper/node_modules",

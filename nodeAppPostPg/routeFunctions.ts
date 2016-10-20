@@ -29,27 +29,72 @@ function getAnon (req, reply) {
   postgresQueries.dbGetData(rfPool, dbQueries.dbGetQueryString, reply, results);
 }
 
-function postDriver (req, reply) {
-    var payload = req.payload;
-    var results = getInsertResultStrings(DRIVER_ROUTE);
+function logPostDriver (req) {
+  var payload = req.payload;
 
     console.log("driver radius1 : " + payload.DriverCollectionRadius);
     sanitiseDriver(payload);
     console.log("driver radius2 : " + payload.DriverCollectionRadius);
 
-    req.log();
-
     console.log("driver payload: " + JSON.stringify(payload, null, 4));
     console.log("driver zip: " + payload.DriverCollectionZIP);
 
-    postgresQueries.dbInsertData(payload, rfPool, dbQueries.dbGetInsertDriverString, 
-                  getDriverPayloadAsArray,
-                  req, reply, results);
+    req.log();
 }
 
-function postRider (req, reply) {
+var postDriver = 
+  createPostFn 
+  (DRIVER_ROUTE, 
+    dbQueries.dbGetInsertDriverString, 
+    getDriverPayloadAsArray, logPostDriver);
+
+// function postDriver (req, reply) {
+//     var payload = req.payload;
+//     var results = getInsertResultStrings(DRIVER_ROUTE);
+
+//     console.log("driver radius1 : " + payload.DriverCollectionRadius);
+//     sanitiseDriver(payload);
+//     console.log("driver radius2 : " + payload.DriverCollectionRadius);
+
+//     console.log("driver payload: " + JSON.stringify(payload, null, 4));
+//     console.log("driver zip: " + payload.DriverCollectionZIP);
+
+//     req.log();
+
+//     postgresQueries.dbInsertData(payload, rfPool, dbQueries.dbGetInsertDriverString, 
+//                   getDriverPayloadAsArray,
+//                   req, reply, results);
+// }
+
+function logPost (req) {
+  req.log();
+}
+
+function createPostFn 
+  (resultStringText: string, 
+    dbQueryFn: any, payloadFn: any, logFn: any) {
+  
+  function postFn (req, reply) {
     var payload = req.payload;
-    var results = getInsertResultStrings(RIDER_ROUTE);
+    var results = getInsertResultStrings(resultStringText);
+
+    if (logFn !== undefined) {
+      logFn(req);
+    } 
+    else {
+      logPost(req);
+    }
+
+    postgresQueries.dbInsertData(payload, rfPool, dbQueryFn, 
+                  payloadFn,
+                  req, reply, results);
+  }
+
+  return postFn; 
+}
+
+function logPostRider (req) {
+    var payload = req.payload;
 
     console.log("rider state1 : " + payload.RiderVotingState);
     sanitiseRider(payload);
@@ -59,24 +104,58 @@ function postRider (req, reply) {
 
     console.log("rider payload: " + JSON.stringify(payload, null, 4));
     console.log("rider zip: " + payload.RiderCollectionZIP);
-
-    postgresQueries.dbInsertData(payload, rfPool, dbQueries.dbGetInsertRiderString, 
-                  getRiderPayloadAsArray,
-                  req, reply, results);
 }
 
-function postHelper (req, reply) {
-    var payload = req.payload;
-    var results = getInsertResultStrings(HELPER_ROUTE);
+var postRider = 
+  createPostFn 
+  (RIDER_ROUTE, 
+    dbQueries.dbGetInsertRiderString, 
+    getRiderPayloadAsArray, logPostRider);
 
-    req.log();
+// function postRiderx (req, reply) {
+//     var payload = req.payload;
+//     var results = getInsertResultStrings(RIDER_ROUTE);
 
-    console.log("helper payload: " + JSON.stringify(payload, null, 4));
+//     console.log("rider state1 : " + payload.RiderVotingState);
+//     sanitiseRider(payload);
+//     console.log("rider state2 : " + payload.RiderVotingState);
 
-    postgresQueries.dbInsertData(payload, rfPool, dbQueries.dbGetInsertHelperString, 
-                  getHelperPayloadAsArray,
-                  req, reply, results);
+//     req.log();
+
+//     console.log("rider payload: " + JSON.stringify(payload, null, 4));
+//     console.log("rider zip: " + payload.RiderCollectionZIP);
+
+//     postgresQueries.dbInsertData(payload, rfPool, dbQueries.dbGetInsertRiderString, 
+//                   getRiderPayloadAsArray,
+//                   req, reply, results);
+// }
+
+function logPostHelper (req) {
+  var payload = req.payload;
+
+  req.log();
+
+  console.log("helper payload: " + JSON.stringify(payload, null, 4));
 }
+
+var postHelper = 
+  createPostFn 
+  (HELPER_ROUTE, 
+    dbQueries.dbGetInsertHelperString, 
+    getHelperPayloadAsArray, logPostHelper);
+
+// function postHelper (req, reply) {
+//     var payload = req.payload;
+//     var results = getInsertResultStrings(HELPER_ROUTE);
+
+//     req.log();
+
+//     console.log("helper payload: " + JSON.stringify(payload, null, 4));
+
+//     postgresQueries.dbInsertData(payload, rfPool, dbQueries.dbGetInsertHelperString, 
+//                   getHelperPayloadAsArray,
+//                   req, reply, results);
+// }
 
 function getUnmatchedDrivers (req, reply) {
   var results = {
