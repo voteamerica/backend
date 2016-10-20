@@ -26,7 +26,7 @@ function getAnon (req, reply) {
 
   req.log();
 
-  postgresQueries.dbGetData(pool, dbQueries.dbGetQueryString, reply, results);
+  postgresQueries.dbGetData(rfPool, dbQueries.dbGetQueryString, reply, results);
 }
 
 function postDriver (req, reply) {
@@ -86,7 +86,7 @@ function getUnmatchedDrivers (req, reply) {
 
   req.log();
 
-  postgresQueries.dbGetUnmatchedDrivers(pool, dbQueries.dbGetUnmatchedDriversQueryString, reply, results);
+  postgresQueries.dbGetUnmatchedDrivers(rfPool, dbQueries.dbGetUnmatchedDriversQueryString, reply, results);
 }
 
 var cancelRider = createConfirmCancelFn 
@@ -165,7 +165,7 @@ function createConfirmCancelFn
       console.log(consoleText + JSON.stringify(payload, null, 4));
 
       postgresQueries.dbExecuteFunction
-        (payload, pool, dbQueryFn, payloadFn, req, reply, results);
+        (payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
   }
 
   return execFn;
