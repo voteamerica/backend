@@ -45,31 +45,31 @@ server.connection({
 server.route({
   method: 'GET',
   path: '/',
-  handler: (req, reply) => {
-    var results = {
-      success: 'GET carpool: ',
-      failure: 'GET error: ' 
-    };
+  handler: routeFns.getAnon
+});
 
-    req.log();
+server.route({
+  method: 'POST',
+  path: '/' + routeFns.DRIVER_ROUTE,
+  handler: routeFns.postDriver
+});
 
-    postgresQueries.dbGetData(pool, dbQueries.dbGetQueryString, reply, results);
-  }
+server.route({
+  method: 'POST',
+  path: '/' + routeFns.RIDER_ROUTE,
+  handler: routeFns.postRider
+});
+
+server.route({
+  method: 'POST',
+  path: '/' + routeFns.HELPER_ROUTE,
+  handler: routeFns.postHelper
 });
 
 server.route({
   method: 'GET',
   path: '/' + routeFns.UNMATCHED_DRIVERS_ROUTE,
-  handler: (req, reply) => {
-    var results = {
-      success: 'GET unmatched drivers: ',
-      failure: 'GET unmatched drivers error: ' 
-    };
-
-    req.log();
-
-    postgresQueries.dbGetUnmatchedDrivers(pool, dbQueries.dbGetUnmatchedDriversQueryString, reply, results);
-  }
+  handler: routeFns.getUnmatchedDrivers
 });
 
 server.route({
@@ -117,24 +117,6 @@ server.route({
     postgresQueries.dbGetMatchSpecificData(pool, dbQueries.dbGetMatchDriverQueryString, 
                             req.params.uuid, reply, results);
   }
-});
-
-server.route({
-  method: 'POST',
-  path: '/' + routeFns.DRIVER_ROUTE,
-  handler: routeFns.postDriver
-});
-
-server.route({
-  method: 'POST',
-  path: '/' + routeFns.RIDER_ROUTE,
-  handler: routeFns.postRider
-});
-
-server.route({
-  method: 'POST',
-  path: '/' + routeFns.HELPER_ROUTE,
-  handler: routeFns.postHelper
 });
 
 server.route({
