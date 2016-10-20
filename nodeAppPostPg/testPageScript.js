@@ -111,7 +111,7 @@ function sendHelperForm() {
   request.send(formData);
 }
 
-function getUnmatchedDrivers () {
+function getUnmatchedDriversTest () {
   var xhr = new XMLHttpRequest();
 
   xhr.open("GET", "http://localhost:8000/unmatched-drivers", true);

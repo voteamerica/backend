@@ -11,6 +11,7 @@
     "ETL",
     "nginx",
 		// "nodeAppPostPg/node_modules",
+		"nodeAppPostPg/testPageScript.js",
 		"smsHandler",
 		"sweeper/node_modules",
 		"./sweeper/node_modules",
