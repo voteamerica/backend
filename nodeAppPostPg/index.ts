@@ -1,7 +1,6 @@
 'use strict';
 
 const Hapi        = require('hapi');
-const moment      = require('moment');
 const Pool        = require('pg').Pool;
 const Good        = require('good');
 const GoodFile    = require('good-file');

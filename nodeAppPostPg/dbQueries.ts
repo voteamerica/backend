@@ -91,9 +91,11 @@ function dbGetInsertRiderString() {
 function dbGetInsertHelperString() {
   return dbGetInsertClause(dbDefs.HELPER_TABLE)
     + ' ('     
-    + '  "helpername", "helperemail", "helpercapability", "sweep_status_id", "timestamp" '       
+    + '  "helpername", "helperemail", "helpercapability" '       
+    // + '  "helpername", "helperemail", "helpercapability", "sweep_status_id", "timestamp" '       
     + ' )'
-    + ' values($1, $2, $3, $4, $5) '  
+    + ' values($1, $2, $3) '  
+    // + ' values($1, $2, $3, $4, $5) '  
 }
 
 // custom items, due to be revised

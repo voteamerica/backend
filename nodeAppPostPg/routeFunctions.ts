@@ -1,5 +1,6 @@
+// const moment          = require('moment');
 const postgresQueries = require('./postgresQueries.js');
-const dbQueries   = require('./dbQueries.js');
+const dbQueries       = require('./dbQueries.js');
 
 const UNMATCHED_DRIVERS_ROUTE = 'unmatched-drivers';
 const DRIVER_ROUTE            = 'driver';
@@ -272,8 +273,8 @@ function createResultStringFn (successText, failureText) {
 
 function getHelperPayloadAsArray (req, payload) {
   return [      
-        payload.Name, payload.Email, payload.Capability,
-        1, moment().toISOString()
+        payload.Name, payload.Email, payload.Capability
+        // 1, moment().toISOString()
     ]
 }
 
