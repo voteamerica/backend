@@ -368,49 +368,99 @@ CREATE FUNCTION queue_email_notif() RETURNS trigger
     LANGUAGE plpgsql
     AS $$                                                                                                                  
 DECLARE                                                                                                                    
-                                                                                                                           
+ 
  v_subject nov2016.outgoing_email.subject%TYPE;                                                                            
  v_body nov2016.outgoing_email.body%TYPE;                                                                                  
-                                                                                                                           
+
 BEGIN                                                                                                                      
-                                                                                                                           
+
     -- triggered by submitting a drive offer form                                                                          
     IF TG_TABLE_NAME = 'websubmission_driver' and TG_TABLE_SCHEMA='stage'                                                  
     THEN                                                                                                                   
-                                                                                                                           
+
         IF NEW."DriverEmail" IS NOT NULL                                                                                   
         THEN                                                                                                               
-                                                                                                                           
+
             v_subject := 'Thank you for submitting a Drive Offer';                                                         
-            v_body := 'Your reference is : ' || NEW."UUID"                                                                 
-                    || '\n Please retain the this reference for future interaction with our system'                        
-                    || '\n In order to manage this Driver Offer, and to accept '                                           
-                    || 'a proposed ride request, please use this link : '                                                  
-                    || '\n https://api.carpoolvote.com/v2.0/driver?UUID=' || NEW."UUID" || '&DriverPhone=' || NEW."DriverPhone";
-                                                                                                                           
+            v_body :=  'Your Drive Offer reference : ' || NEW."UUID" || '\n'                                                        
+                    || 'Please retain the this reference for future interaction with our systems \n\n'
+					|| 'To cancel : https://api.carpoolvote.com/current/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverEmail=' || NEW."DriverEmail" || '\n'
+					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
+					|| '\n\n'
+					|| 'First Name : ' || NEW."DriverFirstName" || '\n'
+					|| 'Last Name : ' || NEW."DriverLastName" || '\n'
+					|| 'Phone Number : ' || COALESCE(NEW."DriverPhone", ' ') || '\n'
+					|| 'Email : ' || NEW."DriverEmail" || '\n'
+					|| 'Collection ZIP : ' || NEW."DriverCollectionZIP" || '\n'
+					|| 'Radius : ' || NEW."DriverCollectionRadius" || '\n'
+					|| 'Drive Times (UTC) : ' || NEW."AvailableDriveTimesJSON" || '\n';
+
             INSERT INTO nov2016.outgoing_email (recipient, subject, body)                                             
             VALUES (NEW."DriverEmail", v_subject, v_body);                                                                 
         END IF;                                                                                                            
-                                                                                                                           
+
+		IF NEW."DriverPhone" IS NOT NULL                                                                                   
+        THEN                                                                                                               
+            v_body :=  'Confirmation of driver offer reference : ' || NEW."UUID" || '\n'                                                        
+					|| 'To cancel : https://api.carpoolvote.com/current/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverEmail=' || NEW."DriverEmail" || '\n'
+					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
+					|| '\n\n'
+					|| 'First Name : ' || NEW."DriverFirstName" || '\n'
+					|| 'Last Name : ' || NEW."DriverLastName" || '\n'
+					|| 'Phone Number : ' || NEW."DriverPhone" || '\n'
+					|| 'Email : ' || COALESCE(NEW."DriverEmail", ' ') || '\n'
+					|| 'Collection ZIP : ' || NEW."DriverCollectionZIP" || '\n'
+					|| 'Radius : ' || NEW."DriverCollectionRadius" || '\n'
+					|| 'Drive Times (UTC) : ' || NEW."AvailableDriveTimesJSON" || '\n';
+
+            INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
+            VALUES (NEW."DriverPhone", v_body);                                                                 
+        END IF;                                                                                                            
+		
     -- triggered by submitting a ride request form                                                                         
     ELSIF TG_TABLE_NAME = 'websubmission_rider' and TG_TABLE_SCHEMA='stage'                                                
     THEN                                                                                                                   
         IF NEW."RiderEmail" IS NOT NULL                                                                                    
         THEN                                                                                                               
-                                                                                                                           
+
             v_subject := 'Thank you for submitting a Ride Request';                                                        
-                                                                                                                           
-            v_body := 'Your reference is : ' || NEW."UUID"                                                                 
-                    || '\n Please retain the this reference for future interaction with our system'                        
-                    || '\n In order to manage this Ride Request, '                                                         
-                    || 'please use this link : '                                                                           
-                    || '\n https://api.carpoolvote.com/v2.0/rider?UUID=' || NEW."UUID" || '&RiderPhone=' || NEW."RiderPhone";
-                                                                                                                           
+
+            v_body :=  'Your Ride Request reference : ' || NEW."UUID" || '\n'                                                        
+                    || 'Please retain the this reference for future interaction with our systems \n\n'
+					|| 'To cancel : https://api.carpoolvote.com/current/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderEmail=' || NEW."RiderEmail" || '\n'
+					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
+					|| '\n\n'
+					|| 'First Name : ' || NEW."RiderFirstName" || '\n'
+					|| 'Last Name : ' || NEW."RiderLastName" || '\n'
+					|| 'Phone Number : ' || COALESCE(NEW."RiderPhone", ' ') || '\n'
+					|| 'Email : ' || NEW."RiderEmail" || '\n'
+					|| 'Collection ZIP : ' || NEW."RiderCollectionZIP" || '\n'
+					|| 'Drop Off ZIP : ' || NEW."RiderDropOffZIP" || '\n'
+					|| 'Ride Times (UTC) : ' || NEW."AvailableRideTimesJSON" || '\n';
+
             INSERT INTO nov2016.outgoing_email (recipient, subject, body)                                             
             VALUES (NEW."RiderEmail", v_subject, v_body);                                                                  
-        END IF;                                                                                                            
+        END IF;
+
+		IF NEW."RiderPhone" IS NOT NULL                                                                                
+        THEN                                                                                                               
+            v_body :=  'Confirmation of ride request reference : ' || NEW."UUID" || '\n'                                                        
+					|| 'To cancel : https://api.carpoolvote.com/current/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderEmail=' || NEW."RiderEmail" || '\n'
+					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
+					|| 'First Name : ' || NEW."RiderFirstName" || '\n'
+					|| 'Last Name : ' || NEW."RiderLastName" || '\n'
+					|| 'Phone Number : ' || COALESCE(NEW."RiderPhone", ' ') || '\n'
+					|| 'Email : ' || NEW."RiderEmail" || '\n'
+					|| 'Collection ZIP : ' || NEW."RiderCollectionZIP" || '\n'
+					|| 'Drop Off ZIP : ' || NEW."RiderDropOffZIP" || '\n'
+					|| 'Ride Times (UTC) : ' || NEW."AvailableRideTimesJSON" || '\n';
+				
+            INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
+            VALUES (NEW."RiderPhone", v_body);                                                                 
+        END IF;                    
+		
     END IF;                                                                                                                
-                                                                                                                           
+
     RETURN NEW;                                                                                                            
 END;    
 $$;
@@ -2024,6 +2074,16 @@ REVOKE ALL ON TABLE outgoing_sms FROM carpool_admins;
 GRANT ALL ON TABLE outgoing_sms TO carpool_admins;
 GRANT ALL ON TABLE outgoing_sms TO carpool_role;
 GRANT INSERT ON TABLE outgoing_sms TO carpool_web;
+
+
+--
+-- Name: outgoing_sms_id_seq; Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON SEQUENCE outgoing_sms_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE outgoing_sms_id_seq FROM carpool_admins;
+GRANT ALL ON SEQUENCE outgoing_sms_id_seq TO carpool_admins;
+GRANT SELECT,USAGE ON SEQUENCE outgoing_sms_id_seq TO carpool_web;
 
 
 --

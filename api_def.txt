@@ -1,5 +1,15 @@
 --- /v2.0
 
+
+https://api.carpoolvote.com/v2.0/unmatched-drivers
+https://api.carpoolvote.com/v2.0/matches
+
+https://api.carpoolvote.com/v2.0/cancel-ride-request?UUID=1e6e274d-ad33-4127-9f02-f35b48a07897&RiderPhone=123
+https://api.carpoolvote.com/v2.0/cancel-rider-match?UUID_driver=1e6e274d-ad33-4127-9f02-f35b48a07897&UUID_rider=1e6e274d-ad33-4127-9f02-f35b48a07897&Score=123&RiderPhone=123
+https://api.carpoolvote.com/v2.0/cancel-drive-offer?UUID=1e6e274d-ad33-4127-9f02-f35b48a07897&DriverPhone=123
+https://api.carpoolvote.com/v2.0/cancel-driver-match?UUID_driver=1e6e274d-ad33-4127-9f02-f35b48a07897&UUID_rider=1e6e274d-ad33-4127-9f02-f35b48a07897&Score=123&DriverPhone=123
+https://api.carpoolvote.com/v2.0/accept-driver-match?UUID_driver=1e6e274d-ad33-4127-9f02-f35b48a07897&UUID_rider=1e6e274d-ad33-4127-9f02-f35b48a07897&Score=123&DriverPhone=123
+
 -- actions by rider
 --nov2016.rider_cancel_ride_request(UUID, phone number or lastname ?)
 --nov2016.rider_cancel_confirmed_match(UUID_driver, UUID_rider, score, rider’s phone number or rider’s lastname ?)
