@@ -239,7 +239,7 @@ function getDriverPayloadAsArray (req, payload) {
         req.info.remoteAddress, payload.DriverCollectionZIP, payload.DriverCollectionRadius, payload.AvailableDriveTimesJSON
       , (payload.DriverCanLoadRiderWithWheelchair ? 'true'  : 'false')
       , payload.SeatCount
-      , (payload.DriverHasInsurance ? 'true' : 'false')
+      // , (payload.DriverHasInsurance ? 'true' : 'false')
       , payload.DriverFirstName, payload.DriverLastName
       , payload.DriverEmail, payload.DriverPhone
       , (payload.DrivingOnBehalfOfOrganization ? 'true' : 'false')
