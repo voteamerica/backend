@@ -143,14 +143,16 @@ function getUnmatchedDriversTest () {
 
 function cancelRideRequestTest() {
   var formData  = new FormData();
-  var url = remoteUrl + '/cancel-ride-request';
+  // var url = remoteUrl + '/cancel-ride-request';
+  var url = remoteUrl + '/cancel-ride-request?UUID=1e6e274d-ad33-4127-9f02-f35b48a07897&RiderPhone=123';
 
-  formData.append("UUID", "1e6e274d-ad33-4127-9f02-f35b48a07897");
-  formData.append("RiderPhone", '1');
+  // formData.append("UUID", "1e6e274d-ad33-4127-9f02-f35b48a07897");
+  // formData.append("RiderPhone", '1');
 
   var request = new XMLHttpRequest();
 
-  request.open("POST", url);
+  // request.open("POST", url);
+  request.open("GET", url);
   request.send(formData);
 }
 
