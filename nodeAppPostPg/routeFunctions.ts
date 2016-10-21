@@ -9,6 +9,7 @@ const HELPER_ROUTE                  = 'helper';
 const CANCEL_RIDE_REQUEST_ROUTE = 'cancel-ride-request';
 const CANCEL_RIDER_MATCH_ROUTE  = 'cancel-rider-match';
 const CANCEL_DRIVE_OFFER_ROUTE  = 'cancel-drive-offer';
+const CANCEL_DRIVER_MATCH_ROUTE = 'cancel-driver-match';
 
 const DELETE_DRIVER_ROUTE           = 'driver';
 const PUT_RIDER_ROUTE               = 'rider';
@@ -127,20 +128,26 @@ function getUnmatchedDrivers (req, reply) {
 var cancelRideRequest = createConfirmCancelFn 
   ('cancel ride request: ', "get payload: ", 
     dbQueries.dbCancelRideRequestFunctionString, 
-    getTwoCancelConfirmPayloadAsArray
+    getTwoRiderCancelConfirmPayloadAsArray
     // getCancelConfirmQueryAsArray
     );
 
 var cancelRiderMatch = createConfirmCancelFn 
   ('cancel rider match: ', "get payload: ", 
     dbQueries.dbCancelRiderMatchFunctionString, 
-    getThreeCancelConfirmPayloadAsArray
+    getThreeRiderCancelConfirmPayloadAsArray
   );
 
 var cancelDriveOffer = createConfirmCancelFn 
   ('cancel drive offer: ', "get payload: ", 
     dbQueries.dbCancelDriveOfferFunctionString, 
     getTwoDriverCancelConfirmPayloadAsArray
+  );
+
+var cancelDriverMatch = createConfirmCancelFn 
+  ('cancel driver match: ', "get payload: ", 
+    dbQueries.dbCancelDriverMatchFunctionString, 
+    getThreeDriverCancelConfirmPayloadAsArray
   );
 
 
@@ -237,7 +244,7 @@ function getDriverPayloadAsArray (req, payload) {
 }
 
 // for all two param Rider fns
-function getTwoCancelConfirmPayloadAsArray (req, payload) {
+function getTwoRiderCancelConfirmPayloadAsArray (req, payload) {
 
   if (req === undefined) {
     console.log("getCancelConfirmPayloadAsArray: no req");
@@ -285,7 +292,7 @@ function getTwoDriverCancelConfirmPayloadAsArray (req, payload) {
 }
 
 // for all three param Rider fns
-function getThreeCancelConfirmPayloadAsArray (req, payload) {
+function getThreeRiderCancelConfirmPayloadAsArray (req, payload) {
 
   if (req === undefined) {
     console.log("getCancelConfirmPayloadAsArray: no req");
@@ -295,8 +302,12 @@ function getThreeCancelConfirmPayloadAsArray (req, payload) {
     console.log("getCancelConfirmPayloadAsArray: no payload");
   }
 
-  if (payload.UUID === undefined) {
-    console.log("getCancelConfirmPayloadAsArray: no payload UUID");
+  if (payload.UUID_driver === undefined) {
+    console.log("getCancelConfirmPayloadAsArray: no payload driver UUID");
+  }
+
+  if (payload.UUID_rider === undefined) {
+    console.log("getCancelConfirmPayloadAsArray: no payload rider UUID");
   }
 
   if (payload.RiderPhone === undefined) {
@@ -305,6 +316,34 @@ function getThreeCancelConfirmPayloadAsArray (req, payload) {
 
   return [      
         payload.UUID_driver, payload.UUID_rider, payload.RiderPhone
+    ]
+}
+
+// for all three param Driver fns
+function getThreeDriverCancelConfirmPayloadAsArray (req, payload) {
+
+  if (req === undefined) {
+    console.log("getCancelConfirmPayloadAsArray: no req");
+  }
+
+  if (payload === undefined) {
+    console.log("getCancelConfirmPayloadAsArray: no payload");
+  }
+
+  if (payload.UUID_driver === undefined) {
+    console.log("getCancelConfirmPayloadAsArray: no payload driver UUID");
+  }
+
+  if (payload.UUID_rider === undefined) {
+    console.log("getCancelConfirmPayloadAsArray: no payload rider UUID");
+  }
+
+  if (payload.DriverPhone === undefined) {
+    console.log("getCancelConfirmPayloadAsArray: no payload DriverPhone");
+  }
+
+  return [      
+        payload.UUID_driver, payload.UUID_rider, payload.DriverPhone
     ]
 }
 
@@ -354,9 +393,10 @@ module.exports = {
   postHelper: postHelper,
   getUnmatchedDrivers: getUnmatchedDrivers,
 
-  cancelRideRequest: cancelRideRequest,
-  cancelRiderMatch: cancelRiderMatch,
-  cancelDriveOffer: cancelDriveOffer,
+  cancelRideRequest:  cancelRideRequest,
+  cancelRiderMatch:   cancelRiderMatch,
+  cancelDriveOffer:   cancelDriveOffer,
+  cancelDriverMatch:  cancelDriverMatch,
 
   cancelRideOffer: cancelRideOffer,
   rejectRide: rejectRide,
@@ -366,9 +406,10 @@ module.exports = {
   RIDER_ROUTE: RIDER_ROUTE,
   HELPER_ROUTE: HELPER_ROUTE,
 
-  CANCEL_RIDE_REQUEST_ROUTE: CANCEL_RIDE_REQUEST_ROUTE,
-  CANCEL_RIDER_MATCH_ROUTE: CANCEL_RIDER_MATCH_ROUTE,
-  CANCEL_DRIVE_OFFER_ROUTE: CANCEL_DRIVE_OFFER_ROUTE,
+  CANCEL_RIDE_REQUEST_ROUTE:  CANCEL_RIDE_REQUEST_ROUTE,
+  CANCEL_RIDER_MATCH_ROUTE:   CANCEL_RIDER_MATCH_ROUTE,
+  CANCEL_DRIVE_OFFER_ROUTE:   CANCEL_DRIVE_OFFER_ROUTE,
+  CANCEL_DRIVER_MATCH_ROUTE:  CANCEL_DRIVER_MATCH_ROUTE,
 
   DELETE_DRIVER_ROUTE: DELETE_DRIVER_ROUTE,
   PUT_RIDER_ROUTE: PUT_RIDER_ROUTE,
