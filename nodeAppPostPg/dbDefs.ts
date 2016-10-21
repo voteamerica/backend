@@ -9,7 +9,7 @@ const MATCH_TABLE   = 'match';
 const UNMATCHED_DRIVERS_VIEW    = 'vw_unmatched_riders';
 
 const CANCEL_RIDE_REQUEST_FUNCTION  = 'rider_cancel_ride_request($1, $2)';
-const CANCEL_RIDER_MATCH_FUNCTION   = 'rider_cancel_confirmed_match($1, $2, $3)';
+const CANCEL_RIDER_MATCH_FUNCTION   = 'rider_cancel_confirmed_match($1, $2, $3, $4)';
 const CANCEL_DRIVE_OFFER_FUNCTION   = 'driver_cancel_drive_offer($1, $2)';
 const CANCEL_DRIVER_MATCH_FUNCTION  = 'driver_cancel_confirmed_match($1, $2, $3)';
 
