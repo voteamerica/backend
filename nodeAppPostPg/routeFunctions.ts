@@ -11,6 +11,8 @@ const CANCEL_RIDER_MATCH_ROUTE  = 'cancel-rider-match';
 const CANCEL_DRIVE_OFFER_ROUTE  = 'cancel-drive-offer';
 const CANCEL_DRIVER_MATCH_ROUTE = 'cancel-driver-match';
 
+const ACCEPT_DRIVER_MATCH_ROUTE = 'accept-driver-match';
+
 const DELETE_DRIVER_ROUTE           = 'driver';
 const PUT_RIDER_ROUTE               = 'rider';
 const PUT_DRIVER_ROUTE              = 'driver';
@@ -147,6 +149,12 @@ var cancelDriveOffer = createConfirmCancelFn
 var cancelDriverMatch = createConfirmCancelFn 
   ('cancel driver match: ', "get payload: ", 
     dbQueries.dbCancelDriverMatchFunctionString, 
+    getThreeDriverCancelConfirmPayloadAsArray
+  );
+
+var acceptDriverMatch = createConfirmCancelFn 
+  ('accept driver match: ', "get payload: ", 
+    dbQueries.dbAcceptDriverMatchFunctionString, 
     getThreeDriverCancelConfirmPayloadAsArray
   );
 
@@ -398,6 +406,8 @@ module.exports = {
   cancelDriveOffer:   cancelDriveOffer,
   cancelDriverMatch:  cancelDriverMatch,
 
+  acceptDriverMatch:  acceptDriverMatch,
+
   cancelRideOffer: cancelRideOffer,
   rejectRide: rejectRide,
   confirmRide: confirmRide,
@@ -410,6 +420,8 @@ module.exports = {
   CANCEL_RIDER_MATCH_ROUTE:   CANCEL_RIDER_MATCH_ROUTE,
   CANCEL_DRIVE_OFFER_ROUTE:   CANCEL_DRIVE_OFFER_ROUTE,
   CANCEL_DRIVER_MATCH_ROUTE:  CANCEL_DRIVER_MATCH_ROUTE,
+
+  ACCEPT_DRIVER_MATCH_ROUTE:  ACCEPT_DRIVER_MATCH_ROUTE,
 
   DELETE_DRIVER_ROUTE: DELETE_DRIVER_ROUTE,
   PUT_RIDER_ROUTE: PUT_RIDER_ROUTE,

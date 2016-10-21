@@ -6,6 +6,8 @@ module.exports = {
   dbCancelDriveOfferFunctionString:   dbCancelDriveOfferFunctionString,
   dbCancelDriverMatchFunctionString:  dbCancelDriverMatchFunctionString,
 
+  dbAcceptDriverMatchFunctionString:  dbAcceptDriverMatchFunctionString,
+
   dbGetMatchRiderQueryString:   dbGetMatchRiderQueryString,
   dbGetMatchDriverQueryString:  dbGetMatchDriverQueryString,
   dbGetMatchesQueryString:      dbGetMatchesQueryString,
@@ -46,6 +48,10 @@ function dbCancelDriveOfferFunctionString() {
 
 function dbCancelDriverMatchFunctionString() {
   return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.CANCEL_DRIVER_MATCH_FUNCTION);
+}
+
+function dbAcceptDriverMatchFunctionString() {
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.ACCEPT_DRIVER_MATCH_FUNCTION);
 }
 
 

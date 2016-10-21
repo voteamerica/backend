@@ -143,6 +143,12 @@ server.route({
   handler: routeFns.cancelDriverMatch
 });
 
+server.route({
+  method: 'GET',
+  path: '/' + routeFns.ACCEPT_DRIVER_MATCH_ROUTE,
+  handler: routeFns.acceptDriverMatch
+});
+
 
 server.route({
   method: 'DELETE',
