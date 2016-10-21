@@ -7,6 +7,7 @@ const DRIVER_ROUTE            = 'driver';
 const RIDER_ROUTE             = 'rider';
 const HELPER_ROUTE                  = 'helper';
 const CANCEL_RIDE_REQUEST_ROUTE = 'cancel-ride-request';
+const CANCEL_RIDER_MATCH_ROUTE  = 'cancel-rider-match';
 const DELETE_DRIVER_ROUTE           = 'driver';
 const PUT_RIDER_ROUTE               = 'rider';
 const PUT_DRIVER_ROUTE              = 'driver';
@@ -211,10 +212,15 @@ function getUnmatchedDrivers (req, reply) {
 var cancelRideRequest = createConfirmCancelFn 
   ('cancel ride request: ', "get payload: ", 
     dbQueries.dbCancelRideRequestFunctionString, 
-    // getCancelConfirmPayloadAsArray
-    getCancelConfirmQueryAsArray
+    getTwoCancelConfirmPayloadAsArray
+    // getCancelConfirmQueryAsArray
     );
 
+var cancelRiderMatch = createConfirmCancelFn 
+  ('cancel rider match: ', "get payload: ", 
+    dbQueries.dbCancelRiderMatchFunctionString, 
+    getThreeCancelConfirmPayloadAsArray
+  );
  
   // ('cancel ride request: ', "get payload: ", 
   //   dbQueries.dbCancelRideRequestFunctionString, getCancelConfirmPayloadAsArray);
@@ -366,7 +372,7 @@ function getDriverPayloadAsArray (req, payload) {
 }
 
 // for all two param Rider fns
-function getCancelConfirmPayloadAsArray (req, payload) {
+function getTwoCancelConfirmPayloadAsArray (req, payload) {
 
   if (req === undefined) {
     console.log("getCancelConfirmPayloadAsArray: no req");
@@ -390,7 +396,31 @@ function getCancelConfirmPayloadAsArray (req, payload) {
 }
 
 // for all two param Rider fns
-function getCancelConfirmQueryAsArray (req, payload) {
+// function getCancelConfirmQueryAsArray (req, payload) {
+
+//   if (req === undefined) {
+//     console.log("getCancelConfirmPayloadAsArray: no req");
+//   }
+
+//   if (payload === undefined) {
+//     console.log("getCancelConfirmPayloadAsArray: no payload");
+//   }
+
+//   if (payload.UUID === undefined) {
+//     console.log("getCancelConfirmPayloadAsArray: no payload UUID");
+//   }
+
+//   if (payload.RiderPhone === undefined) {
+//     console.log("getCancelConfirmPayloadAsArray: no payload RiderPhone");
+//   }
+
+//   return [      
+//         payload.UUID, payload.RiderPhone
+//     ]
+// }
+
+// for all two param Rider fns
+function getThreeCancelConfirmPayloadAsArray (req, payload) {
 
   if (req === undefined) {
     console.log("getCancelConfirmPayloadAsArray: no req");
@@ -409,7 +439,7 @@ function getCancelConfirmQueryAsArray (req, payload) {
   }
 
   return [      
-        payload.UUID, payload.RiderPhone
+        payload.UUID_driver, payload.UUID_rider, payload.RiderPhone
     ]
 }
 
@@ -459,6 +489,7 @@ module.exports = {
   postHelper: postHelper,
   getUnmatchedDrivers: getUnmatchedDrivers,
   cancelRideRequest: cancelRideRequest,
+  cancelRiderMatch: cancelRiderMatch,
   cancelRideOffer: cancelRideOffer,
   rejectRide: rejectRide,
   confirmRide: confirmRide,
@@ -467,6 +498,7 @@ module.exports = {
   RIDER_ROUTE: RIDER_ROUTE,
   HELPER_ROUTE: HELPER_ROUTE,
   CANCEL_RIDE_REQUEST_ROUTE: CANCEL_RIDE_REQUEST_ROUTE,
+  CANCEL_RIDER_MATCH_ROUTE: CANCEL_RIDER_MATCH_ROUTE,
   DELETE_DRIVER_ROUTE: DELETE_DRIVER_ROUTE,
   PUT_RIDER_ROUTE: PUT_RIDER_ROUTE,
   PUT_DRIVER_ROUTE: PUT_DRIVER_ROUTE,

@@ -1,6 +1,7 @@
 module.exports = {
   dbRejectRideFunctionString:   dbRejectRideFunctionString,
-  dbCancelRideRequestFunctionString:   dbCancelRideRequestFunctionString,
+  dbCancelRideRequestFunctionString:  dbCancelRideRequestFunctionString,
+  dbCancelRiderMatchFunctionString:   dbCancelRiderMatchFunctionString,
   dbGetMatchRiderQueryString:   dbGetMatchRiderQueryString,
   dbGetMatchDriverQueryString:  dbGetMatchDriverQueryString,
   dbGetMatchesQueryString:      dbGetMatchesQueryString,
@@ -27,16 +28,20 @@ function dbGetInsertClause (tableName) {
 }
 
 // exec fns
+function dbCancelRideRequestFunctionString() {
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.CANCEL_RIDE_REQUEST_FUNCTION);
+}
+
+function dbCancelRiderMatchFunctionString() {
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.CANCEL_RIDER_MATCH_FUNCTION);
+}
+
 function dbRejectRideFunctionString() {
   return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.REJECT_RIDE_FUNCTION);
 }
 
 function dbConfirmRideFunctionString() {
   return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.CONFIRM_RIDE_FUNCTION);
-}
-
-function dbCancelRideRequestFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.CANCEL_RIDE_REQUEST_FUNCTION);
 }
 
 function dbCancelRideOfferFunctionString() {
