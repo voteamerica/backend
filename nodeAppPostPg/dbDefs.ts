@@ -8,13 +8,14 @@ const MATCH_TABLE   = 'match';
 
 const UNMATCHED_DRIVERS_VIEW    = 'vw_unmatched_riders';
 
-const CANCEL_RIDE_REQUEST_FUNCTION  = 'cancel_ride_request($1, $2)';
+const CANCEL_RIDE_REQUEST_FUNCTION  = 'rider_cancel_ride_request($1, $2)';
 const CANCEL_RIDER_MATCH_FUNCTION   = 'rider_cancel_confirmed_match($1, $2, $3)';
-const CANCEL_DRIVE_OFFER_FUNCTION   = 'cancel_drive_offer($1, $2)';
+const CANCEL_DRIVE_OFFER_FUNCTION   = 'driver_cancel_drive_offer($1, $2)';
 const CANCEL_DRIVER_MATCH_FUNCTION  = 'driver_cancel_confirmed_match($1, $2, $3)';
 
-const ACCEPT_DRIVER_MATCH_FUNCTION  = 'confirm_match($1, $2, $3)';
+const ACCEPT_DRIVER_MATCH_FUNCTION  = 'driver_confirm_match($1, $2, $3)';
 
+// designed for an earlier db design
 const CANCEL_RIDE_OFFER_FUNCTION  = 'cancel_drive_offer($1, $2)';
 const REJECT_RIDE_FUNCTION        = 'reject_ride($1, $2)';
 const CONFIRM_RIDE_FUNCTION       = 'confirm_ride($1, $2)';
