@@ -119,9 +119,10 @@ server.route({
 });
 
 server.route({
-  method: 'DELETE',
-  path: '/' + routeFns.DELETE_RIDER_ROUTE,
-  handler: routeFns.cancelRider
+  method: 'GET',
+  // method: 'POST',
+  path: '/' + routeFns.CANCEL_RIDE_REQUEST_ROUTE,
+  handler: routeFns.cancelRideRequest
 });
 
 server.route({
@@ -161,7 +162,7 @@ server.register({
 
       console.log("driver ins: " + dbQueries.dbGetInsertDriverString());
       console.log("rider ins: " + dbQueries.dbGetInsertRiderString());
-      console.log("cancel ride fn: " + dbQueries.dbCancelRideFunctionString());
+      console.log("cancel ride fn: " + dbQueries.dbCancelRideRequestFunctionString());
       console.log("reject ride fn: " + dbQueries.dbRejectRideFunctionString());
       console.log("ops interval:" + logOptions.ops.interval);
     });

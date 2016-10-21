@@ -1,6 +1,6 @@
 module.exports = {
   dbRejectRideFunctionString:   dbRejectRideFunctionString,
-  dbCancelRideFunctionString:   dbCancelRideFunctionString,
+  dbCancelRideRequestFunctionString:   dbCancelRideRequestFunctionString,
   dbGetMatchRiderQueryString:   dbGetMatchRiderQueryString,
   dbGetMatchDriverQueryString:  dbGetMatchDriverQueryString,
   dbGetMatchesQueryString:      dbGetMatchesQueryString,
@@ -35,8 +35,8 @@ function dbConfirmRideFunctionString() {
   return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.CONFIRM_RIDE_FUNCTION);
 }
 
-function dbCancelRideFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.CANCEL_RIDE_FUNCTION);
+function dbCancelRideRequestFunctionString() {
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.CANCEL_RIDE_REQUEST_FUNCTION);
 }
 
 function dbCancelRideOfferFunctionString() {
