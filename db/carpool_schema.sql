@@ -1282,14 +1282,13 @@ CREATE TABLE websubmission_driver (
     "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL,
     "IPAddress" character varying(20),
     "DriverCollectionZIP" character varying(5) NOT NULL,
-    "DriverCollectionRadius" integer NOT NULL,
+    "DriverCollectionRadius" integer DEFAULT 0 NOT NULL,
     "AvailableDriveTimesJSON" character varying(2000),
     "DriverCanLoadRiderWithWheelchair" boolean DEFAULT false NOT NULL,
     "SeatCount" integer DEFAULT 1,
     "DriverLicenseNumber" character varying(50),
     "DriverFirstName" character varying(255) NOT NULL,
     "DriverLastName" character varying(255) NOT NULL,
-    "PermissionCanRunBackgroundCheck" boolean DEFAULT false NOT NULL,
     "DriverEmail" character varying(255),
     "DriverPhone" character varying(20),
     "DrivingOnBehalfOfOrganization" boolean DEFAULT false NOT NULL,
@@ -1302,7 +1301,8 @@ CREATE TABLE websubmission_driver (
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     state_info text,
-    "DriverPreferredContactMethod" character varying(50)
+    "DriverPreferredContact" character varying(50),
+    "DriverWillTakeCare" boolean DEFAULT false NOT NULL
 );
 
 
@@ -1341,24 +1341,24 @@ CREATE TABLE websubmission_rider (
     "RiderLastName" character varying(255) NOT NULL,
     "RiderEmail" character varying(255),
     "RiderPhone" character varying(20),
-    "RiderVotingState" character(2),
     "RiderCollectionZIP" character varying(5) NOT NULL,
     "RiderDropOffZIP" character varying(5) NOT NULL,
     "AvailableRideTimesJSON" character varying(2000),
-    "TotalPartySize" integer,
+    "TotalPartySize" integer DEFAULT 1 NOT NULL,
     "TwoWayTripNeeded" boolean DEFAULT false NOT NULL,
     "RiderIsVulnerable" boolean DEFAULT false NOT NULL,
     "RiderWillNotTalkPolitics" boolean DEFAULT false NOT NULL,
     "PleaseStayInTouch" boolean DEFAULT false NOT NULL,
     "NeedWheelchair" boolean DEFAULT false NOT NULL,
-    "RiderPreferredContactMethod" character varying(50),
+    "RiderPreferredContact" character varying(50),
     "RiderAccommodationNotes" character varying(1000),
-    "RiderLegalConsent" boolean,
-    "ReadyToMatch" boolean,
+    "RiderLegalConsent" boolean DEFAULT false NOT NULL,
+    "ReadyToMatch" boolean DEFAULT false NOT NULL,
     state character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    state_info text
+    state_info text,
+    "RiderWillBeSafe" boolean DEFAULT false NOT NULL
 );
 
 
@@ -1607,7 +1607,7 @@ CREATE RULE "_RETURN" AS
     zip_codes.latlong
    FROM websubmission_rider rider,
     nov2016.zip_codes zip_codes
-  WHERE (((rider.state)::text = ANY ((ARRAY['Pending'::character varying, 'MatchProposed'::character varying])::text[])) AND ((rider."RiderCollectionZIP")::text = (zip_codes.zip)::text))
+  WHERE (((rider.state)::text = ANY (ARRAY[('Pending'::character varying)::text, ('MatchProposed'::character varying)::text])) AND ((rider."RiderCollectionZIP")::text = (zip_codes.zip)::text))
   GROUP BY zip_codes.zip;
 
 

@@ -30,7 +30,6 @@ POST /driver
  DriverLicenseNumber              | character varying(50)       |                                               | DriverLicenceNumber (notice the different spelling)
  DriverFirstName                  | character varying(255)      | not null                                      | DriverFirstName
  DriverLastName                   | character varying(255)      | not null                                      | DriverLastName
- PermissionCanRunBackgroundCheck  | boolean                     | not null default false                        | --- to be removed from websubmission_driver ?---
  DriverEmail                      | character varying(255)      |                                               | DriverEmail
  DriverPhone                      | character varying(20)       |                                               | DriverPhone
  DrivingOnBehalfOfOrganization    | boolean                     | not null default false                        | DrivingOnBehalfOfOrganization
@@ -39,7 +38,8 @@ POST /driver
  DriverWillNotTalkPolitics        | boolean                     | not null default false                        | DriverWillNotTalkPolitics
  ReadyToMatch                     | boolean                     | not null default false                        | --- to be removed from websubmission_driver ?---
  PleaseStayInTouch                | boolean                     | not null default false                        | PleaseStayInTouch
- DriverPreferredContactMethod     | character varying(50)       |                                               | 
+ DriverPreferredContact           | character varying(50)       |                                               | DriverPreferredContact  [Email|SMS|Phone]
+ DriverWillTakeCare               | boolean                     | not null default false                        | DriverWillTakeCare
 
 
 POST /rider
@@ -52,13 +52,12 @@ POST /rider
  RiderLastName               | character varying(255)      | not null                                      | RiderLastName
  RiderEmail                  | character varying(255)      |                                               | RiderEmail
  RiderPhone                  | character varying(20)       |                                               | RiderPhone
- RiderVotingState            | character(2)                | not null                                      | --- to be removed from websubmission_rider ?---
  RiderCollectionZIP          | character varying(5)        | not null                                      | RiderCollectionZIP
  RiderDropOffZIP             | character varying(5)        | not null                                      | RiderDropOffZIP
  AvailableRideTimesJSON      | character varying(2000)     |                                               | AvailableRideTimesJSON
  TotalPartySize              | integer                     |                                               | TotalPartySize
  TwoWayTripNeeded            | boolean                     | not null default false                        | TwoWayTripNeeded
- RiderPreferredContactMethod | character varying(20)       |                                               | RiderPreferredContactMethod [Email|SMS|Phone]
+ RiderPreferredContact       | character varying(50)       |                                               | RiderPreferredContact [Email|SMS|Phone]
  RiderIsVulnerable           | boolean                     | not null default false                        | RiderIsVulnerable
  RiderWillNotTalkPolitics    | boolean                     | not null default false                        | RiderWillNotTalkPolitics
  RiderLegalConsent           | boolean                     | not null default false                        | RiderLegalConsent
@@ -66,6 +65,7 @@ POST /rider
  ReadyToMatch                | boolean                     | not null default false                        | --- to be removed from websubmission_rider ?---
  NeedWheelchair              | boolean                     | not null default false                        | NeedWheelchair
  RiderAccommodationNotes     | character varying(1000)     |                                               | RiderAccommodationNotes
+ RiderWillBeSafe             | boolean                     | not null default false                        | RiderWillBeSafe
 
 
 POST /helper

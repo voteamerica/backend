@@ -70,21 +70,22 @@ function dbGetInsertDriverString() {
         + ', "DriverFirstName", "DriverLastName"'
         + ', "DriverEmail", "DriverPhone"'
         + ', "DrivingOnBehalfOfOrganization", "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics"'
-        + ', "PleaseStayInTouch", "DriverLicenseNumber" '
+        + ', "PleaseStayInTouch", "DriverLicenseNumber", "DriverPreferredContact" '
+        + ', "DriverWillTakeCare" '
         + ')'
         + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '
-        + '        $13, $14, $15, $16 )'
+        + '        $13, $14, $15, $16, $17, $18 )'
         + ' returning "UUID" ';
 }
 function dbGetInsertRiderString() {
     return dbGetInsertClause(dbDefs.RIDER_TABLE)
         + ' ('
         + '  "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail"'
-        + ', "RiderPhone", "RiderVotingState"'
+        + ', "RiderPhone" '
         + ', "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesJSON"'
-        + ', "TotalPartySize", "TwoWayTripNeeded", "RiderPreferredContactMethod", "RiderIsVulnerable" '
+        + ', "TotalPartySize", "TwoWayTripNeeded", "RiderPreferredContact", "RiderIsVulnerable" '
         + ', "RiderWillNotTalkPolitics", "PleaseStayInTouch", "NeedWheelchair", "RiderAccommodationNotes"'
-        + ', "RiderLegalConsent"'
+        + ', "RiderLegalConsent", "RiderWillBeSafe"'
         + ')'
         + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '
         + '        $13, $14, $15, $16, $17, $18 )'
