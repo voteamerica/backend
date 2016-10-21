@@ -157,7 +157,6 @@ function cancelRideRequestTest() {
 
 function cancelRiderMatchTest() {
   var formData  = new FormData();
-  // var url = remoteUrl + '/cancel-ride-request';
   var url = 
     remoteUrl + '/cancel-rider-match?' + 
     'UUID_driver=1e6e274d-ad33-4127-9f02-f35b48a07897' +
@@ -167,6 +166,22 @@ function cancelRiderMatchTest() {
 
   // formData.append("UUID", "1e6e274d-ad33-4127-9f02-f35b48a07897");
   // formData.append("RiderPhone", '1');
+
+  // request.open("POST", url);
+  request.open("GET", url);
+  request.send(formData);
+}
+
+function cancelDriveOfferTest() {
+  var formData  = new FormData();
+  var url = 
+    remoteUrl + '/cancel-drive-offer?' + 
+    'UUID=1e6e274d-ad33-4127-9f02-f35b48a07897' +
+    '&DriverPhone=123';
+  var request = new XMLHttpRequest();
+
+  // formData.append("UUID", "1e6e274d-ad33-4127-9f02-f35b48a07897");
+  // formData.append("DriverPhone", '1');
 
   // request.open("POST", url);
   request.open("GET", url);

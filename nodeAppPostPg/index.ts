@@ -132,6 +132,13 @@ server.route({
 });
 
 server.route({
+  method: 'GET',
+  path: '/' + routeFns.CANCEL_DRIVE_OFFER_ROUTE,
+  handler: routeFns.cancelDriveOffer
+});
+
+
+server.route({
   method: 'DELETE',
   path: '/' + routeFns.DELETE_DRIVER_ROUTE,
   handler: routeFns.cancelRideOffer

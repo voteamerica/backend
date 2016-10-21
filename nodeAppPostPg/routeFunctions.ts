@@ -8,6 +8,8 @@ const RIDER_ROUTE             = 'rider';
 const HELPER_ROUTE                  = 'helper';
 const CANCEL_RIDE_REQUEST_ROUTE = 'cancel-ride-request';
 const CANCEL_RIDER_MATCH_ROUTE  = 'cancel-rider-match';
+const CANCEL_DRIVE_OFFER_ROUTE  = 'cancel-drive-offer';
+
 const DELETE_DRIVER_ROUTE           = 'driver';
 const PUT_RIDER_ROUTE               = 'rider';
 const PUT_DRIVER_ROUTE              = 'driver';
@@ -49,63 +51,6 @@ var postDriver =
   (DRIVER_ROUTE, 
     dbQueries.dbGetInsertDriverString, 
     getDriverPayloadAsArray, logPostDriver);
-
-// function cancelRideRequest (req, reply) {
-//       var payload = req.payload;
-//       var results = getExecResultStrings('cancel ride request: ');
-
-
-//         if (req === undefined) {
-//     console.log("cancelRideRequest: no req");
-//   }
-//   else {
-//     // console.log("cancelRideRequest req: ", req);    
-//   }
-
-//   if (payload === undefined) {
-//     console.log("cancelRideRequest: no payload");
-//   }
-//   else {
-//     console.log("cancelRideRequest payload: ", payload);    
-//   }
-
-//   if (payload.UUID === undefined) {
-//     console.log("cancelRideRequest: no payload UUID");
-//   }
-
-//   if (payload.RiderPhone === undefined) {
-//     console.log("cancelRideRequest: no payload RiderPhone");
-//   }
-
-
-
-//       console.log("cancelRideRequest-payload xx: ", payload);
-
-//       req.log();
-
-//       console.log('cancel ride request: ' + JSON.stringify(payload, null, 4));
-
-//       postgresQueries.dbExecuteFunction
-//         (payload, rfPool, dbQueries.dbCancelRideRequestFunctionString, getCancelConfirmPayloadAsArray, req, reply, results);
-// }
-
-// function postDriver (req, reply) {
-//     var payload = req.payload;
-//     var results = getInsertResultStrings(DRIVER_ROUTE);
-
-//     console.log("driver radius1 : " + payload.DriverCollectionRadius);
-//     sanitiseDriver(payload);
-//     console.log("driver radius2 : " + payload.DriverCollectionRadius);
-
-//     console.log("driver payload: " + JSON.stringify(payload, null, 4));
-//     console.log("driver zip: " + payload.DriverCollectionZIP);
-
-//     req.log();
-
-//     postgresQueries.dbInsertData(payload, rfPool, dbQueries.dbGetInsertDriverString, 
-//                   getDriverPayloadAsArray,
-//                   req, reply, results);
-// }
 
 function logPost (req) {
   req.log();
@@ -153,24 +98,6 @@ var postRider =
     dbQueries.dbGetInsertRiderString, 
     getRiderPayloadAsArray, logPostRider);
 
-// function postRiderx (req, reply) {
-//     var payload = req.payload;
-//     var results = getInsertResultStrings(RIDER_ROUTE);
-
-//     console.log("rider state1 : " + payload.RiderVotingState);
-//     sanitiseRider(payload);
-//     console.log("rider state2 : " + payload.RiderVotingState);
-
-//     req.log();
-
-//     console.log("rider payload: " + JSON.stringify(payload, null, 4));
-//     console.log("rider zip: " + payload.RiderCollectionZIP);
-
-//     postgresQueries.dbInsertData(payload, rfPool, dbQueries.dbGetInsertRiderString, 
-//                   getRiderPayloadAsArray,
-//                   req, reply, results);
-// }
-
 function logPostHelper (req) {
   var payload = req.payload;
 
@@ -185,19 +112,6 @@ var postHelper =
     dbQueries.dbGetInsertHelperString, 
     getHelperPayloadAsArray, logPostHelper);
 
-// function postHelper (req, reply) {
-//     var payload = req.payload;
-//     var results = getInsertResultStrings(HELPER_ROUTE);
-
-//     req.log();
-
-//     console.log("helper payload: " + JSON.stringify(payload, null, 4));
-
-//     postgresQueries.dbInsertData(payload, rfPool, dbQueries.dbGetInsertHelperString, 
-//                   getHelperPayloadAsArray,
-//                   req, reply, results);
-// }
-
 function getUnmatchedDrivers (req, reply) {
   var results = {
     success: 'GET unmatched drivers: ',
@@ -208,6 +122,7 @@ function getUnmatchedDrivers (req, reply) {
 
   postgresQueries.dbGetUnmatchedDrivers(rfPool, dbQueries.dbGetUnmatchedDriversQueryString, reply, results);
 }
+
 
 var cancelRideRequest = createConfirmCancelFn 
   ('cancel ride request: ', "get payload: ", 
@@ -221,72 +136,22 @@ var cancelRiderMatch = createConfirmCancelFn
     dbQueries.dbCancelRiderMatchFunctionString, 
     getThreeCancelConfirmPayloadAsArray
   );
- 
-  // ('cancel ride request: ', "get payload: ", 
-  //   dbQueries.dbCancelRideRequestFunctionString, getCancelConfirmPayloadAsArray);
 
+var cancelDriveOffer = createConfirmCancelFn 
+  ('cancel drive offer: ', "get payload: ", 
+    dbQueries.dbCancelDriveOfferFunctionString, 
+    getTwoDriverCancelConfirmPayloadAsArray
+  );
 
-
-// function cancelRider (req, reply) {
-//     var payload = req.payload;
-//     var results = getExecResultStrings('cancel ride: ');
-
-//     req.log();
-
-//     console.log("delete payload: " + JSON.stringify(payload, null, 4));
-
-//     postgresQueries.dbExecuteFunction(payload, pool, dbQueries.dbCancelRideFunctionString, 
-//                       getCancelRidePayloadAsArray,
-//                       req, reply, results);
-// }
 
 var cancelRideOffer = createConfirmCancelFn 
   ('cancel ride offer: ', "delete payload: ", dbQueries.dbCancelRideOfferFunctionString, getCancelRideOfferPayloadAsArray);
-
-// function cancelRideOffer (req, reply) {
-//     var payload = req.payload;
-//     var results = getExecResultStrings('cancel ride offer: ');
-
-//     req.log();
-
-//     console.log("delete payload: " + JSON.stringify(payload, null, 4));
-
-//     postgresQueries.dbExecuteFunction(payload, pool, dbQueries.dbCancelRideOfferFunctionString, 
-//                       getCancelRideOfferPayloadAsArray,
-//                       req, reply, results);
-// }
 
 var rejectRide = createConfirmCancelFn 
   ('reject ride: ', "reject payload: ", dbQueries.dbRejectRideFunctionString, getRejectRidePayloadAsArray);
 
 var confirmRide = createConfirmCancelFn 
   ('confirm ride: ', "confirm payload: ", dbQueries.dbConfirmRideFunctionString, 'getConfirmRidePayloadAsArray');
-
-// function rejectRide (req, reply) {
-//     var payload = req.payload;
-//     var results = getExecResultStrings('reject ride: ');
-
-//     req.log();
-
-//     console.log("reject payload: " + JSON.stringify(payload, null, 4));
-
-//     postgresQueries.dbExecuteFunction(payload, pool, dbQueries.dbRejectRideFunctionString, 
-//                       getRejectRidePayloadAsArray,
-//                       req, reply, results);
-// }
-
-// function confirmRide (req, reply) {
-//     var payload = req.payload;
-//     var results = getExecResultStrings('confirm ride: ');
-
-//     req.log();
-
-//     console.log("confirm payload: " + JSON.stringify(payload, null, 4));
-
-//     postgresQueries.dbExecuteFunction(payload, pool, dbQueries.dbConfirmRideFunctionString, 
-//                       getConfirmRidePayloadAsArray,
-//                       req, reply, results);
-// }
 
 function createConfirmCancelFn 
   (resultStringText: string, consoleText: string, dbQueryFn: any, payloadFn: any) {
@@ -395,31 +260,31 @@ function getTwoCancelConfirmPayloadAsArray (req, payload) {
     ]
 }
 
-// for all two param Rider fns
-// function getCancelConfirmQueryAsArray (req, payload) {
+// for all two param Driver fns
+function getTwoDriverCancelConfirmPayloadAsArray (req, payload) {
 
-//   if (req === undefined) {
-//     console.log("getCancelConfirmPayloadAsArray: no req");
-//   }
+  if (req === undefined) {
+    console.log("getCancelConfirmPayloadAsArray: no req");
+  }
 
-//   if (payload === undefined) {
-//     console.log("getCancelConfirmPayloadAsArray: no payload");
-//   }
+  if (payload === undefined) {
+    console.log("getCancelConfirmPayloadAsArray: no payload");
+  }
 
-//   if (payload.UUID === undefined) {
-//     console.log("getCancelConfirmPayloadAsArray: no payload UUID");
-//   }
+  if (payload.UUID === undefined) {
+    console.log("getCancelConfirmPayloadAsArray: no payload UUID");
+  }
 
-//   if (payload.RiderPhone === undefined) {
-//     console.log("getCancelConfirmPayloadAsArray: no payload RiderPhone");
-//   }
+  if (payload.DriverPhone === undefined) {
+    console.log("getCancelConfirmPayloadAsArray: no payload DriverPhone");
+  }
 
-//   return [      
-//         payload.UUID, payload.RiderPhone
-//     ]
-// }
+  return [      
+        payload.UUID, payload.DriverPhone
+    ]
+}
 
-// for all two param Rider fns
+// for all three param Rider fns
 function getThreeCancelConfirmPayloadAsArray (req, payload) {
 
   if (req === undefined) {
@@ -488,8 +353,11 @@ module.exports = {
   postRider: postRider,
   postHelper: postHelper,
   getUnmatchedDrivers: getUnmatchedDrivers,
+
   cancelRideRequest: cancelRideRequest,
   cancelRiderMatch: cancelRiderMatch,
+  cancelDriveOffer: cancelDriveOffer,
+
   cancelRideOffer: cancelRideOffer,
   rejectRide: rejectRide,
   confirmRide: confirmRide,
@@ -497,8 +365,11 @@ module.exports = {
   DRIVER_ROUTE: DRIVER_ROUTE,
   RIDER_ROUTE: RIDER_ROUTE,
   HELPER_ROUTE: HELPER_ROUTE,
+
   CANCEL_RIDE_REQUEST_ROUTE: CANCEL_RIDE_REQUEST_ROUTE,
   CANCEL_RIDER_MATCH_ROUTE: CANCEL_RIDER_MATCH_ROUTE,
+  CANCEL_DRIVE_OFFER_ROUTE: CANCEL_DRIVE_OFFER_ROUTE,
+
   DELETE_DRIVER_ROUTE: DELETE_DRIVER_ROUTE,
   PUT_RIDER_ROUTE: PUT_RIDER_ROUTE,
   PUT_DRIVER_ROUTE: PUT_DRIVER_ROUTE,
