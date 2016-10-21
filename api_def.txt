@@ -1,9 +1,83 @@
 --- /v2.0
 
-/riders?state=[Pending|Proposed|
-Returns JSON-formatted data with UUID of riders in Pending state, along with 
+-- actions by rider
+--nov2016.rider_cancel_ride_request(UUID, phone number or lastname ?)
+--nov2016.rider_cancel_confirmed_match(UUID_driver, UUID_rider, score, rider’s phone number or rider’s lastname ?)
+
+-- actions by driver
+--nov2016.driver_cancel_drive_offer(UUID, phone number or lastname ?)
+--nov2016.driver_cancel_confirmed_match(UUID_driver, UUID_rider, driverr’s phone number or driver’s lastname ?)
+--nov2016.driver_confirm_match(UUID_driver, UUID_rider, score, driver’s phone number or driver’s lastname ?)
+
+-- functions return character varying with explanatory text of error condition. Empty string if success
 
 
+INTERNAL PORT : 3010
+
+POST /driver
+
+
+                                                           Table "stage.websubmission_driver"
+              Column              |            Type             |                   Modifiers                   |          USER FORM FIELD
+----------------------------------+-----------------------------+-----------------------------------------------+-------------------------------------
+ TimeStamp                        | timestamp without time zone | not null default timezone('utc'::text, now()) | [populated by collect app] 
+ IPAddress                        | character varying(20)       |                                               | [populated by collect app]
+ DriverCollectionZIP              | character varying(5)        | not null                                      | DriverCollectionZIP
+ DriverCollectionRadius           | integer                     | not null                                      | DriverCollectionRadius
+ AvailableDriveTimesJSON          | character varying(2000)     |                                               | AvailableDriveTimesJSON
+ DriverCanLoadRiderWithWheelchair | boolean                     | not null default false                        | DriverCanLoadRiderWithWheelchair
+ SeatCount                        | integer                     | default 1                                     | SeatCount
+ DriverLicenseNumber              | character varying(50)       |                                               | DriverLicenceNumber (notice the different spelling)
+ DriverFirstName                  | character varying(255)      | not null                                      | DriverFirstName
+ DriverLastName                   | character varying(255)      | not null                                      | DriverLastName
+ PermissionCanRunBackgroundCheck  | boolean                     | not null default false                        | --- to be removed from websubmission_driver ?---
+ DriverEmail                      | character varying(255)      |                                               | DriverEmail
+ DriverPhone                      | character varying(20)       |                                               | DriverPhone
+ DrivingOnBehalfOfOrganization    | boolean                     | not null default false                        | DrivingOnBehalfOfOrganization
+ DrivingOBOOrganizationName       | character varying(255)      |                                               | DrivingOBOOrganizationName
+ RidersCanSeeDriverDetails        | boolean                     | not null default false                        | RidersCanSeeDriverDetails
+ DriverWillNotTalkPolitics        | boolean                     | not null default false                        | DriverWillNotTalkPolitics
+ ReadyToMatch                     | boolean                     | not null default false                        | --- to be removed from websubmission_driver ?---
+ PleaseStayInTouch                | boolean                     | not null default false                        | PleaseStayInTouch
+ DriverPreferredContactMethod     | character varying(50)       |                                               | 
+
+
+POST /rider
+                                                        Table "stage.websubmission_rider"
+           Column            |            Type             |                   Modifiers                   |          USER FORM FIELD 
+-----------------------------+-----------------------------+-----------------------------------------------+-------------------------------------
+ CreatedTimeStamp            | timestamp without time zone | not null default timezone('utc'::text, now()) | [populated by collect app]
+ IPAddress                   | character varying(20)       |                                               | [populated by collect app]
+ RiderFirstName              | character varying(255)      | not null                                      | RiderFirstName
+ RiderLastName               | character varying(255)      | not null                                      | RiderLastName
+ RiderEmail                  | character varying(255)      |                                               | RiderEmail
+ RiderPhone                  | character varying(20)       |                                               | RiderPhone
+ RiderVotingState            | character(2)                | not null                                      | --- to be removed from websubmission_rider ?---
+ RiderCollectionZIP          | character varying(5)        | not null                                      | RiderCollectionZIP
+ RiderDropOffZIP             | character varying(5)        | not null                                      | RiderDropOffZIP
+ AvailableRideTimesJSON      | character varying(2000)     |                                               | AvailableRideTimesJSON
+ TotalPartySize              | integer                     |                                               | TotalPartySize
+ TwoWayTripNeeded            | boolean                     | not null default false                        | TwoWayTripNeeded
+ RiderPreferredContactMethod | character varying(20)       |                                               | RiderPreferredContactMethod [Email|SMS|Phone]
+ RiderIsVulnerable           | boolean                     | not null default false                        | RiderIsVulnerable
+ RiderWillNotTalkPolitics    | boolean                     | not null default false                        | RiderWillNotTalkPolitics
+ RiderLegalConsent           | boolean                     | not null default false                        | RiderLegalConsent
+ PleaseStayInTouch           | boolean                     | not null default false                        | PleaseStayInTouch
+ ReadyToMatch                | boolean                     | not null default false                        | --- to be removed from websubmission_rider ?---
+ NeedWheelchair              | boolean                     | not null default false                        | NeedWheelchair
+ RiderAccommodationNotes     | character varying(1000)     |                                               | RiderAccommodationNotes
+
+
+POST /helper
+
+                                           Table "stage.websubmission_helper"
+      Column      |            Type             |           Modifiers            |          USER FORM FIELD  
+------------------+-----------------------------+--------------------------------+-------------------------------------
+ timestamp        | timestamp without time zone | not null                       | [populated by collect app]
+ helpername       | character varying(100)      | not null                       | Name
+ helperemail      | character varying(250)      | not null                       | Email
+ helpercapability | character varying(50)[]     |                                | Capability
+ sweep_status_id  | integer                     | not null default '-1'::integer | 
 
 
 
