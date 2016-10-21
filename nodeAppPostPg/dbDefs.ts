@@ -8,10 +8,19 @@ const MATCH_TABLE   = 'match';
 
 const UNMATCHED_DRIVERS_VIEW    = 'vw_unmatched_riders';
 
-var CANCEL_RIDE_FUNCTION        = 'cancel_ride($1, $2)';
-var CANCEL_RIDE_OFFER_FUNCTION  = 'cancel_ride_offer($1, $2)';
-var REJECT_RIDE_FUNCTION        = 'reject_ride($1, $2)';
-var CONFIRM_RIDE_FUNCTION       = 'confirm_ride($1, $2)';
+const CANCEL_RIDE_REQUEST_FUNCTION  = 'rider_cancel_ride_request($1, $2)';
+const CANCEL_RIDER_MATCH_FUNCTION   = 'rider_cancel_confirmed_match($1, $2, $3, $4)';
+const CANCEL_DRIVE_OFFER_FUNCTION   = 'driver_cancel_drive_offer($1, $2)';
+const CANCEL_DRIVER_MATCH_FUNCTION  = 'driver_cancel_confirmed_match($1, $2, $3, $4)';
+
+const ACCEPT_DRIVER_MATCH_FUNCTION  = 'driver_confirm_match($1, $2, $3, $4)';
+
+// designed for an earlier db design
+const CANCEL_RIDE_OFFER_FUNCTION  = 'cancel_drive_offer($1, $2)';
+const REJECT_RIDE_FUNCTION        = 'reject_ride($1, $2)';
+const CONFIRM_RIDE_FUNCTION       = 'confirm_ride($1, $2)';
+
+
 
 // for db carpool
 module.exports = {
@@ -25,7 +34,13 @@ module.exports = {
   HELPER_TABLE: HELPER_TABLE,
   MATCH_TABLE:  MATCH_TABLE,
 
-  CANCEL_RIDE_FUNCTION: CANCEL_RIDE_FUNCTION,
+  CANCEL_RIDE_REQUEST_FUNCTION: CANCEL_RIDE_REQUEST_FUNCTION,
+  CANCEL_RIDER_MATCH_FUNCTION:  CANCEL_RIDER_MATCH_FUNCTION,
+  CANCEL_DRIVE_OFFER_FUNCTION:  CANCEL_DRIVE_OFFER_FUNCTION,
+  CANCEL_DRIVER_MATCH_FUNCTION: CANCEL_DRIVER_MATCH_FUNCTION,
+
+  ACCEPT_DRIVER_MATCH_FUNCTION: ACCEPT_DRIVER_MATCH_FUNCTION,
+
   CANCEL_RIDE_OFFER_FUNCTION: CANCEL_RIDE_OFFER_FUNCTION,
   REJECT_RIDE_FUNCTION: REJECT_RIDE_FUNCTION,
   CONFIRM_RIDE_FUNCTION: CONFIRM_RIDE_FUNCTION

@@ -176,12 +176,16 @@ function dbExecuteFunction(payload, pool, fnExecuteFunctionString, fnPayloadArra
 
     if (result !== undefined && result.rows !== undefined) {
         // result.rows.forEach( val => console.log(val));
-        result.rows.forEach(function (val) { return console.log("exec fn: " + JSON.stringify(val)); });
+        result.rows.forEach(function (val) { 
+          return console.log("exec fn: " + JSON.stringify(val)); 
+        });
+
         firstRowAsString = JSON.stringify(result.rows[0]);
     }
     console.error("executed fn: " + firstRowAsString);
 
-    reply(results.success + firstRowAsString);
+    reply(//results.success + 
+            firstRowAsString);
   })
   .catch(function (e) {
     var message = e.message || '';
