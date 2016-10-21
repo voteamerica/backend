@@ -1,6 +1,5 @@
 'use strict';
 var Hapi = require('hapi');
-var moment = require('moment');
 var Pool = require('pg').Pool;
 var Good = require('good');
 var GoodFile = require('good-file');
@@ -33,26 +32,27 @@ server.connection({
 server.route({
     method: 'GET',
     path: '/',
-    handler: function (req, reply) {
-        var results = {
-            success: 'GET carpool: ',
-            failure: 'GET error: '
-        };
-        req.log();
-        postgresQueries.dbGetData(pool, dbQueries.dbGetQueryString, reply, results);
-    }
+    handler: routeFns.getAnon
+});
+server.route({
+    method: 'POST',
+    path: '/' + routeFns.DRIVER_ROUTE,
+    handler: routeFns.postDriver
+});
+server.route({
+    method: 'POST',
+    path: '/' + routeFns.RIDER_ROUTE,
+    handler: routeFns.postRider
+});
+server.route({
+    method: 'POST',
+    path: '/' + routeFns.HELPER_ROUTE,
+    handler: routeFns.postHelper
 });
 server.route({
     method: 'GET',
     path: '/' + routeFns.UNMATCHED_DRIVERS_ROUTE,
-    handler: function (req, reply) {
-        var results = {
-            success: 'GET unmatched drivers: ',
-            failure: 'GET unmatched drivers error: '
-        };
-        req.log();
-        postgresQueries.dbGetUnmatchedDrivers(pool, dbQueries.dbGetUnmatchedDriversQueryString, reply, results);
-    }
+    handler: routeFns.getUnmatchedDrivers
 });
 server.route({
     method: 'GET',
@@ -91,24 +91,30 @@ server.route({
     }
 });
 server.route({
-    method: 'POST',
-    path: '/' + routeFns.DRIVER_ROUTE,
-    handler: routeFns.postDriver
+    method: 'GET',
+    // method: 'POST',
+    path: '/' + routeFns.CANCEL_RIDE_REQUEST_ROUTE,
+    handler: routeFns.cancelRideRequest
 });
 server.route({
-    method: 'POST',
-    path: '/' + routeFns.RIDER_ROUTE,
-    handler: routeFns.postRider
+    method: 'GET',
+    path: '/' + routeFns.CANCEL_RIDER_MATCH_ROUTE,
+    handler: routeFns.cancelRiderMatch
 });
 server.route({
-    method: 'POST',
-    path: '/' + routeFns.HELPER_ROUTE,
-    handler: routeFns.postHelper
+    method: 'GET',
+    path: '/' + routeFns.CANCEL_DRIVE_OFFER_ROUTE,
+    handler: routeFns.cancelDriveOffer
 });
 server.route({
-    method: 'DELETE',
-    path: '/' + routeFns.DELETE_RIDER_ROUTE,
-    handler: routeFns.cancelRider
+    method: 'GET',
+    path: '/' + routeFns.CANCEL_DRIVER_MATCH_ROUTE,
+    handler: routeFns.cancelDriverMatch
+});
+server.route({
+    method: 'GET',
+    path: '/' + routeFns.ACCEPT_DRIVER_MATCH_ROUTE,
+    handler: routeFns.acceptDriverMatch
 });
 server.route({
     method: 'DELETE',
@@ -139,7 +145,7 @@ server.register({
         console.log("Server running at: " + server.info.uri + " \n");
         console.log("driver ins: " + dbQueries.dbGetInsertDriverString());
         console.log("rider ins: " + dbQueries.dbGetInsertRiderString());
-        console.log("cancel ride fn: " + dbQueries.dbCancelRideFunctionString());
+        console.log("cancel ride fn: " + dbQueries.dbCancelRideRequestFunctionString());
         console.log("reject ride fn: " + dbQueries.dbRejectRideFunctionString());
         console.log("ops interval:" + logOptions.ops.interval);
     });

@@ -149,7 +149,8 @@ var cancelDriveOffer = createConfirmCancelFn
 var cancelDriverMatch = createConfirmCancelFn 
   ('cancel driver match: ', "get payload: ", 
     dbQueries.dbCancelDriverMatchFunctionString, 
-    getThreeDriverCancelConfirmPayloadAsArray
+    // getThreeDriverCancelConfirmPayloadAsArray
+    getFourDriverCancelConfirmPayloadAsArray
   );
 
 var acceptDriverMatch = createConfirmCancelFn 
@@ -239,7 +240,7 @@ function getDriverPayloadAsArray (req, payload) {
         req.info.remoteAddress, payload.DriverCollectionZIP, payload.DriverCollectionRadius, payload.AvailableDriveTimesJSON
       , (payload.DriverCanLoadRiderWithWheelchair ? 'true'  : 'false')
       , payload.SeatCount
-      , (payload.DriverHasInsurance ? 'true' : 'false')
+      // , (payload.DriverHasInsurance ? 'true' : 'false')
       , payload.DriverFirstName, payload.DriverLastName
       , payload.DriverEmail, payload.DriverPhone
       , (payload.DrivingOnBehalfOfOrganization ? 'true' : 'false')
