@@ -161,6 +161,7 @@ function cancelRiderMatchTest() {
     remoteUrl + '/cancel-rider-match?' + 
     'UUID_driver=1e6e274d-ad33-4127-9f02-f35b48a07897' +
     '&UUID_rider=1e6e274d-ad33-4127-9f02-f35b48a07897' +
+    '&Score=123' +
     '&RiderPhone=123';
   var request = new XMLHttpRequest();
 
@@ -211,6 +212,7 @@ function acceptDriverMatchTest() {
     remoteUrl + '/accept-driver-match?' + 
     'UUID_driver=1e6e274d-ad33-4127-9f02-f35b48a07897' +
     '&UUID_rider=1e6e274d-ad33-4127-9f02-f35b48a07897' +
+    '&Score=123' +
     '&DriverPhone=123';
   var request = new XMLHttpRequest();
 
