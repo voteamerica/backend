@@ -9,6 +9,7 @@
         "ETL",
         "nginx",
         "nodeAppPostPg",
+        "typings",
         "nodeAppPostPg/node_modules",
         "smsHandler/node_modules",
         "smsHandler/typings",

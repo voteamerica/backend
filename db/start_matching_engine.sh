@@ -11,5 +11,6 @@ while true
 do
 date  >> matching_engine_$1.log
 psql -h /tmp $1 < matching_engine.sql 2>&1 >> matching_engine_$1.log
+python3.5 emailSender.py $1 >> emailSender_$1.log
 sleep 30
 done
