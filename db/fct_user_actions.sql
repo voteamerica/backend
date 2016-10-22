@@ -182,10 +182,20 @@ BEGIN
 			WHERE "UUID" = match_row.uuid_driver;	
 		
 			v_step := 'S3';
-			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-			VALUES (drive_offer_row."DriverEmail", 
-			'Cancellation Notice', 
-			'Confirmed match was canceled by rider: ' || match_row.uuid_driver || ', ' || match_row.uuid_rider);
+			IF drive_offer_row."DriverEmail" IS NOT NULL
+			THEN
+				INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+				VALUES (drive_offer_row."DriverEmail", 
+				'Cancellation Notice', 
+				'Confirmed match was canceled by rider: ' || match_row.uuid_driver || ', ' || match_row.uuid_rider);
+			END IF;
+			
+			IF drive_offer_row."DriverPhone" IS NOT NULL
+			THEN
+				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				VALUES (drive_offer_row."DriverPhone", 
+				'Confirmed Ride was canceled by rider: ' || match_row.uuid_driver || ', ' || match_row.uuid_rider);
+			END IF;
 
 			v_step := 'S4';
 			UPDATE nov2016.match
@@ -213,6 +223,28 @@ BEGIN
 		UPDATE stage.websubmission_rider
 		SET state='Canceled'
 		WHERE "UUID" = a_UUID;
+		
+		
+		-- Send cancellation notice to rider
+		v_step := 'S8';
+		SELECT * INTO ride_request_row
+		FROM stage.websubmission_rider
+		WHERE "UUID" = a_UUID;	
+
+		IF ride_request_row."RiderEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (ride_request_row."RiderEmail", 
+			'Cancellation Notice', 
+			'Ride Request was canceled by rider: ' || a_UUID);
+		END IF;
+			
+		IF ride_request_row."RiderPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (ride_request_row."RiderPhone", 
+			'Ride Request was canceled by rider: ' || a_UUID);
+		END IF;
 		
 		return '';
     
@@ -283,10 +315,21 @@ BEGIN
 		WHERE "UUID" = a_UUID_driver;	
 		
 		v_step := 'S2';
-		INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-		VALUES (drive_offer_row."DriverEmail", 
-		'Cancellation Notice', 
-		'Confirmed match was canceled by rider: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		IF drive_offer_row."DriverEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (drive_offer_row."DriverEmail", 
+			'Cancellation Notice', 
+			'Confirmed Ride was canceled by rider: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
+		IF drive_offer_row."DriverPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (drive_offer_row."DriverPhone", 
+			'Confirmed Ride was canceled by rider: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+
 
 		v_step := 'S3';
 		v_return_text := nov2016.update_drive_offer_state(a_UUID_driver);
@@ -303,6 +346,29 @@ BEGIN
 			v_step := v_step || ' ' || v_return_text;
 			RAISE EXCEPTION '%', v_return_text;
 		END IF;
+
+
+		-- Send cancellation notice to rider
+		v_step := 'S8';
+		SELECT * INTO ride_request_row
+		FROM stage.websubmission_rider
+		WHERE "UUID" = a_UUID_rider;	
+
+		IF ride_request_row."RiderEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (ride_request_row."RiderEmail", 
+			'Cancellation Notice', 
+			'Confirmed Ride was canceled by rider: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+			
+		IF ride_request_row."RiderPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (ride_request_row."RiderPhone", 
+			'Confirmed Ride was canceled by rider: '  || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
 		
 		return '';
 	
@@ -367,10 +433,21 @@ BEGIN
 			WHERE "UUID" = match_row.uuid_rider;	
 		
 			v_step := 'S3';
-			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-			VALUES (ride_request_row."DriverEmail", 
-			'Cancellation Notice', 
-			'Confirmed match was canceled by rider: ' || match_row.uuid_rider || ', ' || match_row.uuid_driver);
+			IF ride_request_row."RiderEmail" IS NOT NULL
+			THEN
+				INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+				VALUES (ride_request_row."RiderEmail", 
+				'Cancellation Notice', 
+				'Confirmed Ride was canceled by driver: ' || match_row.uuid_rider || ', ' || match_row.uuid_driver);
+			END IF;
+			
+			IF ride_request_row."RiderPhone" IS NOT NULL
+			THEN
+				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				VALUES (ride_request_row."RiderPhone", 
+				'Confirmed Ride was canceled by driver: ' || match_row.uuid_rider || ', ' || match_row.uuid_driver);
+			END IF;
+			
 
 			v_step := 'S4';
 			UPDATE nov2016.match
@@ -398,6 +475,28 @@ BEGIN
 		UPDATE stage.websubmission_driver
 		SET state='Canceled'
 		WHERE "UUID" = a_UUID;
+
+		-- Send cancellation notice to driver
+		v_step := 'S8';
+		SELECT * INTO drive_offer_row
+		FROM stage.websubmission_driver
+		WHERE "UUID" = a_UUID;	
+
+		IF drive_offer_row."DriverEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (drive_offer_row."DriverEmail", 
+			'Cancellation Notice', 
+			'Drive Offer was canceled by driver: ' || a_UUID);
+		END IF;
+			
+		IF drive_offer_row."DriverPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (drive_offer_row."DriverPhone", 
+			'Drive Offer was canceled by driver: ' || a_UUID);
+		END IF;
+		
 		
 		return '';
     	
@@ -464,11 +563,22 @@ BEGIN
 		WHERE "UUID" = a_UUID_rider;	
 		
 		v_step := 'S2';
-		INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-		VALUES (ride_request_row."RiderEmail", 
-		'Cancellation Notice', 
-		'Confirmed match was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
-
+		-- send cancellation notice to rider
+		IF ride_request_row."RiderEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (ride_request_row."RiderEmail", 
+			'Cancellation Notice', 
+			'Confirmed Ride was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
+		IF ride_request_row."RiderPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (ride_request_row."RiderPhone", 
+			'Confirmed Ride was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
 		v_step := 'S3';
 		v_return_text := nov2016.update_drive_offer_state(a_UUID_driver);
 		IF  v_return_text != ''
@@ -483,6 +593,28 @@ BEGIN
 		THEN
 			v_step := v_step || ' ' || v_return_text;
 			RAISE EXCEPTION '%', v_return_text;
+		END IF;
+		
+		
+		v_step := 'S5';
+		-- send cancellation notice to driver
+		SELECT * INTO drive_offer_row
+		FROM stage.websubmission_driver
+		WHERE "UUID" = a_UUID_driver;	
+
+		IF drive_offer_row."DriverEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (drive_offer_row."DriverEmail", 
+			'Cancellation Notice', 
+			'Confirmed Ride was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
+		IF drive_offer_row."DriverPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (drive_offer_row."DriverPhone", 
+			'Confirmed Ride was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
 		END IF;
 		
 		return '';
@@ -552,10 +684,20 @@ BEGIN
 		WHERE "UUID" = a_UUID_rider;	
 		
 		v_step := 'S2';
-		INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-		VALUES (ride_request_row."RiderEmail", 
-		'Confirmation Notice', 
-		'Match was confirmed by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		IF ride_request_row."RiderEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (ride_request_row."RiderEmail", 
+			'Confirmation Notice', 
+			'Ride was confirmed by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
+		IF ride_request_row."RiderPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (ride_request_row."RiderPhone", 
+			'Ride was confirmed by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
 
 		v_step := 'S3, ' || a_UUID_driver;
 		v_return_text := nov2016.update_drive_offer_state(a_UUID_driver);
@@ -573,6 +715,31 @@ BEGIN
 			v_step := v_step || ' ' || v_return_text;
 			RAISE NOTICE '%', v_return_text;
 			RAISE EXCEPTION '%', v_return_text;
+		END IF;
+		
+		
+		
+		v_step := 'S5.1';
+		
+		-- send confirmation notice to driver
+		SELECT * INTO drive_offer_row
+		FROM stage.websubmission_driver
+		WHERE "UUID" = a_UUID_driver;	
+		
+		IF drive_offer_row."DriverEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (drive_offer_row."DriverEmail", 
+			'Confirmation Notice', 
+			'Ride was confirmed by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
+		v_step := 'S5.2';
+		IF drive_offer_row."DriverPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (drive_offer_row."DriverPhone", 
+			'Ride was confirmed by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
 		END IF;
 		
 		return '';
