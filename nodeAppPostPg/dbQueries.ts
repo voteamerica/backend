@@ -100,7 +100,7 @@ function dbGetInsertDriverString() {
     + ')'
 
     + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, ' 
-    + '        $13, $14, $15, $16, $17, $18, $19  )' 
+    + '        $13, $14, $15, $16, $17, $18, $19 )' 
     + ' returning "UUID" ' 
 }
 
@@ -108,11 +108,11 @@ function dbGetInsertRiderString() {
   return dbGetInsertClause(dbDefs.RIDER_TABLE)
     + ' ('     
     + '  "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail"'       
-    + ', "RiderPhone", "RiderVotingState"'
-    + ', "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesUTC", "AvailableRideTimesLocal" '
+    + ', "RiderPhone" '
+    + ', "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesUTC", "AvailableRideTimesLocal"'
     + ', "TotalPartySize", "TwoWayTripNeeded", "RiderPreferredContact", "RiderIsVulnerable" '
     + ', "RiderWillNotTalkPolitics", "PleaseStayInTouch", "NeedWheelchair", "RiderAccommodationNotes"'
-    + ', "RiderLegalConsent", "RiderWillBeSafe" '
+    + ', "RiderLegalConsent", "RiderWillBeSafe"'
     + ')'
     + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, ' 
     + '        $13, $14, $15, $16, $17, $18, $19 )'
