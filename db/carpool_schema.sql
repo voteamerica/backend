@@ -1375,7 +1375,7 @@ CREATE VIEW vw_drive_offer AS
     websubmission_driver."DriverCanLoadRiderWithWheelchair",
     websubmission_driver."SeatCount",
     websubmission_driver."DrivingOnBehalfOfOrganization",
-    websubmission_driver."AvailableDriveTimesUTC" ,
+    websubmission_driver."AvailableDriveTimesUTC",
     websubmission_driver."AvailableDriveTimesLocal"
    FROM websubmission_driver;
 
@@ -1439,6 +1439,28 @@ CREATE VIEW vw_ride_request AS
 
 
 ALTER TABLE vw_ride_request OWNER TO carpool_admins;
+
+--
+-- Name: vw_unmatched_drivers; Type: TABLE; Schema: stage; Owner: carpool_admins
+--
+
+CREATE TABLE vw_unmatched_drivers (
+    count bigint,
+    zip character varying(5),
+    state character(2),
+    latitude character varying(10),
+    longitude character varying(10),
+    city character varying(50),
+    full_state character varying(50),
+    latitude_numeric real,
+    longitude_numeric real,
+    latlong point
+);
+
+ALTER TABLE ONLY vw_unmatched_drivers REPLICA IDENTITY NOTHING;
+
+
+ALTER TABLE vw_unmatched_drivers OWNER TO carpool_admins;
 
 --
 -- Name: vw_unmatched_riders; Type: TABLE; Schema: stage; Owner: carpool_admins
@@ -1662,6 +1684,27 @@ CREATE RULE "_RETURN" AS
    FROM websubmission_rider rider,
     nov2016.zip_codes zip_codes
   WHERE (((rider.state)::text = ANY (ARRAY[('Pending'::character varying)::text, ('MatchProposed'::character varying)::text])) AND ((rider."RiderCollectionZIP")::text = (zip_codes.zip)::text))
+  GROUP BY zip_codes.zip;
+
+
+--
+-- Name: _RETURN; Type: RULE; Schema: stage; Owner: carpool_admins
+--
+
+CREATE RULE "_RETURN" AS
+    ON SELECT TO vw_unmatched_drivers DO INSTEAD  SELECT count(*) AS count,
+    zip_codes.zip,
+    zip_codes.state,
+    zip_codes.latitude,
+    zip_codes.longitude,
+    zip_codes.city,
+    zip_codes.full_state,
+    zip_codes.latitude_numeric,
+    zip_codes.longitude_numeric,
+    zip_codes.latlong
+   FROM websubmission_driver driver,
+    nov2016.zip_codes zip_codes
+  WHERE (((driver.state)::text = ANY (ARRAY[('Pending'::character varying)::text, ('MatchProposed'::character varying)::text])) AND ((driver."DriverCollectionZIP")::text = (zip_codes.zip)::text))
   GROUP BY zip_codes.zip;
 
 
@@ -2190,6 +2233,17 @@ REVOKE ALL ON TABLE vw_ride_request FROM PUBLIC;
 REVOKE ALL ON TABLE vw_ride_request FROM carpool_admins;
 GRANT ALL ON TABLE vw_ride_request TO carpool_admins;
 GRANT SELECT ON TABLE vw_ride_request TO carpool_role;
+
+
+--
+-- Name: vw_unmatched_drivers; Type: ACL; Schema: stage; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE vw_unmatched_drivers FROM PUBLIC;
+REVOKE ALL ON TABLE vw_unmatched_drivers FROM carpool_admins;
+GRANT ALL ON TABLE vw_unmatched_drivers TO carpool_admins;
+GRANT SELECT ON TABLE vw_unmatched_drivers TO carpool_web_role;
+GRANT SELECT ON TABLE vw_unmatched_drivers TO carpool_role;
 
 
 --

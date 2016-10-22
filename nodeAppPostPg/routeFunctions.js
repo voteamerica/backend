@@ -2,6 +2,7 @@
 var postgresQueries = require('./postgresQueries.js');
 var dbQueries = require('./dbQueries.js');
 var UNMATCHED_DRIVERS_ROUTE = 'unmatched-drivers';
+var UNMATCHED_RIDERS_ROUTE = 'unmatched-riders';
 var DRIVER_ROUTE = 'driver';
 var RIDER_ROUTE = 'rider';
 var HELPER_ROUTE = 'helper';
@@ -76,6 +77,15 @@ function getUnmatchedDrivers(req, reply) {
     };
     req.log();
     postgresQueries.dbGetUnmatchedDrivers(rfPool, dbQueries.dbGetUnmatchedDriversQueryString, reply, results);
+}
+
+function getUnmatchedRiders(req, reply) {
+    var results = {
+        success: 'GET unmatched riders: ',
+        failure: 'GET unmatched riders error: '
+    };
+    req.log();
+    postgresQueries.dbGetUnmatchedRiders(rfPool, dbQueries.dbGetUnmatchedRidersQueryString, reply, results);
 }
 var cancelRideRequest = createConfirmCancelFn('cancel ride request: ', "get payload: ", dbQueries.dbCancelRideRequestFunctionString, getTwoRiderCancelConfirmPayloadAsArray);
 var cancelRiderMatch = createConfirmCancelFn('cancel rider match: ', "get payload: ", dbQueries.dbCancelRiderMatchFunctionString, getFourRiderCancelConfirmPayloadAsArray);
@@ -328,6 +338,7 @@ module.exports = {
     postRider: postRider,
     postHelper: postHelper,
     getUnmatchedDrivers: getUnmatchedDrivers,
+    getUnmatchedRiders: getUnmatchedRiders,
     cancelRideRequest: cancelRideRequest,
     cancelRiderMatch: cancelRiderMatch,
     cancelDriveOffer: cancelDriveOffer,
@@ -337,6 +348,7 @@ module.exports = {
     rejectRide: rejectRide,
     confirmRide: confirmRide,
     UNMATCHED_DRIVERS_ROUTE: UNMATCHED_DRIVERS_ROUTE,
+    UNMATCHED_RIDERS_ROUTE: UNMATCHED_RIDERS_ROUTE,
     DRIVER_ROUTE: DRIVER_ROUTE,
     RIDER_ROUTE: RIDER_ROUTE,
     HELPER_ROUTE: HELPER_ROUTE,

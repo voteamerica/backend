@@ -10,6 +10,7 @@ module.exports = {
     dbGetMatchesQueryString: dbGetMatchesQueryString,
     dbGetQueryString: dbGetQueryString,
     dbGetUnmatchedDriversQueryString: dbGetUnmatchedDriversQueryString,
+    dbGetUnmatchedRidersQueryString: dbGetUnmatchedRidersQueryString,
     dbGetInsertClause: dbGetInsertClause,
     dbGetInsertDriverString: dbGetInsertDriverString,
     dbGetInsertRiderString: dbGetInsertRiderString,
@@ -59,6 +60,9 @@ function dbGetQueryString() {
 }
 function dbGetUnmatchedDriversQueryString() {
     return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.UNMATCHED_DRIVERS_VIEW);
+}
+function dbGetUnmatchedRidersQueryString() {
+    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.UNMATCHED_RIDERS_VIEW);
 }
 // inserts
 // , "DriverHasInsurance" , $17
