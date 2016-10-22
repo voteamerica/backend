@@ -9,7 +9,7 @@ fi
 
 id=$1
 
-PGDATABASE="carpool"
+PGDATABASE=${PGDATABASE:=carpool_v2.0_live}
 if [[ "X$2" != "X" ]]
 then
 PGDATABASE=$2

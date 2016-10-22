@@ -8,7 +8,7 @@ echo "Usage: $0 uuid_rider [dbname]"
 exit 1
 fi
 
-PGDATABASE="carpool"
+PGDATABASE=${PGDATABASE:=carpool_v2.0_live}
 if [[ "X$2" != "X" ]]
 then
 PGDATABASE=$2

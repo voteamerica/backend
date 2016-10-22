@@ -163,6 +163,25 @@ BEGIN
 					b_rider_validated := FALSE;
 				END IF;
 				
+				-- zip code verification
+				IF NOT EXISTS
+					(SELECT 1 FROM nov2016.zip_codes z where z.zip = ride_request_row."RiderCollectionZIP")
+				THEN
+					UPDATE stage.websubmission_rider 
+					SET state='Failed', state_info='Invalid/Not Found RiderCollectionZIP:' || ride_request_row."RiderCollectionZIP"
+					WHERE "UUID"=ride_request_row."UUID";
+					b_rider_validated := FALSE;
+				END IF;
+
+				IF NOT EXISTS 
+					(SELECT 1 FROM nov2016.zip_codes z where z.zip = ride_request_row."RiderDropOffZIP")
+				THEN
+					UPDATE stage.websubmission_rider 
+					SET state='Failed', state_info='Invalid/Not Found RiderDropOffZIP:' || ride_request_row."RiderDropOffZIP"
+					WHERE "UUID"=ride_request_row."UUID";
+					b_rider_validated := FALSE;
+				END IF;
+				
 			END LOOP;
 	
 			IF b_rider_validated
@@ -195,7 +214,15 @@ BEGIN
  					
  						b_driver_validated := FALSE;
  					END;
- 					
+
+					IF NOT EXISTS 
+						(SELECT 1 FROM nov2016.zip_codes z where z.zip = drive_offer_row."DriverCollectionZIP")
+					THEN
+						UPDATE stage.websubmission_driver 
+						SET state='Failed', state_info='Invalid/Not Found DriverCollectionZIP:' || drive_offer_row."DriverCollectionZIP"
+						WHERE "UUID"=drive_offer_row."UUID";
+						b_driver_validated := FALSE;
+					END IF; 					
  					
  					-- split AvailableDriveTimesUTC in individual time intervals
  					-- NOTE : we do not want actual JSON here...
@@ -267,6 +294,7 @@ BEGIN
 									zip_dropoff.latitude_numeric,
 									zip_dropoff.longitude_numeric);
 
+									
 						--RAISE NOTICE 'distance_origin_pickup=%', distance_origin_pickup;
 						--RAISE NOTICE 'distance_origin_dropoff=%', distance_origin_pickup;
 						
@@ -448,14 +476,14 @@ BEGIN
 					   || '?UUID_driver=' || g_record.uuid_driver
 					   || '&UUID_rider=' || g_record.uuid_rider
 					   || '&Score=' || g_record.score
-					   || '&DriverEmail=' || drive_offer_row."DriverEmail\n";
+					   || '&DriverEmail=' || drive_offer_row."DriverEmail" || '\n';
 				
-				g_sms_body := g_email_body 
+				g_sms_body := g_sms_body 
 				       || 'https://api.carpoolvote.com/v2.0/accept-driver-match'
 					   || '?UUID_driver=' || g_record.uuid_driver
 					   || '&UUID_rider=' || g_record.uuid_rider
 					   || '&Score=' || g_record.score
-					   || '&DriverPhone=' || drive_offer_row."DriverPhone\n";
+					   || '&DriverPhone=' || drive_offer_row."DriverPhone" || '\n';
 				
 			END LOOP;
 			
