@@ -86,9 +86,9 @@ function createPostFn
 function logPostRider (req) {
     var payload = req.payload;
 
-    // console.log("rider state1 : " + payload.RiderVotingState);
+    //console.log("rider state1 : " + payload.RiderVotingState);
     sanitiseRider(payload);
-    // console.log("rider state2 : " + payload.RiderVotingState);
+    //console.log("rider state2 : " + payload.RiderVotingState);
 
     req.log();
 
@@ -261,7 +261,6 @@ function getDriverPayloadAsArray (req, payload) {
       payload.AvailableDriveTimesJSON,   // this one should be in local time as passed along by the forms         
       (payload.DriverCanLoadRiderWithWheelchair ? 'true'  : 'false'),
       payload.SeatCount,
-      // , (payload.DriverHasInsurance ? 'true' : 'false')
       payload.DriverFirstName,
       payload.DriverLastName,
       payload.DriverEmail, 
@@ -271,7 +270,7 @@ function getDriverPayloadAsArray (req, payload) {
       , (payload.RidersCanSeeDriverDetails ? 'true' : 'false')
       , (payload.DriverWillNotTalkPolitics ? 'true' : 'false')
       , (payload.PleaseStayInTouch ? 'true' : 'false')
-      , payload.DriverLicenceNumberr,
+      , payload.DriverLicenceNumber,
         payload.DriverPreferredContact,
         (payload.DriverWillTakeCare ? 'true' : 'false')
     ]
