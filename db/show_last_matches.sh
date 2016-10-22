@@ -2,7 +2,7 @@
 
 # USAGE : $0 [dbname] [max-rows]
 
-PGDATABASE="carpool"
+PGDATABASE=${PGDATABASE:=carpool_v2.0_live}
 if [[ "X$1" != "X" ]]
 then
 PGDATABASE=$1
@@ -17,7 +17,7 @@ fi
 echo $PGDATABASE $LIMIT
 
 psql -h /tmp $PGDATABASE <<RPT
-select * from nov2016.match order by last_updated_ts desc, score desc $LIMIT
+select * from nov2016.match order by created_ts desc, score desc $LIMIT
 RPT
 
 
