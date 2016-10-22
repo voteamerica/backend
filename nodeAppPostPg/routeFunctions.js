@@ -127,7 +127,8 @@ function getRiderPayloadAsArray(req, payload) {
         payload.RiderPhone, 
         payload.RiderCollectionZIP, 
         payload.RiderDropOffZIP, 
-        payload.AvailableRideTimesJSON,
+        payload.AvailableRideTimesJSON, // this one the node app should convert to UTC using db function to convert (TODO)
+        payload.AvailableRideTimesJSON, // this one should be in local time as passed along by the forms
         payload.TotalPartySize,
         (payload.TwoWayTripNeeded ? 'true' : 'false'),
         payload.RiderPreferredContact,
@@ -145,7 +146,8 @@ function getDriverPayloadAsArray(req, payload) {
         req.info.remoteAddress, 
         payload.DriverCollectionZIP, 
         payload.DriverCollectionRadius, 
-        payload.AvailableDriveTimesJSON,
+        payload.AvailableDriveTimesJSON,   //  this one the node app should convert to UTC using db function to convert (TODO)
+        payload.AvailableDriveTimesJSON,   // this one should be in local time as passed along by the forms
         (payload.DriverCanLoadRiderWithWheelchair ? 'true' : 'false'),
         payload.SeatCount,
         payload.DriverFirstName,

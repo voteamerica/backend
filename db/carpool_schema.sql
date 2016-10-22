@@ -393,7 +393,7 @@ BEGIN
 					|| 'Email : ' || NEW."DriverEmail" || '\n'
 					|| 'Collection ZIP : ' || NEW."DriverCollectionZIP" || '\n'
 					|| 'Radius : ' || NEW."DriverCollectionRadius" || '\n'
-					|| 'Drive Times (UTC) : ' || NEW."AvailableDriveTimesJSON" || '\n';
+					|| 'Drive Times : ' || NEW."AvailableDriveTimesLocal" || '\n';
 
             INSERT INTO nov2016.outgoing_email (recipient, subject, body)                                             
             VALUES (NEW."DriverEmail", v_subject, v_body);                                                                 
@@ -411,7 +411,7 @@ BEGIN
 					|| 'Email : ' || COALESCE(NEW."DriverEmail", ' ') || '\n'
 					|| 'Collection ZIP : ' || NEW."DriverCollectionZIP" || '\n'
 					|| 'Radius : ' || NEW."DriverCollectionRadius" || '\n'
-					|| 'Drive Times (UTC) : ' || NEW."AvailableDriveTimesJSON" || '\n';
+					|| 'Drive Times  : ' || NEW."AvailableDriveTimesLocal" || '\n';
 
             INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
             VALUES (NEW."DriverPhone", v_body);                                                                 
@@ -436,7 +436,7 @@ BEGIN
 					|| 'Email : ' || NEW."RiderEmail" || '\n'
 					|| 'Collection ZIP : ' || NEW."RiderCollectionZIP" || '\n'
 					|| 'Drop Off ZIP : ' || NEW."RiderDropOffZIP" || '\n'
-					|| 'Ride Times (UTC) : ' || NEW."AvailableRideTimesJSON" || '\n';
+					|| 'Ride Times : ' || NEW."AvailableRideTimesLocal" || '\n';
 
             INSERT INTO nov2016.outgoing_email (recipient, subject, body)                                             
             VALUES (NEW."RiderEmail", v_subject, v_body);                                                                  
@@ -453,7 +453,7 @@ BEGIN
 					|| 'Email : ' || NEW."RiderEmail" || '\n'
 					|| 'Collection ZIP : ' || NEW."RiderCollectionZIP" || '\n'
 					|| 'Drop Off ZIP : ' || NEW."RiderDropOffZIP" || '\n'
-					|| 'Ride Times (UTC) : ' || NEW."AvailableRideTimesJSON" || '\n';
+					|| 'Ride Times : ' || NEW."AvailableRideTimesLocal" || '\n';
 				
             INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
             VALUES (NEW."RiderPhone", v_body);                                                                 
@@ -1333,7 +1333,7 @@ CREATE TABLE websubmission_driver (
     "IPAddress" character varying(20),
     "DriverCollectionZIP" character varying(5) NOT NULL,
     "DriverCollectionRadius" integer DEFAULT 0 NOT NULL,
-    "AvailableDriveTimesJSON" character varying(2000),
+    "AvailableDriveTimesUTC" character varying(2000),
     "DriverCanLoadRiderWithWheelchair" boolean DEFAULT false NOT NULL,
     "SeatCount" integer DEFAULT 1,
     "DriverLicenseNumber" character varying(50),
@@ -1352,7 +1352,8 @@ CREATE TABLE websubmission_driver (
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     state_info text,
     "DriverPreferredContact" character varying(50),
-    "DriverWillTakeCare" boolean DEFAULT false NOT NULL
+    "DriverWillTakeCare" boolean DEFAULT false NOT NULL,
+    "AvailableDriveTimesLocal" character varying(2000)
 );
 
 
@@ -1374,7 +1375,8 @@ CREATE VIEW vw_drive_offer AS
     websubmission_driver."DriverCanLoadRiderWithWheelchair",
     websubmission_driver."SeatCount",
     websubmission_driver."DrivingOnBehalfOfOrganization",
-    websubmission_driver."AvailableDriveTimesJSON"
+    websubmission_driver."AvailableDriveTimesUTC" ,
+    websubmission_driver."AvailableDriveTimesLocal"
    FROM websubmission_driver;
 
 
@@ -1393,7 +1395,7 @@ CREATE TABLE websubmission_rider (
     "RiderPhone" character varying(20),
     "RiderCollectionZIP" character varying(5) NOT NULL,
     "RiderDropOffZIP" character varying(5) NOT NULL,
-    "AvailableRideTimesJSON" character varying(2000),
+    "AvailableRideTimesUTC" character varying(2000),
     "TotalPartySize" integer DEFAULT 1 NOT NULL,
     "TwoWayTripNeeded" boolean DEFAULT false NOT NULL,
     "RiderIsVulnerable" boolean DEFAULT false NOT NULL,
@@ -1408,7 +1410,8 @@ CREATE TABLE websubmission_rider (
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     state_info text,
-    "RiderWillBeSafe" boolean DEFAULT false NOT NULL
+    "RiderWillBeSafe" boolean DEFAULT false NOT NULL,
+    "AvailableRideTimesLocal" character varying(2000)
 );
 
 
@@ -1430,7 +1433,8 @@ CREATE VIEW vw_ride_request AS
     websubmission_rider."TotalPartySize",
     websubmission_rider."RiderIsVulnerable",
     websubmission_rider."NeedWheelchair",
-    websubmission_rider."AvailableRideTimesJSON"
+    websubmission_rider."AvailableRideTimesUTC",
+    websubmission_rider."AvailableRideTimesLocal"
    FROM websubmission_rider;
 
 

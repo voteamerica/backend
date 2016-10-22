@@ -65,7 +65,7 @@ function dbGetUnmatchedDriversQueryString() {
 function dbGetInsertDriverString() {
     return dbGetInsertClause(dbDefs.DRIVER_TABLE)
         + ' ('
-        + '  "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", "AvailableDriveTimesJSON"'
+        + '  "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", "AvailableDriveTimesUTC", "AvailableDriveTimesLocal"'
         + ', "DriverCanLoadRiderWithWheelchair", "SeatCount" '
         + ', "DriverFirstName", "DriverLastName"'
         + ', "DriverEmail", "DriverPhone"'
@@ -74,7 +74,7 @@ function dbGetInsertDriverString() {
         + ', "DriverWillTakeCare" '
         + ')'
         + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '
-        + '        $13, $14, $15, $16, $17, $18 )'
+        + '        $13, $14, $15, $16, $17, $18, $19 )'
         + ' returning "UUID" ';
 }
 function dbGetInsertRiderString() {
@@ -82,13 +82,13 @@ function dbGetInsertRiderString() {
         + ' ('
         + '  "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail"'
         + ', "RiderPhone" '
-        + ', "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesJSON"'
+        + ', "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesUTC", "AvailableRideTimesLocal"'
         + ', "TotalPartySize", "TwoWayTripNeeded", "RiderPreferredContact", "RiderIsVulnerable" '
         + ', "RiderWillNotTalkPolitics", "PleaseStayInTouch", "NeedWheelchair", "RiderAccommodationNotes"'
         + ', "RiderLegalConsent", "RiderWillBeSafe"'
         + ')'
         + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '
-        + '        $13, $14, $15, $16, $17, $18 )'
+        + '        $13, $14, $15, $16, $17, $18, $19 )'
         + ' returning "UUID" ';
 }
 function dbGetInsertHelperString() {

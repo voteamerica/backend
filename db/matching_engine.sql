@@ -68,7 +68,7 @@ BEGIN
 			WHERE r.state in ('Pending','MatchProposed')
 		LOOP
 		
-			IF length(ride_request_row."AvailableRideTimesJSON") = 0
+			IF length(ride_request_row."AvailableRideTimesUTC") = 0
 			THEN
 				UPDATE stage.websubmission_rider 
 				SET state='Failed', state_info='Invalid AvailableRideTimes'
@@ -104,8 +104,8 @@ BEGIN
 			END IF;
 	
 	
-			-- split AvailableRideTimesJSON in individual time intervals
-			ride_times_rider := string_to_array(ride_request_row."AvailableRideTimesJSON", '|');
+			-- split AvailableRideTimesUTC in individual time intervals
+			ride_times_rider := string_to_array(ride_request_row."AvailableRideTimesUTC", '|');
 			b_rider_all_times_expired := TRUE;  -- Assumes all expired
 			FOREACH rider_time IN ARRAY ride_times_rider
 			LOOP
@@ -163,7 +163,7 @@ BEGIN
 
  				LOOP
  
- 					IF length(drive_offer_row."AvailableDriveTimesJSON") = 0
+ 					IF length(drive_offer_row."AvailableDriveTimesUTC") = 0
  					THEN
  						UPDATE stage.websubmission_driver 
  						SET state='Failed', state_info='Invalid AvailableDriveTimes'
@@ -184,11 +184,11 @@ BEGIN
  					END;
  					
  					
- 					-- split AvailableDriveTimesJSON in individual time intervals
+ 					-- split AvailableDriveTimesUTC in individual time intervals
  					-- NOTE : we do not want actual JSON here...
  					-- FORMAT should be like this 
  					-- 2016-10-01T08:00:00-0500/2016-10-01T10:00:00-0500|2016-10-01T10:00:00-0500/2016-10-01T22:00:00-0500|2016-10-01T22:00:00-0500/2016-10-01T23:00:00-0500
- 					ride_times_driver := string_to_array(drive_offer_row."AvailableDriveTimesJSON", '|');
+ 					ride_times_driver := string_to_array(drive_offer_row."AvailableDriveTimesUTC", '|');
 					b_driver_all_times_expired := TRUE;
  					FOREACH driver_time IN ARRAY ride_times_driver
 					LOOP
