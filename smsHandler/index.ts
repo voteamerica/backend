@@ -147,10 +147,14 @@ function dbGetData(pool, executeFunctionArray) {
 }
 
 function formatMessage (msg) {
-  return '[This is a test] ' +
-    ' Driver: ' + msg +
-    '. Go to: http://carpoolvote.com ' +
-    'for more details.';
+  return msg
+    // '[This is a test] ' +
+    // ' Driver: ' + 
+    // msg
+    //  +
+    // '. Go to: http://carpoolvote.com ' +
+    // 'for more details.'
+    ;
 };
 
 function makeCalls (message: SMSMessage) {
