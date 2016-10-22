@@ -17,7 +17,7 @@ fi
 echo $PGDATABASE 
 
 psql -h /tmp $PGDATABASE <<RPT
-select * from nov2016.match where uuid_rider='$1';
+select * from nov2016.match where uuid_rider='$1' order by score desc;
 RPT
 
 

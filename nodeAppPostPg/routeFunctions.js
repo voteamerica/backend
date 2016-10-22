@@ -2,6 +2,7 @@
 var postgresQueries = require('./postgresQueries.js');
 var dbQueries = require('./dbQueries.js');
 var UNMATCHED_DRIVERS_ROUTE = 'unmatched-drivers';
+var UNMATCHED_RIDERS_ROUTE = 'unmatched-riders';
 var DRIVER_ROUTE = 'driver';
 var RIDER_ROUTE = 'rider';
 var HELPER_ROUTE = 'helper';
@@ -55,9 +56,9 @@ function createPostFn(resultStringText, dbQueryFn, payloadFn, logFn) {
 }
 function logPostRider(req) {
     var payload = req.payload;
-    console.log("rider state1 : " + payload.RiderVotingState);
+    //console.log("rider state1 : " + payload.RiderVotingState);
     sanitiseRider(payload);
-    console.log("rider state2 : " + payload.RiderVotingState);
+    //console.log("rider state2 : " + payload.RiderVotingState);
     req.log();
     console.log("rider payload: " + JSON.stringify(payload, null, 4));
     console.log("rider zip: " + payload.RiderCollectionZIP);
@@ -76,6 +77,15 @@ function getUnmatchedDrivers(req, reply) {
     };
     req.log();
     postgresQueries.dbGetUnmatchedDrivers(rfPool, dbQueries.dbGetUnmatchedDriversQueryString, reply, results);
+}
+
+function getUnmatchedRiders(req, reply) {
+    var results = {
+        success: 'GET unmatched riders: ',
+        failure: 'GET unmatched riders error: '
+    };
+    req.log();
+    postgresQueries.dbGetUnmatchedRiders(rfPool, dbQueries.dbGetUnmatchedRidersQueryString, reply, results);
 }
 var cancelRideRequest = createConfirmCancelFn('cancel ride request: ', "get payload: ", dbQueries.dbCancelRideRequestFunctionString, getTwoRiderCancelConfirmPayloadAsArray);
 var cancelRiderMatch = createConfirmCancelFn('cancel rider match: ', "get payload: ", dbQueries.dbCancelRiderMatchFunctionString, getFourRiderCancelConfirmPayloadAsArray);
@@ -120,33 +130,48 @@ function getHelperPayloadAsArray(req, payload) {
 }
 function getRiderPayloadAsArray(req, payload) {
     return [
-        req.info.remoteAddress, payload.RiderFirstName, payload.RiderLastName, payload.RiderEmail,
-        payload.RiderPhone, payload.RiderVotingState,
-        payload.RiderCollectionZIP, payload.RiderDropOffZIP, payload.AvailableRideTimesJSON,
+        req.info.remoteAddress, 
+        payload.RiderFirstName, 
+        payload.RiderLastName, 
+        payload.RiderEmail,
+        payload.RiderPhone, 
+        payload.RiderCollectionZIP, 
+        payload.RiderDropOffZIP, 
+        payload.AvailableRideTimesJSON, // this one the node app should convert to UTC using db function to convert (TODO)
+        payload.AvailableRideTimesJSON, // this one should be in local time as passed along by the forms
         payload.TotalPartySize,
         (payload.TwoWayTripNeeded ? 'true' : 'false'),
-        payload.RiderPreferredContactMethod,
+        payload.RiderPreferredContact,
         (payload.RiderIsVulnerable ? 'true' : 'false'),
         (payload.RiderWillNotTalkPolitics ? 'true' : 'false'),
         (payload.PleaseStayInTouch ? 'true' : 'false'),
         (payload.NeedWheelchair ? 'true' : 'false'),
         payload.RiderAccommodationNotes,
-        (payload.RiderLegalConsent ? 'true' : 'false')
+        (payload.RiderLegalConsent ? 'true' : 'false'),
+        (payload.RiderWillBeSafe ? 'true' : 'false')
     ];
 }
 function getDriverPayloadAsArray(req, payload) {
     return [
-        req.info.remoteAddress, payload.DriverCollectionZIP, payload.DriverCollectionRadius, payload.AvailableDriveTimesJSON,
+        req.info.remoteAddress, 
+        payload.DriverCollectionZIP, 
+        payload.DriverCollectionRadius, 
+        payload.AvailableDriveTimesJSON,   //  this one the node app should convert to UTC using db function to convert (TODO)
+        payload.AvailableDriveTimesJSON,   // this one should be in local time as passed along by the forms
         (payload.DriverCanLoadRiderWithWheelchair ? 'true' : 'false'),
         payload.SeatCount,
-        payload.DriverFirstName, payload.DriverLastName,
-        payload.DriverEmail, payload.DriverPhone,
+        payload.DriverFirstName,
+        payload.DriverLastName,
+        payload.DriverEmail, 
+        payload.DriverPhone,
         (payload.DrivingOnBehalfOfOrganization ? 'true' : 'false'),
         payload.DrivingOBOOrganizationName,
         (payload.RidersCanSeeDriverDetails ? 'true' : 'false'),
         (payload.DriverWillNotTalkPolitics ? 'true' : 'false'),
         (payload.PleaseStayInTouch ? 'true' : 'false'),
-        payload.DriverLicenceNumber
+        payload.DriverLicenceNumber,
+        payload.DriverPreferredContact,
+        (payload.DriverWillTakeCare ? 'true' : 'false')
     ];
 }
 // for all two param Rider fns
@@ -303,9 +328,9 @@ function sanitiseDriver(payload) {
     }
 }
 function sanitiseRider(payload) {
-    if (payload.RiderVotingState === undefined) {
-        payload.RiderVotingState = "MO";
-    }
+    //if (payload.RiderVotingState === undefined) {
+    //    payload.RiderVotingState = "MO";
+    //}
 }
 module.exports = {
     getAnon: getAnon,
@@ -313,6 +338,7 @@ module.exports = {
     postRider: postRider,
     postHelper: postHelper,
     getUnmatchedDrivers: getUnmatchedDrivers,
+    getUnmatchedRiders: getUnmatchedRiders,
     cancelRideRequest: cancelRideRequest,
     cancelRiderMatch: cancelRiderMatch,
     cancelDriveOffer: cancelDriveOffer,
@@ -322,6 +348,7 @@ module.exports = {
     rejectRide: rejectRide,
     confirmRide: confirmRide,
     UNMATCHED_DRIVERS_ROUTE: UNMATCHED_DRIVERS_ROUTE,
+    UNMATCHED_RIDERS_ROUTE: UNMATCHED_RIDERS_ROUTE,
     DRIVER_ROUTE: DRIVER_ROUTE,
     RIDER_ROUTE: RIDER_ROUTE,
     HELPER_ROUTE: HELPER_ROUTE,

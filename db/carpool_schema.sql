@@ -133,11 +133,22 @@ BEGIN
 		WHERE "UUID" = a_UUID_rider;	
 		
 		v_step := 'S2';
-		INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-		VALUES (ride_request_row."RiderEmail", 
-		'Cancellation Notice', 
-		'Confirmed match was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
-
+		-- send cancellation notice to rider
+		IF ride_request_row."RiderEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (ride_request_row."RiderEmail", 
+			'Cancellation Notice', 
+			'Confirmed Ride was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
+		IF ride_request_row."RiderPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (ride_request_row."RiderPhone", 
+			'Confirmed Ride was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
 		v_step := 'S3';
 		v_return_text := nov2016.update_drive_offer_state(a_UUID_driver);
 		IF  v_return_text != ''
@@ -152,6 +163,28 @@ BEGIN
 		THEN
 			v_step := v_step || ' ' || v_return_text;
 			RAISE EXCEPTION '%', v_return_text;
+		END IF;
+		
+		
+		v_step := 'S5';
+		-- send cancellation notice to driver
+		SELECT * INTO drive_offer_row
+		FROM stage.websubmission_driver
+		WHERE "UUID" = a_UUID_driver;	
+
+		IF drive_offer_row."DriverEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (drive_offer_row."DriverEmail", 
+			'Cancellation Notice', 
+			'Confirmed Ride was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
+		IF drive_offer_row."DriverPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (drive_offer_row."DriverPhone", 
+			'Confirmed Ride was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
 		END IF;
 		
 		return '';
@@ -213,10 +246,21 @@ BEGIN
 			WHERE "UUID" = match_row.uuid_rider;	
 		
 			v_step := 'S3';
-			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-			VALUES (ride_request_row."DriverEmail", 
-			'Cancellation Notice', 
-			'Confirmed match was canceled by rider: ' || match_row.uuid_rider || ', ' || match_row.uuid_driver);
+			IF ride_request_row."RiderEmail" IS NOT NULL
+			THEN
+				INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+				VALUES (ride_request_row."RiderEmail", 
+				'Cancellation Notice', 
+				'Confirmed Ride was canceled by driver: ' || match_row.uuid_rider || ', ' || match_row.uuid_driver);
+			END IF;
+			
+			IF ride_request_row."RiderPhone" IS NOT NULL
+			THEN
+				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				VALUES (ride_request_row."RiderPhone", 
+				'Confirmed Ride was canceled by driver: ' || match_row.uuid_rider || ', ' || match_row.uuid_driver);
+			END IF;
+			
 
 			v_step := 'S4';
 			UPDATE nov2016.match
@@ -244,6 +288,28 @@ BEGIN
 		UPDATE stage.websubmission_driver
 		SET state='Canceled'
 		WHERE "UUID" = a_UUID;
+
+		-- Send cancellation notice to driver
+		v_step := 'S8';
+		SELECT * INTO drive_offer_row
+		FROM stage.websubmission_driver
+		WHERE "UUID" = a_UUID;	
+
+		IF drive_offer_row."DriverEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (drive_offer_row."DriverEmail", 
+			'Cancellation Notice', 
+			'Drive Offer was canceled by driver: ' || a_UUID);
+		END IF;
+			
+		IF drive_offer_row."DriverPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (drive_offer_row."DriverPhone", 
+			'Drive Offer was canceled by driver: ' || a_UUID);
+		END IF;
+		
 		
 		return '';
     	
@@ -306,10 +372,20 @@ BEGIN
 		WHERE "UUID" = a_UUID_rider;	
 		
 		v_step := 'S2';
-		INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-		VALUES (ride_request_row."RiderEmail", 
-		'Confirmation Notice', 
-		'Match was confirmed by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		IF ride_request_row."RiderEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (ride_request_row."RiderEmail", 
+			'Confirmation Notice', 
+			'Ride was confirmed by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
+		IF ride_request_row."RiderPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (ride_request_row."RiderPhone", 
+			'Ride was confirmed by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
 
 		v_step := 'S3, ' || a_UUID_driver;
 		v_return_text := nov2016.update_drive_offer_state(a_UUID_driver);
@@ -327,6 +403,31 @@ BEGIN
 			v_step := v_step || ' ' || v_return_text;
 			RAISE NOTICE '%', v_return_text;
 			RAISE EXCEPTION '%', v_return_text;
+		END IF;
+		
+		
+		
+		v_step := 'S5.1';
+		
+		-- send confirmation notice to driver
+		SELECT * INTO drive_offer_row
+		FROM stage.websubmission_driver
+		WHERE "UUID" = a_UUID_driver;	
+		
+		IF drive_offer_row."DriverEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (drive_offer_row."DriverEmail", 
+			'Confirmation Notice', 
+			'Ride was confirmed by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
+		v_step := 'S5.2';
+		IF drive_offer_row."DriverPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (drive_offer_row."DriverPhone", 
+			'Ride was confirmed by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
 		END IF;
 		
 		return '';
@@ -361,6 +462,516 @@ $$;
 ALTER FUNCTION nov2016.fct_modified_column() OWNER TO carpool_admins;
 
 --
+-- Name: perform_match(); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE FUNCTION perform_match() RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+run_now nov2016.match_engine_scheduler.need_run_flag%TYPE;
+
+v_start_ts nov2016.match_engine_activity_log.start_ts%TYPE;
+v_end_ts nov2016.match_engine_activity_log.end_ts%TYPE;
+v_evaluated_pairs nov2016.match_engine_activity_log.evaluated_pairs%TYPE;
+v_proposed_count nov2016.match_engine_activity_log.proposed_count%TYPE;
+v_error_count nov2016.match_engine_activity_log.error_count%TYPE;
+v_expired_count nov2016.match_engine_activity_log.expired_count%TYPE;
+
+b_rider_all_times_expired  boolean := TRUE;
+b_rider_validated boolean := TRUE;
+b_driver_all_times_expired boolean := TRUE;
+b_driver_validated boolean := TRUE;
+
+RADIUS_MAX_ALLOWED integer := 100;
+
+drive_offer_row stage.websubmission_driver%ROWTYPE;
+ride_request_row stage.websubmission_rider%ROWTYPE;
+cnt integer;
+match_points integer;
+time_criteria_points integer;
+
+ride_times_rider text[];
+ride_times_driver text[];
+driver_time text;
+rider_time text;
+seconds_diff integer;
+
+start_ride_time timestamp with time zone;
+end_ride_time timestamp with time zone;
+start_drive_time timestamp with time zone;
+end_drive_time timestamp with time zone;
+
+zip_origin nov2016.zip_codes%ROWTYPE;  -- Driver's origin
+zip_pickup nov2016.zip_codes%ROWTYPE;  -- Rider's pickup
+zip_dropoff nov2016.zip_codes%ROWTYPE; -- Rider's dropoff
+
+distance_origin_pickup double precision;  -- From driver origin to rider pickup point
+distance_origin_dropoff double precision; -- From driver origin to rider drop off point
+
+g_uuid_driver character varying(50);
+g_uuid_rider  character varying(50);
+g_record record;
+g_email_body text;
+g_sms_body text;
+
+BEGIN
+
+	run_now := true;
+	--BEGIN
+	--	INSERT INTO nov2016.match_engine_scheduler VALUES(true);
+	--EXCEPTION WHEN OTHERS
+	--THEN
+		-- ignore
+	--END;
+	--SELECT need_run_flag INTO run_now from nov2016.match_engine_scheduler LIMIT 1;
+	IF run_now
+	THEN
+
+		CREATE TEMPORARY TABLE match_notifications_buffer (
+		 uuid_driver character varying(50) NOT NULL,
+		 uuid_rider character varying(50) NOT NULL,
+		 score smallint
+		);
+	
+		-- Initialize Counters
+		v_start_ts := now();
+		v_evaluated_pairs := 0;
+		v_proposed_count := 0;
+		v_error_count := 0;
+		v_expired_count := 0;
+
+		
+		
+		FOR ride_request_row in SELECT * from stage.websubmission_rider r
+			WHERE r.state in ('Pending','MatchProposed')
+		LOOP
+		
+			IF length(ride_request_row."AvailableRideTimesUTC") = 0
+			THEN
+				UPDATE stage.websubmission_rider 
+				SET state='Failed', state_info='Invalid AvailableRideTimes'
+				WHERE "UUID"=ride_request_row."UUID";
+				
+				b_rider_validated := FALSE;
+			END IF;
+			
+
+			BEGIN
+				-- DriverCollectionZIP
+				-- DriverCollectionRadius
+			
+				SELECT * INTO zip_pickup FROM nov2016.zip_codes WHERE zip=ride_request_row."RiderCollectionZIP";
+				SELECT * INTO zip_dropoff FROM nov2016.zip_codes WHERE zip=ride_request_row."RiderDropOffZIP";
+			
+			EXCEPTION WHEN OTHERS
+			THEN
+				UPDATE stage.websubmission_rider 
+				SET state='Failed', state_info='Unknown/Invalid RiderCollectionZIP or RiderDropOffZIP'
+				WHERE "UUID"=ride_request_row."UUID";
+				
+				b_rider_validated := FALSE;
+			END;
+			
+			IF ride_request_row."TotalPartySize" = 0
+			THEN
+				UPDATE stage.websubmission_rider 
+				SET state='Failed', state_info='Invalid TotalPartySize'
+				WHERE "UUID"=ride_request_row."UUID";
+				
+				b_rider_validated := FALSE;
+			END IF;
+	
+	
+			-- split AvailableRideTimesUTC in individual time intervals
+			ride_times_rider := string_to_array(ride_request_row."AvailableRideTimesUTC", '|');
+			b_rider_all_times_expired := TRUE;  -- Assumes all expired
+			FOREACH rider_time IN ARRAY ride_times_rider
+			LOOP
+				BEGIN
+					-- each time interval is in ISO8601 format
+					-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
+					start_ride_time := substr(rider_time, 1, 24)::timestamp with time zone;
+					end_ride_time := substr(rider_time, 26, 24)::timestamp with time zone;
+					
+					IF start_ride_time > end_ride_time
+					THEN
+						UPDATE stage.websubmission_rider 
+						SET state='Failed', state_info='Invalid value in AvailableRideTimes:' || rider_time
+						WHERE "UUID"=ride_request_row."UUID";
+				
+						b_rider_validated := FALSE;
+					ELSE
+					
+						IF end_ride_time > now()   ----   --[NOW]--[S]--[E]   : not expired
+						THEN                       ----   --[S]---[NOW]--[E]  : not expired
+													      --[S]--[E]----[NOW] : expired
+							b_rider_all_times_expired := FALSE;
+						END IF;
+					END IF;
+				EXCEPTION WHEN OTHERS
+				THEN				
+					UPDATE stage.websubmission_rider
+					SET state='Failed', state_info='Invalid value in AvailableRideTimes:' || rider_time
+					WHERE "UUID"=ride_request_row."UUID";
+
+					b_rider_validated := FALSE;
+				END;
+				
+				IF b_rider_all_times_expired
+				THEN
+					UPDATE stage.websubmission_rider r
+					SET state='Expired', state_info='All AvailableRideTimes are expired'
+					WHERE "UUID"=ride_request_row."UUID";
+
+					v_expired_count := v_expired_count +1;
+					
+					b_rider_validated := FALSE;
+				END IF;
+				
+			END LOOP;
+	
+			IF b_rider_validated
+			THEN
+			
+ 				FOR drive_offer_row in SELECT * from stage.websubmission_driver d
+ 					WHERE state IN ('Pending','MatchProposed','MatchConfirmed')
+ 					AND ((ride_request_row."NeedWheelchair"=true AND d."DriverCanLoadRiderWithWheelchair" = true) -- driver must be able to transport wheelchair if rider needs it
+ 						OR ride_request_row."NeedWheelchair"=false)   -- but a driver equipped for wheelchair may drive someone who does not need one
+ 					AND ride_request_row."TotalPartySize" <= d."SeatCount"  -- driver must be able to accommodate the entire party in one ride
+
+ 				LOOP
+ 
+ 					IF length(drive_offer_row."AvailableDriveTimesUTC") = 0
+ 					THEN
+ 						UPDATE stage.websubmission_driver 
+ 						SET state='Failed', state_info='Invalid AvailableDriveTimes'
+ 						WHERE "UUID"=drive_offer_row."UUID";
+ 				
+ 						b_driver_validated := false;
+ 					END IF;
+ 
+ 					BEGIN
+ 						SELECT * INTO zip_origin FROM nov2016.zip_codes WHERE zip=drive_offer_row."DriverCollectionZIP";
+ 					EXCEPTION WHEN OTHERS
+ 					THEN
+ 						UPDATE stage.websubmission_driver 
+ 						SET state='Failed', state_info='Invalid DriverCollectionZIP'
+ 						WHERE "UUID"=drive_offer_row."UUID";
+ 					
+ 						b_driver_validated := FALSE;
+ 					END;
+ 					
+ 					
+ 					-- split AvailableDriveTimesUTC in individual time intervals
+ 					-- NOTE : we do not want actual JSON here...
+ 					-- FORMAT should be like this 
+ 					-- 2016-10-01T08:00:00-0500/2016-10-01T10:00:00-0500|2016-10-01T10:00:00-0500/2016-10-01T22:00:00-0500|2016-10-01T22:00:00-0500/2016-10-01T23:00:00-0500
+ 					ride_times_driver := string_to_array(drive_offer_row."AvailableDriveTimesUTC", '|');
+					b_driver_all_times_expired := TRUE;
+ 					FOREACH driver_time IN ARRAY ride_times_driver
+					LOOP
+						BEGIN
+							-- each time interval is in ISO8601 format
+							-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
+							start_drive_time := substr(driver_time, 1, 24)::timestamp with time zone;
+							end_drive_time := substr(driver_time, 26, 24)::timestamp with time zone;
+							
+							IF start_drive_time > end_drive_time
+							THEN
+								UPDATE stage.websubmission_driver 
+								SET state='Failed', state_info='Invalid value in AvailableDriveTimes:' || driver_time
+								WHERE "UUID"=drive_offer_row."UUID";
+				
+								b_driver_validated := FALSE;
+							ELSE
+							
+								IF end_drive_time > now()   ----   --[NOW]--[S]--[E]   : not expired
+								THEN                       ----   --[S]---[NOW]--[E]  : not expired
+													      --[S]--[E]----[NOW] : expired
+									b_driver_all_times_expired := FALSE;
+								END IF;
+							END IF;
+							
+						EXCEPTION WHEN OTHERS
+						THEN
+							UPDATE stage.websubmission_driver 
+							SET state='Failed', state_info='Invalid value in AvailableDriveTimes :' || driver_time
+							WHERE "UUID"=drive_offer_row."UUID";
+
+							b_driver_validated := FALSE;
+						END;
+		
+		
+						IF b_driver_all_times_expired
+						THEN
+							UPDATE stage.websubmission_driver
+							SET state='Expired', state_info='All AvailableDriveTimes are expired'
+							WHERE "UUID"=drive_offer_row."UUID";
+
+							v_expired_count := v_expired_count +1;
+					
+							b_driver_validated := FALSE;
+						END IF;
+				
+					END LOOP;		
+					IF 	b_driver_validated
+					THEN
+				
+						match_points := 0;
+				
+						-- Compare RiderCollectionZIP with DriverCollectionZIP / DriverCollectionRadius
+						distance_origin_pickup := nov2016.distance(
+									zip_origin.latitude_numeric,
+									zip_origin.longitude_numeric,
+									zip_pickup.latitude_numeric,
+									zip_pickup.longitude_numeric);
+						
+						distance_origin_dropoff := nov2016.distance(
+									zip_origin.latitude_numeric,
+									zip_origin.longitude_numeric,
+									zip_dropoff.latitude_numeric,
+									zip_dropoff.longitude_numeric);
+
+						--RAISE NOTICE 'distance_origin_pickup=%', distance_origin_pickup;
+						--RAISE NOTICE 'distance_origin_dropoff=%', distance_origin_pickup;
+						
+						IF distance_origin_pickup < RADIUS_MAX_ALLOWED AND distance_origin_dropoff < RADIUS_MAX_ALLOWED
+						THEN
+
+							-- driver/rider distance ranking
+							IF distance_origin_pickup <= drive_offer_row."DriverCollectionRadius" 
+								AND distance_origin_dropoff <= drive_offer_row."DriverCollectionRadius"
+							THEN
+								match_points := match_points + 200 
+									- distance_origin_pickup -- closest distance gets more points 
+									- distance_origin_dropoff ;
+							END IF; 
+							
+							--RAISE NOTICE 'D-%, R-%, distance ranking Score=%', 
+							--			drive_offer_row."UUID", 
+							--			ride_request_row."UUID", 
+							--			match_points;
+			
+							
+							-- vulnerable rider matching
+							IF ride_request_row."RiderIsVulnerable" = false
+							THEN
+								match_points := match_points + 200;
+							ELSIF ride_request_row."RiderIsVulnerable" = true 
+								AND drive_offer_row."DrivingOnBehalfOfOrganization" 
+							THEN
+								match_points := match_points + 200;
+							END IF;
+					
+							--RAISE NOTICE 'D-%, R-%, vulnerable ranking Score=%', 
+							--			drive_offer_row."UUID", 
+							--			ride_request_row."UUID", 
+							--			match_points;
+			
+							-- time matching
+							-- Each combination of rider time and driver time can give a potential match
+							FOREACH driver_time IN ARRAY ride_times_driver
+							LOOP
+								FOREACH rider_time IN ARRAY ride_times_rider
+								LOOP
+									
+									v_evaluated_pairs := v_evaluated_pairs +1;
+									
+									-- each time interval is in ISO8601 format
+									-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
+									start_ride_time := substr(rider_time, 1, 24)::timestamp with time zone;
+									end_ride_time := substr(rider_time, 26, 24)::timestamp with time zone;
+									
+									-- each time interval is in ISO8601 format
+									-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
+									start_drive_time := substr(driver_time, 1, 24)::timestamp with time zone;
+									end_drive_time := substr(driver_time, 26, 24)::timestamp with time zone;
+									
+									
+									time_criteria_points := 200;
+									
+									IF end_drive_time < start_ride_time       -- [ddddd]  [rrrrrr]
+										OR end_ride_time < start_drive_time   -- [rrrrr]  [dddddd]
+									THEN
+										-- we're totally disconnected
+										
+										IF end_drive_time < start_ride_time
+										THEN
+										
+											-- substracts one point per minute the driver is outside the rider interval
+											time_criteria_points := 
+												time_criteria_points - abs(EXTRACT(EPOCH FROM (start_ride_time - end_drive_time))) / 60;
+										ELSIF end_ride_time < start_drive_time
+										THEN
+											time_criteria_points := 
+												time_criteria_points - abs(EXTRACT(EPOCH FROM (start_drive_time - end_ride_time))) / 60;
+										END IF;
+										
+										if time_criteria_points < 0
+										THEN
+											time_criteria_points := 0; 
+										END IF;
+										
+									-- ELSIF start_drive_time < start_ride_time  -- [ddd[rdrdrdrdrd]ddd] 
+										-- AND end_drive_time > end_ride_time
+									-- THEN
+										-- -- perfect! we're in the interval
+									-- ELSIF start_drive_time < start_ride_time  -- [ddddddd[rdrdrd]rrrr]
+										-- AND start_ride_time < end_drive_time
+									-- THEN
+										-- -- We're at least partially in the interval
+									-- ELSIF  start_ride_time < start_drive_time -- [rrrrr[rdrdrd]ddddd]
+										-- AND start_drive_time < end_ride_time
+									-- THEN
+										-- -- We're at least partially in the interval
+									-- ELSIF start_ride_time < start_drive_time  -- [rrr[rdrdrdrdrd]rrrrr]
+										-- AND end_drive_time < end_ride_time
+									-- THEN
+										-- -- We're completely in the interval
+									END IF;
+									
+									--RAISE NOTICE 'D-%, R-%, time ranking ranking Score=%', 
+									--	drive_offer_row."UUID", 
+									--	ride_request_row."UUID", 
+									--	match_points+time_criteria_points;
+									
+									IF match_points + time_criteria_points >= 300
+									THEN
+									
+										BEGIN
+											INSERT INTO nov2016.match (uuid_rider, uuid_driver, score, state)
+												VALUES (
+													ride_request_row."UUID",               --pkey
+													drive_offer_row."UUID",                --pkey 
+													match_points + time_criteria_points,   --pkey
+													'MatchProposed'
+												);
+
+											INSERT INTO match_notifications_buffer (uuid_driver, uuid_rider, score)
+											VALUES (drive_offer_row."UUID", ride_request_row."UUID", match_points + time_criteria_points);
+											
+											-- The state of the ride request is 
+											
+											UPDATE stage.websubmission_rider r
+											SET state='MatchProposed'
+											WHERE r."UUID" = ride_request_row."UUID";
+
+											-- If already MatchConfirmed, keep it as is
+											IF drive_offer_row.state = 'Pending'
+											THEN
+												UPDATE stage.websubmission_driver d
+												SET state='MatchProposed'
+												WHERE d."UUID" = drive_offer_row."UUID";
+											END IF;
+											
+											v_proposed_count := v_proposed_count +1;
+											
+											RAISE NOTICE 'Proposed Match, Rider=%, Driver=%, Score=%',
+														 ride_request_row."UUID", drive_offer_row."UUID", match_points + time_criteria_points;
+										EXCEPTION WHEN unique_violation
+										THEN
+											-- ignore
+											-- don't insert duplicate match
+										END;                 
+									 
+									END IF;
+									
+								END LOOP;
+							
+								
+							END LOOP;
+
+						END IF; -- distances are within radius tolerance
+					ELSE
+						v_error_count := v_error_count +1;
+					END IF; -- driver is validated
+ 				END LOOP; -- for each drive offer
+			ELSE
+				v_error_count := v_error_count +1;
+			END IF; -- rider is validated
+			
+		END LOOP; -- for each ride request
+		
+		-- send notifications to driver only. Riders will be waiting to be contacted
+		FOR drive_offer_row IN SELECT * FROM stage.websubmission_driver d
+								WHERE d."UUID" IN (SELECT DISTINCT uuid_driver FROM match_notifications_buffer)
+		LOOP
+		
+			g_email_body := '';
+			g_sms_body := '';
+		
+			FOR g_record IN SELECT * FROM match_notifications_buffer b 
+									WHERE b.uuid_driver = drive_offer_row."UUID"
+			LOOP
+					
+				SELECT * INTO ride_request_row FROM stage.websubmission_rider r
+												WHERE r."UUID" = g_record.uuid_rider;
+
+				
+				g_email_body := g_email_body 
+				       || 'https://api.carpoolvote.com/v2.0/accept-driver-match'
+					   || '?UUID_driver=' || g_record.uuid_driver
+					   || '&UUID_rider=' || g_record.uuid_rider
+					   || '&Score=' || g_record.score
+					   || '&DriverEmail=' || drive_offer_row."DriverEmail";
+				
+				g_sms_body := g_email_body 
+				       || 'https://api.carpoolvote.com/v2.0/accept-driver-match'
+					   || '?UUID_driver=' || g_record.uuid_driver
+					   || '&UUID_rider=' || g_record.uuid_rider
+					   || '&Score=' || g_record.score
+					   || '&DriverPhone=' || drive_offer_row."DriverPhone";
+				
+			END LOOP;
+			
+			IF drive_offer_row."DriverEmail" IS NOT NULL
+			THEN
+				INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+				VALUES (drive_offer_row."DriverEmail", 
+				'New Match Notification', 
+				g_email_body);
+				
+			END IF;
+				
+			IF drive_offer_row."DriverPhone" IS NOT NULL
+			THEN
+			
+				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				VALUES (drive_offer_row."DriverPhone", 
+				g_sms_body);
+			
+			END IF;
+
+			
+		END LOOP;
+		
+
+		
+		v_end_ts := now();
+		-- Update activity log
+		INSERT INTO nov2016.match_engine_activity_log (
+				start_ts, end_ts , evaluated_pairs,
+				proposed_count, error_count, expired_count)
+		VALUES(v_start_ts, v_end_ts, v_evaluated_pairs,
+				v_proposed_count, v_error_count, v_expired_count);
+		
+		-- Update scheduler
+		-- UPDATE nov2016.match_engine_scheduler set need_run_flag = false;
+		
+		
+		
+	END IF;
+	
+	return '';
+END
+$$;
+
+
+ALTER FUNCTION nov2016.perform_match() OWNER TO carpool_admins;
+
+--
 -- Name: queue_email_notif(); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
 --
 
@@ -368,49 +979,99 @@ CREATE FUNCTION queue_email_notif() RETURNS trigger
     LANGUAGE plpgsql
     AS $$                                                                                                                  
 DECLARE                                                                                                                    
-                                                                                                                           
+ 
  v_subject nov2016.outgoing_email.subject%TYPE;                                                                            
  v_body nov2016.outgoing_email.body%TYPE;                                                                                  
-                                                                                                                           
+
 BEGIN                                                                                                                      
-                                                                                                                           
+
     -- triggered by submitting a drive offer form                                                                          
     IF TG_TABLE_NAME = 'websubmission_driver' and TG_TABLE_SCHEMA='stage'                                                  
     THEN                                                                                                                   
-                                                                                                                           
+
         IF NEW."DriverEmail" IS NOT NULL                                                                                   
         THEN                                                                                                               
-                                                                                                                           
+
             v_subject := 'Thank you for submitting a Drive Offer';                                                         
-            v_body := 'Your reference is : ' || NEW."UUID"                                                                 
-                    || '\n Please retain the this reference for future interaction with our system'                        
-                    || '\n In order to manage this Driver Offer, and to accept '                                           
-                    || 'a proposed ride request, please use this link : '                                                  
-                    || '\n https://api.carpoolvote.com/v2.0/driver?UUID=' || NEW."UUID" || '&DriverPhone=' || NEW."DriverPhone";
-                                                                                                                           
+            v_body :=  'Your Drive Offer reference : ' || NEW."UUID" || '\n'                                                        
+                    || 'Please retain the this reference for future interaction with our systems \n\n'
+					|| 'To cancel : https://api.carpoolvote.com/current/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverEmail=' || NEW."DriverEmail" || '\n'
+					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
+					|| '\n\n'
+					|| 'First Name : ' || NEW."DriverFirstName" || '\n'
+					|| 'Last Name : ' || NEW."DriverLastName" || '\n'
+					|| 'Phone Number : ' || COALESCE(NEW."DriverPhone", ' ') || '\n'
+					|| 'Email : ' || NEW."DriverEmail" || '\n'
+					|| 'Collection ZIP : ' || NEW."DriverCollectionZIP" || '\n'
+					|| 'Radius : ' || NEW."DriverCollectionRadius" || '\n'
+					|| 'Drive Times : ' || NEW."AvailableDriveTimesLocal" || '\n';
+
             INSERT INTO nov2016.outgoing_email (recipient, subject, body)                                             
             VALUES (NEW."DriverEmail", v_subject, v_body);                                                                 
         END IF;                                                                                                            
-                                                                                                                           
+
+		IF NEW."DriverPhone" IS NOT NULL                                                                                   
+        THEN                                                                                                               
+            v_body :=  'Confirmation of driver offer reference : ' || NEW."UUID" || '\n'                                                        
+					|| 'To cancel : https://api.carpoolvote.com/current/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverEmail=' || NEW."DriverEmail" || '\n'
+					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
+					|| '\n\n'
+					|| 'First Name : ' || NEW."DriverFirstName" || '\n'
+					|| 'Last Name : ' || NEW."DriverLastName" || '\n'
+					|| 'Phone Number : ' || NEW."DriverPhone" || '\n'
+					|| 'Email : ' || COALESCE(NEW."DriverEmail", ' ') || '\n'
+					|| 'Collection ZIP : ' || NEW."DriverCollectionZIP" || '\n'
+					|| 'Radius : ' || NEW."DriverCollectionRadius" || '\n'
+					|| 'Drive Times  : ' || NEW."AvailableDriveTimesLocal" || '\n';
+
+            INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
+            VALUES (NEW."DriverPhone", v_body);                                                                 
+        END IF;                                                                                                            
+		
     -- triggered by submitting a ride request form                                                                         
     ELSIF TG_TABLE_NAME = 'websubmission_rider' and TG_TABLE_SCHEMA='stage'                                                
     THEN                                                                                                                   
         IF NEW."RiderEmail" IS NOT NULL                                                                                    
         THEN                                                                                                               
-                                                                                                                           
+
             v_subject := 'Thank you for submitting a Ride Request';                                                        
-                                                                                                                           
-            v_body := 'Your reference is : ' || NEW."UUID"                                                                 
-                    || '\n Please retain the this reference for future interaction with our system'                        
-                    || '\n In order to manage this Ride Request, '                                                         
-                    || 'please use this link : '                                                                           
-                    || '\n https://api.carpoolvote.com/v2.0/rider?UUID=' || NEW."UUID" || '&RiderPhone=' || NEW."RiderPhone";
-                                                                                                                           
+
+            v_body :=  'Your Ride Request reference : ' || NEW."UUID" || '\n'                                                        
+                    || 'Please retain the this reference for future interaction with our systems \n\n'
+					|| 'To cancel : https://api.carpoolvote.com/current/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderEmail=' || NEW."RiderEmail" || '\n'
+					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
+					|| '\n\n'
+					|| 'First Name : ' || NEW."RiderFirstName" || '\n'
+					|| 'Last Name : ' || NEW."RiderLastName" || '\n'
+					|| 'Phone Number : ' || COALESCE(NEW."RiderPhone", ' ') || '\n'
+					|| 'Email : ' || NEW."RiderEmail" || '\n'
+					|| 'Collection ZIP : ' || NEW."RiderCollectionZIP" || '\n'
+					|| 'Drop Off ZIP : ' || NEW."RiderDropOffZIP" || '\n'
+					|| 'Ride Times : ' || NEW."AvailableRideTimesLocal" || '\n';
+
             INSERT INTO nov2016.outgoing_email (recipient, subject, body)                                             
             VALUES (NEW."RiderEmail", v_subject, v_body);                                                                  
-        END IF;                                                                                                            
+        END IF;
+
+		IF NEW."RiderPhone" IS NOT NULL                                                                                
+        THEN                                                                                                               
+            v_body :=  'Confirmation of ride request reference : ' || NEW."UUID" || '\n'                                                        
+					|| 'To cancel : https://api.carpoolvote.com/current/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderEmail=' || NEW."RiderEmail" || '\n'
+					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
+					|| 'First Name : ' || NEW."RiderFirstName" || '\n'
+					|| 'Last Name : ' || NEW."RiderLastName" || '\n'
+					|| 'Phone Number : ' || COALESCE(NEW."RiderPhone", ' ') || '\n'
+					|| 'Email : ' || NEW."RiderEmail" || '\n'
+					|| 'Collection ZIP : ' || NEW."RiderCollectionZIP" || '\n'
+					|| 'Drop Off ZIP : ' || NEW."RiderDropOffZIP" || '\n'
+					|| 'Ride Times : ' || NEW."AvailableRideTimesLocal" || '\n';
+				
+            INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
+            VALUES (NEW."RiderPhone", v_body);                                                                 
+        END IF;                    
+		
     END IF;                                                                                                                
-                                                                                                                           
+
     RETURN NEW;                                                                                                            
 END;    
 $$;
@@ -465,10 +1126,21 @@ BEGIN
 		WHERE "UUID" = a_UUID_driver;	
 		
 		v_step := 'S2';
-		INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-		VALUES (drive_offer_row."DriverEmail", 
-		'Cancellation Notice', 
-		'Confirmed match was canceled by rider: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		IF drive_offer_row."DriverEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (drive_offer_row."DriverEmail", 
+			'Cancellation Notice', 
+			'Confirmed Ride was canceled by rider: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
+		IF drive_offer_row."DriverPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (drive_offer_row."DriverPhone", 
+			'Confirmed Ride was canceled by rider: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+
 
 		v_step := 'S3';
 		v_return_text := nov2016.update_drive_offer_state(a_UUID_driver);
@@ -485,6 +1157,29 @@ BEGIN
 			v_step := v_step || ' ' || v_return_text;
 			RAISE EXCEPTION '%', v_return_text;
 		END IF;
+
+
+		-- Send cancellation notice to rider
+		v_step := 'S8';
+		SELECT * INTO ride_request_row
+		FROM stage.websubmission_rider
+		WHERE "UUID" = a_UUID_rider;	
+
+		IF ride_request_row."RiderEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (ride_request_row."RiderEmail", 
+			'Cancellation Notice', 
+			'Confirmed Ride was canceled by rider: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+			
+		IF ride_request_row."RiderPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (ride_request_row."RiderPhone", 
+			'Confirmed Ride was canceled by rider: '  || a_UUID_driver || ', ' || a_UUID_rider);
+		END IF;
+		
 		
 		return '';
 	
@@ -545,10 +1240,20 @@ BEGIN
 			WHERE "UUID" = match_row.uuid_driver;	
 		
 			v_step := 'S3';
-			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-			VALUES (drive_offer_row."DriverEmail", 
-			'Cancellation Notice', 
-			'Confirmed match was canceled by rider: ' || match_row.uuid_driver || ', ' || match_row.uuid_rider);
+			IF drive_offer_row."DriverEmail" IS NOT NULL
+			THEN
+				INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+				VALUES (drive_offer_row."DriverEmail", 
+				'Cancellation Notice', 
+				'Confirmed match was canceled by rider: ' || match_row.uuid_driver || ', ' || match_row.uuid_rider);
+			END IF;
+			
+			IF drive_offer_row."DriverPhone" IS NOT NULL
+			THEN
+				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				VALUES (drive_offer_row."DriverPhone", 
+				'Confirmed Ride was canceled by rider: ' || match_row.uuid_driver || ', ' || match_row.uuid_rider);
+			END IF;
 
 			v_step := 'S4';
 			UPDATE nov2016.match
@@ -576,6 +1281,28 @@ BEGIN
 		UPDATE stage.websubmission_rider
 		SET state='Canceled'
 		WHERE "UUID" = a_UUID;
+		
+		
+		-- Send cancellation notice to rider
+		v_step := 'S8';
+		SELECT * INTO ride_request_row
+		FROM stage.websubmission_rider
+		WHERE "UUID" = a_UUID;	
+
+		IF ride_request_row."RiderEmail" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			VALUES (ride_request_row."RiderEmail", 
+			'Cancellation Notice', 
+			'Ride Request was canceled by rider: ' || a_UUID);
+		END IF;
+			
+		IF ride_request_row."RiderPhone" IS NOT NULL
+		THEN
+			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			VALUES (ride_request_row."RiderPhone", 
+			'Ride Request was canceled by rider: ' || a_UUID);
+		END IF;
 		
 		return '';
     
@@ -1282,14 +2009,13 @@ CREATE TABLE websubmission_driver (
     "UUID" character varying(50) DEFAULT public.gen_random_uuid() NOT NULL,
     "IPAddress" character varying(20),
     "DriverCollectionZIP" character varying(5) NOT NULL,
-    "DriverCollectionRadius" integer NOT NULL,
-    "AvailableDriveTimesJSON" character varying(2000),
+    "DriverCollectionRadius" integer DEFAULT 0 NOT NULL,
+    "AvailableDriveTimesUTC" character varying(2000),
     "DriverCanLoadRiderWithWheelchair" boolean DEFAULT false NOT NULL,
     "SeatCount" integer DEFAULT 1,
     "DriverLicenseNumber" character varying(50),
     "DriverFirstName" character varying(255) NOT NULL,
     "DriverLastName" character varying(255) NOT NULL,
-    "PermissionCanRunBackgroundCheck" boolean DEFAULT false NOT NULL,
     "DriverEmail" character varying(255),
     "DriverPhone" character varying(20),
     "DrivingOnBehalfOfOrganization" boolean DEFAULT false NOT NULL,
@@ -1302,7 +2028,9 @@ CREATE TABLE websubmission_driver (
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     state_info text,
-    "DriverPreferredContactMethod" character varying(50)
+    "DriverPreferredContact" character varying(50),
+    "DriverWillTakeCare" boolean DEFAULT false NOT NULL,
+    "AvailableDriveTimesLocal" character varying(2000)
 );
 
 
@@ -1324,7 +2052,8 @@ CREATE VIEW vw_drive_offer AS
     websubmission_driver."DriverCanLoadRiderWithWheelchair",
     websubmission_driver."SeatCount",
     websubmission_driver."DrivingOnBehalfOfOrganization",
-    websubmission_driver."AvailableDriveTimesJSON"
+    websubmission_driver."AvailableDriveTimesUTC",
+    websubmission_driver."AvailableDriveTimesLocal"
    FROM websubmission_driver;
 
 
@@ -1341,24 +2070,25 @@ CREATE TABLE websubmission_rider (
     "RiderLastName" character varying(255) NOT NULL,
     "RiderEmail" character varying(255),
     "RiderPhone" character varying(20),
-    "RiderVotingState" character(2),
     "RiderCollectionZIP" character varying(5) NOT NULL,
     "RiderDropOffZIP" character varying(5) NOT NULL,
-    "AvailableRideTimesJSON" character varying(2000),
-    "TotalPartySize" integer,
+    "AvailableRideTimesUTC" character varying(2000),
+    "TotalPartySize" integer DEFAULT 1 NOT NULL,
     "TwoWayTripNeeded" boolean DEFAULT false NOT NULL,
     "RiderIsVulnerable" boolean DEFAULT false NOT NULL,
     "RiderWillNotTalkPolitics" boolean DEFAULT false NOT NULL,
     "PleaseStayInTouch" boolean DEFAULT false NOT NULL,
     "NeedWheelchair" boolean DEFAULT false NOT NULL,
-    "RiderPreferredContactMethod" character varying(50),
+    "RiderPreferredContact" character varying(50),
     "RiderAccommodationNotes" character varying(1000),
-    "RiderLegalConsent" boolean,
-    "ReadyToMatch" boolean,
+    "RiderLegalConsent" boolean DEFAULT false NOT NULL,
+    "ReadyToMatch" boolean DEFAULT false NOT NULL,
     state character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-    state_info text
+    state_info text,
+    "RiderWillBeSafe" boolean DEFAULT false NOT NULL,
+    "AvailableRideTimesLocal" character varying(2000)
 );
 
 
@@ -1380,11 +2110,34 @@ CREATE VIEW vw_ride_request AS
     websubmission_rider."TotalPartySize",
     websubmission_rider."RiderIsVulnerable",
     websubmission_rider."NeedWheelchair",
-    websubmission_rider."AvailableRideTimesJSON"
+    websubmission_rider."AvailableRideTimesUTC",
+    websubmission_rider."AvailableRideTimesLocal"
    FROM websubmission_rider;
 
 
 ALTER TABLE vw_ride_request OWNER TO carpool_admins;
+
+--
+-- Name: vw_unmatched_drivers; Type: TABLE; Schema: stage; Owner: carpool_admins
+--
+
+CREATE TABLE vw_unmatched_drivers (
+    count bigint,
+    zip character varying(5),
+    state character(2),
+    latitude character varying(10),
+    longitude character varying(10),
+    city character varying(50),
+    full_state character varying(50),
+    latitude_numeric real,
+    longitude_numeric real,
+    latlong point
+);
+
+ALTER TABLE ONLY vw_unmatched_drivers REPLICA IDENTITY NOTHING;
+
+
+ALTER TABLE vw_unmatched_drivers OWNER TO carpool_admins;
 
 --
 -- Name: vw_unmatched_riders; Type: TABLE; Schema: stage; Owner: carpool_admins
@@ -1607,7 +2360,28 @@ CREATE RULE "_RETURN" AS
     zip_codes.latlong
    FROM websubmission_rider rider,
     nov2016.zip_codes zip_codes
-  WHERE (((rider.state)::text = ANY ((ARRAY['Pending'::character varying, 'MatchProposed'::character varying])::text[])) AND ((rider."RiderCollectionZIP")::text = (zip_codes.zip)::text))
+  WHERE (((rider.state)::text = ANY (ARRAY[('Pending'::character varying)::text, ('MatchProposed'::character varying)::text])) AND ((rider."RiderCollectionZIP")::text = (zip_codes.zip)::text))
+  GROUP BY zip_codes.zip;
+
+
+--
+-- Name: _RETURN; Type: RULE; Schema: stage; Owner: carpool_admins
+--
+
+CREATE RULE "_RETURN" AS
+    ON SELECT TO vw_unmatched_drivers DO INSTEAD  SELECT count(*) AS count,
+    zip_codes.zip,
+    zip_codes.state,
+    zip_codes.latitude,
+    zip_codes.longitude,
+    zip_codes.city,
+    zip_codes.full_state,
+    zip_codes.latitude_numeric,
+    zip_codes.longitude_numeric,
+    zip_codes.latlong
+   FROM websubmission_driver driver,
+    nov2016.zip_codes zip_codes
+  WHERE (((driver.state)::text = ANY (ARRAY[('Pending'::character varying)::text, ('MatchProposed'::character varying)::text])) AND ((driver."DriverCollectionZIP")::text = (zip_codes.zip)::text))
   GROUP BY zip_codes.zip;
 
 
@@ -1795,6 +2569,17 @@ REVOKE ALL ON FUNCTION fct_modified_column() FROM carpool_admins;
 GRANT ALL ON FUNCTION fct_modified_column() TO carpool_admins;
 GRANT ALL ON FUNCTION fct_modified_column() TO carpool_role;
 GRANT ALL ON FUNCTION fct_modified_column() TO carpool_web_role;
+
+
+--
+-- Name: perform_match(); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION perform_match() FROM PUBLIC;
+REVOKE ALL ON FUNCTION perform_match() FROM carpool_admins;
+GRANT ALL ON FUNCTION perform_match() TO carpool_admins;
+GRANT ALL ON FUNCTION perform_match() TO PUBLIC;
+GRANT ALL ON FUNCTION perform_match() TO carpool_role;
 
 
 --
@@ -2027,6 +2812,16 @@ GRANT INSERT ON TABLE outgoing_sms TO carpool_web;
 
 
 --
+-- Name: outgoing_sms_id_seq; Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON SEQUENCE outgoing_sms_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE outgoing_sms_id_seq FROM carpool_admins;
+GRANT ALL ON SEQUENCE outgoing_sms_id_seq TO carpool_admins;
+GRANT SELECT,USAGE ON SEQUENCE outgoing_sms_id_seq TO carpool_web;
+
+
+--
 -- Name: zip_codes; Type: ACL; Schema: nov2016; Owner: carpool_admins
 --
 
@@ -2126,6 +2921,17 @@ REVOKE ALL ON TABLE vw_ride_request FROM PUBLIC;
 REVOKE ALL ON TABLE vw_ride_request FROM carpool_admins;
 GRANT ALL ON TABLE vw_ride_request TO carpool_admins;
 GRANT SELECT ON TABLE vw_ride_request TO carpool_role;
+
+
+--
+-- Name: vw_unmatched_drivers; Type: ACL; Schema: stage; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE vw_unmatched_drivers FROM PUBLIC;
+REVOKE ALL ON TABLE vw_unmatched_drivers FROM carpool_admins;
+GRANT ALL ON TABLE vw_unmatched_drivers TO carpool_admins;
+GRANT SELECT ON TABLE vw_unmatched_drivers TO carpool_web_role;
+GRANT SELECT ON TABLE vw_unmatched_drivers TO carpool_role;
 
 
 --

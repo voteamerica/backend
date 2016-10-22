@@ -10,6 +10,7 @@ module.exports = {
     dbGetMatchesQueryString: dbGetMatchesQueryString,
     dbGetQueryString: dbGetQueryString,
     dbGetUnmatchedDriversQueryString: dbGetUnmatchedDriversQueryString,
+    dbGetUnmatchedRidersQueryString: dbGetUnmatchedRidersQueryString,
     dbGetInsertClause: dbGetInsertClause,
     dbGetInsertDriverString: dbGetInsertDriverString,
     dbGetInsertRiderString: dbGetInsertRiderString,
@@ -60,34 +61,38 @@ function dbGetQueryString() {
 function dbGetUnmatchedDriversQueryString() {
     return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.UNMATCHED_DRIVERS_VIEW);
 }
+function dbGetUnmatchedRidersQueryString() {
+    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.UNMATCHED_RIDERS_VIEW);
+}
 // inserts
 // , "DriverHasInsurance" , $17
 function dbGetInsertDriverString() {
     return dbGetInsertClause(dbDefs.DRIVER_TABLE)
         + ' ('
-        + '  "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", "AvailableDriveTimesJSON"'
+        + '  "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", "AvailableDriveTimesUTC", "AvailableDriveTimesLocal"'
         + ', "DriverCanLoadRiderWithWheelchair", "SeatCount" '
         + ', "DriverFirstName", "DriverLastName"'
         + ', "DriverEmail", "DriverPhone"'
         + ', "DrivingOnBehalfOfOrganization", "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics"'
-        + ', "PleaseStayInTouch", "DriverLicenseNumber" '
+        + ', "PleaseStayInTouch", "DriverLicenseNumber", "DriverPreferredContact" '
+        + ', "DriverWillTakeCare" '
         + ')'
         + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '
-        + '        $13, $14, $15, $16 )'
+        + '        $13, $14, $15, $16, $17, $18, $19 )'
         + ' returning "UUID" ';
 }
 function dbGetInsertRiderString() {
     return dbGetInsertClause(dbDefs.RIDER_TABLE)
         + ' ('
         + '  "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail"'
-        + ', "RiderPhone", "RiderVotingState"'
-        + ', "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesJSON"'
-        + ', "TotalPartySize", "TwoWayTripNeeded", "RiderPreferredContactMethod", "RiderIsVulnerable" '
+        + ', "RiderPhone" '
+        + ', "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesUTC", "AvailableRideTimesLocal"'
+        + ', "TotalPartySize", "TwoWayTripNeeded", "RiderPreferredContact", "RiderIsVulnerable" '
         + ', "RiderWillNotTalkPolitics", "PleaseStayInTouch", "NeedWheelchair", "RiderAccommodationNotes"'
-        + ', "RiderLegalConsent"'
+        + ', "RiderLegalConsent", "RiderWillBeSafe"'
         + ')'
         + ' values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '
-        + '        $13, $14, $15, $16, $17, $18 )'
+        + '        $13, $14, $15, $16, $17, $18, $19 )'
         + ' returning "UUID" ';
 }
 function dbGetInsertHelperString() {

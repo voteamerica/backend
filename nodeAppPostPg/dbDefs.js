@@ -4,7 +4,8 @@ var DRIVER_TABLE = 'websubmission_driver';
 var RIDER_TABLE = 'websubmission_rider';
 var HELPER_TABLE = 'websubmission_helper';
 var MATCH_TABLE = 'match';
-var UNMATCHED_DRIVERS_VIEW = 'vw_unmatched_riders';
+var UNMATCHED_DRIVERS_VIEW = 'vw_unmatched_drivers';
+var UNMATCHED_RIDERS_VIEW = 'vw_unmatched_riders';
 var CANCEL_RIDE_REQUEST_FUNCTION = 'rider_cancel_ride_request($1, $2)';
 var CANCEL_RIDER_MATCH_FUNCTION = 'rider_cancel_confirmed_match($1, $2, $3, $4)';
 var CANCEL_DRIVE_OFFER_FUNCTION = 'driver_cancel_drive_offer($1, $2)';
@@ -19,6 +20,7 @@ module.exports = {
     SCHEMA_NAME: SCHEMA_NAME,
     SCHEMA_NOV2016_NAME: SCHEMA_NOV2016_NAME,
     UNMATCHED_DRIVERS_VIEW: UNMATCHED_DRIVERS_VIEW,
+    UNMATCHED_RIDERS_VIEW: UNMATCHED_RIDERS_VIEW,
     DRIVER_TABLE: DRIVER_TABLE,
     RIDER_TABLE: RIDER_TABLE,
     HELPER_TABLE: HELPER_TABLE,

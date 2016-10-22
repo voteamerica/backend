@@ -16,25 +16,25 @@ function sendDriverForm() {
 
   formData.append("DriverCanLoadRiderWithWheelchair", false); 
   formData.append("SeatCount", 3);
-  formData.append("DriverHasInsurance", true); 
-  formData.append("DriverInsuranceProviderName", "ill. ins"); 
-  formData.append("DriverInsurancePolicyNumber", 1234);
+  //formData.append("DriverHasInsurance", true); 
+  //formData.append("DriverInsuranceProviderName", "ill. ins"); 
+  //formData.append("DriverInsurancePolicyNumber", 1234);
 
-  formData.append("DriverLicenseState", 'MO');
+  //formData.append("DriverLicenseState", 'MO');
   // formData.append("DriverLicenseState", 'MOii');
   formData.append("DriverLicenseNumber", '5678');
   formData.append("DriverFirstName", 'jim');
   formData.append("DriverLastName", 'nilsen');
-  formData.append("PermissionCanRunBackgroundCheck", true);
+  //formData.append("PermissionCanRunBackgroundCheck", true);
 
   formData.append("DriverEmail", 'jn@t.com');
   formData.append("DriverPhone", 
     // '246'
     (testDriverAreaCode++).toString()
     );
-  formData.append("DriverAreaCode", 123);
-  formData.append("DriverEmailValidated", false);              
-  formData.append("DriverPhoneValidated", true);
+  //formData.append("DriverAreaCode", 123);
+  //formData.append("DriverEmailValidated", false);              
+  //formData.append("DriverPhoneValidated", true);
 
   formData.append("DrivingOnBehalfOfOrganization", false); 
   formData.append("DrivingOBOOrganizationName", 'none');
@@ -66,7 +66,7 @@ function sendRiderForm() {
   formData.append("RiderAreaCode", 123);
   formData.append("RiderEmailValidated", false);
   formData.append("RiderPhoneValidated", true);
-  formData.append("RiderVotingState", 'MO');
+  //formData.append("RiderVotingState", 'MO');
 
   formData.append("RiderCollectionZIP", testZipCode++); // 60004 
   formData.append("RiderDropOffZIP", 60004); 
@@ -76,7 +76,7 @@ function sendRiderForm() {
 
   formData.append("TotalPartySize", 4);
   formData.append("TwoWayTripNeeded", false);
-  formData.append("RiderPreferredContactMethod", 1);
+  formData.append("RiderPreferredContact", 1);
   formData.append("RiderIsVulnerable", false);
   formData.append("DriverCanContactRider", true);
 
