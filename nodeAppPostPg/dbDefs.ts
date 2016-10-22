@@ -6,7 +6,8 @@ const RIDER_TABLE   = 'websubmission_rider';
 const HELPER_TABLE  = 'websubmission_helper';
 const MATCH_TABLE   = 'match';
 
-const UNMATCHED_DRIVERS_VIEW    = 'vw_unmatched_riders';
+const UNMATCHED_DRIVERS_VIEW  = 'vw_unmatched_drivers';
+const UNMATCHED_RIDERS_VIEW   = 'vw_unmatched_riders';
 
 const CANCEL_RIDE_REQUEST_FUNCTION  = 'rider_cancel_ride_request($1, $2)';
 const CANCEL_RIDER_MATCH_FUNCTION   = 'rider_cancel_confirmed_match($1, $2, $3, $4)';
@@ -28,6 +29,7 @@ module.exports = {
   SCHEMA_NOV2016_NAME:  SCHEMA_NOV2016_NAME,
 
   UNMATCHED_DRIVERS_VIEW: UNMATCHED_DRIVERS_VIEW,
+  UNMATCHED_RIDERS_VIEW: UNMATCHED_RIDERS_VIEW,
 
   DRIVER_TABLE: DRIVER_TABLE,
   RIDER_TABLE:  RIDER_TABLE,
