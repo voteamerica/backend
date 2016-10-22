@@ -31,10 +31,10 @@ driver_time text;
 rider_time text;
 seconds_diff integer;
 
-start_ride_time timestamp with time zone;
-end_ride_time timestamp with time zone;
-start_drive_time timestamp with time zone;
-end_drive_time timestamp with time zone;
+start_ride_time timestamp without time zone;
+end_ride_time timestamp without time zone;
+start_drive_time timestamp without time zone;
+end_drive_time timestamp without time zone;
 
 zip_origin nov2016.zip_codes%ROWTYPE;  -- Driver's origin
 zip_pickup nov2016.zip_codes%ROWTYPE;  -- Rider's pickup
@@ -81,7 +81,7 @@ BEGIN
 			WHERE r.state in ('Pending','MatchProposed')
 		LOOP
 		
-			IF length(ride_request_row."AvailableRideTimesUTC") = 0
+			IF length(ride_request_row."AvailableRideTimesLocal") = 0
 			THEN
 				UPDATE stage.websubmission_rider 
 				SET state='Failed', state_info='Invalid AvailableRideTimes'
@@ -117,16 +117,16 @@ BEGIN
 			END IF;
 	
 	
-			-- split AvailableRideTimesUTC in individual time intervals
-			ride_times_rider := string_to_array(ride_request_row."AvailableRideTimesUTC", '|');
+			-- split AvailableRideTimesLocal in individual time intervals
+			ride_times_rider := string_to_array(ride_request_row."AvailableRideTimesLocal", '|');
 			b_rider_all_times_expired := TRUE;  -- Assumes all expired
 			FOREACH rider_time IN ARRAY ride_times_rider
 			LOOP
 				BEGIN
-					-- each time interval is in ISO8601 format
-					-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
-					start_ride_time := substr(rider_time, 1, 24)::timestamp with time zone;
-					end_ride_time := substr(rider_time, 26, 24)::timestamp with time zone;
+					-- each time interval is in ISO8601 format					
+					-- new format without timezone : 2016-10-01T02:00/2016-10-01T03:00
+					start_ride_time :=  (substring(rider_time from 1 for (position ('/' in rider_time)-1)))::timestamp without time zone;
+					end_ride_time :=    (substring(rider_time from position ('/' in rider_time)))::timestamp without time zone;
 					
 					IF start_ride_time > end_ride_time
 					THEN
@@ -195,7 +195,7 @@ BEGIN
 
  				LOOP
  
- 					IF length(drive_offer_row."AvailableDriveTimesUTC") = 0
+ 					IF length(drive_offer_row."AvailableDriveTimesLocal") = 0
  					THEN
  						UPDATE stage.websubmission_driver 
  						SET state='Failed', state_info='Invalid AvailableDriveTimes'
@@ -224,20 +224,19 @@ BEGIN
 						b_driver_validated := FALSE;
 					END IF; 					
  					
- 					-- split AvailableDriveTimesUTC in individual time intervals
- 					-- NOTE : we do not want actual JSON here...
+ 					-- split AvailableDriveTimesLocal in individual time intervals
  					-- FORMAT should be like this 
- 					-- 2016-10-01T08:00:00-0500/2016-10-01T10:00:00-0500|2016-10-01T10:00:00-0500/2016-10-01T22:00:00-0500|2016-10-01T22:00:00-0500/2016-10-01T23:00:00-0500
- 					ride_times_driver := string_to_array(drive_offer_row."AvailableDriveTimesUTC", '|');
+ 					-- 2016-10-01T02:00/2016-10-01T03:00|2016-10-01T02:00/2016-10-01T03:00|2016-10-01T02:00/2016-10-01T03:00
+ 					ride_times_driver := string_to_array(drive_offer_row."AvailableDriveTimesLocal", '|');
 					b_driver_all_times_expired := TRUE;
  					FOREACH driver_time IN ARRAY ride_times_driver
 					LOOP
 						BEGIN
 							-- each time interval is in ISO8601 format
-							-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
-							start_drive_time := substr(driver_time, 1, 24)::timestamp with time zone;
-							end_drive_time := substr(driver_time, 26, 24)::timestamp with time zone;
-							
+							-- new format without timezone : 2016-10-01T02:00/2016-10-01T03:00
+							start_drive_time :=  (substring(driver_time from 1 for (position ('/' in driver_time)-1)))::timestamp without time zone;
+							end_drive_time :=    (substring(driver_time from position ('/' in driver_time)))::timestamp without time zone;
+					
 							IF start_drive_time > end_drive_time
 							THEN
 								UPDATE stage.websubmission_driver 
@@ -341,14 +340,15 @@ BEGIN
 									v_evaluated_pairs := v_evaluated_pairs +1;
 									
 									-- each time interval is in ISO8601 format
-									-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
-									start_ride_time := substr(rider_time, 1, 24)::timestamp with time zone;
-									end_ride_time := substr(rider_time, 26, 24)::timestamp with time zone;
-									
+									-- new format without timezone : 2016-10-01T02:00/2016-10-01T03:00
+									start_ride_time :=  (substring(rider_time from 1 for (position ('/' in rider_time)-1)))::timestamp without time zone;
+									end_ride_time :=    (substring(rider_time from position ('/' in rider_time)))::timestamp without time zone;
+					
 									-- each time interval is in ISO8601 format
 									-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
-									start_drive_time := substr(driver_time, 1, 24)::timestamp with time zone;
-									end_drive_time := substr(driver_time, 26, 24)::timestamp with time zone;
+									start_drive_time :=  (substring(driver_time from 1 for (position ('/' in driver_time)-1)))::timestamp without time zone;
+									end_drive_time :=    (substring(driver_time from position ('/' in driver_time)))::timestamp without time zone;
+
 									
 									
 									time_criteria_points := 200;
