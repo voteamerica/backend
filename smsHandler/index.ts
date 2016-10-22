@@ -1,11 +1,19 @@
 'use strict';
 
-var cfg = {};
+interface TwilioConfig {
+  accountSid: String;
+  authToken: String;
+  sendingNumber: String; 
+}
+
+var cfg: TwilioConfig = {
 
 // get info from env vars
-cfg.accountSid = process.env.TWILIO_ACCOUNT_SID;
-cfg.authToken = process.env.TWILIO_AUTH_TOKEN;
-cfg.sendingNumber = process.env.TWILIO_NUMBER;
+  accountSid: process.env.TWILIO_ACCOUNT_SID,
+  authToken: process.env.TWILIO_AUTH_TOKEN,
+  sendingNumber: process.env.TWILIO_NUMBER
+};
+
 
 var requiredConfig = [cfg.accountSid, cfg.authToken, cfg.sendingNumber];
 var isConfigured = requiredConfig.every(function(configValue) {
@@ -21,6 +29,11 @@ if (!isConfigured) {
 
 var client = require('twilio')(cfg.accountSid, cfg.authToken);
 
+interface SMSMessage {
+  state: String;
+  body: String;
+  phoneNumber: String; 
+}
 
 var admins = require('./nums.json');
 
@@ -45,7 +58,9 @@ const OUTGOING_SMS_TABLE      = 'outgoing_sms';
 var currentFunction = 0;
 
 setInterval(function () {
-  dbGetData(pool, [dbGetOutgoingEmailString
+  dbGetData(pool, [
+    // dbGetOutgoingEmailString
+    dbGetOutgoingSmsString
       // ,
       // dbExecuteDriversFunctionString
   ]);
@@ -53,8 +68,8 @@ setInterval(function () {
 
 function dbGetOutgoingEmailString() {
   // return 'SELECT * FROM ' + SCHEMA_NAME + '.' + UNMATCHED_DRIVERS_VIEW
-  // return 'SELECT * FROM '
-  return 'SELECT uuid_driver FROM '
+  return 'SELECT * FROM '
+  // return 'SELECT uuid_driver FROM '
           + SCHEMA_NAME + '.' 
           + OUTGOING_EMAIL_TABLE
   // UNMATCHED_DRIVERS_VIEW
@@ -64,9 +79,9 @@ function dbGetOutgoingEmailString() {
 }
 
 function dbGetOutgoingSmsString() {
-  return 'SELECT uuid_driver FROM '
+  return 'SELECT * FROM '
           + SCHEMA_NAME + '.' 
-          + OUTGOING_EMAIL_TABLE
+          + OUTGOING_SMS_TABLE
       ;
 }
 
@@ -88,7 +103,8 @@ function dbGetData(pool, executeFunctionArray) {
   .then(function (result) {
     var firstRowAsString = "";
 
-    if (result !== undefined && result.rows !== undefined) {
+    if (result !== undefined && result.rows !== undefined &&
+        result.rows.length > 0) {
       // result.rows.forEach( val => console.log(val));
       result.rows.forEach(function (val) { 
         console.log("select: " + JSON.stringify(val)); 
@@ -96,10 +112,16 @@ function dbGetData(pool, executeFunctionArray) {
 
       firstRowAsString = JSON.stringify(result.rows[0]);
 
-      var uuid_driver = result.rows[0].uuid_driver.toString();
+      // var uuid_driver = result.rows[0].uuid_driver.toString();
 
-      var state   = result.rows[0].state.toString();
-      var msgText = result.rows[0].body.toString();
+      var message: SMSMessage = {
+        state: result.rows[0].state.toString(),
+        body: result.rows[0].body.toString(),
+        phoneNumber: result.rows[0].recipient.toString()
+      };
+
+      // console.log("uuid: ", uuid_driver);
+      makeCalls(message);
 
   //      id serial NOT NULL,
   // created_ts timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now()),
@@ -110,13 +132,9 @@ function dbGetData(pool, executeFunctionArray) {
   // body text NOT NULL,
   // emission_info text,
 
-
-
-      console.log("uuid: ", uuid_driver);
-      makeCalls(uuid_driver);
     }
 
-    console.error("executed query: " + firstRowAsString);
+    console.error("executed sms query: " + firstRowAsString);
   })
   .catch(function (e) {
     var message = e.message || '';
@@ -128,10 +146,6 @@ function dbGetData(pool, executeFunctionArray) {
   });
 }
 
-
-
-// makeCalls();
-
 function formatMessage (msg) {
   return '[This is a test] ' +
     ' Driver: ' + msg +
@@ -139,17 +153,22 @@ function formatMessage (msg) {
     'for more details.';
 };
 
-function makeCalls (message) {
+function makeCalls (message: SMSMessage) {
+// interface SMSMessage {
+//   state: String;
+//   body: String;
+//   phoneNumber: String; 
+// }
 
   admins.forEach( admin => {
-    var messageToSend = formatMessage(message);
+    var messageToSend = formatMessage(message.body);
 
-    sendSms(admin.phoneNumber, messageToSend);
+    sendSms(message.phoneNumber, messageToSend);
   });
 
 };
 
-function sendSms (to, message) {
+function sendSms (to: String, message: String) {
   client.messages.create({
       body: message,
       to: to,
