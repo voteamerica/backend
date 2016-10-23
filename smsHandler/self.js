@@ -5,6 +5,8 @@ var testAreaCode = 246;
 var testDriverAreaCode = 346;
 var needWheelchair = true;
 
+// call page with querystring
+// self.html?UUID_driver=9dba44a5-8188-4ced-925f-11c80fa9e130&DriverPhone=07958110786
 
 // will support fairly old browsers?
 // 

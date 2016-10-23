@@ -30,6 +30,7 @@ if (!isConfigured) {
 var client = require('twilio')(cfg.accountSid, cfg.authToken);
 
 interface SMSMessage {
+  id: Number,
   state: String;
   body: String;
   phoneNumber: String; 
@@ -106,18 +107,20 @@ function dbGetData(pool, executeFunctionArray) {
     if (result !== undefined && result.rows !== undefined &&
         result.rows.length > 0) {
       // result.rows.forEach( val => console.log(val));
-      result.rows.forEach(function (val) { 
-        console.log("select: " + JSON.stringify(val)); 
-      });
+      result.rows.forEach(function (smsMessage) { 
+        var smsMessageOutput = JSON.stringify(smsMessage);
 
-      firstRowAsString = JSON.stringify(result.rows[0]);
+        console.log("select: " + smsMessageOutput); 
+
+      // firstRowAsString = JSON.stringify(result.rows[0]);
 
       // var uuid_driver = result.rows[0].uuid_driver.toString();
 
       var message: SMSMessage = {
-        state: result.rows[0].state.toString(),
-        body: result.rows[0].body.toString(),
-        phoneNumber: result.rows[0].recipient.toString()
+        id:           smsMessage.id,
+        state:        smsMessage.state,
+        body:         smsMessage.body,
+        phoneNumber:  smsMessage.recipient
       };
 
       // console.log("uuid: ", uuid_driver);
@@ -132,9 +135,12 @@ function dbGetData(pool, executeFunctionArray) {
   // body text NOT NULL,
   // emission_info text,
 
+    console.error("executed sms query: " + firstRowAsString);
+
+      });
+
     }
 
-    console.error("executed sms query: " + firstRowAsString);
   })
   .catch(function (e) {
     var message = e.message || '';
@@ -164,15 +170,15 @@ function makeCalls (message: SMSMessage) {
 //   phoneNumber: String; 
 // }
 
-  admins.forEach( admin => {
+  // admins.forEach( admin => {
     var messageToSend = formatMessage(message.body);
 
-    sendSms(message.phoneNumber, messageToSend);
-  });
+    sendSms(message.id, message.phoneNumber, messageToSend);
+  // });
 
 };
 
-function sendSms (to: String, message: String) {
+function sendSms (id: Number, to: String, message: String) {
   client.messages.create({
       body: message,
       to: to,
@@ -184,6 +190,8 @@ function sendSms (to: String, message: String) {
         console.error('Could not notify administrator');
         return console.error(err);
       } 
+      
+      dbUpdateData(id, pool, dbGetUpdateString);
       
       console.log('Administrator notified');
     }
@@ -215,4 +223,40 @@ function sendSms (to: String, message: String) {
 //    <Message>Hello from Twilio!</Message>
 // </Response>
 
+function dbGetUpdateString (tableName) {
+  return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
+          ' SET state=' + " '" + 'Sent' + "' WHERE id=$1";
+}
+
+function dbUpdateData(id, pool, fnUpdateString) {
+  var updateString = fnUpdateString();
+
+  pool.query(
+    updateString,
+    // fnPayloadArray(req, payload)
+    [id]
+  )
+  .then(result => {
+    var displayResult = result || '';
+    var uuid = "";
+
+    try {
+      displayResult = JSON.stringify(result);
+      uuid = result.rows[0].UUID;
+      console.error('row: ' + JSON.stringify(result.rows[0]) );
+    }
+    catch (err) {
+      console.error('no uuid returned');
+    }
+
+    console.log('update: ', uuid + ' ' + displayResult);
+
+  })
+  .catch(e => {
+    var message = e.message || '';
+    var stack   = e.stack   || '';
+
+    console.error('query error: ', message, stack);
+  });
+}
 
