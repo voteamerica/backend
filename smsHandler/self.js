@@ -27,10 +27,16 @@ function getParameterByName(name, url) {
 var UUID_driver = getParameterByName('UUID_driver'); 
 var UUID_rider = getParameterByName('UUID_rider'); 
 var Score = getParameterByName('Score'); 
-var DriverPhone = getParameterByName('DriverPhone'); 
-var RiderPhone = getParameterByName('RiderPhone'); 
-var LastName = getParameterByName('LastName'); 
+// var DriverPhone = getParameterByName('DriverPhone'); 
+// var RiderPhone = getParameterByName('RiderPhone'); 
+// var LastName = getParameterByName('LastName'); 
 
+function getCheckValue() {
+  var phoneNumField = document.getElementById("inputPhoneNumber");
+
+  return phoneNumField.value;
+}
+ 
 if (UUID_driver === null) {
   var buttonCancelDriveOffer = document.getElementById("btnCancelDriveOffer");
 
@@ -42,6 +48,13 @@ if (UUID_rider === null) {
 
   buttonCancelRideRequest.className += "hiddenButton";
 }
+
+if (Score === null) {
+  var buttonAcceptDriverMatch = document.getElementById("btnAcceptDriverMatch");
+
+  buttonAcceptDriverMatch.className += "hiddenButton";
+}
+
 
 function getUnmatchedDriversTest () {
   var xhr = new XMLHttpRequest();
@@ -74,7 +87,10 @@ function getUnmatchedDriversTest () {
 }
 
 function cancelRideRequest() {
-  var checkField = (RiderPhone || LastName || "");
+  // var checkField = (RiderPhone || LastName || "");
+  var checkField = getCheckValue();
+
+  buttonCancelDriveOffer.className += "hiddenButton";
 
   var url = 
     remoteUrl + 
@@ -107,7 +123,8 @@ function cancelRiderMatchTest() {
 }
 
 function cancelDriveOffer() {
-  var checkField = (DriverPhone || LastName || "");
+  var checkField = getCheckValue();
+  // var checkField = (DriverPhone || LastName || "");
 
   var url = 
     remoteUrl + '/cancel-drive-offer?' + 
@@ -138,20 +155,18 @@ function cancelDriverMatchTest() {
   request.send(formData);
 }
 
-function acceptDriverMatchTest() {
-  var formData  = new FormData();
+function acceptDriverMatch() {
+  var checkField = getCheckValue();
+
   var url = 
     remoteUrl + '/accept-driver-match?' + 
-    'UUID_driver=1e6e274d-ad33-4127-9f02-f35b48a07897' +
-    '&UUID_rider=1e6e274d-ad33-4127-9f02-f35b48a07897' +
-    '&Score=123' +
-    '&DriverPhone=123';
+    'UUID_driver=' + UUID_driver +
+    '&UUID_rider=' + UUID_rider + 
+    '&Score=' + Score +
+    '&DriverPhone=' + checkField;
+
   var request = new XMLHttpRequest();
 
-  // formData.append("UUID", "1e6e274d-ad33-4127-9f02-f35b48a07897");
-  // formData.append("DriverPhone", '1');
-
-  // request.open("POST", url);
   request.open("GET", url);
-  request.send(formData);
+  request.send();
 }
