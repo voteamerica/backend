@@ -236,7 +236,7 @@ function getRiderPayloadAsArray (req, payload) {
       payload.RiderPhone, 
       payload.RiderCollectionZIP, 
       payload.RiderDropOffZIP, 
-      payload.AvailableRideTimesJSON, // this one should be in local time as passed along by the forms
+      payload.AvailableRideTimesJSON // this one should be in local time as passed along by the forms
         
       , payload.TotalPartySize
       , (payload.TwoWayTripNeeded ? 'true' : 'false')
