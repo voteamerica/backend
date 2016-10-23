@@ -1,9 +1,10 @@
 'use strict';
-var cfg = {};
-// get info from env vars
-cfg.accountSid = process.env.TWILIO_ACCOUNT_SID;
-cfg.authToken = process.env.TWILIO_AUTH_TOKEN;
-cfg.sendingNumber = process.env.TWILIO_NUMBER;
+var cfg = {
+    // get info from env vars
+    accountSid: process.env.TWILIO_ACCOUNT_SID,
+    authToken: process.env.TWILIO_AUTH_TOKEN,
+    sendingNumber: process.env.TWILIO_NUMBER
+};
 var requiredConfig = [cfg.accountSid, cfg.authToken, cfg.sendingNumber];
 var isConfigured = requiredConfig.every(function (configValue) {
     return configValue || false;
@@ -17,31 +18,33 @@ var admins = require('./nums.json');
 var DELAY = process.env.CP_DELAY || 10000;
 var Pool = require('pg').Pool;
 var pool = new Pool({
-    idleTimeoutMillis: 2000 //close idle clients after 1 second
+    idleTimeoutMillis: 2000 //close idle clients after 2 seconds
 });
 // var SCHEMA_NAME = 'stage';
 var SCHEMA_NAME = 'nov2016';
-// var SWEEPER_RIDERS_FUNCTION = 'create_riders()';
-// var SWEEPER_DRIVERS_FUNCTION = 'create_drivers()';
-// random thing to call
-var UNMATCHED_DRIVERS_VIEW = 'vw_unmatched_riders';
-var MATCH_TABLE = 'match';
+var OUTGOING_EMAIL_TABLE = 'outgoing_email';
+var OUTGOING_SMS_TABLE = 'outgoing_sms';
 var currentFunction = 0;
 setInterval(function () {
-    dbGetData(pool, [dbExecuteRidersFunctionString
+    dbGetData(pool, [
+        // dbGetOutgoingEmailString
+        dbGetOutgoingSmsString
     ]);
 }, DELAY);
-function dbExecuteRidersFunctionString() {
-    // return 'SELECT * FROM ' + SCHEMA_NAME + '.' + UNMATCHED_DRIVERS_VIEW
-    // return 'SELECT * FROM '
-    return 'SELECT uuid_driver FROM '
-        + SCHEMA_NAME + '.' +
-        // UNMATCHED_DRIVERS_VIEW
-        MATCH_TABLE;
+function dbGetOutgoingEmailString() {
+    return 'SELECT * FROM '
+        + SCHEMA_NAME + '.'
+        + OUTGOING_EMAIL_TABLE
+        + ' WHERE state=' + " '" + 'Pending' + "' ";
+    ;
 }
-// function dbExecuteDriversFunctionString() {
-//     return 'select ' + SCHEMA_NAME + '.' + SWEEPER_DRIVERS_FUNCTION;
-// }
+function dbGetOutgoingSmsString() {
+    return 'SELECT * FROM '
+        + SCHEMA_NAME + '.'
+        + OUTGOING_SMS_TABLE
+        + ' WHERE state=' + " '" + 'Pending' + "' ";
+    ;
+}
 function dbGetData(pool, executeFunctionArray) {
     var fnExecuteFunction = executeFunctionArray[currentFunction++];
     if (currentFunction >= executeFunctionArray.length) {
@@ -51,55 +54,65 @@ function dbGetData(pool, executeFunctionArray) {
     console.log("fn index: " + currentFunction);
     var queryString = fnExecuteFunction();
     console.log("queryString: " + queryString);
-    pool.query(queryString)
+    pool
+        .query(queryString)
         .then(function (result) {
         var firstRowAsString = "";
-        if (result !== undefined && result.rows !== undefined) {
-            // result.rows.forEach( val => console.log(val));
-            result.rows.forEach(function (val) { return console.log("select: " + JSON.stringify(val)); });
-            firstRowAsString = JSON.stringify(result.rows[0]);
-            var uuid_driver = result.rows[0].uuid_driver.toString();
-            console.log("uuid: ", uuid_driver);
-            makeCalls(uuid_driver);
+        if (result !== undefined && result.rows !== undefined &&
+            result.rows.length > 0) {
+            result.rows.forEach(function (smsMessage) {
+                var smsMessageOutput = JSON.stringify(smsMessage);
+                console.log("select: " + smsMessageOutput);
+                // firstRowAsString = JSON.stringify(result.rows[0]);
+                // var uuid_driver = result.rows[0].uuid_driver.toString();
+                var message = {
+                    id: smsMessage.id,
+                    state: smsMessage.state,
+                    body: smsMessage.body,
+                    phoneNumber: smsMessage.recipient
+                };
+                // console.log("uuid: ", uuid_driver);
+                makeCalls(message);
+                //      id serial NOT NULL,
+                // created_ts timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+                // last_updated_ts timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+                // state character varying(30) NOT NULL DEFAULT 'Pending'::character varying,
+                // recipient character varying(255) NOT NULL,
+                // subject character varying(255) NOT NULL,
+                // body text NOT NULL,
+                // emission_info text,
+                console.error("executed sms query: " + firstRowAsString);
+            });
         }
-        console.error("executed query: " + firstRowAsString);
-        // reply(results.success + firstRowAsString);
     })
         .catch(function (e) {
         var message = e.message || '';
         var stack = e.stack || '';
-        console.error(
-        // results.failure, 
-        message, stack);
-        // reply(results.failure + message).code(500);
+        console.error(message, stack);
     });
 }
-// makeCalls();
 function formatMessage(msg) {
-    return '[This is a test] ' +
-        ' Driver: ' + msg +
-        '. Go to: http://carpoolvote.com ' +
-        'for more details.';
+    return msg;
 }
 ;
 function makeCalls(message) {
-    admins.forEach(function (admin) {
-        var messageToSend = formatMessage(message);
-        sendSms(admin.phoneNumber, messageToSend);
-    });
+    var messageToSend = formatMessage(message.body);
+    sendSms(message.id, message.phoneNumber, messageToSend);
 }
 ;
-function sendSms(to, message) {
+function sendSms(id, to, message) {
     client.messages.create({
         body: message,
         to: to,
         from: cfg.sendingNumber
     }, function (err, data) {
         if (err) {
-            console.error('Could not notify administrator');
+            console.error('Could not notify user');
             return console.error(err);
         }
-        console.log('Administrator notified');
+        // update table status
+        dbUpdateData(id, pool, dbGetUpdateString);
+        console.log('User notified');
     });
 }
 ;
@@ -123,4 +136,28 @@ function sendSms(to, message) {
 // <Response>
 //    <Message>Hello from Twilio!</Message>
 // </Response>
+function dbGetUpdateString(tableName) {
+    return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
+        ' SET state=' + " '" + 'Sent' + "' WHERE id=$1";
+}
+function dbUpdateData(id, pool, fnUpdateString) {
+    var updateString = fnUpdateString();
+    pool.query(updateString, [id])
+        .then(function (result) {
+        var displayResult = result || '';
+        // var uuid = "";
+        try {
+            displayResult = JSON.stringify(result);
+        }
+        catch (err) {
+            console.error('no result returned');
+        }
+        console.log('update: ', id + ' ' + displayResult);
+    })
+        .catch(function (e) {
+        var message = e.message || '';
+        var stack = e.stack || '';
+        console.error('query error: ', message, stack);
+    });
+}
 //# sourceMappingURL=index.js.map

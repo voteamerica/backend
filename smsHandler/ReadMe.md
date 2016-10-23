@@ -24,6 +24,7 @@ export PGUSER=carpool
 // 30 seconds delay between sweeps
 export CP_DELAY=30000
 
+// specify account details
 export TWILIO_ACCOUNT_SID=
 export TWILIO_AUTH_TOKEN=
 export TWILIO_NUMBER=

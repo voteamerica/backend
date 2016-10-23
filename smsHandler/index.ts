@@ -42,16 +42,11 @@ var DELAY = process.env.CP_DELAY || 10000;
 
 var Pool = require('pg').Pool;
 var pool = new Pool({
-  idleTimeoutMillis: 2000 //close idle clients after 1 second
+  idleTimeoutMillis: 2000 //close idle clients after 2 seconds
 });
 
 // var SCHEMA_NAME = 'stage';
 var SCHEMA_NAME = 'nov2016';
-// var SWEEPER_RIDERS_FUNCTION = 'create_riders()';
-// var SWEEPER_DRIVERS_FUNCTION = 'create_drivers()';
-// random thing to call
-// const UNMATCHED_DRIVERS_VIEW  = 'vw_unmatched_riders';
-// const MATCH_TABLE             = 'match';
 
 const OUTGOING_EMAIL_TABLE    = 'outgoing_email';
 const OUTGOING_SMS_TABLE      = 'outgoing_sms';
@@ -62,20 +57,14 @@ setInterval(function () {
   dbGetData(pool, [
     // dbGetOutgoingEmailString
     dbGetOutgoingSmsString
-      // ,
-      // dbExecuteDriversFunctionString
   ]);
 }, DELAY);
 
 function dbGetOutgoingEmailString() {
-  // return 'SELECT * FROM ' + SCHEMA_NAME + '.' + UNMATCHED_DRIVERS_VIEW
   return 'SELECT * FROM '
-  // return 'SELECT uuid_driver FROM '
           + SCHEMA_NAME + '.' 
           + OUTGOING_EMAIL_TABLE
-  // UNMATCHED_DRIVERS_VIEW
-  // MATCH_TABLE 
-      //SWEEPER_RIDERS_FUNCTION
+          + ' WHERE state=' + " '" + 'Pending' + "' ";
       ;
 }
 
@@ -83,6 +72,7 @@ function dbGetOutgoingSmsString() {
   return 'SELECT * FROM '
           + SCHEMA_NAME + '.' 
           + OUTGOING_SMS_TABLE
+          + ' WHERE state=' + " '" + 'Pending' + "' ";
       ;
 }
 
@@ -101,13 +91,13 @@ function dbGetData(pool, executeFunctionArray) {
 
   pool
   .query(queryString)
-  .then(function (result) {
+  .then( result => {
     var firstRowAsString = "";
 
     if (result !== undefined && result.rows !== undefined &&
         result.rows.length > 0) {
-      // result.rows.forEach( val => console.log(val));
-      result.rows.forEach(function (smsMessage) { 
+
+      result.rows.forEach( smsMessage => { 
         var smsMessageOutput = JSON.stringify(smsMessage);
 
         console.log("select: " + smsMessageOutput); 
@@ -126,28 +116,24 @@ function dbGetData(pool, executeFunctionArray) {
       // console.log("uuid: ", uuid_driver);
       makeCalls(message);
 
-  //      id serial NOT NULL,
-  // created_ts timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now()),
-  // last_updated_ts timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now()),
-  // state character varying(30) NOT NULL DEFAULT 'Pending'::character varying,
-  // recipient character varying(255) NOT NULL,
-  // subject character varying(255) NOT NULL,
-  // body text NOT NULL,
-  // emission_info text,
+      //      id serial NOT NULL,
+      // created_ts timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+      // last_updated_ts timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+      // state character varying(30) NOT NULL DEFAULT 'Pending'::character varying,
+      // recipient character varying(255) NOT NULL,
+      // subject character varying(255) NOT NULL,
+      // body text NOT NULL,
+      // emission_info text,
 
-    console.error("executed sms query: " + firstRowAsString);
-
+        console.error("executed sms query: " + firstRowAsString);
       });
-
     }
-
   })
   .catch(function (e) {
     var message = e.message || '';
     var stack = e.stack || '';
 
     console.error(
-      // results.failure, 
       message, stack);
   });
 }
@@ -164,18 +150,9 @@ function formatMessage (msg) {
 };
 
 function makeCalls (message: SMSMessage) {
-// interface SMSMessage {
-//   state: String;
-//   body: String;
-//   phoneNumber: String; 
-// }
+  var messageToSend = formatMessage(message.body);
 
-  // admins.forEach( admin => {
-    var messageToSend = formatMessage(message.body);
-
-    sendSms(message.id, message.phoneNumber, messageToSend);
-  // });
-
+  sendSms(message.id, message.phoneNumber, messageToSend);
 };
 
 function sendSms (id: Number, to: String, message: String) {
@@ -186,14 +163,16 @@ function sendSms (id: Number, to: String, message: String) {
       // mediaUrl: 'http://www.yourserver.com/someimage.png'
     }, 
     (err, data) => {
+      
       if (err) {
-        console.error('Could not notify administrator');
+        console.error('Could not notify user');
         return console.error(err);
       } 
       
+      // update table status
       dbUpdateData(id, pool, dbGetUpdateString);
       
-      console.log('Administrator notified');
+      console.log('User notified');
     }
   );
 };
@@ -233,24 +212,22 @@ function dbUpdateData(id, pool, fnUpdateString) {
 
   pool.query(
     updateString,
-    // fnPayloadArray(req, payload)
     [id]
   )
   .then(result => {
     var displayResult = result || '';
-    var uuid = "";
+    // var uuid = "";
 
     try {
       displayResult = JSON.stringify(result);
-      uuid = result.rows[0].UUID;
-      console.error('row: ' + JSON.stringify(result.rows[0]) );
+      // uuid = result.rows[0].UUID;
+      // console.error('row: ' + JSON.stringify(result.rows[0]) );
     }
     catch (err) {
-      console.error('no uuid returned');
+      console.error('no result returned');
     }
 
-    console.log('update: ', uuid + ' ' + displayResult);
-
+    console.log('update: ', id + ' ' + displayResult);
   })
   .catch(e => {
     var message = e.message || '';
