@@ -35,7 +35,6 @@ POST /driver
  IPAddress                        | character varying(20)       |                                               | [populated by collect app]
  DriverCollectionZIP              | character varying(5)        | not null                                      | DriverCollectionZIP
  DriverCollectionRadius           | integer                     | not null                                      | DriverCollectionRadius
- AvailableDriveTimesUTC           | character varying(2000)     |                                               | AvailableDriveTimesJSON  -- node app must convert to utc before storing into db
  AvailableDriveTimesLocal         | character varying(2000)     |                                               | AvailableDriveTimesJSON  -- form  should send in local time
  DriverCanLoadRiderWithWheelchair | boolean                     | not null default false                        | DriverCanLoadRiderWithWheelchair
  SeatCount                        | integer                     | default 1                                     | SeatCount
@@ -66,7 +65,6 @@ POST /rider
  RiderPhone                  | character varying(20)       |                                               | RiderPhone
  RiderCollectionZIP          | character varying(5)        | not null                                      | RiderCollectionZIP
  RiderDropOffZIP             | character varying(5)        | not null                                      | RiderDropOffZIP
- AvailableRideTimesUTC       | character varying(2000)     |                                               | AvailableRideTimesJSON -- node app must convert to utc before storing into db
  AvailableRideTimesLocal     | character varying(2000)     |                                               | AvailableRideTimesJSON -- form  should send in local time
  TotalPartySize              | integer                     |                                               | TotalPartySize
  TwoWayTripNeeded            | boolean                     | not null default false                        | TwoWayTripNeeded
