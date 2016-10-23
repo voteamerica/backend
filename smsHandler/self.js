@@ -29,6 +29,19 @@ var UUID_rider = getParameterByName('UUID_rider');
 var Score = getParameterByName('Score'); 
 var DriverPhone = getParameterByName('DriverPhone'); 
 var RiderPhone = getParameterByName('RiderPhone'); 
+var LastName = getParameterByName('LastName'); 
+
+if (UUID_driver === null) {
+  var buttonCancelDriveOffer = document.getElementById("btnCancelDriveOffer");
+
+  buttonCancelDriveOffer.className += "hiddenButton";
+}
+
+if (UUID_rider === null) {
+  var buttonCancelRideRequest = document.getElementById("btnCancelRideRequest");
+
+  buttonCancelRideRequest.className += "hiddenButton";
+}
 
 function getUnmatchedDriversTest () {
   var xhr = new XMLHttpRequest();
@@ -93,10 +106,12 @@ function cancelRiderMatchTest() {
 }
 
 function cancelDriveOfferTest() {
+  var checkField = (DriverPhone || LastName || "");
+
   var url = 
     remoteUrl + '/cancel-drive-offer?' + 
     'UUID=' + UUID_driver +
-    '&DriverPhone=' + DriverPhone;
+    '&DriverPhone=' + checkField;
 
   var request = new XMLHttpRequest();
 
