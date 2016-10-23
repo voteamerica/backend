@@ -31,10 +31,10 @@ driver_time text;
 rider_time text;
 seconds_diff integer;
 
-start_ride_time timestamp with time zone;
-end_ride_time timestamp with time zone;
-start_drive_time timestamp with time zone;
-end_drive_time timestamp with time zone;
+start_ride_time timestamp without time zone;
+end_ride_time timestamp without time zone;
+start_drive_time timestamp without time zone;
+end_drive_time timestamp without time zone;
 
 zip_origin nov2016.zip_codes%ROWTYPE;  -- Driver's origin
 zip_pickup nov2016.zip_codes%ROWTYPE;  -- Rider's pickup
@@ -48,6 +48,15 @@ g_uuid_rider  character varying(50);
 g_record record;
 g_email_body text;
 g_sms_body text;
+
+v_subject nov2016.outgoing_email.subject%TYPE;                                                                            
+v_body nov2016.outgoing_email.body%TYPE;                                                                                  
+v_html_header nov2016.outgoing_email.body%TYPE;
+v_html_body   nov2016.outgoing_email.body%TYPE;
+v_html_footer nov2016.outgoing_email.body%TYPE;
+
+v_loop_cnt integer;
+v_row_style text;
 
 BEGIN
 
@@ -81,7 +90,7 @@ BEGIN
 			WHERE r.state in ('Pending','MatchProposed')
 		LOOP
 		
-			IF length(ride_request_row."AvailableRideTimesUTC") = 0
+			IF length(ride_request_row."AvailableRideTimesLocal") = 0
 			THEN
 				UPDATE stage.websubmission_rider 
 				SET state='Failed', state_info='Invalid AvailableRideTimes'
@@ -117,16 +126,16 @@ BEGIN
 			END IF;
 	
 	
-			-- split AvailableRideTimesUTC in individual time intervals
-			ride_times_rider := string_to_array(ride_request_row."AvailableRideTimesUTC", '|');
+			-- split AvailableRideTimesLocal in individual time intervals
+			ride_times_rider := string_to_array(ride_request_row."AvailableRideTimesLocal", '|');
 			b_rider_all_times_expired := TRUE;  -- Assumes all expired
 			FOREACH rider_time IN ARRAY ride_times_rider
 			LOOP
 				BEGIN
-					-- each time interval is in ISO8601 format
-					-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
-					start_ride_time := substr(rider_time, 1, 24)::timestamp with time zone;
-					end_ride_time := substr(rider_time, 26, 24)::timestamp with time zone;
+					-- each time interval is in ISO8601 format					
+					-- new format without timezone : 2016-10-01T02:00/2016-10-01T03:00
+					start_ride_time :=  (substring(rider_time from 1 for (position ('/' in rider_time)-1)))::timestamp without time zone;
+					end_ride_time :=    (substring(rider_time from position ('/' in rider_time)))::timestamp without time zone;
 					
 					IF start_ride_time > end_ride_time
 					THEN
@@ -195,7 +204,7 @@ BEGIN
 
  				LOOP
  
- 					IF length(drive_offer_row."AvailableDriveTimesUTC") = 0
+ 					IF length(drive_offer_row."AvailableDriveTimesLocal") = 0
  					THEN
  						UPDATE stage.websubmission_driver 
  						SET state='Failed', state_info='Invalid AvailableDriveTimes'
@@ -224,20 +233,19 @@ BEGIN
 						b_driver_validated := FALSE;
 					END IF; 					
  					
- 					-- split AvailableDriveTimesUTC in individual time intervals
- 					-- NOTE : we do not want actual JSON here...
+ 					-- split AvailableDriveTimesLocal in individual time intervals
  					-- FORMAT should be like this 
- 					-- 2016-10-01T08:00:00-0500/2016-10-01T10:00:00-0500|2016-10-01T10:00:00-0500/2016-10-01T22:00:00-0500|2016-10-01T22:00:00-0500/2016-10-01T23:00:00-0500
- 					ride_times_driver := string_to_array(drive_offer_row."AvailableDriveTimesUTC", '|');
+ 					-- 2016-10-01T02:00/2016-10-01T03:00|2016-10-01T02:00/2016-10-01T03:00|2016-10-01T02:00/2016-10-01T03:00
+ 					ride_times_driver := string_to_array(drive_offer_row."AvailableDriveTimesLocal", '|');
 					b_driver_all_times_expired := TRUE;
  					FOREACH driver_time IN ARRAY ride_times_driver
 					LOOP
 						BEGIN
 							-- each time interval is in ISO8601 format
-							-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
-							start_drive_time := substr(driver_time, 1, 24)::timestamp with time zone;
-							end_drive_time := substr(driver_time, 26, 24)::timestamp with time zone;
-							
+							-- new format without timezone : 2016-10-01T02:00/2016-10-01T03:00
+							start_drive_time :=  (substring(driver_time from 1 for (position ('/' in driver_time)-1)))::timestamp without time zone;
+							end_drive_time :=    (substring(driver_time from position ('/' in driver_time)))::timestamp without time zone;
+					
 							IF start_drive_time > end_drive_time
 							THEN
 								UPDATE stage.websubmission_driver 
@@ -341,14 +349,15 @@ BEGIN
 									v_evaluated_pairs := v_evaluated_pairs +1;
 									
 									-- each time interval is in ISO8601 format
-									-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
-									start_ride_time := substr(rider_time, 1, 24)::timestamp with time zone;
-									end_ride_time := substr(rider_time, 26, 24)::timestamp with time zone;
-									
+									-- new format without timezone : 2016-10-01T02:00/2016-10-01T03:00
+									start_ride_time :=  (substring(rider_time from 1 for (position ('/' in rider_time)-1)))::timestamp without time zone;
+									end_ride_time :=    (substring(rider_time from position ('/' in rider_time)))::timestamp without time zone;
+					
 									-- each time interval is in ISO8601 format
 									-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
-									start_drive_time := substr(driver_time, 1, 24)::timestamp with time zone;
-									end_drive_time := substr(driver_time, 26, 24)::timestamp with time zone;
+									start_drive_time :=  (substring(driver_time from 1 for (position ('/' in driver_time)-1)))::timestamp without time zone;
+									end_drive_time :=    (substring(driver_time from position ('/' in driver_time)))::timestamp without time zone;
+
 									
 									
 									time_criteria_points := 200;
@@ -454,29 +463,107 @@ BEGIN
 			END IF; -- rider is validated
 			
 		END LOOP; -- for each ride request
+
+        v_html_header := '<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
+		|| '<html>' 
+		|| '<head>'
+		|| '<meta http-equiv="content-type" content="text/html; charset=UTF-8">'
+		|| '<style type="text/css">'
+		|| '.evenRow {'
+		|| '  font-family:Monospace;'
+		|| '  border-bottom: black thin;'
+		|| '  border-top: black thin;'
+		|| '  border-right: black thin;'
+		|| '  border-left: black thin;'	
+		|| '  border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #F0F0F0'
+		|| '}'
+		|| '.oddRow {'
+		|| '  font-family:Monospace;'
+		|| '	border-bottom: black thin;'
+		|| '	border-top: black thin;'
+		|| '	border-right: black thin;'
+		|| '	border-left: black thin;'	
+		|| '	border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #E0E0E0'
+		|| '}'
+		|| '.warnRow {'
+		|| '  font-family:Monospace;'
+		|| '	border-bottom: black thin;'
+		|| '	border-top: black thin;'
+		|| '	border-right: black thin;'
+		|| '	border-left: black thin;'	
+		|| '	border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #FF9933'
+		|| '}'
+		|| '</style>'
+		|| '</head>'; 
+
+        v_html_footer := '</html>';	
+
 		
 		-- send notifications to driver only. Riders will be waiting to be contacted
 		FOR drive_offer_row IN SELECT * FROM stage.websubmission_driver d
 								WHERE d."UUID" IN (SELECT DISTINCT uuid_driver FROM match_notifications_buffer)
 		LOOP
 		
-			g_email_body := '';
-			g_sms_body := '';
-		
-			FOR g_record IN SELECT * FROM match_notifications_buffer b 
-									WHERE b.uuid_driver = drive_offer_row."UUID"
+            v_html_body := '<body>'
+            || '<p>Dear ' || drive_offer_row."DriverFirstName" ||  ' ' || drive_offer_row."DriverLastName" || ', <p>' 
+            || '<p>Great news - we found riders who match your criteria!</p>'
+            || '<p><table>'
+            || '<tr>' 
+            || '<td class="oddRow">Action</td>' 
+            || '<td class="oddRow">Score (best=600)</td>' 
+            || '<td class="oddRow">Pick-up location</td>'
+            || '<td class="oddRow">Destination</td>'
+            || '<td class="oddRow">Preferred Ride Times</td>'
+            || '<td class="oddRow">Party Size</td>'
+            || '<td class="oddRow">Wheelchair accessibility needed</td>'
+            || '<td class="oddRow">Two-way trip needed</td>'
+            || '<td class="oddRow">Notes</td>'
+            || '<td class="oddRow">Name</td>'
+            || '<td class="oddRow">Email (*=preferred)</td>'
+            || '<td class="oddRow">Phone Number (*)=preferred</td>'
+            || '</tr>';
+
+			--RAISE NOTICE 'BODY 1 : %', v_html_body;
+			
+            v_loop_cnt := 0;
+			FOR g_record IN SELECT * FROM nov2016.match m 
+									WHERE m.uuid_driver = drive_offer_row."UUID" order by score desc
 			LOOP
+                v_row_style := CASE WHEN v_loop_cnt % 2 =1 THEN 'oddRow' else 'evenRow' END;
 					
 				SELECT * INTO ride_request_row FROM stage.websubmission_rider r
 												WHERE r."UUID" = g_record.uuid_rider;
 
-				
-				g_email_body := g_email_body 
-				       || 'https://api.carpoolvote.com/v2.0/accept-driver-match'
-					   || '?UUID_driver=' || g_record.uuid_driver
-					   || '&UUID_rider=' || g_record.uuid_rider
-					   || '&Score=' || g_record.score
-					   || '&DriverEmail=' || drive_offer_row."DriverEmail" || '\n';
+				v_html_body := v_html_body 
+                    || '<tr>' 
+                    || '<td class="' || v_row_style || '">' ||
+                        CASE WHEN g_record.state='MatchProposed' THEN '<a href="' || 'https://api.carpoolvote.com/live/accept-driver-match' 
+                            || '?UUID_driver=' || drive_offer_row."UUID"
+                            || '&UUID_rider=' || g_record.uuid_rider
+                            || '&Score=' || g_record.score
+                            || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName" )   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
+                            || '">Accept</a>'
+                        ELSE g_record.state END || '</td>'
+                    || '<td class="' || v_row_style || '">' || g_record.score || '</td>'
+                    || '<td class="' || v_row_style || '">' || ride_request_row."RiderCollectionZIP" || '</td>'
+                    || '<td class="' || v_row_style || '">' || ride_request_row."RiderDropOffZIP" || '</td>'
+                    || '<td class="' || v_row_style || '">' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-')  || '</td>'
+                    || '<td class="' || v_row_style || '">' || ride_request_row."TotalPartySize" || '</td>'
+                    || '<td class="' || v_row_style || '">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td>'
+                    || '<td class="' || v_row_style || '">' || CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || '</td>'
+                    || '<td class="' || v_row_style || '">' || COALESCE (ride_request_row."RiderAccommodationNotes", ' ') || '</td>'
+                    || '<td class="' || v_row_style || '">' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || '</td>'
+                    || '<td class="' || v_row_style || '">' || COALESCE(ride_request_row."RiderEmail", ' ') || CASE WHEN coalesce(ride_request_row."RiderPreferredContact" LIKE '%Email%',false) THEN '(*)' else ' ' END || '</td>'
+                    || '<td class="' || v_row_style || '">' || COALESCE(ride_request_row."RiderPhone", ' ') || CASE WHEN coalesce(ride_request_row."RiderPreferredContact" LIKE '%Phone%', false) THEN '(*)' Else ' ' END || '</td>'
+                    || '</tr>';
+                
+				--RAISE NOTICE 'BODY 2 : % % %', v_html_body, v_row_style, ride_request_row."UUID";
 				
 				g_sms_body := g_sms_body 
 				       || 'https://api.carpoolvote.com/v2.0/accept-driver-match'
@@ -484,15 +571,34 @@ BEGIN
 					   || '&UUID_rider=' || g_record.uuid_rider
 					   || '&Score=' || g_record.score
 					   || '&DriverPhone=' || drive_offer_row."DriverPhone" || '\n';
-				
+			
+				v_loop_cnt := v_loop_cnt + 1;
 			END LOOP;
+			
+			
+			--RAISE NOTICE 'BODY 3 : %', v_html_body;
+			
+            v_html_body := v_html_body || '</table></p>'
+                || '<p>If you do not wish to accept the proposed rides, you do not need to do anything. A match is only confirmed once you have accepted it.</p>'
+                || '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">self-service portal</a>.</p>'
+                || '<p><a href="' || 'https://api.carpoolvote.com/live/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel your Drive Offer</a></p>'
+                || '<p>Warm wishes</p>'
+                || '<p>The CarpoolVote.com team.</p>'
+                || '</body>';
+
+            v_body := v_html_header || v_html_body || v_html_footer;
+			--RAISE NOTICE 	'%', drive_offer_row."UUID";
+			--RAISE NOTICE '%', v_body;
+			--RAISE NOTICE '%', v_html_header;
+			--RAISE NOTICE '%', v_html_body;
+			--RAISE NOTICE '%', v_html_footer;
 			
 			IF drive_offer_row."DriverEmail" IS NOT NULL
 			THEN
 				INSERT INTO nov2016.outgoing_email (recipient, subject, body)
 				VALUES (drive_offer_row."DriverEmail", 
-				'New Match Notification', 
-				g_email_body);
+				'Proposed rider match update!   --- [' || drive_offer_row."UUID" || ']', 
+				v_body);
 				
 			END IF;
 				
@@ -501,7 +607,7 @@ BEGIN
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
-				g_sms_body);
+				' ');
 			
 			END IF;
 
