@@ -73,6 +73,12 @@ server.route({
 
 server.route({
   method: 'GET',
+  path: '/' + routeFns.UNMATCHED_RIDERS_ROUTE,
+  handler: routeFns.getUnmatchedRiders
+});
+
+server.route({
+  method: 'GET',
   path: '/matches',
   handler: (req, reply) => {
     var results = {
