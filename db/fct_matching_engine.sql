@@ -49,6 +49,15 @@ g_record record;
 g_email_body text;
 g_sms_body text;
 
+v_subject nov2016.outgoing_email.subject%TYPE;                                                                            
+v_body nov2016.outgoing_email.body%TYPE;                                                                                  
+v_html_header nov2016.outgoing_email.body%TYPE;
+v_html_body   nov2016.outgoing_email.body%TYPE;
+v_html_footer nov2016.outgoing_email.body%TYPE;
+
+v_loop_cnt integer;
+v_row_style text;
+
 BEGIN
 
 	run_now := true;
@@ -454,29 +463,107 @@ BEGIN
 			END IF; -- rider is validated
 			
 		END LOOP; -- for each ride request
+
+        v_html_header := '<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
+		|| '<html>' 
+		|| '<head>'
+		|| '<meta http-equiv="content-type" content="text/html; charset=UTF-8">'
+		|| '<style type="text/css">'
+		|| '.evenRow {'
+		|| '  font-family:Monospace;'
+		|| '  border-bottom: black thin;'
+		|| '  border-top: black thin;'
+		|| '  border-right: black thin;'
+		|| '  border-left: black thin;'	
+		|| '  border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #F0F0F0'
+		|| '}'
+		|| '.oddRow {'
+		|| '  font-family:Monospace;'
+		|| '	border-bottom: black thin;'
+		|| '	border-top: black thin;'
+		|| '	border-right: black thin;'
+		|| '	border-left: black thin;'	
+		|| '	border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #E0E0E0'
+		|| '}'
+		|| '.warnRow {'
+		|| '  font-family:Monospace;'
+		|| '	border-bottom: black thin;'
+		|| '	border-top: black thin;'
+		|| '	border-right: black thin;'
+		|| '	border-left: black thin;'	
+		|| '	border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #FF9933'
+		|| '}'
+		|| '</style>'
+		|| '</head>'; 
+
+        v_html_footer := '</html>';	
+
 		
 		-- send notifications to driver only. Riders will be waiting to be contacted
 		FOR drive_offer_row IN SELECT * FROM stage.websubmission_driver d
 								WHERE d."UUID" IN (SELECT DISTINCT uuid_driver FROM match_notifications_buffer)
 		LOOP
 		
-			g_email_body := '';
-			g_sms_body := '';
-		
-			FOR g_record IN SELECT * FROM match_notifications_buffer b 
-									WHERE b.uuid_driver = drive_offer_row."UUID"
+            v_html_body := '<body>'
+            || '<p>Dear ' || drive_offer_row."DriverFirstName" ||  ' ' || drive_offer_row."DriverLastName" || ', <p>' 
+            || '<p>Great news - we found riders who match your criteria!</p>'
+            || '<p><table>'
+            || '<tr>' 
+            || '<td class="oddRow">Action</td>' 
+            || '<td class="oddRow">Score (best=600)</td>' 
+            || '<td class="oddRow">Pick-up location</td>'
+            || '<td class="oddRow">Destination</td>'
+            || '<td class="oddRow">Preferred Ride Times</td>'
+            || '<td class="oddRow">Party Size</td>'
+            || '<td class="oddRow">Wheelchair accessibility needed</td>'
+            || '<td class="oddRow">Two-way trip needed</td>'
+            || '<td class="oddRow">Notes</td>'
+            || '<td class="oddRow">Name</td>'
+            || '<td class="oddRow">Email (*=preferred)</td>'
+            || '<td class="oddRow">Phone Number (*)=preferred</td>'
+            || '</tr>';
+
+			--RAISE NOTICE 'BODY 1 : %', v_html_body;
+			
+            v_loop_cnt := 0;
+			FOR g_record IN SELECT * FROM nov2016.match m 
+									WHERE m.uuid_driver = drive_offer_row."UUID" order by score desc
 			LOOP
+                v_row_style := CASE WHEN v_loop_cnt % 2 =1 THEN 'oddRow' else 'evenRow' END;
 					
 				SELECT * INTO ride_request_row FROM stage.websubmission_rider r
 												WHERE r."UUID" = g_record.uuid_rider;
 
-				
-				g_email_body := g_email_body 
-				       || 'https://api.carpoolvote.com/v2.0/accept-driver-match'
-					   || '?UUID_driver=' || g_record.uuid_driver
-					   || '&UUID_rider=' || g_record.uuid_rider
-					   || '&Score=' || g_record.score
-					   || '&DriverEmail=' || drive_offer_row."DriverEmail" || '\n';
+				v_html_body := v_html_body 
+                    || '<tr>' 
+                    || '<td class="' || v_row_style || '">' ||
+                        CASE WHEN g_record.state='MatchProposed' THEN '<a href="' || 'https://api.carpoolvote.com/live/accept-driver-match' 
+                            || '?UUID_driver=' || drive_offer_row."UUID"
+                            || '&UUID_rider=' || g_record.uuid_rider
+                            || '&Score=' || g_record.score
+                            || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName" )   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
+                            || '">Accept</a>'
+                        ELSE g_record.state END || '</td>'
+                    || '<td class="' || v_row_style || '">' || g_record.score || '</td>'
+                    || '<td class="' || v_row_style || '">' || ride_request_row."RiderCollectionZIP" || '</td>'
+                    || '<td class="' || v_row_style || '">' || ride_request_row."RiderDropOffZIP" || '</td>'
+                    || '<td class="' || v_row_style || '">' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-')  || '</td>'
+                    || '<td class="' || v_row_style || '">' || ride_request_row."TotalPartySize" || '</td>'
+                    || '<td class="' || v_row_style || '">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td>'
+                    || '<td class="' || v_row_style || '">' || CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || '</td>'
+                    || '<td class="' || v_row_style || '">' || COALESCE (ride_request_row."RiderAccommodationNotes", ' ') || '</td>'
+                    || '<td class="' || v_row_style || '">' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || '</td>'
+                    || '<td class="' || v_row_style || '">' || COALESCE(ride_request_row."RiderEmail", ' ') || CASE WHEN coalesce(ride_request_row."RiderPreferredContact" LIKE '%Email%',false) THEN '(*)' else ' ' END || '</td>'
+                    || '<td class="' || v_row_style || '">' || COALESCE(ride_request_row."RiderPhone", ' ') || CASE WHEN coalesce(ride_request_row."RiderPreferredContact" LIKE '%Phone%', false) THEN '(*)' Else ' ' END || '</td>'
+                    || '</tr>';
+                
+				--RAISE NOTICE 'BODY 2 : % % %', v_html_body, v_row_style, ride_request_row."UUID";
 				
 				g_sms_body := g_sms_body 
 				       || 'https://api.carpoolvote.com/v2.0/accept-driver-match'
@@ -484,15 +571,34 @@ BEGIN
 					   || '&UUID_rider=' || g_record.uuid_rider
 					   || '&Score=' || g_record.score
 					   || '&DriverPhone=' || drive_offer_row."DriverPhone" || '\n';
-				
+			
+				v_loop_cnt := v_loop_cnt + 1;
 			END LOOP;
+			
+			
+			--RAISE NOTICE 'BODY 3 : %', v_html_body;
+			
+            v_html_body := v_html_body || '</table></p>'
+                || '<p>If you do not wish to accept the proposed rides, you do not need to do anything. A match is only confirmed once you have accepted it.</p>'
+                || '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">self-service portal</a>.</p>'
+                || '<p><a href="' || 'https://api.carpoolvote.com/live/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel your Drive Offer</a></p>'
+                || '<p>Warm wishes</p>'
+                || '<p>The CarpoolVote.com team.</p>'
+                || '</body>';
+
+            v_body := v_html_header || v_html_body || v_html_footer;
+			--RAISE NOTICE 	'%', drive_offer_row."UUID";
+			--RAISE NOTICE '%', v_body;
+			--RAISE NOTICE '%', v_html_header;
+			--RAISE NOTICE '%', v_html_body;
+			--RAISE NOTICE '%', v_html_footer;
 			
 			IF drive_offer_row."DriverEmail" IS NOT NULL
 			THEN
 				INSERT INTO nov2016.outgoing_email (recipient, subject, body)
 				VALUES (drive_offer_row."DriverEmail", 
-				'New Match Notification', 
-				g_email_body);
+				'Proposed rider match update!   --- [' || drive_offer_row."UUID" || ']', 
+				v_body);
 				
 			END IF;
 				
@@ -501,7 +607,7 @@ BEGIN
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
-				g_sms_body);
+				' ');
 			
 			END IF;
 
