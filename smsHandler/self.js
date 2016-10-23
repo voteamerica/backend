@@ -73,18 +73,19 @@ function getUnmatchedDriversTest () {
   xhr.send(null);
 }
 
-function cancelRideRequestTest() {
-  var formData  = new FormData();
-  // var url = remoteUrl + '/cancel-ride-request';
-  var url = remoteUrl + '/cancel-ride-request?UUID=1e6e274d-ad33-4127-9f02-f35b48a07897&RiderPhone=123';
+function cancelRideRequest() {
+  var checkField = (RiderPhone || LastName || "");
+
+  var url = 
+    remoteUrl + 
+    '/cancel-ride-request?' + 
+    'UUID=' + UUID_rider + 
+    '&RiderPhone=' + checkField;
+
   var request = new XMLHttpRequest();
 
-  // formData.append("UUID", "1e6e274d-ad33-4127-9f02-f35b48a07897");
-  // formData.append("RiderPhone", '1');
-
-  // request.open("POST", url);
   request.open("GET", url);
-  request.send(formData);
+  request.send();
 }
 
 function cancelRiderMatchTest() {
@@ -105,7 +106,7 @@ function cancelRiderMatchTest() {
   request.send(formData);
 }
 
-function cancelDriveOfferTest() {
+function cancelDriveOffer() {
   var checkField = (DriverPhone || LastName || "");
 
   var url = 

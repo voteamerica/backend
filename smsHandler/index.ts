@@ -6,6 +6,13 @@ interface TwilioConfig {
   sendingNumber: String; 
 }
 
+interface SMSMessage {
+  id: Number,
+  state: String;
+  body: String;
+  phoneNumber: String; 
+}
+
 var cfg: TwilioConfig = {
 
 // get info from env vars
@@ -29,15 +36,6 @@ if (!isConfigured) {
 
 var client = require('twilio')(cfg.accountSid, cfg.authToken);
 
-interface SMSMessage {
-  id: Number,
-  state: String;
-  body: String;
-  phoneNumber: String; 
-}
-
-var admins = require('./nums.json');
-
 var DELAY = process.env.CP_DELAY || 10000;
 
 var Pool = require('pg').Pool;
@@ -54,7 +52,7 @@ const OUTGOING_SMS_TABLE      = 'outgoing_sms';
 var currentFunction = 0;
 
 setInterval(function () {
-  dbGetData(pool, [
+  dbGetItemsToSend(pool, [
     // dbGetOutgoingEmailString
     dbGetOutgoingSmsString
   ]);
@@ -76,7 +74,7 @@ function dbGetOutgoingSmsString() {
       ;
 }
 
-function dbGetData(pool, executeFunctionArray) {
+function dbGetItemsToSend(pool, executeFunctionArray) {
   var fnExecuteFunction = executeFunctionArray[currentFunction++];
   if (currentFunction >= executeFunctionArray.length) {
       currentFunction = 0;
@@ -100,30 +98,16 @@ function dbGetData(pool, executeFunctionArray) {
       result.rows.forEach( smsMessage => { 
         var smsMessageOutput = JSON.stringify(smsMessage);
 
-        console.log("select: " + smsMessageOutput); 
+        console.log("message: " + smsMessageOutput); 
 
-      // firstRowAsString = JSON.stringify(result.rows[0]);
+        var message: SMSMessage = {
+          id:           smsMessage.id,
+          state:        smsMessage.state,
+          body:         smsMessage.body,
+          phoneNumber:  smsMessage.recipient
+        };
 
-      // var uuid_driver = result.rows[0].uuid_driver.toString();
-
-      var message: SMSMessage = {
-        id:           smsMessage.id,
-        state:        smsMessage.state,
-        body:         smsMessage.body,
-        phoneNumber:  smsMessage.recipient
-      };
-
-      // console.log("uuid: ", uuid_driver);
-      makeCalls(message);
-
-      //      id serial NOT NULL,
-      // created_ts timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now()),
-      // last_updated_ts timestamp without time zone NOT NULL DEFAULT timezone('utc'::text, now()),
-      // state character varying(30) NOT NULL DEFAULT 'Pending'::character varying,
-      // recipient character varying(255) NOT NULL,
-      // subject character varying(255) NOT NULL,
-      // body text NOT NULL,
-      // emission_info text,
+        makeCalls(message);
 
         console.error("executed sms query: " + firstRowAsString);
       });
@@ -170,12 +154,44 @@ function sendSms (id: Number, to: String, message: String) {
       } 
       
       // update table status
-      dbUpdateData(id, pool, dbGetUpdateString);
+      dbUpdateMessageItemStatus(id, pool, dbGetUpdateString);
       
       console.log('User notified');
     }
   );
 };
+
+function dbGetUpdateString (tableName) {
+  return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
+          ' SET state=' + " '" + 'Sent' + "' WHERE id=$1";
+}
+
+function dbUpdateMessageItemStatus(id, pool, fnUpdateString) {
+  var updateString = fnUpdateString();
+
+  pool.query(
+    updateString,
+    [id]
+  )
+  .then(result => {
+    var displayResult = result || '';
+
+    try {
+      displayResult = JSON.stringify(result);
+    }
+    catch (err) {
+      console.error('no update result returned');
+    }
+
+    console.log('update: ', id + ' ' + displayResult);
+  })
+  .catch(e => {
+    var message = e.message || '';
+    var stack   = e.stack   || '';
+
+    console.error('update error: ', message, stack);
+  });
+}
 
 //  curl -X POST 'https://api.twilio.com/2010-04-01/Accounts/<AccountSid>/Messages.json' \
 //         --data-urlencode 'To=<ToNumber>' \
@@ -201,39 +217,4 @@ function sendSms (id: Number, to: String, message: String) {
 // <Response>
 //    <Message>Hello from Twilio!</Message>
 // </Response>
-
-function dbGetUpdateString (tableName) {
-  return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
-          ' SET state=' + " '" + 'Sent' + "' WHERE id=$1";
-}
-
-function dbUpdateData(id, pool, fnUpdateString) {
-  var updateString = fnUpdateString();
-
-  pool.query(
-    updateString,
-    [id]
-  )
-  .then(result => {
-    var displayResult = result || '';
-    // var uuid = "";
-
-    try {
-      displayResult = JSON.stringify(result);
-      // uuid = result.rows[0].UUID;
-      // console.error('row: ' + JSON.stringify(result.rows[0]) );
-    }
-    catch (err) {
-      console.error('no result returned');
-    }
-
-    console.log('update: ', id + ' ' + displayResult);
-  })
-  .catch(e => {
-    var message = e.message || '';
-    var stack   = e.stack   || '';
-
-    console.error('query error: ', message, stack);
-  });
-}
 
