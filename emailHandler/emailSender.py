@@ -30,7 +30,7 @@ for row in rows:
 		'from': 'noreply@carpoolvote.com',
 		'to': row[1],
 		'subject': row[2],
-		'text': row[3]
+		'html': row[3]
 		})
 	
 	print ('Status: {0}'.format(request.status_code))
