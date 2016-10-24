@@ -78,7 +78,7 @@ BEGIN
 			|| '</table>'
 			|| '</p>'
 			|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
-			|| '<p><a href="'|| 'https://api.carpoolvote.com/live/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName") ||  '">Cancel this offer</a></p>'  -- yes, this is correct, the API uses DriverPhone as parameter, and one can pass a phone number or a last name
+			|| '<p><a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName") ||  '">Cancel this offer</a></p>'  -- yes, this is correct, the API uses DriverPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
@@ -93,7 +93,7 @@ BEGIN
 		IF NEW."DriverPhone" IS NOT NULL                                                                                   
         THEN                                                                                                               
             v_body :=  'Confirmation of driver offer reference : ' || NEW."UUID" || '\n'                                                        
-					|| 'To cancel : https://api.carpoolvote.com/live/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || NEW."DriverLastName" || '\n'
+					|| 'To cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || NEW."DriverLastName" || '\n'
 					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
 					|| '\n\n'
 					|| 'First Name : ' || NEW."DriverFirstName" || '\n'
@@ -134,7 +134,7 @@ BEGIN
 			|| '</table>'
 			|| '</p>'
 			|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
-			|| '<p><a href="' || 'https://api.carpoolvote.com/live/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName") ||  '">Cancel this request</a></p>' -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
+			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName") ||  '">Cancel this request</a></p>' -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
@@ -147,7 +147,7 @@ BEGIN
 		IF NEW."RiderPhone" IS NOT NULL                                                                                
         THEN                                                                                                               
             v_body :=  'Confirmation of ride request reference : ' || NEW."UUID" || '\n'                                                        
-					|| 'To cancel : https://api.carpoolvote.com/live/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || NEW."RiderLastName" || '\n'  -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
+					|| 'To cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || NEW."RiderLastName" || '\n'  -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
 					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
 					|| 'First Name : ' || NEW."RiderFirstName" || '\n'
 					|| 'Last Name : ' || NEW."RiderLastName" || '\n'

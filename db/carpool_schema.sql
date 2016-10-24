@@ -119,6 +119,48 @@ DECLARE
 	v_html_footer nov2016.outgoing_email.body%TYPE;
 
 BEGIN 
+
+	v_html_header := '<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
+		|| '<html>' 
+		|| '<head>'
+		|| '<meta http-equiv="content-type" content="text/html; charset=UTF-8">'
+		|| '<style type="text/css">'
+		|| '.evenRow {'
+		|| '  font-family:Monospace;'
+		|| '  border-bottom: black thin;'
+		|| '  border-top: black thin;'
+		|| '  border-right: black thin;'
+		|| '  border-left: black thin;'	
+		|| '  border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #F0F0F0'
+		|| '}'
+		|| '.oddRow {'
+		|| '  font-family:Monospace;'
+		|| '	border-bottom: black thin;'
+		|| '	border-top: black thin;'
+		|| '	border-right: black thin;'
+		|| '	border-left: black thin;'	
+		|| '	border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #E0E0E0'
+		|| '}'
+		|| '.warnRow {'
+		|| '  font-family:Monospace;'
+		|| '	border-bottom: black thin;'
+		|| '	border-top: black thin;'
+		|| '	border-right: black thin;'
+		|| '	border-left: black thin;'	
+		|| '	border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #FF9933'
+		|| '}'
+		|| '</style>'
+		|| '</head>'; 
+
+	v_html_footer := '</html>';	
+
+
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
@@ -147,15 +189,49 @@ BEGIN
 		SELECT * INTO ride_request_row
 		FROM stage.websubmission_rider
 		WHERE "UUID" = a_UUID_rider;	
+
+		SELECT * INTO drive_offer_row
+		FROM stage.websubmission_driver
+		WHERE "UUID" = a_UUID_driver;	
+
 		
 		v_step := 'S2';
 		-- send cancellation notice to rider
 		IF ride_request_row."RiderEmail" IS NOT NULL
 		THEN
+			-- Cancellation notice to rider
+			v_subject := 'Confirmed Ride Cancellation Notice   --- [' || ride_request_row."UUID" || ']';
+			v_html_body := '<body>'
+			|| '<p>Dear ' || ride_request_row."RiderFirstName" ||  ' ' || ride_request_row."RiderLastName" || ', <p>' 
+			|| '<p>Your driver ' || drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" 
+			|| ' has canceled this ride. </p>'
+			|| '<p>These were the ride details: </p>'
+			|| '<p><table>'
+			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
+				replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
+			|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
+			|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
+			|| '<tr><td class="evenRow">Notes</td><td class="evenRow">' || ride_request_row."RiderAccommodationNotes" || '</td></tr>'
+			|| '</table>'
+			|| '</p>'
+			|| '<p>Concerning this ride, no further action is needed from you.</p>'
+			|| '<p>We will try to find another suitable driver.</p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
+			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
+			|| '<p>Warm wishes</p>'
+			|| '<p>The CarpoolVote.com team.</p>'
+			|| '</body>';
+
+			v_body := v_html_header || v_html_body || v_html_footer;
+
 			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
 			VALUES (ride_request_row."RiderEmail", 
-			'Cancellation Notice', 
-			'Confirmed Ride was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+			v_subject, 
+			v_body);
+
 		END IF;
 		
 		IF ride_request_row."RiderPhone" IS NOT NULL
@@ -184,16 +260,42 @@ BEGIN
 		
 		v_step := 'S5';
 		-- send cancellation notice to driver
-		SELECT * INTO drive_offer_row
-		FROM stage.websubmission_driver
-		WHERE "UUID" = a_UUID_driver;	
 
 		IF drive_offer_row."DriverEmail" IS NOT NULL
 		THEN
+
+			-- Cancellation notice to rider
+			v_subject := 'Confirmed Ride Cancellation Notice   --- [' || ride_request_row."UUID" || ']';
+			v_html_body := '<body>'
+			|| '<p>Dear ' || drive_offer_row."DriverFirstName" ||  ' ' || drive_offer_row."DriverLastName" ||  ', </p>'
+			|| '<p>We have processed your request to cancel a confirmed ride with a rider ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || '</p>'
+			|| '<p>These were the ride details: </p>'
+			|| '<p><table>'
+			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
+				replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
+			|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
+			|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
+			|| '<tr><td class="evenRow">Notes</td><td class="evenRow">' || ride_request_row."RiderAccommodationNotes" || '</td></tr>'
+			|| '</table>'
+			|| '</p>'
+			|| '<p>No further action is needed from you.</p>'
+			|| '<p>We hope you can still are still able to help another rider.</p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
+			|| '<p>If are no longer able to offer a ride, please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">cancel this Drive Offer</a></p>'
+			|| '<p>Warm wishes</p>'
+			|| '<p>The CarpoolVote.com team.</p>'
+			|| '</body>';
+			
+			v_body := v_html_header || v_html_body || v_html_footer;
+
 			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-			VALUES (drive_offer_row."DriverEmail", 
-			'Cancellation Notice', 
-			'Confirmed Ride was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+			VALUES (ride_request_row."RiderEmail", 
+			v_subject, 
+			v_body);
+		
 		END IF;
 		
 		IF drive_offer_row."DriverPhone" IS NOT NULL
@@ -240,6 +342,46 @@ DECLARE
 
 BEGIN 
 
+	v_html_header := '<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
+		|| '<html>' 
+		|| '<head>'
+		|| '<meta http-equiv="content-type" content="text/html; charset=UTF-8">'
+		|| '<style type="text/css">'
+		|| '.evenRow {'
+		|| '  font-family:Monospace;'
+		|| '  border-bottom: black thin;'
+		|| '  border-top: black thin;'
+		|| '  border-right: black thin;'
+		|| '  border-left: black thin;'	
+		|| '  border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #F0F0F0'
+		|| '}'
+		|| '.oddRow {'
+		|| '  font-family:Monospace;'
+		|| '	border-bottom: black thin;'
+		|| '	border-top: black thin;'
+		|| '	border-right: black thin;'
+		|| '	border-left: black thin;'	
+		|| '	border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #E0E0E0'
+		|| '}'
+		|| '.warnRow {'
+		|| '  font-family:Monospace;'
+		|| '	border-bottom: black thin;'
+		|| '	border-top: black thin;'
+		|| '	border-right: black thin;'
+		|| '	border-left: black thin;'	
+		|| '	border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #FF9933'
+		|| '}'
+		|| '</style>'
+		|| '</head>'; 
+
+	v_html_footer := '</html>';	
+
 
 	-- input validation
 	IF NOT EXISTS (
@@ -255,7 +397,11 @@ BEGIN
 	END IF;
 
 	BEGIN
-
+		v_step := 'S0';
+		SELECT * INTO drive_offer_row
+		FROM stage.websubmission_driver
+		WHERE "UUID" = a_UUID;	
+	
 		v_step := 'S1';
 		FOR match_row IN SELECT * FROM nov2016.match
 			WHERE uuid_driver = a_UUID
@@ -271,10 +417,41 @@ BEGIN
 			v_step := 'S3';
 			IF ride_request_row."RiderEmail" IS NOT NULL
 			THEN
+
+				-- Cancellation notice to rider
+				v_subject := 'Confirmed Ride Cancellation Notice   --- [' || drive_offer_row."UUID" || ']';
+				v_html_body := '<body>'
+				|| '<p>Dear ' || ride_request_row."RiderFirstName" ||  ' ' || ride_request_row."RiderLastName" || ', <p>' 
+				|| '<p>Your driver ' || drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" 
+				|| ' has canceled this ride. </p>'
+				|| '<p>These were the ride details: </p>'
+				|| '<p><table>'
+				|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
+					replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+				|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+				|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+				|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
+				|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
+				|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
+				|| '<tr><td class="evenRow">Notes</td><td class="evenRow">' || ride_request_row."RiderAccommodationNotes" || '</td></tr>'
+				|| '</table>'
+				|| '</p>'
+				|| '<p>Concerning this ride, no further action is needed from you.</p>'
+				|| '<p>We will try to find another suitable driver.</p>'
+				|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
+				|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
+				|| '<p>Warm wishes</p>'
+				|| '<p>The CarpoolVote.com team.</p>'
+				|| '</body>';
+
+				v_body := v_html_header || v_html_body || v_html_footer;
+
 				INSERT INTO nov2016.outgoing_email (recipient, subject, body)
 				VALUES (ride_request_row."RiderEmail", 
-				'Cancellation Notice', 
-				'Confirmed Ride was canceled by driver: ' || match_row.uuid_rider || ', ' || match_row.uuid_driver);
+				v_subject, 
+				v_body);
+
+			
 			END IF;
 			
 			IF ride_request_row."RiderPhone" IS NOT NULL
@@ -314,16 +491,37 @@ BEGIN
 
 		-- Send cancellation notice to driver
 		v_step := 'S8';
-		SELECT * INTO drive_offer_row
-		FROM stage.websubmission_driver
-		WHERE "UUID" = a_UUID;	
+
 
 		IF drive_offer_row."DriverEmail" IS NOT NULL
 		THEN
-			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-			VALUES (drive_offer_row."DriverEmail", 
-			'Cancellation Notice', 
-			'Drive Offer was canceled by driver: ' || a_UUID);
+			
+			v_subject := 'Drive Offer is canceled   --- [' || drive_offer_row."UUID" || ']';
+			v_html_body := '<body>'
+			|| '<p>Dear ' || drive_offer_row."DriverFirstName" ||  ' ' || drive_offer_row."DriverLastName" || ', <p>' 
+			|| '<p>We have received your request to cancel your drive offer.</p>'
+			|| 'These were the details of the offer:<br/>'
+			|| '<table>'
+			|| '<tr><td class="evenRow">Pick-up ZIP</td><td class="evenRow">' || drive_offer_row."DriverCollectionZIP" || '</td></tr>'
+			|| '<tr><td class="oddRow">Radius</td><td class="oddRow">' || drive_offer_row."DriverCollectionRadius" || ' miles</td></tr>'
+			|| '<tr><td class="evenRow">Drive Times</td><td class="evenRow">' || replace(replace(replace(replace(replace(drive_offer_row."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+			|| '<tr><td class="oddRow">Seats</td><td class="oddRow">' || drive_offer_row."SeatCount" || '</td></tr>'
+			|| '<tr><td class="evenRow">Wheelchair accessible</td><td class="evenRow">' || CASE WHEN drive_offer_row."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
+			|| '<tr><td class="oddRow">Phone Number</td><td class="oddRow">' || drive_offer_row."DriverPhone" || '</td></tr>'
+			|| '<tr><td class="evenRow">Email</td><td class="evenRow">' || drive_offer_row."DriverEmail" || '</td></tr>'
+			|| '</table>'
+			|| '</p>'
+			|| '<p>No further action is necessary.</p>'
+			|| '<p>Warm wishes</p>'
+			|| '<p>The CarpoolVote.com team.</p>'
+			|| '</body>';
+
+			v_body := v_html_header || v_html_body || v_html_footer;
+
+
+            INSERT INTO nov2016.outgoing_email (recipient, subject, body)                                             
+            VALUES (drive_offer_row."DriverEmail", v_subject, v_body);                                                                 
+			
 		END IF;
 			
 		IF drive_offer_row."DriverPhone" IS NOT NULL
@@ -494,12 +692,12 @@ BEGIN
 			|| '</table>'
 			|| '</p>'
 			|| '<p>If you can no longer drive ' || drive_offer_row."DriverFirstName" || ', please let us know and '
-			|| '<a href="' || 'https://api.carpoolvote.com/live/cancel-driver-match?UUID_driver=' || a_UUID_driver 
+			|| '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-driver-match?UUID_driver=' || a_UUID_driver 
 			|| '&UUID_rider=' || a_UUID_rider 
 			|| '&Score=' || a_score 
 			|| '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName" ) || '">cancel this ride match only</a></p>'
 			|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
-			|| '<p><a href="' || 'https://api.carpoolvote.com/live/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel this Drive Offer</a></p>'
+			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel this Drive Offer</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
@@ -538,12 +736,12 @@ BEGIN
 			|| CASE WHEN drive_offer_row."DriverPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(drive_offer_row."DriverPreferredContact" LIKE '%SMS%',false) THEN '(*)' else ' ' END || 'SMS/Text: ' || drive_offer_row."DriverPhone"  ELSE ' ' END || '<br/>'
 			|| '(*) = Preferred Method</p>'
 			|| '<p>If you would prefer to have a different driver, please let us know, and '
-			|| '<a href="' || 'https://api.carpoolvote.com/live/cancel-rider-match?UUID_driver=' || a_UUID_driver 
+			|| '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-rider-match?UUID_driver=' || a_UUID_driver 
 			|| '&UUID_rider=' || a_UUID_rider 
 			|| '&Score=' || a_score 
 			|| '&RiderPhone=' || nov2016.urlencode( ride_request_row."RiderLastName") || '">cancel this ride match only</a></p>'   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
-			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/live/cancel-ride-offer?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
+			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-offer?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
@@ -579,6 +777,55 @@ $$;
 
 
 ALTER FUNCTION nov2016.driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) OWNER TO carpool_admins;
+
+--
+-- Name: driver_pause_match(character varying, character varying); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE FUNCTION driver_pause_match(a_uuid character varying, confirmation_parameter character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE                                                   
+	drive_offer_row stage.websubmission_driver%ROWTYPE;
+	v_step character varying(200); 
+	v_return_text character varying(200);	
+	
+BEGIN 
+
+	-- input validation
+	IF NOT EXISTS (
+	SELECT 1 
+	FROM stage.websubmission_driver r
+	WHERE r."UUID" = a_UUID
+	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
+		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
+			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	)
+	THEN
+		return 'No Drive Offer found for those parameters';
+	END IF;
+
+	BEGIN
+		v_step := 'S1';
+		UPDATE stage.websubmission_driver
+			SET "ReadyToMatch" = False
+			WHERE "UUID" = a_UUID;
+			
+		return '';
+	
+	EXCEPTION WHEN OTHERS 
+	THEN
+		RETURN 'Exception occurred during processing: driver_pause_match,' || v_step;
+	END;
+
+
+    END  
+
+$$;
+
+
+ALTER FUNCTION nov2016.driver_pause_match(a_uuid character varying, confirmation_parameter character varying) OWNER TO carpool_admins;
 
 --
 -- Name: evaluate_match_single_pair(character varying, character varying); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
@@ -1041,6 +1288,36 @@ $$;
 ALTER FUNCTION nov2016.fct_modified_column() OWNER TO carpool_admins;
 
 --
+-- Name: get_param_value(character varying); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE FUNCTION get_param_value(a_param_name character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+
+v_env nov2016.params.value%TYPE;
+
+BEGIN
+
+v_env := NULL;
+
+BEGIN
+	SELECT value INTO v_env FROM nov2016.params WHERE name=a_param_name;
+EXCEPTION WHEN OTHERS
+THEN
+	v_env := NULL;
+END;
+
+RETURN v_env;
+
+END
+$$;
+
+
+ALTER FUNCTION nov2016.get_param_value(a_param_name character varying) OWNER TO carpool_admins;
+
+--
 -- Name: perform_match(); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
 --
 
@@ -1244,6 +1521,7 @@ BEGIN
 			
  				FOR drive_offer_row in SELECT * from stage.websubmission_driver d
  					WHERE state IN ('Pending','MatchProposed','MatchConfirmed')
+					AND d."ReadyToMatch" = true
  					AND ((ride_request_row."NeedWheelchair"=true AND d."DriverCanLoadRiderWithWheelchair" = true) -- driver must be able to transport wheelchair if rider needs it
  						OR ride_request_row."NeedWheelchair"=false)   -- but a driver equipped for wheelchair may drive someone who does not need one
  					AND ride_request_row."TotalPartySize" <= d."SeatCount"  -- driver must be able to accommodate the entire party in one ride
@@ -1591,7 +1869,7 @@ BEGIN
 				v_html_body := v_html_body 
                     || '<tr>' 
                     || '<td class="' || v_row_style || '">' ||
-                        CASE WHEN g_record.state='MatchProposed' THEN '<a href="' || 'https://api.carpoolvote.com/live/accept-driver-match' 
+                        CASE WHEN g_record.state='MatchProposed' THEN '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/accept-driver-match' 
                             || '?UUID_driver=' || drive_offer_row."UUID"
                             || '&UUID_rider=' || g_record.uuid_rider
                             || '&Score=' || g_record.score
@@ -1628,9 +1906,10 @@ BEGIN
 			
             v_html_body := v_html_body || '</table></p>'
                 || '<p>If you do not wish to accept the proposed rides, you do not need to do anything. A match is only confirmed once you have accepted it.</p>'
+				|| '<p>If you do not with to receive future notifications about new proposed matches for this Driver Offer, please <a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/pause-match-driver?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">click here</a></p>'            
+                || '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel your Drive Offer</a></p>'
                 || '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">self-service portal</a>.</p>'
-                || '<p><a href="' || 'https://api.carpoolvote.com/live/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel your Drive Offer</a></p>'
-                || '<p>Warm wishes</p>'
+				|| '<p>Warm wishes</p>'
                 || '<p>The CarpoolVote.com team.</p>'
                 || '</body>';
 
@@ -1768,7 +2047,7 @@ BEGIN
 			|| '</table>'
 			|| '</p>'
 			|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
-			|| '<p><a href="'|| 'https://api.carpoolvote.com/live/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName") ||  '">Cancel this offer</a></p>'  -- yes, this is correct, the API uses DriverPhone as parameter, and one can pass a phone number or a last name
+			|| '<p><a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName") ||  '">Cancel this offer</a></p>'  -- yes, this is correct, the API uses DriverPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
@@ -1783,7 +2062,7 @@ BEGIN
 		IF NEW."DriverPhone" IS NOT NULL                                                                                   
         THEN                                                                                                               
             v_body :=  'Confirmation of driver offer reference : ' || NEW."UUID" || '\n'                                                        
-					|| 'To cancel : https://api.carpoolvote.com/live/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || NEW."DriverLastName" || '\n'
+					|| 'To cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || NEW."DriverLastName" || '\n'
 					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
 					|| '\n\n'
 					|| 'First Name : ' || NEW."DriverFirstName" || '\n'
@@ -1824,7 +2103,7 @@ BEGIN
 			|| '</table>'
 			|| '</p>'
 			|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
-			|| '<p><a href="' || 'https://api.carpoolvote.com/live/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName") ||  '">Cancel this request</a></p>' -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
+			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName") ||  '">Cancel this request</a></p>' -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
@@ -1837,7 +2116,7 @@ BEGIN
 		IF NEW."RiderPhone" IS NOT NULL                                                                                
         THEN                                                                                                               
             v_body :=  'Confirmation of ride request reference : ' || NEW."UUID" || '\n'                                                        
-					|| 'To cancel : https://api.carpoolvote.com/live/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || NEW."RiderLastName" || '\n'  -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
+					|| 'To cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || NEW."RiderLastName" || '\n'  -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
 					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
 					|| 'First Name : ' || NEW."RiderFirstName" || '\n'
 					|| 'Last Name : ' || NEW."RiderLastName" || '\n'
@@ -1883,6 +2162,47 @@ DECLARE
 
 BEGIN 
 
+	v_html_header := '<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
+		|| '<html>' 
+		|| '<head>'
+		|| '<meta http-equiv="content-type" content="text/html; charset=UTF-8">'
+		|| '<style type="text/css">'
+		|| '.evenRow {'
+		|| '  font-family:Monospace;'
+		|| '  border-bottom: black thin;'
+		|| '  border-top: black thin;'
+		|| '  border-right: black thin;'
+		|| '  border-left: black thin;'	
+		|| '  border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #F0F0F0'
+		|| '}'
+		|| '.oddRow {'
+		|| '  font-family:Monospace;'
+		|| '	border-bottom: black thin;'
+		|| '	border-top: black thin;'
+		|| '	border-right: black thin;'
+		|| '	border-left: black thin;'	
+		|| '	border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #E0E0E0'
+		|| '}'
+		|| '.warnRow {'
+		|| '  font-family:Monospace;'
+		|| '	border-bottom: black thin;'
+		|| '	border-top: black thin;'
+		|| '	border-right: black thin;'
+		|| '	border-left: black thin;'	
+		|| '	border-collapse: collapse;'
+		|| '  margin: 0.4em;'
+		|| '  background-color: #FF9933'
+		|| '}'
+		|| '</style>'
+		|| '</head>'; 
+
+	v_html_footer := '</html>';	
+
+
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
@@ -1913,13 +2233,45 @@ BEGIN
 		FROM stage.websubmission_driver
 		WHERE "UUID" = a_UUID_driver;	
 		
+		SELECT * INTO ride_request_row
+		FROM stage.websubmission_rider
+		WHERE "UUID" = a_UUID_rider;	
+
+		
 		v_step := 'S2';
 		IF drive_offer_row."DriverEmail" IS NOT NULL
 		THEN
-			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-			VALUES (drive_offer_row."DriverEmail", 
-			'Cancellation Notice', 
-			'Confirmed Ride was canceled by rider: ' || a_UUID_driver || ', ' || a_UUID_rider);
+			-- Cancellation notice to driver
+				v_subject := 'Confirmed Ride Cancellation Notice   --- [' || drive_offer_row."UUID" || ']';
+				v_html_body := '<body>'
+				|| '<p>Dear ' || drive_offer_row."DriverFirstName" ||  ' ' || drive_offer_row."DriverLastName" || ', <p>' 
+				|| '<p>' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" 
+				|| ' no longer needs a ride.</p>'
+				|| '<p>These were the ride details: </p>'
+				|| '<p><table>'
+				|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
+					replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+				|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+				|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+				|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
+				|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
+				|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
+				|| '<tr><td class="evenRow">Notes</td><td class="evenRow">' || ride_request_row."RiderAccommodationNotes" || '</td></tr>'
+				|| '</table>'
+				|| '</p>'
+				|| '<p>Concerning this ride, no further action is needed from you.</p>'
+				|| '<p>Hopefully you can help another rider in your area.</p>'
+				|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
+				|| '<p>Warm wishes</p>'
+				|| '<p>The CarpoolVote.com team.</p>'
+				|| '</body>';
+
+				v_body := v_html_header || v_html_body || v_html_footer;
+
+				INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+				VALUES (drive_offer_row."DriverEmail", 
+				v_subject, 
+				v_body);
 		END IF;
 		
 		IF drive_offer_row."DriverPhone" IS NOT NULL
@@ -1949,16 +2301,41 @@ BEGIN
 
 		-- Send cancellation notice to rider
 		v_step := 'S8';
-		SELECT * INTO ride_request_row
-		FROM stage.websubmission_rider
-		WHERE "UUID" = a_UUID_rider;	
-
+		
 		IF ride_request_row."RiderEmail" IS NOT NULL
 		THEN
+			-- Cancellation notice to rider
+			v_subject := 'Confirmed Ride Cancellation Notice   --- [' || ride_request_row."UUID" || ']';
+			v_html_body := '<body>'
+			|| '<p>Dear ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || ', </p>'
+			|| '<p>We have processed your request to cancel a confirmed ride with a driver ' || drive_offer_row."DriverFirstName" ||  ' ' || drive_offer_row."DriverLastName" || '</p>'
+			|| '<p>These were the ride details: </p>'
+			|| '<p><table>'
+			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
+				replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
+			|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
+			|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
+			|| '<tr><td class="evenRow">Notes</td><td class="evenRow">' || ride_request_row."RiderAccommodationNotes" || '</td></tr>'
+			|| '</table>'
+			|| '</p>'
+			|| '<p>No further action is needed from you.</p>'
+			|| '<p>We will try to find another suitable driver.</p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
+			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
+			|| '<p>Warm wishes</p>'
+			|| '<p>The CarpoolVote.com team.</p>'
+			|| '</body>';
+			
+			v_body := v_html_header || v_html_body || v_html_footer;
+
 			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
 			VALUES (ride_request_row."RiderEmail", 
-			'Cancellation Notice', 
-			'Confirmed Ride was canceled by rider: ' || a_UUID_driver || ', ' || a_UUID_rider);
+			v_subject, 
+			v_body);
+			
 		END IF;
 			
 		IF ride_request_row."RiderPhone" IS NOT NULL
@@ -2062,7 +2439,11 @@ BEGIN
 
 	
 	BEGIN
-
+		v_step := 'S0';
+		SELECT * INTO ride_request_row
+		FROM stage.websubmission_rider
+		WHERE "UUID" = a_UUID;
+	
 		v_step := 'S1';
 		FOR match_row IN SELECT * FROM nov2016.match
 			WHERE uuid_rider = a_UUID
@@ -2073,21 +2454,43 @@ BEGIN
 			v_step := 'S2';
 			SELECT * INTO drive_offer_row
 			FROM stage.websubmission_driver
-			WHERE "UUID" = match_row.uuid_driver;	
+			WHERE "UUID" = match_row.uuid_driver;
 		
 			v_step := 'S3';   -- Cancellation Notification to confirmed drivers
 			IF drive_offer_row."DriverEmail" IS NOT NULL
 			THEN
 				
+				-- Cancellation notice to driver
+				v_subject := 'Confirmed Ride Cancellation Notice   --- [' || drive_offer_row."UUID" || ']';
 				v_html_body := '<body>'
+				|| '<p>Dear ' || drive_offer_row."DriverFirstName" ||  ' ' || drive_offer_row."DriverLastName" || ', <p>' 
+				|| '<p>' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" 
+				|| ' no longer needs a ride. </p>'
+				|| '<p>These were the ride details: </p>'
+				|| '<p><table>'
+				|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
+					replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+				|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+				|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+				|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
+				|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
+				|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
+				|| '<tr><td class="evenRow">Notes</td><td class="evenRow">' || ride_request_row."RiderAccommodationNotes" || '</td></tr>'
+				|| '</table>'
+				|| '</p>'
+				|| '<p>Concerning this ride, no further action is needed from you.</p>'
+				|| '<p>Hopefully you can help another rider in your area.</p>'
+				|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
+				|| '<p>Warm wishes</p>'
+				|| '<p>The CarpoolVote.com team.</p>'
 				|| '</body>';
 
 				v_body := v_html_header || v_html_body || v_html_footer;
-			
+
 				INSERT INTO nov2016.outgoing_email (recipient, subject, body)
 				VALUES (drive_offer_row."DriverEmail", 
-				'Cancellation Notice', 
-				'Confirmed match was canceled by rider: ' || match_row.uuid_driver || ', ' || match_row.uuid_rider);
+				v_subject, 
+				v_body);
 			END IF;
 			
 			IF drive_offer_row."DriverPhone" IS NOT NULL
@@ -2126,17 +2529,35 @@ BEGIN
 		
 		
 		-- Send cancellation notice to rider
-		v_step := 'S8';
-		SELECT * INTO ride_request_row
-		FROM stage.websubmission_rider
-		WHERE "UUID" = a_UUID;	
-
 		IF ride_request_row."RiderEmail" IS NOT NULL
 		THEN
+			v_subject := 'Ride Request Cancellation Notice   --- [' || ride_request_row."UUID" || ']';
+			v_html_body := '<body>'
+			|| '<p>Dear ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || ', </p>'
+			|| '<p>We have processed your request to cancel a ride request. If a ride had already been confirmed, the driver has been notified.</p>'
+			|| '<p>These were the ride details: </p>'
+			|| '<p><table>'
+			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
+				replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
+			|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
+			|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
+			|| '<tr><td class="evenRow">Notes</td><td class="evenRow">' || ride_request_row."RiderAccommodationNotes" || '</td></tr>'
+			|| '</table>'
+			|| '</p>'
+			|| '<p>No further action is needed from you.</p>'
+			|| '<p>Warm wishes</p>'
+			|| '<p>The CarpoolVote.com team.</p>'
+			|| '</body>';
+			
+			v_body := v_html_header || v_html_body || v_html_footer;
+			
 			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
 			VALUES (ride_request_row."RiderEmail", 
-			'Ride Request Cancellation Notice', 
-			'Ride Request was canceled by rider: ' || a_UUID);
+			v_subject, 
+			v_body);
 		END IF;
 			
 		IF ride_request_row."RiderPhone" IS NOT NULL
@@ -2894,6 +3315,18 @@ ALTER SEQUENCE outgoing_sms_id_seq OWNED BY outgoing_sms.id;
 
 
 --
+-- Name: params; Type: TABLE; Schema: nov2016; Owner: carpool_admins
+--
+
+CREATE TABLE params (
+    name character varying(50) NOT NULL,
+    value character varying(400)
+);
+
+
+ALTER TABLE params OWNER TO carpool_admins;
+
+--
 -- Name: tz_dst_offset; Type: TABLE; Schema: nov2016; Owner: eric
 --
 
@@ -2987,7 +3420,7 @@ CREATE TABLE websubmission_driver (
     "DrivingOBOOrganizationName" character varying(255),
     "RidersCanSeeDriverDetails" boolean DEFAULT false NOT NULL,
     "DriverWillNotTalkPolitics" boolean DEFAULT false NOT NULL,
-    "ReadyToMatch" boolean DEFAULT false NOT NULL,
+    "ReadyToMatch" boolean DEFAULT true NOT NULL,
     "PleaseStayInTouch" boolean DEFAULT false NOT NULL,
     state character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -3011,6 +3444,7 @@ CREATE VIEW vw_drive_offer AS
     websubmission_driver."DriverPhone",
     websubmission_driver."DriverEmail",
     websubmission_driver.state,
+    websubmission_driver."ReadyToMatch",
     websubmission_driver.created_ts,
     websubmission_driver.last_updated_ts,
     websubmission_driver."DriverCollectionZIP",
@@ -3048,7 +3482,7 @@ CREATE TABLE websubmission_rider (
     "RiderPreferredContact" character varying(50),
     "RiderAccommodationNotes" character varying(1000),
     "RiderLegalConsent" boolean DEFAULT false NOT NULL,
-    "ReadyToMatch" boolean DEFAULT false NOT NULL,
+    "ReadyToMatch" boolean DEFAULT true NOT NULL,
     state character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -3260,6 +3694,14 @@ ALTER TABLE ONLY outgoing_email
 
 ALTER TABLE ONLY outgoing_sms
     ADD CONSTRAINT outgoing_sms_pk PRIMARY KEY (id);
+
+
+--
+-- Name: pk_param; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY params
+    ADD CONSTRAINT pk_param PRIMARY KEY (name);
 
 
 --
@@ -3516,6 +3958,18 @@ GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uu
 
 
 --
+-- Name: driver_pause_match(character varying, character varying); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION driver_pause_match(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_pause_match(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_pause_match(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_pause_match(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION driver_pause_match(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION driver_pause_match(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+
+
+--
 -- Name: evaluate_match_single_pair(character varying, character varying); Type: ACL; Schema: nov2016; Owner: carpool_admins
 --
 
@@ -3535,6 +3989,18 @@ REVOKE ALL ON FUNCTION fct_modified_column() FROM carpool_admins;
 GRANT ALL ON FUNCTION fct_modified_column() TO carpool_admins;
 GRANT ALL ON FUNCTION fct_modified_column() TO carpool_role;
 GRANT ALL ON FUNCTION fct_modified_column() TO carpool_web_role;
+
+
+--
+-- Name: get_param_value(character varying); Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION get_param_value(a_param_name character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION get_param_value(a_param_name character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION get_param_value(a_param_name character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION get_param_value(a_param_name character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION get_param_value(a_param_name character varying) TO carpool_web;
+GRANT ALL ON FUNCTION get_param_value(a_param_name character varying) TO carpool_role;
 
 
 --
@@ -3799,6 +4265,17 @@ REVOKE ALL ON SEQUENCE outgoing_sms_id_seq FROM carpool_admins;
 GRANT ALL ON SEQUENCE outgoing_sms_id_seq TO carpool_admins;
 GRANT SELECT,USAGE ON SEQUENCE outgoing_sms_id_seq TO carpool_web;
 GRANT SELECT,USAGE ON SEQUENCE outgoing_sms_id_seq TO carpool_role;
+
+
+--
+-- Name: params; Type: ACL; Schema: nov2016; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE params FROM PUBLIC;
+REVOKE ALL ON TABLE params FROM carpool_admins;
+GRANT ALL ON TABLE params TO carpool_admins;
+GRANT SELECT ON TABLE params TO carpool_role;
+GRANT SELECT ON TABLE params TO carpool_web_role;
 
 
 --

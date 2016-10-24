@@ -174,7 +174,7 @@ BEGIN
 				
 				-- zip code verification
 				IF NOT EXISTS
-					(SELECT 1 FROM nov2016.zip_codes z where z.zip = ride_request_row."RiderCollectionZIP")
+					(SELECT 1 FROM nov2016.zip_codes z where z.zip = ride_request_row."RiderCollectionZIP" AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
 				THEN
 					UPDATE stage.websubmission_rider 
 					SET state='Failed', state_info='Invalid/Not Found RiderCollectionZIP:' || ride_request_row."RiderCollectionZIP"
@@ -183,7 +183,7 @@ BEGIN
 				END IF;
 
 				IF NOT EXISTS 
-					(SELECT 1 FROM nov2016.zip_codes z where z.zip = ride_request_row."RiderDropOffZIP")
+					(SELECT 1 FROM nov2016.zip_codes z WHERE z.zip = ride_request_row."RiderDropOffZIP" AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
 				THEN
 					UPDATE stage.websubmission_rider 
 					SET state='Failed', state_info='Invalid/Not Found RiderDropOffZIP:' || ride_request_row."RiderDropOffZIP"
@@ -198,6 +198,7 @@ BEGIN
 			
  				FOR drive_offer_row in SELECT * from stage.websubmission_driver d
  					WHERE state IN ('Pending','MatchProposed','MatchConfirmed')
+					AND d."ReadyToMatch" = true
  					AND ((ride_request_row."NeedWheelchair"=true AND d."DriverCanLoadRiderWithWheelchair" = true) -- driver must be able to transport wheelchair if rider needs it
  						OR ride_request_row."NeedWheelchair"=false)   -- but a driver equipped for wheelchair may drive someone who does not need one
  					AND ride_request_row."TotalPartySize" <= d."SeatCount"  -- driver must be able to accommodate the entire party in one ride
@@ -213,6 +214,15 @@ BEGIN
  						b_driver_validated := false;
  					END IF;
  
+					IF NOT EXISTS 
+						(SELECT 1 FROM nov2016.zip_codes z where z.zip = drive_offer_row."DriverCollectionZIP" AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
+					THEN
+						UPDATE stage.websubmission_driver 
+						SET state='Failed', state_info='Invalid/Not Found DriverCollectionZIP:' || drive_offer_row."DriverCollectionZIP"
+						WHERE "UUID"=drive_offer_row."UUID";
+						b_driver_validated := FALSE;
+					END IF; 	
+ 
  					BEGIN
  						SELECT * INTO zip_origin FROM nov2016.zip_codes WHERE zip=drive_offer_row."DriverCollectionZIP";
  					EXCEPTION WHEN OTHERS
@@ -224,14 +234,7 @@ BEGIN
  						b_driver_validated := FALSE;
  					END;
 
-					IF NOT EXISTS 
-						(SELECT 1 FROM nov2016.zip_codes z where z.zip = drive_offer_row."DriverCollectionZIP")
-					THEN
-						UPDATE stage.websubmission_driver 
-						SET state='Failed', state_info='Invalid/Not Found DriverCollectionZIP:' || drive_offer_row."DriverCollectionZIP"
-						WHERE "UUID"=drive_offer_row."UUID";
-						b_driver_validated := FALSE;
-					END IF; 					
+									
  					
  					-- split AvailableDriveTimesLocal in individual time intervals
  					-- FORMAT should be like this 
@@ -543,7 +546,7 @@ BEGIN
 				v_html_body := v_html_body 
                     || '<tr>' 
                     || '<td class="' || v_row_style || '">' ||
-                        CASE WHEN g_record.state='MatchProposed' THEN '<a href="' || 'https://api.carpoolvote.com/live/accept-driver-match' 
+                        CASE WHEN g_record.state='MatchProposed' THEN '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/accept-driver-match' 
                             || '?UUID_driver=' || drive_offer_row."UUID"
                             || '&UUID_rider=' || g_record.uuid_rider
                             || '&Score=' || g_record.score
@@ -580,9 +583,10 @@ BEGIN
 			
             v_html_body := v_html_body || '</table></p>'
                 || '<p>If you do not wish to accept the proposed rides, you do not need to do anything. A match is only confirmed once you have accepted it.</p>'
+				|| '<p>If you do not with to receive future notifications about new proposed matches for this Driver Offer, please <a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/pause-match-driver?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">click here</a></p>'            
+                || '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel your Drive Offer</a></p>'
                 || '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">self-service portal</a>.</p>'
-                || '<p><a href="' || 'https://api.carpoolvote.com/live/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel your Drive Offer</a></p>'
-                || '<p>Warm wishes</p>'
+				|| '<p>Warm wishes</p>'
                 || '<p>The CarpoolVote.com team.</p>'
                 || '</body>';
 
