@@ -14,6 +14,15 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
+-- Name: import; Type: SCHEMA; Schema: -; Owner: eric
+--
+
+CREATE SCHEMA import;
+
+
+ALTER SCHEMA import OWNER TO eric;
+
+--
 -- Name: nov2016; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
@@ -1211,7 +1220,7 @@ BEGIN
 				
 				-- zip code verification
 				IF NOT EXISTS
-					(SELECT 1 FROM nov2016.zip_codes z where z.zip = ride_request_row."RiderCollectionZIP")
+					(SELECT 1 FROM nov2016.zip_codes z where z.zip = ride_request_row."RiderCollectionZIP" AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
 				THEN
 					UPDATE stage.websubmission_rider 
 					SET state='Failed', state_info='Invalid/Not Found RiderCollectionZIP:' || ride_request_row."RiderCollectionZIP"
@@ -1220,7 +1229,7 @@ BEGIN
 				END IF;
 
 				IF NOT EXISTS 
-					(SELECT 1 FROM nov2016.zip_codes z where z.zip = ride_request_row."RiderDropOffZIP")
+					(SELECT 1 FROM nov2016.zip_codes z WHERE z.zip = ride_request_row."RiderDropOffZIP" AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
 				THEN
 					UPDATE stage.websubmission_rider 
 					SET state='Failed', state_info='Invalid/Not Found RiderDropOffZIP:' || ride_request_row."RiderDropOffZIP"
@@ -1250,6 +1259,15 @@ BEGIN
  						b_driver_validated := false;
  					END IF;
  
+					IF NOT EXISTS 
+						(SELECT 1 FROM nov2016.zip_codes z where z.zip = drive_offer_row."DriverCollectionZIP" AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
+					THEN
+						UPDATE stage.websubmission_driver 
+						SET state='Failed', state_info='Invalid/Not Found DriverCollectionZIP:' || drive_offer_row."DriverCollectionZIP"
+						WHERE "UUID"=drive_offer_row."UUID";
+						b_driver_validated := FALSE;
+					END IF; 	
+ 
  					BEGIN
  						SELECT * INTO zip_origin FROM nov2016.zip_codes WHERE zip=drive_offer_row."DriverCollectionZIP";
  					EXCEPTION WHEN OTHERS
@@ -1261,14 +1279,7 @@ BEGIN
  						b_driver_validated := FALSE;
  					END;
 
-					IF NOT EXISTS 
-						(SELECT 1 FROM nov2016.zip_codes z where z.zip = drive_offer_row."DriverCollectionZIP")
-					THEN
-						UPDATE stage.websubmission_driver 
-						SET state='Failed', state_info='Invalid/Not Found DriverCollectionZIP:' || drive_offer_row."DriverCollectionZIP"
-						WHERE "UUID"=drive_offer_row."UUID";
-						b_driver_validated := FALSE;
-					END IF; 					
+									
  					
  					-- split AvailableDriveTimesLocal in individual time intervals
  					-- FORMAT should be like this 
@@ -2441,11 +2452,92 @@ $$;
 
 ALTER FUNCTION stage.create_riders() OWNER TO carpool_admins;
 
-SET search_path = nov2016, pg_catalog;
+SET search_path = import, pg_catalog;
 
 SET default_tablespace = '';
 
 SET default_with_oids = false;
+
+--
+-- Name: zip_code_database_commercial; Type: TABLE; Schema: import; Owner: eric
+--
+
+CREATE TABLE zip_code_database_commercial (
+    zip text,
+    type text,
+    decommissioned text,
+    primary_city text,
+    acceptable_cities text,
+    unacceptable_cities text,
+    state text,
+    county text,
+    timezone text,
+    area_codes text,
+    world_region text,
+    country text,
+    latitude text,
+    longitude text,
+    precise_latitude text,
+    precise_longitude text,
+    latitude_min text,
+    latitude_max text,
+    longitude_min text,
+    longitude_max text,
+    area_land text,
+    housing_count text,
+    estimated_households_2005 text,
+    estimated_households_2006 text,
+    estimated_households_2007 text,
+    estimated_households_2008 text,
+    estimated_households_2009 text,
+    estimated_households_2010 text,
+    estimated_households_2011 text,
+    estimated_households_2012 text,
+    estimated_households_2013 text,
+    estimated_households_2014 text,
+    population_count text,
+    estimated_population_2005 text,
+    estimated_population_2006 text,
+    estimated_population_2007 text,
+    estimated_population_2008 text,
+    estimated_population_2009 text,
+    estimated_population_2010 text,
+    estimated_population_2011 text,
+    estimated_population_2012 text,
+    estimated_population_2013 text,
+    estimated_population_2014 text,
+    white text,
+    black_or_african_american text,
+    american_indian_or_alaskan_native text,
+    asian text,
+    native_hawaiian_and_other_pacific_islander text,
+    other_race text,
+    two_or_more_races text,
+    total_male_population text,
+    total_female_population text,
+    pop_under_10 text,
+    pop_10_to_19 text,
+    pop_20_to_29 text,
+    pop_30_to_39 text,
+    pop_40_to_49 text,
+    pop_50_to_59 text,
+    pop_60_to_69 text,
+    pop_70_to_79 text,
+    pop_80_plus text,
+    percent_population_in_poverty text,
+    median_earnings_past_year text,
+    median_household_income text,
+    median_gross_rent text,
+    median_home_value text,
+    percent_high_school_graduate text,
+    percent_bachelors_degree text,
+    percent_graduate_degree text
+);
+
+
+ALTER TABLE zip_code_database_commercial OWNER TO eric;
+
+SET search_path = nov2016, pg_catalog;
 
 --
 -- Name: driver; Type: TABLE; Schema: nov2016; Owner: carpool_admins
@@ -2802,6 +2894,20 @@ ALTER SEQUENCE outgoing_sms_id_seq OWNED BY outgoing_sms.id;
 
 
 --
+-- Name: tz_dst_offset; Type: TABLE; Schema: nov2016; Owner: eric
+--
+
+CREATE TABLE tz_dst_offset (
+    timezone text NOT NULL,
+    observes_dst character varying(50),
+    offset_summer integer,
+    offset_fall integer
+);
+
+
+ALTER TABLE tz_dst_offset OWNER TO eric;
+
+--
 -- Name: usstate; Type: TABLE; Schema: nov2016; Owner: carpool_admins
 --
 
@@ -2826,24 +2932,12 @@ CREATE TABLE zip_codes (
     full_state character varying(50) DEFAULT ''::character varying,
     latitude_numeric real,
     longitude_numeric real,
-    latlong point
+    latlong point,
+    timezone character varying(50) DEFAULT ''::character varying
 );
 
 
 ALTER TABLE zip_codes OWNER TO carpool_admins;
-
---
--- Name: zipcode_dist; Type: TABLE; Schema: nov2016; Owner: carpool_admins
---
-
-CREATE TABLE zipcode_dist (
-    "ZIPCODE_FROM" character(5) NOT NULL,
-    "ZIPCODE_TO" character(5) NOT NULL,
-    "DISTANCE_IN_MILES" numeric(10,2) DEFAULT 999.00
-);
-
-
-ALTER TABLE zipcode_dist OWNER TO carpool_admins;
 
 SET search_path = stage, pg_catalog;
 
@@ -2998,13 +3092,10 @@ CREATE TABLE vw_unmatched_drivers (
     count bigint,
     zip character varying(5),
     state character(2),
-    latitude character varying(10),
-    longitude character varying(10),
     city character varying(50),
     full_state character varying(50),
     latitude_numeric real,
-    longitude_numeric real,
-    latlong point
+    longitude_numeric real
 );
 
 ALTER TABLE ONLY vw_unmatched_drivers REPLICA IDENTITY NOTHING;
@@ -3020,13 +3111,10 @@ CREATE TABLE vw_unmatched_riders (
     count bigint,
     zip character varying(5),
     state character(2),
-    latitude character varying(10),
-    longitude character varying(10),
     city character varying(50),
     full_state character varying(50),
     latitude_numeric real,
-    longitude_numeric real,
-    latlong point
+    longitude_numeric real
 );
 
 ALTER TABLE ONLY vw_unmatched_riders REPLICA IDENTITY NOTHING;
@@ -3135,14 +3223,6 @@ ALTER TABLE ONLY usstate
 
 
 --
--- Name: ZIPCODE_DIST_pkey; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
---
-
-ALTER TABLE ONLY zipcode_dist
-    ADD CONSTRAINT "ZIPCODE_DIST_pkey" PRIMARY KEY ("ZIPCODE_FROM", "ZIPCODE_TO");
-
-
---
 -- Name: ZIP_CODES_pkey; Type: CONSTRAINT; Schema: nov2016; Owner: carpool_admins
 --
 
@@ -3180,6 +3260,14 @@ ALTER TABLE ONLY outgoing_email
 
 ALTER TABLE ONLY outgoing_sms
     ADD CONSTRAINT outgoing_sms_pk PRIMARY KEY (id);
+
+
+--
+-- Name: tz_dst_offset_pkey; Type: CONSTRAINT; Schema: nov2016; Owner: eric
+--
+
+ALTER TABLE ONLY tz_dst_offset
+    ADD CONSTRAINT tz_dst_offset_pkey PRIMARY KEY (timezone);
 
 
 SET search_path = stage, pg_catalog;
@@ -3221,19 +3309,16 @@ ALTER TABLE ONLY sweep_status
 --
 
 CREATE RULE "_RETURN" AS
-    ON SELECT TO vw_unmatched_riders DO INSTEAD  SELECT count(*) AS count,
+    ON SELECT TO vw_unmatched_drivers DO INSTEAD  SELECT count(*) AS count,
     zip_codes.zip,
     zip_codes.state,
-    zip_codes.latitude,
-    zip_codes.longitude,
     zip_codes.city,
     zip_codes.full_state,
     zip_codes.latitude_numeric,
-    zip_codes.longitude_numeric,
-    zip_codes.latlong
-   FROM websubmission_rider rider,
+    zip_codes.longitude_numeric
+   FROM websubmission_driver driver,
     nov2016.zip_codes zip_codes
-  WHERE (((rider.state)::text = ANY (ARRAY[('Pending'::character varying)::text, ('MatchProposed'::character varying)::text])) AND ((rider."RiderCollectionZIP")::text = (zip_codes.zip)::text))
+  WHERE (((driver.state)::text = ANY (ARRAY[('Pending'::character varying)::text, ('MatchProposed'::character varying)::text])) AND ((driver."DriverCollectionZIP")::text = (zip_codes.zip)::text))
   GROUP BY zip_codes.zip;
 
 
@@ -3242,19 +3327,16 @@ CREATE RULE "_RETURN" AS
 --
 
 CREATE RULE "_RETURN" AS
-    ON SELECT TO vw_unmatched_drivers DO INSTEAD  SELECT count(*) AS count,
+    ON SELECT TO vw_unmatched_riders DO INSTEAD  SELECT count(*) AS count,
     zip_codes.zip,
     zip_codes.state,
-    zip_codes.latitude,
-    zip_codes.longitude,
     zip_codes.city,
     zip_codes.full_state,
     zip_codes.latitude_numeric,
-    zip_codes.longitude_numeric,
-    zip_codes.latlong
-   FROM websubmission_driver driver,
+    zip_codes.longitude_numeric
+   FROM websubmission_rider rider,
     nov2016.zip_codes zip_codes
-  WHERE (((driver.state)::text = ANY (ARRAY[('Pending'::character varying)::text, ('MatchProposed'::character varying)::text])) AND ((driver."DriverCollectionZIP")::text = (zip_codes.zip)::text))
+  WHERE (((rider.state)::text = ANY (ARRAY[('Pending'::character varying)::text, ('MatchProposed'::character varying)::text])) AND ((rider."RiderCollectionZIP")::text = (zip_codes.zip)::text))
   GROUP BY zip_codes.zip;
 
 
@@ -3727,16 +3809,6 @@ REVOKE ALL ON TABLE zip_codes FROM PUBLIC;
 REVOKE ALL ON TABLE zip_codes FROM carpool_admins;
 GRANT ALL ON TABLE zip_codes TO carpool_admins;
 GRANT ALL ON TABLE zip_codes TO carpool_role;
-
-
---
--- Name: zipcode_dist; Type: ACL; Schema: nov2016; Owner: carpool_admins
---
-
-REVOKE ALL ON TABLE zipcode_dist FROM PUBLIC;
-REVOKE ALL ON TABLE zipcode_dist FROM carpool_admins;
-GRANT ALL ON TABLE zipcode_dist TO carpool_admins;
-GRANT ALL ON TABLE zipcode_dist TO carpool_role;
 
 
 SET search_path = stage, pg_catalog;
