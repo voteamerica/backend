@@ -19,6 +19,7 @@ https://api.carpoolvote.com/v2.0/accept-driver-match?UUID_driver=1e6e274d-ad33-4
 --nov2016.driver_cancel_drive_offer(UUID, phone number or lastname ?)
 --nov2016.driver_cancel_confirmed_match(UUID_driver, UUID_rider, driverr’s phone number or driver’s lastname ?)
 --nov2016.driver_confirm_match(UUID_driver, UUID_rider, score, driver’s phone number or driver’s lastname ?)
+--nov2016.driver_pause_match(UUID, phone number or lastname ?)
 
 -- functions return character varying with explanatory text of error condition. Empty string if success
 
@@ -47,7 +48,7 @@ POST /driver
  DrivingOBOOrganizationName       | character varying(255)      |                                               | DrivingOBOOrganizationName
  RidersCanSeeDriverDetails        | boolean                     | not null default false                        | RidersCanSeeDriverDetails
  DriverWillNotTalkPolitics        | boolean                     | not null default false                        | DriverWillNotTalkPolitics
- ReadyToMatch                     | boolean                     | not null default false                        | --- to be removed from websubmission_driver ?---
+ ReadyToMatch                     | boolean                     | not null default true                         | used by driver_pause_match function to mute new matches
  PleaseStayInTouch                | boolean                     | not null default false                        | PleaseStayInTouch
  DriverPreferredContact           | character varying(50)       |                                               | DriverPreferredContact  [Email|SMS|Phone]
  DriverWillTakeCare               | boolean                     | not null default false                        | DriverWillTakeCare
@@ -73,7 +74,7 @@ POST /rider
  RiderWillNotTalkPolitics    | boolean                     | not null default false                        | RiderWillNotTalkPolitics
  RiderLegalConsent           | boolean                     | not null default false                        | RiderLegalConsent
  PleaseStayInTouch           | boolean                     | not null default false                        | PleaseStayInTouch
- ReadyToMatch                | boolean                     | not null default false                        | --- to be removed from websubmission_rider ?---
+ ReadyToMatch                | boolean                     | not null default true                         | --- to be removed from websubmission_rider ?---
  NeedWheelchair              | boolean                     | not null default false                        | NeedWheelchair
  RiderAccommodationNotes     | character varying(1000)     |                                               | RiderAccommodationNotes
  RiderWillBeSafe             | boolean                     | not null default false                        | RiderWillBeSafe
