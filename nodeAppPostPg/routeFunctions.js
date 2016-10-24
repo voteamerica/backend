@@ -1,3 +1,4 @@
+// route names, handlers and support functions
 // const moment          = require('moment');
 var postgresQueries = require('./postgresQueries.js');
 var dbQueries = require('./dbQueries.js');
@@ -11,6 +12,7 @@ var CANCEL_RIDER_MATCH_ROUTE = 'cancel-rider-match';
 var CANCEL_DRIVE_OFFER_ROUTE = 'cancel-drive-offer';
 var CANCEL_DRIVER_MATCH_ROUTE = 'cancel-driver-match';
 var ACCEPT_DRIVER_MATCH_ROUTE = 'accept-driver-match';
+var PAUSE_DRIVER_MATCH_ROUTE = 'pause-driver-match';
 var DELETE_DRIVER_ROUTE = 'driver';
 var PUT_RIDER_ROUTE = 'rider';
 var PUT_DRIVER_ROUTE = 'driver';
@@ -78,7 +80,6 @@ function getUnmatchedDrivers(req, reply) {
     req.log();
     postgresQueries.dbGetUnmatchedDrivers(rfPool, dbQueries.dbGetUnmatchedDriversQueryString, reply, results);
 }
-
 function getUnmatchedRiders(req, reply) {
     var results = {
         success: 'GET unmatched riders: ',
@@ -94,6 +95,7 @@ var cancelDriverMatch = createConfirmCancelFn('cancel driver match: ', "get payl
 // getThreeDriverCancelConfirmPayloadAsArray
 getFourDriverCancelConfirmPayloadAsArray);
 var acceptDriverMatch = createConfirmCancelFn('accept driver match: ', "get payload: ", dbQueries.dbAcceptDriverMatchFunctionString, getFourDriverCancelConfirmPayloadAsArray);
+var pauseDriverMatch = createConfirmCancelFn('pause driver match: ', "get payload: ", dbQueries.dbPauseDriverMatchFunctionString, getTwoDriverCancelConfirmPayloadAsArray);
 var cancelRideOffer = createConfirmCancelFn('cancel ride offer: ', "delete payload: ", dbQueries.dbCancelRideOfferFunctionString, getCancelRideOfferPayloadAsArray);
 var rejectRide = createConfirmCancelFn('reject ride: ', "reject payload: ", dbQueries.dbRejectRideFunctionString, getRejectRidePayloadAsArray);
 var confirmRide = createConfirmCancelFn('confirm ride: ', "confirm payload: ", dbQueries.dbConfirmRideFunctionString, 'getConfirmRidePayloadAsArray');
@@ -130,14 +132,15 @@ function getHelperPayloadAsArray(req, payload) {
 }
 function getRiderPayloadAsArray(req, payload) {
     return [
-        req.info.remoteAddress, 
-        payload.RiderFirstName, 
-        payload.RiderLastName, 
+        req.info.remoteAddress,
+        payload.RiderFirstName,
+        payload.RiderLastName,
         payload.RiderEmail,
-        payload.RiderPhone, 
-        payload.RiderCollectionZIP, 
-        payload.RiderDropOffZIP, 
-        payload.AvailableRideTimesJSON, // this one should be in local time as passed along by the forms
+        payload.RiderPhone,
+        payload.RiderCollectionZIP,
+        payload.RiderDropOffZIP,
+        payload.AvailableRideTimesJSON // this one should be in local time as passed along by the forms
+        ,
         payload.TotalPartySize,
         (payload.TwoWayTripNeeded ? 'true' : 'false'),
         payload.RiderPreferredContact,
@@ -152,15 +155,15 @@ function getRiderPayloadAsArray(req, payload) {
 }
 function getDriverPayloadAsArray(req, payload) {
     return [
-        req.info.remoteAddress, 
-        payload.DriverCollectionZIP, 
-        payload.DriverCollectionRadius, 
-        payload.AvailableDriveTimesJSON,   // this one should be in local time as passed along by the forms
+        req.info.remoteAddress,
+        payload.DriverCollectionZIP,
+        payload.DriverCollectionRadius,
+        payload.AvailableDriveTimesJSON,
         (payload.DriverCanLoadRiderWithWheelchair ? 'true' : 'false'),
         payload.SeatCount,
         payload.DriverFirstName,
         payload.DriverLastName,
-        payload.DriverEmail, 
+        payload.DriverEmail,
         payload.DriverPhone,
         (payload.DrivingOnBehalfOfOrganization ? 'true' : 'false'),
         payload.DrivingOBOOrganizationName,
@@ -326,9 +329,9 @@ function sanitiseDriver(payload) {
     }
 }
 function sanitiseRider(payload) {
-    //if (payload.RiderVotingState === undefined) {
-    //    payload.RiderVotingState = "MO";
-    //}
+    // if (payload.RiderVotingState === undefined) {
+    //   payload.RiderVotingState = "MO";
+    // }
 }
 module.exports = {
     getAnon: getAnon,
@@ -342,6 +345,7 @@ module.exports = {
     cancelDriveOffer: cancelDriveOffer,
     cancelDriverMatch: cancelDriverMatch,
     acceptDriverMatch: acceptDriverMatch,
+    pauseDriverMatch: pauseDriverMatch,
     cancelRideOffer: cancelRideOffer,
     rejectRide: rejectRide,
     confirmRide: confirmRide,
@@ -355,6 +359,7 @@ module.exports = {
     CANCEL_DRIVE_OFFER_ROUTE: CANCEL_DRIVE_OFFER_ROUTE,
     CANCEL_DRIVER_MATCH_ROUTE: CANCEL_DRIVER_MATCH_ROUTE,
     ACCEPT_DRIVER_MATCH_ROUTE: ACCEPT_DRIVER_MATCH_ROUTE,
+    PAUSE_DRIVER_MATCH_ROUTE: PAUSE_DRIVER_MATCH_ROUTE,
     DELETE_DRIVER_ROUTE: DELETE_DRIVER_ROUTE,
     PUT_RIDER_ROUTE: PUT_RIDER_ROUTE,
     PUT_DRIVER_ROUTE: PUT_DRIVER_ROUTE,

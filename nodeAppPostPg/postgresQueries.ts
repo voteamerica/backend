@@ -1,3 +1,5 @@
+// functions that use postgresql pg library to execute db queries etc
+
 module.exports = {
   dbGetData:              dbGetData,
   dbGetUnmatchedDrivers:  dbGetUnmatchedDrivers,

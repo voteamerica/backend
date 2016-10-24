@@ -122,6 +122,11 @@ server.route({
     handler: routeFns.acceptDriverMatch
 });
 server.route({
+    method: 'GET',
+    path: '/' + routeFns.PAUSE_DRIVER_MATCH_ROUTE,
+    handler: routeFns.pauseDriverMatch
+});
+server.route({
     method: 'DELETE',
     path: '/' + routeFns.DELETE_DRIVER_ROUTE,
     handler: routeFns.cancelRideOffer

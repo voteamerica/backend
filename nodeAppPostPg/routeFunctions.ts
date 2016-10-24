@@ -1,3 +1,5 @@
+// route names, handlers and support functions
+
 // const moment          = require('moment');
 const postgresQueries = require('./postgresQueries.js');
 const dbQueries       = require('./dbQueries.js');
@@ -13,6 +15,8 @@ const CANCEL_DRIVE_OFFER_ROUTE  = 'cancel-drive-offer';
 const CANCEL_DRIVER_MATCH_ROUTE = 'cancel-driver-match';
 
 const ACCEPT_DRIVER_MATCH_ROUTE = 'accept-driver-match';
+
+const PAUSE_DRIVER_MATCH_ROUTE  = 'pause-driver-match';
 
 const DELETE_DRIVER_ROUTE           = 'driver';
 const PUT_RIDER_ROUTE               = 'rider';
@@ -166,6 +170,12 @@ var acceptDriverMatch = createConfirmCancelFn
   ('accept driver match: ', "get payload: ", 
     dbQueries.dbAcceptDriverMatchFunctionString, 
     getFourDriverCancelConfirmPayloadAsArray
+  );
+
+var pauseDriverMatch = createConfirmCancelFn 
+  ('pause driver match: ', "get payload: ", 
+    dbQueries.dbPauseDriverMatchFunctionString, 
+    getTwoDriverCancelConfirmPayloadAsArray
   );
 
 
@@ -494,6 +504,7 @@ module.exports = {
   cancelDriverMatch:  cancelDriverMatch,
 
   acceptDriverMatch:  acceptDriverMatch,
+  pauseDriverMatch:   pauseDriverMatch,
 
   cancelRideOffer: cancelRideOffer,
   rejectRide: rejectRide,
@@ -510,6 +521,7 @@ module.exports = {
   CANCEL_DRIVER_MATCH_ROUTE:  CANCEL_DRIVER_MATCH_ROUTE,
 
   ACCEPT_DRIVER_MATCH_ROUTE:  ACCEPT_DRIVER_MATCH_ROUTE,
+  PAUSE_DRIVER_MATCH_ROUTE:   PAUSE_DRIVER_MATCH_ROUTE,
 
   DELETE_DRIVER_ROUTE: DELETE_DRIVER_ROUTE,
   PUT_RIDER_ROUTE: PUT_RIDER_ROUTE,

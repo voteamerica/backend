@@ -1,3 +1,5 @@
+// generate string for db query statements etc 
+
 module.exports = {
   dbRejectRideFunctionString:   dbRejectRideFunctionString,
 
@@ -7,6 +9,7 @@ module.exports = {
   dbCancelDriverMatchFunctionString:  dbCancelDriverMatchFunctionString,
 
   dbAcceptDriverMatchFunctionString:  dbAcceptDriverMatchFunctionString,
+  dbPauseDriverMatchFunctionString:   dbPauseDriverMatchFunctionString,
 
   dbGetMatchRiderQueryString:   dbGetMatchRiderQueryString,
   dbGetMatchDriverQueryString:  dbGetMatchDriverQueryString,
@@ -53,6 +56,10 @@ function dbCancelDriverMatchFunctionString() {
 
 function dbAcceptDriverMatchFunctionString() {
   return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.ACCEPT_DRIVER_MATCH_FUNCTION);
+}
+
+function dbPauseDriverMatchFunctionString() {
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.PAUSE_DRIVER_MATCH_FUNCTION);
 }
 
 
