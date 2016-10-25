@@ -1,3 +1,4 @@
+// functions that use postgresql pg library to execute db queries etc
 module.exports = {
     dbGetData: dbGetData,
     dbGetUnmatchedDrivers: dbGetUnmatchedDrivers,
@@ -46,8 +47,6 @@ function dbGetUnmatchedDrivers(pool, fnGetString, reply, results) {
         reply(results.failure + message).code(500);
     });
 }
-
-
 function dbGetUnmatchedRiders(pool, fnGetString, reply, results) {
     var queryString = fnGetString();
     pool.query(queryString)
@@ -69,7 +68,6 @@ function dbGetUnmatchedRiders(pool, fnGetString, reply, results) {
         reply(results.failure + message).code(500);
     });
 }
-
 function dbGetMatchesData(pool, fnGetString, reply, results) {
     var queryString = fnGetString();
     pool.query(queryString)

@@ -1,3 +1,4 @@
+// generate string for db query statements etc 
 module.exports = {
     dbRejectRideFunctionString: dbRejectRideFunctionString,
     dbCancelRideRequestFunctionString: dbCancelRideRequestFunctionString,
@@ -5,6 +6,7 @@ module.exports = {
     dbCancelDriveOfferFunctionString: dbCancelDriveOfferFunctionString,
     dbCancelDriverMatchFunctionString: dbCancelDriverMatchFunctionString,
     dbAcceptDriverMatchFunctionString: dbAcceptDriverMatchFunctionString,
+    dbPauseDriverMatchFunctionString: dbPauseDriverMatchFunctionString,
     dbGetMatchRiderQueryString: dbGetMatchRiderQueryString,
     dbGetMatchDriverQueryString: dbGetMatchDriverQueryString,
     dbGetMatchesQueryString: dbGetMatchesQueryString,
@@ -41,6 +43,9 @@ function dbCancelDriverMatchFunctionString() {
 }
 function dbAcceptDriverMatchFunctionString() {
     return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.ACCEPT_DRIVER_MATCH_FUNCTION);
+}
+function dbPauseDriverMatchFunctionString() {
+    return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.PAUSE_DRIVER_MATCH_FUNCTION);
 }
 function dbRejectRideFunctionString() {
     return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.REJECT_RIDE_FUNCTION);
