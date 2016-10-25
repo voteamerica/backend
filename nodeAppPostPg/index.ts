@@ -13,7 +13,7 @@ const postgresQueries = require('./postgresQueries.js');
 
 
 // const logging     = require('./logging.js');
-import logging as from ("./logging");
+import logging from ("./logging");
 
 const routeFns = require('./routeFunctions.js');
 
