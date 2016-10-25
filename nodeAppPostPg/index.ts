@@ -1,6 +1,6 @@
 'use strict';
 
-const Hapi        = require('hapi');
+import * as Hapi        from 'hapi';
 const Pool        = require('pg').Pool;
 const Good        = require('good');
 const GoodFile    = require('good-file');
@@ -155,6 +155,11 @@ server.route({
   handler: routeFns.acceptDriverMatch
 });
 
+server.route({
+  method: 'GET',
+  path: '/' + routeFns.PAUSE_DRIVER_MATCH_ROUTE,
+  handler: routeFns.pauseDriverMatch
+});
 
 server.route({
   method: 'DELETE',

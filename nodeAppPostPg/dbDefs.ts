@@ -1,3 +1,5 @@
+// location of db names 
+
 const SCHEMA_NAME           = 'stage';
 const SCHEMA_NOV2016_NAME   = 'nov2016';
 
@@ -15,6 +17,7 @@ const CANCEL_DRIVE_OFFER_FUNCTION   = 'driver_cancel_drive_offer($1, $2)';
 const CANCEL_DRIVER_MATCH_FUNCTION  = 'driver_cancel_confirmed_match($1, $2, $3, $4)';
 
 const ACCEPT_DRIVER_MATCH_FUNCTION  = 'driver_confirm_match($1, $2, $3, $4)';
+const PAUSE_DRIVER_MATCH_FUNCTION   = 'driver_pause_match($1, $2)';
 
 // designed for an earlier db design
 const CANCEL_RIDE_OFFER_FUNCTION  = 'cancel_drive_offer($1, $2)';
@@ -42,6 +45,7 @@ module.exports = {
   CANCEL_DRIVER_MATCH_FUNCTION: CANCEL_DRIVER_MATCH_FUNCTION,
 
   ACCEPT_DRIVER_MATCH_FUNCTION: ACCEPT_DRIVER_MATCH_FUNCTION,
+  PAUSE_DRIVER_MATCH_FUNCTION:  PAUSE_DRIVER_MATCH_FUNCTION,
 
   CANCEL_RIDE_OFFER_FUNCTION: CANCEL_RIDE_OFFER_FUNCTION,
   REJECT_RIDE_FUNCTION: REJECT_RIDE_FUNCTION,
