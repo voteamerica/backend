@@ -1,7 +1,10 @@
 // route names, handlers and support functions
 
 // const moment          = require('moment');
-const postgresQueries = require('./postgresQueries.js');
+// const postgresQueries = require('./postgresQueries.js');
+import { PostgresQueries }  from "./postgresQueries";
+let postgresQueries = new PostgresQueries();
+
 const dbQueries       = require('./dbQueries.js');
 
 const UNMATCHED_DRIVERS_ROUTE = 'unmatched-drivers';

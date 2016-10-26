@@ -9,13 +9,14 @@ const config      = require('./dbInfo.js');
 const logOptions  = require('./logInfo.js');
 
 const dbQueries   = require('./dbQueries.js');
-const postgresQueries = require('./postgresQueries.js');
 
+const routeFns    = require('./routeFunctions.js');
 
-// const logging     = require('./logging.js');
-import logging from ("./logging");
+import { PostgresQueries }  from "./postgresQueries";
+import { Logging }          from "./Logging";
 
-const routeFns = require('./routeFunctions.js');
+let postgresQueries = new PostgresQueries();
+let logging        = new Logging();
 
 config.user       = process.env.PGUSER;
 config.database   = process.env.PGDATABASE;
