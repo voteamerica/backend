@@ -29,14 +29,12 @@ function getAnon(req, reply) {
     req.log();
     postgresQueries.dbGetData(rfPool, dbQueries.dbGetQueryString, reply, results);
 }
-
-getClientAddress = function (req) {
-		// See http://stackoverflow.com/questions/10849687/express-js-how-to-get-remote-client-address
-		// and http://stackoverflow.com/questions/19266329/node-js-get-clients-ip/19267284
-        return (req.headers['x-forwarded-for'] || '').split(',')[0] 
+var getClientAddress = function (req) {
+    // See http://stackoverflow.com/questions/10849687/express-js-how-to-get-remote-client-address
+    // and http://stackoverflow.com/questions/19266329/node-js-get-clients-ip/19267284
+    return (req.headers['x-forwarded-for'] || '').split(',')[0]
         || req.connection.remoteAddress;
 };
-
 function logPostDriver(req) {
     var payload = req.payload;
     console.log("driver radius1 : " + payload.DriverCollectionRadius);
@@ -139,12 +137,11 @@ function getHelperPayloadAsArray(req, payload) {
     ];
 }
 function getRiderPayloadAsArray(req, payload) {
-	var ip = getClientAddress(req);
-	
+    var ip = getClientAddress(req);
     return [
-        ip, 
-        payload.RiderFirstName, 
-        payload.RiderLastName, 
+        ip,
+        payload.RiderFirstName,
+        payload.RiderLastName,
         payload.RiderEmail,
         payload.RiderPhone,
         payload.RiderCollectionZIP,
@@ -164,13 +161,12 @@ function getRiderPayloadAsArray(req, payload) {
     ];
 }
 function getDriverPayloadAsArray(req, payload) {
-	var ip = getClientAddress(req);
-
+    var ip = getClientAddress(req);
     return [
-        ip, 
-        payload.DriverCollectionZIP, 
-        payload.DriverCollectionRadius, 
-        payload.AvailableDriveTimesJSON,   // this one should be in local time as passed along by the forms
+        ip,
+        payload.DriverCollectionZIP,
+        payload.DriverCollectionRadius,
+        payload.AvailableDriveTimesJSON,
         (payload.DriverCanLoadRiderWithWheelchair ? 'true' : 'false'),
         payload.SeatCount,
         payload.DriverFirstName,
