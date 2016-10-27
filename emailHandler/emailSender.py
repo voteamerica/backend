@@ -43,7 +43,7 @@ for row in rows:
 	else:
 		cur.execute("""UPDATE nov2016.outgoing_email
 						SET state='Failed', emission_info = %s 
-						WHERE id = %d""", ((request.status_code + ':' + request.text), row[0], ))
+						WHERE id = %s""", ("{0}: {1}".format(request.status_code,request.text), "{0}".format(row[0]), ))
 
 	conn.commit()
 	
