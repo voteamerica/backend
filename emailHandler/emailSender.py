@@ -1,4 +1,5 @@
 #!/usr/bin/python3.5
+import os
 import sys
 import requests
 import psycopg2
@@ -9,7 +10,7 @@ import psycopg2
 ########################################################
 
 
-key = 'key-288a0fac896a89f91855c2e3a8d2bac6'
+key = os.environ['MAILGUNKEY']
 request_url = 'https://api.mailgun.net/v3/www.carpoolvote.com/messages'
 
 try:
