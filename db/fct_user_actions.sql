@@ -279,8 +279,8 @@ BEGIN
 				|| '<p><table>'
 				|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
 					replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
-				|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
-				|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+				|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">'  || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+				|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') ||  ride_request_row."RiderDropOffZIP" || '</td></tr>'
 				|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
 				|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
 				|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
@@ -289,7 +289,7 @@ BEGIN
 				|| '</p>'
 				|| '<p>Concerning this ride, no further action is needed from you.</p>'
 				|| '<p>Hopefully you can help another rider in your area.</p>'
-				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
+				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
 				|| '<p>Warm wishes</p>'
 				|| '<p>The CarpoolVote.com team.</p>'
 				|| '</body>';
@@ -308,7 +308,7 @@ BEGIN
 				v_body := 'From CarpoolVote.com\n'
 					|| 'Confirmed Ride was canceled by rider. No further action needed. \n'
 					|| 'Rider : ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || '\n'
-					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Pick-up location : '  ||  COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
 					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
 					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
@@ -356,8 +356,8 @@ BEGIN
 			|| '<p><table>'
 			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
 				replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
-			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
-			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
 			|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
 			|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
@@ -382,7 +382,7 @@ BEGIN
 		
 			v_body := 'From CarpoolVote.com\n'
 					|| 'Ride Request ' || ride_request_row."UUID"  || ' was canceled. No further action needed. \n'
-					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
 					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
 					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 		
@@ -525,8 +525,8 @@ BEGIN
 				|| '<p><table>'
 				|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
 					replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
-				|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
-				|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+				|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+				|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || '</td></tr>'
 				|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
 				|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
 				|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
@@ -535,7 +535,7 @@ BEGIN
 				|| '</p>'
 				|| '<p>Concerning this ride, no further action is needed from you.</p>'
 				|| '<p>Hopefully you can help another rider in your area.</p>'
-				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
+				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
 				|| '<p>Warm wishes</p>'
 				|| '<p>The CarpoolVote.com team.</p>'
 				|| '</body>';
@@ -554,7 +554,7 @@ BEGIN
 			v_body := 'From CarpoolVote.com\n'
 					|| 'Confirmed Ride was canceled by rider. No further action needed. \n'
 					|| 'Rider : ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || '\n'
-					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
 					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
 					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
@@ -596,8 +596,8 @@ BEGIN
 			|| '<p><table>'
 			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
 				replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
-			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
-			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
 			|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
 			|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
@@ -606,7 +606,7 @@ BEGIN
 			|| '</p>'
 			|| '<p>No further action is needed from you.</p>'
 			|| '<p>We will try to find another suitable driver.</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -626,7 +626,7 @@ BEGIN
 		
 			v_body := 'From CarpoolVote.com\n'
 					|| 'Confirmed Ride was canceled. No further action needed. \n'
-					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
 					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
 					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
@@ -762,8 +762,8 @@ BEGIN
 				|| '<p><table>'
 				|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
 					replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
-				|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
-				|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+				|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+				|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || '</td></tr>'
 				|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
 				|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
 				|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
@@ -772,7 +772,7 @@ BEGIN
 				|| '</p>'
 				|| '<p>Concerning this ride, no further action is needed from you.</p>'
 				|| '<p>We will try to find another suitable driver.</p>'
-				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
+				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
 				|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 				|| '<p>Warm wishes</p>'
 				|| '<p>The CarpoolVote.com team.</p>'
@@ -794,7 +794,7 @@ BEGIN
 				v_body := 'From CarpoolVote.com\n'
 					|| 'Confirmed Ride was canceled by driver. No further action needed. \n'
 					|| 'Driver : ' || drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" || '\n'
-					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
 					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
 					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
@@ -1015,8 +1015,8 @@ BEGIN
 			|| '<p><table>'
 			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
 				replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
-			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
-			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
 			|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
 			|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
@@ -1025,7 +1025,7 @@ BEGIN
 			|| '</p>'
 			|| '<p>Concerning this ride, no further action is needed from you.</p>'
 			|| '<p>We will try to find another suitable driver.</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -1046,7 +1046,7 @@ BEGIN
 			v_body := 'From CarpoolVote.com\n'
 					|| 'Confirmed Ride was canceled by driver. No further action needed. \n'
 					|| 'Driver : ' ||  drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName"  || '\n'
-					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
 					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
 					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
@@ -1087,8 +1087,8 @@ BEGIN
 			|| '<p><table>'
 			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
 				replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
-			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
-			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
 			|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
 			|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
@@ -1097,7 +1097,7 @@ BEGIN
 			|| '</p>'
 			|| '<p>No further action is needed from you.</p>'
 			|| '<p>We hope you can still are still able to help another rider.</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p>If are no longer able to offer a ride, please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">cancel this Drive Offer</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -1118,7 +1118,7 @@ BEGIN
 			v_body := 'From CarpoolVote.com\n'
 					|| 'Confirmed Ride was canceled. No further action needed. \n'
 					|| 'Rider : ' ||  ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || '\n'
-					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
 					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
 					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
@@ -1283,8 +1283,8 @@ BEGIN
 			|| '<p><table>'
 			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
 				replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
-			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || ride_request_row."RiderCollectionZIP" || '</td></tr>'
-			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || ride_request_row."RiderDropOffZIP" || '</td></tr>'
+			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '</td></tr>'
+			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || ride_request_row."TotalPartySize" || '</td></tr>'
 			|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
 			|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
@@ -1296,7 +1296,7 @@ BEGIN
 			|| '&UUID_rider=' || a_UUID_rider 
 			|| '&Score=' || a_score 
 			|| '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName" ) || '">cancel this ride match only</a></p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel this Drive Offer</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -1317,7 +1317,7 @@ BEGIN
 			v_body := 'From CarpoolVote.com\n'
 					|| 'Match is confirmed. No further action needed. \n'
 					|| 'Rider : ' ||  ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || '\n'
-					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
 					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
 					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
@@ -1338,7 +1338,7 @@ BEGIN
 			|| '<p>Dear ' || ride_request_row."RiderFirstName" ||  ' ' || ride_request_row."RiderLastName" || ', <p>' 
 			|| '<p>Great news - a driver has accepted your request for a ride!</p>'
 			|| '<p>' || drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" 
-			|| 'will get in touch to arrange the details of the ride.</p>'
+			|| ' will get in touch to arrange the details of the ride.</p>'
 			|| '<p>If you DO NOT hear from ' || drive_offer_row."DriverFirstName" || ', please feel free to reach out :<br/>'
 			|| CASE WHEN drive_offer_row."DriverEmail" IS NOT NULL THEN '- ' || CASE WHEN coalesce(drive_offer_row."DriverPreferredContact" LIKE '%Email%',false) THEN '(*)' else ' ' END || 'Email: ' || drive_offer_row."DriverEmail"  ELSE ' ' END || '<br/>'
 			|| CASE WHEN drive_offer_row."DriverPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(drive_offer_row."DriverPreferredContact" LIKE '%Phone%',false) THEN '(*)' else ' ' END || 'Phone: ' || drive_offer_row."DriverPhone"  ELSE ' ' END || '<br/>'
@@ -1349,7 +1349,7 @@ BEGIN
 			|| '&UUID_rider=' || a_UUID_rider 
 			|| '&Score=' || a_score 
 			|| '&RiderPhone=' || nov2016.urlencode( ride_request_row."RiderLastName") || '">cancel this ride match only</a></p>'   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -1369,7 +1369,8 @@ BEGIN
 			v_body := 'From CarpoolVote.com\n'
 					|| 'Match is confirmed by driver. No further action needed. \n'
 					|| 'Driver : ' ||  drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" || '\n'
-					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Destination : ' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || '\n'
 					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
 					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			

@@ -78,6 +78,8 @@ POST /rider
  NeedWheelchair              | boolean                     | not null default false                        | NeedWheelchair
  RiderAccommodationNotes     | character varying(1000)     |                                               | RiderAccommodationNotes
  RiderWillBeSafe             | boolean                     | not null default false                        | RiderWillBeSafe
+ RiderCollectionAddress      | character varying(1000)     |                                               | RiderCollectionAddress
+ RiderDestinationAddress     | character varying(1000)     |                                               | RiderDestinationAddress
 
 
 POST /helper
