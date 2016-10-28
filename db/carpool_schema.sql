@@ -234,12 +234,21 @@ BEGIN
 
 		END IF;
 		
-		IF ride_request_row."RiderPhone" IS NOT NULL
+		IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 		THEN
-			INSERT INTO nov2016.outgoing_sms (recipient, body)
-			VALUES (ride_request_row."RiderPhone", 
-			'Confirmed Ride was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		
+			v_body := 'From CarpoolVote.com\n'
+					|| 'Confirmed Ride was canceled by driver. No further action needed. \n'
+					|| 'Driver : ' ||  drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName"  || '\n'
+					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
+					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			
+				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				VALUES (ride_request_row."RiderPhone", 
+				v_body);
 		END IF;
+		
 		
 		v_step := 'S3';
 		v_return_text := nov2016.update_drive_offer_state(a_UUID_driver);
@@ -264,7 +273,6 @@ BEGIN
 		IF drive_offer_row."DriverEmail" IS NOT NULL
 		THEN
 
-			-- Cancellation notice to rider
 			v_subject := 'Confirmed Ride Cancellation Notice   --- [' || ride_request_row."UUID" || ']';
 			v_html_body := '<body>'
 			|| '<p>Dear ' || drive_offer_row."DriverFirstName" ||  ' ' || drive_offer_row."DriverLastName" ||  ', </p>'
@@ -292,19 +300,26 @@ BEGIN
 			v_body := v_html_header || v_html_body || v_html_footer;
 
 			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
-			VALUES (ride_request_row."RiderEmail", 
+			VALUES (drive_offer_row."DriverEmail", 
 			v_subject, 
 			v_body);
 		
 		END IF;
 		
-		IF drive_offer_row."DriverPhone" IS NOT NULL
+		IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 		THEN
-			INSERT INTO nov2016.outgoing_sms (recipient, body)
-			VALUES (drive_offer_row."DriverPhone", 
-			'Confirmed Ride was canceled by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
-		END IF;
 		
+			v_body := 'From CarpoolVote.com\n'
+					|| 'Confirmed Ride was canceled. No further action needed. \n'
+					|| 'Rider : ' ||  ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || '\n'
+					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
+					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			
+				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				VALUES (drive_offer_row."DriverPhone", 
+				v_body);
+		END IF;		
 		return '';
 	
 	EXCEPTION WHEN OTHERS 
@@ -454,12 +469,21 @@ BEGIN
 			
 			END IF;
 			
-			IF ride_request_row."RiderPhone" IS NOT NULL
+			IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 			THEN
+		
+				v_body := 'From CarpoolVote.com\n'
+					|| 'Confirmed Ride was canceled by driver. No further action needed. \n'
+					|| 'Driver : ' || drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" || '\n'
+					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
+					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (ride_request_row."RiderPhone", 
-				'Confirmed Ride was canceled by driver: ' || match_row.uuid_rider || ', ' || match_row.uuid_driver);
+				v_body);
 			END IF;
+
 			
 
 			v_step := 'S4';
@@ -523,12 +547,20 @@ BEGIN
             VALUES (drive_offer_row."DriverEmail", v_subject, v_body);                                                                 
 			
 		END IF;
-			
+
+		
 		IF drive_offer_row."DriverPhone" IS NOT NULL
 		THEN
+		
+			v_body := 'From CarpoolVote.com\n'
+					|| 'Drive Offer ' || drive_offer_row."UUID" ||  ' was canceled. No further action needed. \n'
+					|| 'Pick-up ZIP : ' || drive_offer_row."DriverCollectionZIP" || '\n'
+					|| 'Radius : ' || drive_offer_row."DriverCollectionRadius" || '\n'
+					|| 'Drive Times : ' || replace(replace(replace(replace(replace(drive_offer_row."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-'); 
+			
 			INSERT INTO nov2016.outgoing_sms (recipient, body)
 			VALUES (drive_offer_row."DriverPhone", 
-			'Drive Offer was canceled by driver: ' || a_UUID);
+			v_body);
 		END IF;
 		
 		
@@ -711,12 +743,21 @@ BEGIN
 		END IF;
 		
 		v_step := 'S6';
-		IF drive_offer_row."DriverPhone" IS NOT NULL
+		IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 		THEN
-			INSERT INTO nov2016.outgoing_sms (recipient, body)
-			VALUES (drive_offer_row."DriverPhone", 
-			'Ride was confirmed by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
-		END IF;
+		
+			v_body := 'From CarpoolVote.com\n'
+					|| 'Match is confirmed. No further action needed. \n'
+					|| 'Rider : ' ||  ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || '\n'
+					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
+					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			
+				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				VALUES (drive_offer_row."DriverPhone", 
+				v_body);
+		END IF;		
+
 
 
 		v_step := 'S7';
@@ -741,7 +782,7 @@ BEGIN
 			|| '&Score=' || a_score 
 			|| '&RiderPhone=' || nov2016.urlencode( ride_request_row."RiderLastName") || '">cancel this ride match only</a></p>'   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
-			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-offer?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
+			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
@@ -755,12 +796,19 @@ BEGIN
 		END IF;
 		
 		v_step := 'S8';
-		IF ride_request_row."RiderPhone" IS NOT NULL
+		IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 		THEN
-			INSERT INTO nov2016.outgoing_sms (recipient, body)
-			VALUES (ride_request_row."RiderPhone", 
-			'Ride was confirmed by driver: ' || a_UUID_driver || ', ' || a_UUID_rider);
-		END IF;
+			v_body := 'From CarpoolVote.com\n'
+					|| 'Match is confirmed by driver. No further action needed. \n'
+					|| 'Driver : ' ||  drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" || '\n'
+					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
+					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			
+				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				VALUES (ride_request_row."RiderPhone", 
+				v_body);
+		END IF;		
 
 		
 		return '';
@@ -1914,13 +1962,7 @@ BEGIN
                 
 				--RAISE NOTICE 'BODY 2 : % % %', v_html_body, v_row_style, ride_request_row."UUID";
 				
-				g_sms_body := g_sms_body 
-				       || 'https://api.carpoolvote.com/v2.0/accept-driver-match'
-					   || '?UUID_driver=' || g_record.uuid_driver
-					   || '&UUID_rider=' || g_record.uuid_rider
-					   || '&Score=' || g_record.score
-					   || '&DriverPhone=' || drive_offer_row."DriverPhone" || '\n';
-			
+				
 				v_loop_cnt := v_loop_cnt + 1;
 			END LOOP;
 			
@@ -1952,12 +1994,16 @@ BEGIN
 				
 			END IF;
 				
-			IF drive_offer_row."DriverPhone" IS NOT NULL
+			IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 			THEN
+			
+				g_sms_body := 'From CarpoolVote.com\n' 
+						|| 'New matches are available.\n'
+				        || 'Visit the self-service page for details http://carpoolvote.com/self-service/?uuid_driver=' || drive_offer_row."UUID";			
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
-				' ');
+				g_sms_body);
 			
 			END IF;
 
@@ -2069,7 +2115,7 @@ BEGIN
 			|| '<tr><td class="evenRow">Email</td><td class="evenRow">' || NEW."DriverEmail" || '</td></tr>'
 			|| '</table>'
 			|| '</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || NEW."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid_driver=' || NEW."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p><a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName") ||  '">Cancel this offer</a></p>'  -- yes, this is correct, the API uses DriverPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -2082,19 +2128,18 @@ BEGIN
             VALUES (NEW."DriverEmail", v_subject, v_body);                                                                 
         END IF;                                                                                                            
 
-		IF NEW."DriverPhone" IS NOT NULL                                                                                   
+		IF NEW."DriverPhone" IS NOT NULL AND (position('SMS' in NEW."DriverPreferredContact") > 0)
         THEN                                                                                                               
-            v_body :=  'Confirmation of driver offer reference : ' || NEW."UUID" || '\n'                                                        
-					|| 'To cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || NEW."DriverLastName" || '\n'
-					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
-					|| '\n\n'
-					|| 'First Name : ' || NEW."DriverFirstName" || '\n'
-					|| 'Last Name : ' || NEW."DriverLastName" || '\n'
-					|| 'Phone Number : ' || NEW."DriverPhone" || '\n'
-					|| 'Email : ' || COALESCE(NEW."DriverEmail", ' ') || '\n'
-					|| 'Collection ZIP : ' || NEW."DriverCollectionZIP" || '\n'
+            v_body :=  'From CarpoolVote.com\n' 
+					|| 'Driver offer received! Ref: ' || NEW."UUID" || '\n'
+					|| 'Pick-up ZIP : ' || NEW."DriverCollectionZIP" || '\n'
 					|| 'Radius : ' || NEW."DriverCollectionRadius" || '\n'
-					|| 'Drive Times  : ' || NEW."AvailableDriveTimesLocal" || '\n';
+					|| 'Drive Times  : ' || replace(replace(replace(replace(replace(NEW."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '\n'
+					|| 'Seats : ' || NEW."SeatCount" || '\n'
+					|| 'Wheelchair accessible : ' || CASE WHEN NEW."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || '\n'
+					|| 'Phone Number : ' || NEW."DriverPhone" || '\n'
+					|| 'Self-Service portal : http://carpoolvote.com/self-service/?uuid_driver=' || NEW."UUID" || '\n'
+					|| 'Cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName");
 					
             INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
             VALUES (NEW."DriverPhone", v_body);                                                                 
@@ -2125,7 +2170,7 @@ BEGIN
 			|| '<tr><td class="evenRow">Email</td><td class="evenRow">' || NEW."RiderEmail" || '</td></tr>'
 			|| '</table>'
 			|| '</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || NEW."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid_rider=' || NEW."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName") ||  '">Cancel this request</a></p>' -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -2136,18 +2181,20 @@ BEGIN
             VALUES (NEW."RiderEmail", v_subject, v_body);                                                                  
         END IF;
 
-		IF NEW."RiderPhone" IS NOT NULL                                                                                
+		IF NEW."RiderPhone" IS NOT NULL AND (position('SMS' in NEW."RiderPreferredContact") > 0)                                                                               
         THEN                                                                                                               
-            v_body :=  'Confirmation of ride request reference : ' || NEW."UUID" || '\n'                                                        
-					|| 'To cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || NEW."RiderLastName" || '\n'  -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
-					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
-					|| 'First Name : ' || NEW."RiderFirstName" || '\n'
-					|| 'Last Name : ' || NEW."RiderLastName" || '\n'
-					|| 'Phone Number : ' || COALESCE(NEW."RiderPhone", ' ') || '\n'
-					|| 'Email : ' || NEW."RiderEmail" || '\n'
-					|| 'Collection ZIP : ' || NEW."RiderCollectionZIP" || '\n'
-					|| 'Drop Off ZIP : ' || NEW."RiderDropOffZIP" || '\n'
-					|| 'Ride Times : ' || NEW."AvailableRideTimesLocal" || '\n';
+            v_body := 'From CarpoolVote.com\n' 
+					|| 'Ride Request received! Ref: ' || NEW."UUID" || '\n'
+					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(NEW."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '\n'
+					|| 'Pick-up location : ' || NEW."RiderCollectionZIP" || '\n'
+					|| 'Destination : ' || NEW."RiderDropOffZIP" || '\n'
+					|| 'Party Size : ' || NEW."TotalPartySize" || '\n'
+					|| 'Wheelchair accessibility needed : ' ||  CASE WHEN NEW."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '\n'
+					|| 'Two-way trip needed : ' ||  CASE WHEN NEW."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || '\n'
+					|| 'Notes : ' ||  NEW."RiderAccommodationNotes" || '\n'
+					|| 'Phone Number : ' ||  NEW."RiderPhone" || '\n'
+					|| 'Self-Service portal : http://carpoolvote.com/self-service/?uuid_rider=' || NEW."UUID" || '\n'
+					|| 'Cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName");
 				
             INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
             VALUES (NEW."RiderPhone", v_body);                                                                 
@@ -2297,12 +2344,21 @@ BEGIN
 				v_body);
 		END IF;
 		
-		IF drive_offer_row."DriverPhone" IS NOT NULL
+		IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 		THEN
-			INSERT INTO nov2016.outgoing_sms (recipient, body)
-			VALUES (drive_offer_row."DriverPhone", 
-			'Confirmed Ride was canceled by rider: ' || a_UUID_driver || ', ' || a_UUID_rider);
+		
+			v_body := 'From CarpoolVote.com\n'
+					|| 'Confirmed Ride was canceled by rider. No further action needed. \n'
+					|| 'Rider : ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || '\n'
+					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
+					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			
+				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				VALUES (drive_offer_row."DriverPhone", 
+				v_body);
 		END IF;
+		
 
 
 		v_step := 'S3';
@@ -2361,14 +2417,20 @@ BEGIN
 			
 		END IF;
 			
-		IF ride_request_row."RiderPhone" IS NOT NULL
+		IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 		THEN
-			INSERT INTO nov2016.outgoing_sms (recipient, body)
-			VALUES (ride_request_row."RiderPhone", 
-			'Confirmed Ride was canceled by rider: '  || a_UUID_driver || ', ' || a_UUID_rider);
+		
+			v_body := 'From CarpoolVote.com\n'
+					|| 'Confirmed Ride was canceled. No further action needed. \n'
+					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
+					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			
+				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				VALUES (ride_request_row."RiderPhone", 
+				v_body);
 		END IF;
-		
-		
+				
 		return '';
 	
 	EXCEPTION WHEN OTHERS 
@@ -2516,11 +2578,19 @@ BEGIN
 				v_body);
 			END IF;
 			
-			IF drive_offer_row."DriverPhone" IS NOT NULL
+			IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 			THEN
+			
+				v_body := 'From CarpoolVote.com\n'
+					|| 'Confirmed Ride was canceled by rider. No further action needed. \n'
+					|| 'Rider : ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || '\n'
+					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
+					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
-				'Confirmed Ride was canceled by rider: ' || match_row.uuid_driver || ', ' || match_row.uuid_rider);
+				v_body);
 			END IF;
 
 			v_step := 'S4';
@@ -2583,11 +2653,18 @@ BEGIN
 			v_body);
 		END IF;
 			
-		IF ride_request_row."RiderPhone" IS NOT NULL
+		IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 		THEN
+		
+			v_body := 'From CarpoolVote.com\n'
+					|| 'Ride Request ' || ride_request_row."UUID"  || ' was canceled. No further action needed. \n'
+					|| 'Pick-up location : ' || ride_request_row."RiderCollectionZIP" || '\n'
+					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
+					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+		
 			INSERT INTO nov2016.outgoing_sms (recipient, body)
 			VALUES (ride_request_row."RiderPhone", 
-			'Ride Request was canceled by rider: ' || a_UUID);
+			v_body);
 		END IF;
 		
 		return '';
@@ -3511,7 +3588,9 @@ CREATE TABLE websubmission_rider (
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     state_info text,
     "RiderWillBeSafe" boolean DEFAULT false NOT NULL,
-    "AvailableRideTimesLocal" character varying(2000)
+    "AvailableRideTimesLocal" character varying(2000),
+    "RiderCollectionAddress" character varying(1000),
+    "RiderDestinationAddress" character varying(1000)
 );
 
 
