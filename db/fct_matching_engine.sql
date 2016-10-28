@@ -591,13 +591,7 @@ BEGIN
                 
 				--RAISE NOTICE 'BODY 2 : % % %', v_html_body, v_row_style, ride_request_row."UUID";
 				
-				g_sms_body := g_sms_body 
-				       || 'https://api.carpoolvote.com/v2.0/accept-driver-match'
-					   || '?UUID_driver=' || g_record.uuid_driver
-					   || '&UUID_rider=' || g_record.uuid_rider
-					   || '&Score=' || g_record.score
-					   || '&DriverPhone=' || drive_offer_row."DriverPhone" || '\n';
-			
+				
 				v_loop_cnt := v_loop_cnt + 1;
 			END LOOP;
 			
@@ -629,12 +623,16 @@ BEGIN
 				
 			END IF;
 				
-			IF drive_offer_row."DriverPhone" IS NOT NULL
+			IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 			THEN
+			
+				g_sms_body := 'From CarpoolVote.com\n' 
+						|| 'New matches are available.\n'
+				        || 'Visit the self-service page for details http://carpoolvote.com/self-service/?uuid_driver=' || drive_offer_row."UUID";			
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
-				' ');
+				g_sms_body);
 			
 			END IF;
 
