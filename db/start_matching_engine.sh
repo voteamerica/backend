@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. ~/.bash_profile
+
 if [[ "X$1" = "X" ]]
 then
 	echo missing DB name
