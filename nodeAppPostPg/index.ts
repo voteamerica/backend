@@ -10,7 +10,10 @@ const logOptions  = require('./logInfo.js');
 
 const dbQueries   = require('./dbQueries.js');
 const postgresQueries = require('./postgresQueries.js');
-const logging     = require('./logging.js');
+
+
+// const logging     = require('./logging.js');
+import logging as from ("./logging");
 
 const routeFns = require('./routeFunctions.js');
 

@@ -1,5 +1,9 @@
-module.exports = {
-  logReqResp: logReqResp
+// module.exports = {
+//   logReqResp: logReqResp
+// }
+
+export interface CustomLog {
+  logReqResp (server: Any, pool: Any): Any
 }
 
 function logReqResp(server, pool) {
