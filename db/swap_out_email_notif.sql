@@ -93,15 +93,15 @@ BEGIN
 
 		IF NEW."DriverPhone" IS NOT NULL AND (position('SMS' in NEW."DriverPreferredContact") > 0)
         THEN                                                                                                               
-            v_body :=  'From CarpoolVote.com\n' 
-					|| 'Driver offer received! Ref: ' || NEW."UUID" || '%0a'
-					|| 'Pick-up ZIP : ' || NEW."DriverCollectionZIP" || '%0a'
-					|| 'Radius : ' || NEW."DriverCollectionRadius" || '%0a'
-					|| 'Drive Times  : ' || replace(replace(replace(replace(replace(NEW."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '%0a'
-					|| 'Seats : ' || NEW."SeatCount" || '%0a'
-					|| 'Wheelchair accessible : ' || CASE WHEN NEW."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || '%0a'
-					|| 'Phone Number : ' || NEW."DriverPhone" || '%0a'
-					|| 'Self-Service portal (cancel offer, review matches etc.) : http://carpoolvote.com/self-service/?uuid_driver=' || NEW."UUID" || '%0a';
+            v_body :=  'From CarpoolVote.com ' 
+					|| 'Driver offer received! Ref: ' || NEW."UUID" || ' '
+					|| 'Pick-up ZIP : ' || NEW."DriverCollectionZIP" || ' '
+					|| 'Radius : ' || NEW."DriverCollectionRadius" || ' '
+					|| 'Drive Times  : ' || replace(replace(replace(replace(replace(NEW."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || ' '
+					|| 'Seats : ' || NEW."SeatCount" || ' '
+					|| 'Wheelchair accessible : ' || CASE WHEN NEW."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || ' '
+					|| 'Phone Number : ' || NEW."DriverPhone" || ' '
+					|| 'Self-Service portal (cancel offer, review matches etc.) : http://carpoolvote.com/self-service/?uuid_driver=' || NEW."UUID" || ' ';
 --					|| 'Cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName");
 					
             INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
