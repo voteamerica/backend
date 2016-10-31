@@ -1,5 +1,5 @@
-DROP TRIGGER send_email_notif_ins_driver_trg;
-DROP TRIGGER send_email_notif_ins_rider_trg;
+DROP TRIGGER IF EXISTS send_email_notif_ins_driver_trg ON stage.websubmission_driver;
+DROP TRIGGER IF EXISTS send_email_notif_ins_rider_trg ON stage.websubmission_rider;
 
 CREATE OR REPLACE FUNCTION nov2016.queue_email_notif() RETURNS trigger
     LANGUAGE plpgsql
@@ -171,5 +171,5 @@ $$;
 
 ALTER FUNCTION nov2016.queue_email_notif() OWNER TO carpool_admins;
 
-CREATE TRIGGER send_email_notif_ins_driver_trg AFTER INSERT ON websubmission_driver FOR EACH ROW EXECUTE PROCEDURE nov2016.queue_email_notif();
-CREATE TRIGGER send_email_notif_ins_rider_trg AFTER INSERT ON websubmission_rider FOR EACH ROW EXECUTE PROCEDURE nov2016.queue_email_notif();
+CREATE TRIGGER send_email_notif_ins_driver_trg AFTER INSERT ON stage.websubmission_driver FOR EACH ROW EXECUTE PROCEDURE nov2016.queue_email_notif();
+CREATE TRIGGER send_email_notif_ins_rider_trg AFTER INSERT ON stage.websubmission_rider FOR EACH ROW EXECUTE PROCEDURE nov2016.queue_email_notif();
