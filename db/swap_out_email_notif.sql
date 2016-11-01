@@ -407,12 +407,12 @@ $$;
 ALTER FUNCTION nov2016.rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) OWNER TO carpool_admins;
 
 
-REVOKE ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
-REVOKE ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
-GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
-GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
-GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+REVOKE ALL ON FUNCTION nov2016.rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION nov2016.rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION nov2016.rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION nov2016.rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION nov2016.rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION nov2016.rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
 
 CREATE OR REPLACE FUNCTION nov2016.rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) RETURNS character varying
     LANGUAGE plpgsql
@@ -646,12 +646,12 @@ $$;
 
 ALTER FUNCTION nov2016.rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) OWNER TO carpool_admins;
 
-REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
-REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
-GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
-GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
-GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
+REVOKE ALL ON FUNCTION nov2016.rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION nov2016.rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION nov2016.rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION nov2016.rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION nov2016.rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION nov2016.rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
 
 
 CREATE OR REPLACE FUNCTION nov2016.driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) RETURNS character varying
@@ -887,12 +887,12 @@ $$;
 
 ALTER FUNCTION nov2016.driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) OWNER TO carpool_admins;
 
-REVOKE ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
-REVOKE ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
-GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
-GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
-GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
+REVOKE ALL ON FUNCTION nov2016.driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION nov2016.driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION nov2016.driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION nov2016.driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION nov2016.driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION nov2016.driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
 
 CREATE OR REPLACE FUNCTION nov2016.driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) RETURNS character varying
     LANGUAGE plpgsql
@@ -1133,12 +1133,12 @@ $$;
 
 ALTER FUNCTION nov2016.driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) OWNER TO carpool_admins;
 
-REVOKE ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
-REVOKE ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
-GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
-GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
-GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+REVOKE ALL ON FUNCTION nov2016.driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION nov2016.driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION nov2016.driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION nov2016.driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION nov2016.driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION nov2016.driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
 
 CREATE OR REPLACE FUNCTION nov2016.driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) RETURNS character varying
     LANGUAGE plpgsql
@@ -1389,12 +1389,12 @@ $$;
 
 ALTER FUNCTION nov2016.driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) OWNER TO carpool_admins;
 
-REVOKE ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
-REVOKE ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
-GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
-GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
-GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
+REVOKE ALL ON FUNCTION nov2016.driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION nov2016.driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION nov2016.driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION nov2016.driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION nov2016.driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION nov2016.driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
 
 CREATE OR REPLACE FUNCTION nov2016.perform_match() RETURNS character varying
     LANGUAGE plpgsql
@@ -2060,9 +2060,9 @@ $$;
 
 ALTER FUNCTION nov2016.perform_match() OWNER TO carpool_admins;
 
-REVOKE ALL ON FUNCTION perform_match() FROM PUBLIC;
-REVOKE ALL ON FUNCTION perform_match() FROM carpool_admins;
-GRANT ALL ON FUNCTION perform_match() TO carpool_admins;
-GRANT ALL ON FUNCTION perform_match() TO PUBLIC;
-GRANT ALL ON FUNCTION perform_match() TO carpool_role;
+REVOKE ALL ON FUNCTION nov2016.perform_match() FROM PUBLIC;
+REVOKE ALL ON FUNCTION nov2016.perform_match() FROM carpool_admins;
+GRANT ALL ON FUNCTION nov2016.perform_match() TO carpool_admins;
+GRANT ALL ON FUNCTION nov2016.perform_match() TO PUBLIC;
+GRANT ALL ON FUNCTION nov2016.perform_match() TO carpool_role;
 
