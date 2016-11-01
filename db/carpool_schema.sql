@@ -219,7 +219,7 @@ BEGIN
 			|| '</p>'
 			|| '<p>Concerning this ride, no further action is needed from you.</p>'
 			|| '<p>We will try to find another suitable driver.</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?UUID_rider=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -291,7 +291,7 @@ BEGIN
 			|| '</p>'
 			|| '<p>No further action is needed from you.</p>'
 			|| '<p>We hope you can still are still able to help another rider.</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?UUID_driver=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p>If are no longer able to offer a ride, please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">cancel this Drive Offer</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -453,7 +453,7 @@ BEGIN
 				|| '</p>'
 				|| '<p>Concerning this ride, no further action is needed from you.</p>'
 				|| '<p>We will try to find another suitable driver.</p>'
-				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
+				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?UUID_rider=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
 				|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 				|| '<p>Warm wishes</p>'
 				|| '<p>The CarpoolVote.com team.</p>'
@@ -728,7 +728,7 @@ BEGIN
 			|| '&UUID_rider=' || a_UUID_rider 
 			|| '&Score=' || a_score 
 			|| '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName" ) || '">cancel this ride match only</a></p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?UUID_driver=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel this Drive Offer</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -781,7 +781,7 @@ BEGIN
 			|| '&UUID_rider=' || a_UUID_rider 
 			|| '&Score=' || a_score 
 			|| '&RiderPhone=' || nov2016.urlencode( ride_request_row."RiderLastName") || '">cancel this ride match only</a></p>'   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?UUID_rider=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -1973,7 +1973,7 @@ BEGIN
                 || '<p>If you do not wish to accept the proposed rides, you do not need to do anything. A match is only confirmed once you have accepted it.</p>'
 				|| '<p>If you do not with to receive future notifications about new proposed matches for this Driver Offer, please <a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/pause-match-driver?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">click here</a></p>'            
                 || '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel your Drive Offer</a></p>'
-                || '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || drive_offer_row."UUID" || '">self-service portal</a>.</p>'
+                || '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?UUID_driver=' || drive_offer_row."UUID" || '">self-service portal</a>.</p>'
 				|| '<p>Warm wishes</p>'
                 || '<p>The CarpoolVote.com team.</p>'
                 || '</body>';
@@ -1999,7 +1999,7 @@ BEGIN
 			
 				g_sms_body := 'From CarpoolVote.com\n' 
 						|| 'New matches are available.\n'
-				        || 'Visit the self-service page for details http://carpoolvote.com/self-service/?uuid_driver=' || drive_offer_row."UUID";			
+				        || 'Visit the self-service page for details http://carpoolvote.com/self-service/?UUID_driver=' || drive_offer_row."UUID";			
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
@@ -2115,7 +2115,7 @@ BEGIN
 			|| '<tr><td class="evenRow">Email</td><td class="evenRow">' || NEW."DriverEmail" || '</td></tr>'
 			|| '</table>'
 			|| '</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid_driver=' || NEW."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?UUID_driver=' || NEW."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p><a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName") ||  '">Cancel this offer</a></p>'  -- yes, this is correct, the API uses DriverPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -2138,7 +2138,7 @@ BEGIN
 					|| 'Seats : ' || NEW."SeatCount" || ' '
 					|| 'Wheelchair accessible : ' || CASE WHEN NEW."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || ' '
 					|| 'Phone Number : ' || NEW."DriverPhone" || ' '
-					|| 'Self-Service portal (cancel offer, review matches etc.) : http://carpoolvote.com/self-service/?uuid_driver=' || NEW."UUID" || ' ';
+					|| 'Self-Service portal (cancel offer, review matches etc.) : http://carpoolvote.com/self-service/?UUID_driver=' || NEW."UUID" || ' ';
 --					|| 'Cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName");
 					
             INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
@@ -2170,7 +2170,7 @@ BEGIN
 			|| '<tr><td class="evenRow">Email</td><td class="evenRow">' || NEW."RiderEmail" || '</td></tr>'
 			|| '</table>'
 			|| '</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid_rider=' || NEW."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?UUID_rider=' || NEW."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName") ||  '">Cancel this request</a></p>' -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -2193,7 +2193,7 @@ BEGIN
 					|| 'Two-way trip needed : ' ||  CASE WHEN NEW."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || '\n'
 					|| 'Notes : ' ||  NEW."RiderAccommodationNotes" || '\n'
 					|| 'Phone Number : ' ||  NEW."RiderPhone" || '\n'
-					|| 'Self-Service portal : http://carpoolvote.com/self-service/?uuid_rider=' || NEW."UUID" || '\n'
+					|| 'Self-Service portal : http://carpoolvote.com/self-service/?UUID_rider=' || NEW."UUID" || '\n'
 					|| 'Cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName");
 				
             INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
@@ -2331,7 +2331,7 @@ BEGIN
 				|| '</p>'
 				|| '<p>Concerning this ride, no further action is needed from you.</p>'
 				|| '<p>Hopefully you can help another rider in your area.</p>'
-				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
+				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?UUID_driver=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
 				|| '<p>Warm wishes</p>'
 				|| '<p>The CarpoolVote.com team.</p>'
 				|| '</body>';
@@ -2402,7 +2402,7 @@ BEGIN
 			|| '</p>'
 			|| '<p>No further action is needed from you.</p>'
 			|| '<p>We will try to find another suitable driver.</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?UUID_rider=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -2565,7 +2565,7 @@ BEGIN
 				|| '</p>'
 				|| '<p>Concerning this ride, no further action is needed from you.</p>'
 				|| '<p>Hopefully you can help another rider in your area.</p>'
-				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
+				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?UUID_driver=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
 				|| '<p>Warm wishes</p>'
 				|| '<p>The CarpoolVote.com team.</p>'
 				|| '</body>';
