@@ -421,7 +421,7 @@ CREATE OR REPLACE FUNCTION nov2016.rider_cancel_confirmed_match(a_uuid_driver ch
 DECLARE                                                   
 	ride_request_row stage.websubmission_rider%ROWTYPE;
 	drive_offer_row stage.websubmission_driver%ROWTYPE;
-	match_row nov2016.match%ROWTYPE;4
+	match_row nov2016.match%ROWTYPE;
 	v_step character varying(200);
 	v_return_text character varying(200);
 	
