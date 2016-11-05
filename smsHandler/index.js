@@ -96,17 +96,23 @@ function sendSms(id, to, message) {
     }, function (err, data) {
         if (err) {
             console.error('Could not notify user');
+            // update table status
+            dbUpdateMessageItemStatus(id, pool, dbUpdateFailedString);
             return console.error(err);
         }
         // update table status
-        dbUpdateMessageItemStatus(id, pool, dbGetUpdateString);
+        dbUpdateMessageItemStatus(id, pool, dbUpdateSentString);
         console.log('User notified');
     });
 }
 ;
-function dbGetUpdateString(tableName) {
+function dbUpdateSentString(tableName) {
     return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
         ' SET state=' + " '" + 'Sent' + "' WHERE id=$1";
+}
+function dbUpdateFailedString(tableName) {
+    return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
+        ' SET state=' + " '" + 'Failed' + "' WHERE id=$1";
 }
 function dbUpdateMessageItemStatus(id, pool, fnUpdateString) {
     var updateString = fnUpdateString();

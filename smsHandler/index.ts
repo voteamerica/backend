@@ -123,14 +123,7 @@ function dbGetItemsToSend(pool, executeFunctionArray) {
 }
 
 function formatMessage (msg) {
-  return msg
-    // '[This is a test] ' +
-    // ' Driver: ' + 
-    // msg
-    //  +
-    // '. Go to: http://carpoolvote.com ' +
-    // 'for more details.'
-    ;
+  return msg;
 };
 
 function makeCalls (message: SMSMessage) {
@@ -144,26 +137,34 @@ function sendSms (id: Number, to: String, message: String) {
       body: message,
       to: to,
       from: cfg.sendingNumber
-      // mediaUrl: 'http://www.yourserver.com/someimage.png'
     }, 
     (err, data) => {
       
       if (err) {
         console.error('Could not notify user');
+
+        // update table status
+        dbUpdateMessageItemStatus(id, pool, dbUpdateFailedString);
+      
         return console.error(err);
       } 
       
       // update table status
-      dbUpdateMessageItemStatus(id, pool, dbGetUpdateString);
+      dbUpdateMessageItemStatus(id, pool, dbUpdateSentString);
       
       console.log('User notified');
     }
   );
 };
 
-function dbGetUpdateString (tableName) {
+function dbUpdateSentString (tableName) {
   return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
           ' SET state=' + " '" + 'Sent' + "' WHERE id=$1";
+}
+
+function dbUpdateFailedString (tableName) {
+  return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
+          ' SET state=' + " '" + 'Failed' + "' WHERE id=$1";
 }
 
 function dbUpdateMessageItemStatus(id, pool, fnUpdateString) {

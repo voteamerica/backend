@@ -77,7 +77,7 @@ BEGIN
 			|| '<tr><td class="evenRow">Email</td><td class="evenRow">' || NEW."DriverEmail" || '</td></tr>'
 			|| '</table>'
 			|| '</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || NEW."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p><a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName") ||  '">Cancel this offer</a></p>'  -- yes, this is correct, the API uses DriverPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -90,19 +90,18 @@ BEGIN
             VALUES (NEW."DriverEmail", v_subject, v_body);                                                                 
         END IF;                                                                                                            
 
-		IF NEW."DriverPhone" IS NOT NULL                                                                                   
+		IF NEW."DriverPhone" IS NOT NULL AND (position('SMS' in NEW."DriverPreferredContact") > 0)
         THEN                                                                                                               
-            v_body :=  'Confirmation of driver offer reference : ' || NEW."UUID" || '\n'                                                        
-					|| 'To cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || NEW."DriverLastName" || '\n'
-					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
-					|| '\n\n'
-					|| 'First Name : ' || NEW."DriverFirstName" || '\n'
-					|| 'Last Name : ' || NEW."DriverLastName" || '\n'
-					|| 'Phone Number : ' || NEW."DriverPhone" || '\n'
-					|| 'Email : ' || COALESCE(NEW."DriverEmail", ' ') || '\n'
-					|| 'Collection ZIP : ' || NEW."DriverCollectionZIP" || '\n'
+            v_body :=  'From CarpoolVote.com\n' 
+					|| 'Driver offer received! Ref: ' || NEW."UUID" || '\n'
+					|| 'Pick-up ZIP : ' || NEW."DriverCollectionZIP" || '\n'
 					|| 'Radius : ' || NEW."DriverCollectionRadius" || '\n'
-					|| 'Drive Times  : ' || NEW."AvailableDriveTimesLocal" || '\n';
+					|| 'Drive Times  : ' || replace(replace(replace(replace(replace(NEW."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '\n'
+					|| 'Seats : ' || NEW."SeatCount" || '\n'
+					|| 'Wheelchair accessible : ' || CASE WHEN NEW."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || '\n'
+					|| 'Phone Number : ' || NEW."DriverPhone" || '\n'
+					|| 'Self-Service portal : http://carpoolvote.com/self-service/?type=driver&uuid=' || NEW."UUID" || '\n'
+					|| 'Cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName");
 					
             INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
             VALUES (NEW."DriverPhone", v_body);                                                                 
@@ -123,8 +122,10 @@ BEGIN
 			|| 'We will get in touch as soon as a driver has offered to give you a ride. Please check that the below details are correct:<br/>'
 			|| '<table>'
 			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || replace(replace(replace(replace(replace(NEW."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
-			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || NEW."RiderCollectionZIP" || '</td></tr>'
-			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || NEW."RiderDropOffZIP" || '</td></tr>'
+			|| '<tr><td class="oddRow">Pick-up Address</td><td class="oddRow">' || COALESCE(NEW."RiderCollectionAddress", ' ') || '</td></tr>'
+			|| '<tr><td class="evenRow">Pick-up ZIP</td><td class="evenRow">' || NEW."RiderCollectionZIP" || '</td></tr>'
+			|| '<tr><td class="oddRow">Destination Address</td><td class="oddRow">' || COALESCE(NEW."RiderDestinationAddress", ' ') || '</td></tr>'
+			|| '<tr><td class="evenRow">Destination ZIP</td><td class="evenRow">' || NEW."RiderDropOffZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || NEW."TotalPartySize" || '</td></tr>'
 			|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN NEW."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
 			|| '<tr><td class="oddRow">Two-way trip needed</td><td class="oddRow">' ||  CASE WHEN NEW."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END  || '</td></tr>'
@@ -133,7 +134,7 @@ BEGIN
 			|| '<tr><td class="evenRow">Email</td><td class="evenRow">' || NEW."RiderEmail" || '</td></tr>'
 			|| '</table>'
 			|| '</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://www.carpoolvote.com/selfservice.html">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || NEW."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName") ||  '">Cancel this request</a></p>' -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -144,18 +145,20 @@ BEGIN
             VALUES (NEW."RiderEmail", v_subject, v_body);                                                                  
         END IF;
 
-		IF NEW."RiderPhone" IS NOT NULL                                                                                
+		IF NEW."RiderPhone" IS NOT NULL AND (position('SMS' in NEW."RiderPreferredContact") > 0)                                                                               
         THEN                                                                                                               
-            v_body :=  'Confirmation of ride request reference : ' || NEW."UUID" || '\n'                                                        
-					|| 'To cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || NEW."RiderLastName" || '\n'  -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
-					|| 'To view and manage your matches : http://www.carpoolvote.com/selfservice.html \n '
-					|| 'First Name : ' || NEW."RiderFirstName" || '\n'
-					|| 'Last Name : ' || NEW."RiderLastName" || '\n'
-					|| 'Phone Number : ' || COALESCE(NEW."RiderPhone", ' ') || '\n'
-					|| 'Email : ' || NEW."RiderEmail" || '\n'
-					|| 'Collection ZIP : ' || NEW."RiderCollectionZIP" || '\n'
-					|| 'Drop Off ZIP : ' || NEW."RiderDropOffZIP" || '\n'
-					|| 'Ride Times : ' || NEW."AvailableRideTimesLocal" || '\n';
+            v_body := 'From CarpoolVote.com\n' 
+					|| 'Ride Request received! Ref: ' || NEW."UUID" || '\n'
+					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(NEW."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '\n'
+					|| 'Pick-up : ' || COALESCE(NEW."RiderCollectionAddress" || ', ', '') || NEW."RiderCollectionZIP" || '\n'
+					|| 'Destination : ' || COALESCE(NEW."RiderDestinationAddress" || ', ', '') || NEW."RiderDropOffZIP" || '\n'
+					|| 'Party Size : ' || NEW."TotalPartySize" || '\n'
+					|| 'Wheelchair accessibility needed : ' ||  CASE WHEN NEW."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '\n'
+					|| 'Two-way trip needed : ' ||  CASE WHEN NEW."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || '\n'
+					|| 'Notes : ' ||  NEW."RiderAccommodationNotes" || '\n'
+					|| 'Phone Number : ' ||  NEW."RiderPhone" || '\n'
+					|| 'Self-Service portal : http://carpoolvote.com/self-service/?type=rider&uuid=' || NEW."UUID" || '\n'
+					|| 'Cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName");
 				
             INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
             VALUES (NEW."RiderPhone", v_body);                                                                 

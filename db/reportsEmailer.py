@@ -10,7 +10,7 @@ import psycopg2
 ########################################################
 
 
-key = os.environ['MAILGUNKEY']
+key =  os.environ['MAILGUNKEY']
 request_url = 'https://api.mailgun.net/v3/www.carpoolvote.com/messages'
 
 try:
@@ -20,34 +20,26 @@ except:
 	exit
 
 cur = conn.cursor()
-cur.execute("""SELECT id, recipient, subject, body from nov2016.outgoing_email where state='Pending' order by created_ts asc """)
+cur.execute("""SELECT value from nov2016.params where name='reports_mailing_list'""")
 
 rows = cur.fetchall()
 
 for row in rows:
-	print (row[1] + ' ' + row[2] + '\n' + row[3] + '\n')
-	
+	recipients = row[0].split(',')
+
+	#print (recipients)
+	body = "".join(sys.stdin)	
+	#print ('\n')
+	#print (body)
 	request = requests.post(request_url, auth=('api', key), data={
 		'from': 'noreply@carpoolvote.com',
-		'to': row[1],
-		'subject': row[2],
-		'html': row[3]
+		'to': recipients,
+		'subject': "{0}".format(sys.argv[2]) ,
+		'text': body 
 		})
 	
 	print ('Status: {0}'.format(request.status_code))
-	print ('Body:   {0}'.format(request.text))
-
-	if request.status_code == 200:
-		cur.execute("""UPDATE nov2016.outgoing_email
-						SET state='Sent', emission_info = '200 - OK' 
-						WHERE id = %s""", (row[0],))
-	else:
-		cur.execute("""UPDATE nov2016.outgoing_email
-						SET state='Failed', emission_info = %s 
-						WHERE id = %s""", ("{0}: {1}".format(request.status_code,request.text), "{0}".format(row[0]), ))
-
-	conn.commit()
-	
+#	print ('Body:   {0}'.format(request.text))
 cur.close()
 conn.close()
 
