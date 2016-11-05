@@ -13,10 +13,10 @@ const dbQueries   = require('./dbQueries.js');
 const routeFns    = require('./routeFunctions.js');
 
 import { PostgresQueries }  from "./postgresQueries";
-import { Logging }          from "./Logging";
+import { logging }          from "./logging";
 
 let postgresQueries = new PostgresQueries();
-let logging        = new Logging();
+let loggingItem        = new logging();
 
 config.user       = process.env.PGUSER;
 config.database   = process.env.PGDATABASE;
@@ -209,4 +209,4 @@ server.register({
   }
 );
 
-logging.logReqResp(server, pool);
+loggingItem.logReqResp(server, pool);

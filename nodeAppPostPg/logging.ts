@@ -2,9 +2,10 @@ export interface CustomLog {
   logReqResp (server: any, pool: any): any;
 }
 
-export { Logging };
+export { logging };
 
-class Logging implements CustomLog {
+// lower case class name to avoid git rename issues 
+class logging implements CustomLog {
 
   logReqResp(server: any, pool: any): any {
 
