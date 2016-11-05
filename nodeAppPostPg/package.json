@@ -28,6 +28,8 @@
     "pg": "^6.1.0"
   },
   "devDependencies": {
-    "@types/node": "^6.0.45"
+    "@types/node": "^6.0.45",
+    "typescript": "^2.0.6",
+    "typings": "^1.4.0"
   }
 }
