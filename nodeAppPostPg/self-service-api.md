@@ -21,7 +21,7 @@ Proposed functions
 
 Driver
 
-View offer info
+View offer info - basic
 
 View proposed matches
 
@@ -30,11 +30,17 @@ View accepted matches
 
 Rider
 
-View ride request
+View ride request - basic
 
 View match
 
- 
+
+
+New 
+
+Driver exists
+
+Rider exists
 
 
 
