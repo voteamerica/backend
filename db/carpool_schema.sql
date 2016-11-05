@@ -1395,6 +1395,7 @@ b_driver_all_times_expired boolean := TRUE;
 b_driver_validated boolean := TRUE;
 
 RADIUS_MAX_ALLOWED integer := 100;
+BEYOND_RADIUS_TOLERANCE integer := 20;
 
 drive_offer_row stage.websubmission_driver%ROWTYPE;
 ride_request_row stage.websubmission_rider%ROWTYPE;
@@ -1691,6 +1692,8 @@ BEGIN
 						--RAISE NOTICE 'distance_origin_dropoff=%', distance_origin_pickup;
 						
 						IF distance_origin_pickup < RADIUS_MAX_ALLOWED AND distance_origin_dropoff < RADIUS_MAX_ALLOWED
+							AND distance_origin_pickup < (drive_offer_row."DriverCollectionRadius" + BEYOND_RADIUS_TOLERANCE)
+							AND distance_origin_dropoff < (drive_offer_row."DriverCollectionRadius" + BEYOND_RADIUS_TOLERANCE)
 						THEN
 
 							-- driver/rider distance ranking
@@ -1698,7 +1701,7 @@ BEGIN
 								AND distance_origin_dropoff <= drive_offer_row."DriverCollectionRadius"
 							THEN
 								match_points := match_points + 200 
-									- distance_origin_pickup -- closest distance gets more points 
+									- distance_origin_pickup  -- closest distance gets more points 
 									- distance_origin_dropoff ;
 							END IF; 
 							
@@ -1954,8 +1957,8 @@ BEGIN
                             || '">Accept</a>'
                         ELSE g_record.state END || '</td>'
                     || '<td class="' || v_row_style || '">' || g_record.score || '</td>'
-                    || '<td class="' || v_row_style || '">' || ride_request_row."RiderCollectionZIP" || '</td>'
-                    || '<td class="' || v_row_style || '">' || ride_request_row."RiderDropOffZIP" || '</td>'
+                    || '<td class="' || v_row_style || '">' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '</td>'
+                    || '<td class="' || v_row_style || '">' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || '</td>'
                     || '<td class="' || v_row_style || '">' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-')  || '</td>'
                     || '<td class="' || v_row_style || '">' || ride_request_row."TotalPartySize" || '</td>'
                     || '<td class="' || v_row_style || '">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td>'
@@ -1979,7 +1982,7 @@ BEGIN
                 || '<p>If you do not wish to accept the proposed rides, you do not need to do anything. A match is only confirmed once you have accepted it.</p>'
 				|| '<p>If you do not with to receive future notifications about new proposed matches for this Driver Offer, please <a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/pause-match-driver?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">click here</a></p>'            
                 || '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel your Drive Offer</a></p>'
-                || '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?UUID_driver=' || drive_offer_row."UUID" || '">self-service portal</a>.</p>'
+                || '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || drive_offer_row."UUID" || '">self-service portal</a>.</p>'
 				|| '<p>Warm wishes</p>'
                 || '<p>The CarpoolVote.com team.</p>'
                 || '</body>';
@@ -2005,7 +2008,7 @@ BEGIN
 			
 				g_sms_body := 'From CarpoolVote.com\n' 
 						|| 'New matches are available.\n'
-				        || 'Visit the self-service page for details http://carpoolvote.com/self-service/?UUID_driver=' || drive_offer_row."UUID";			
+				        || 'Visit the self-service page for details http://carpoolvote.com/self-service/?type=driver&uuid=' || drive_offer_row."UUID";			
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
@@ -2044,7 +2047,7 @@ ALTER FUNCTION nov2016.perform_match() OWNER TO carpool_admins;
 -- Name: queue_email_notif(); Type: FUNCTION; Schema: nov2016; Owner: carpool_admins
 --
 
-CREATE OR REPLACE FUNCTION queue_email_notif() RETURNS trigger
+CREATE FUNCTION queue_email_notif() RETURNS trigger
     LANGUAGE plpgsql
     AS $$                                                                                                                  
 DECLARE                                                                                                                    
@@ -3669,7 +3672,7 @@ ALTER TABLE vw_unmatched_riders OWNER TO carpool_admins;
 --
 
 CREATE TABLE websubmission_helper (
-    "timestamp" timestamp without time zone NOT NULL,
+    "timestamp" timestamp without time zone DEFAULT now() NOT NULL,
     helpername character varying(100) NOT NULL,
     helperemail character varying(250) NOT NULL,
     helpercapability character varying(500)[],
@@ -4052,9 +4055,9 @@ GRANT ALL ON FUNCTION distance(lat1 double precision, lon1 double precision, lat
 REVOKE ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
 REVOKE ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
 GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
 GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
 GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
+GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
 
 
 --
@@ -4064,9 +4067,9 @@ GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character vary
 REVOKE ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
 REVOKE ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
 GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
 GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
 GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
 
 
 --
@@ -4076,9 +4079,9 @@ GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confir
 REVOKE ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
 REVOKE ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
 GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
 GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
 GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
+GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
 
 
 --
@@ -4134,8 +4137,8 @@ GRANT ALL ON FUNCTION get_param_value(a_param_name character varying) TO carpool
 REVOKE ALL ON FUNCTION perform_match() FROM PUBLIC;
 REVOKE ALL ON FUNCTION perform_match() FROM carpool_admins;
 GRANT ALL ON FUNCTION perform_match() TO carpool_admins;
-GRANT ALL ON FUNCTION perform_match() TO PUBLIC;
 GRANT ALL ON FUNCTION perform_match() TO carpool_role;
+GRANT ALL ON FUNCTION perform_match() TO PUBLIC;
 
 
 --
@@ -4145,9 +4148,9 @@ GRANT ALL ON FUNCTION perform_match() TO carpool_role;
 REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
 REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
 GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
 GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
 GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
+GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
 
 
 --
@@ -4157,9 +4160,9 @@ GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varyi
 REVOKE ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
 REVOKE ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
 GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
 GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
 GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
 
 
 --

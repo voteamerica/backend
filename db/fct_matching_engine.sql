@@ -18,6 +18,7 @@ b_driver_all_times_expired boolean := TRUE;
 b_driver_validated boolean := TRUE;
 
 RADIUS_MAX_ALLOWED integer := 100;
+BEYOND_RADIUS_TOLERANCE integer := 20;
 
 drive_offer_row stage.websubmission_driver%ROWTYPE;
 ride_request_row stage.websubmission_rider%ROWTYPE;
@@ -314,6 +315,8 @@ BEGIN
 						--RAISE NOTICE 'distance_origin_dropoff=%', distance_origin_pickup;
 						
 						IF distance_origin_pickup < RADIUS_MAX_ALLOWED AND distance_origin_dropoff < RADIUS_MAX_ALLOWED
+							AND distance_origin_pickup < (drive_offer_row."DriverCollectionRadius" + BEYOND_RADIUS_TOLERANCE)
+							AND distance_origin_dropoff < (drive_offer_row."DriverCollectionRadius" + BEYOND_RADIUS_TOLERANCE)
 						THEN
 
 							-- driver/rider distance ranking
@@ -321,7 +324,7 @@ BEGIN
 								AND distance_origin_dropoff <= drive_offer_row."DriverCollectionRadius"
 							THEN
 								match_points := match_points + 200 
-									- distance_origin_pickup -- closest distance gets more points 
+									- distance_origin_pickup  -- closest distance gets more points 
 									- distance_origin_dropoff ;
 							END IF; 
 							
