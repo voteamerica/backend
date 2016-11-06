@@ -6,9 +6,11 @@ var GoodFile = require('good-file');
 var config = require('./dbInfo.js');
 var logOptions = require('./logInfo.js');
 var dbQueries = require('./dbQueries.js');
-var postgresQueries = require('./postgresQueries.js');
-var logging = require('./logging.js');
 var routeFns = require('./routeFunctions.js');
+var postgresQueries_1 = require("./postgresQueries");
+var logging_1 = require("./logging");
+var postgresQueries = new postgresQueries_1.PostgresQueries();
+var loggingItem = new logging_1.logging();
 config.user = process.env.PGUSER;
 config.database = process.env.PGDATABASE;
 config.password = process.env.PGPASSWORD;
@@ -58,6 +60,41 @@ server.route({
     method: 'GET',
     path: '/' + routeFns.UNMATCHED_RIDERS_ROUTE,
     handler: routeFns.getUnmatchedRiders
+});
+server.route({
+    method: 'GET',
+    path: '/' + routeFns.DRIVER_EXISTS_ROUTE,
+    handler: routeFns.driverExists
+});
+server.route({
+    method: 'GET',
+    path: '/' + routeFns.DRIVER_INFO_ROUTE,
+    handler: routeFns.driverInfo
+});
+server.route({
+    method: 'GET',
+    path: '/' + routeFns.DRIVER_PROPOSED_MATCHES_ROUTE,
+    handler: routeFns.driverProposedMatches
+});
+server.route({
+    method: 'GET',
+    path: '/' + routeFns.DRIVER_CONFIRMED_MATCHES_ROUTE,
+    handler: routeFns.driverConfirmedMatches
+});
+server.route({
+    method: 'GET',
+    path: '/' + routeFns.RIDER_EXISTS_ROUTE,
+    handler: routeFns.riderExists
+});
+server.route({
+    method: 'GET',
+    path: '/' + routeFns.RIDER_INFO_ROUTE,
+    handler: routeFns.riderInfo
+});
+server.route({
+    method: 'GET',
+    path: '/' + routeFns.RIDER_CONFIRMED_MATCH_ROUTE,
+    handler: routeFns.riderConfirmedMatch
 });
 server.route({
     method: 'GET',
@@ -160,5 +197,5 @@ server.register({
         console.log("ops interval:" + logOptions.ops.interval);
     });
 });
-logging.logReqResp(server, pool);
+loggingItem.logReqResp(server, pool);
 //# sourceMappingURL=index.js.map

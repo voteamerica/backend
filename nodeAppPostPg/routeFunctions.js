@@ -1,6 +1,9 @@
 // route names, handlers and support functions
+"use strict";
 // const moment          = require('moment');
-var postgresQueries = require('./postgresQueries.js');
+// const postgresQueries = require('./postgresQueries.js');
+var postgresQueries_1 = require("./postgresQueries");
+var postgresQueries = new postgresQueries_1.PostgresQueries();
 var dbQueries = require('./dbQueries.js');
 var UNMATCHED_DRIVERS_ROUTE = 'unmatched-drivers';
 var UNMATCHED_RIDERS_ROUTE = 'unmatched-riders';
@@ -13,6 +16,13 @@ var CANCEL_DRIVE_OFFER_ROUTE = 'cancel-drive-offer';
 var CANCEL_DRIVER_MATCH_ROUTE = 'cancel-driver-match';
 var ACCEPT_DRIVER_MATCH_ROUTE = 'accept-driver-match';
 var PAUSE_DRIVER_MATCH_ROUTE = 'pause-driver-match';
+var DRIVER_EXISTS_ROUTE = 'driver-exists';
+var DRIVER_INFO_ROUTE = 'driver-info';
+var DRIVER_PROPOSED_MATCHES_ROUTE = 'driver-proposed-matches';
+var DRIVER_CONFIRMED_MATCHES_ROUTE = 'driver-confirmed-matches';
+var RIDER_EXISTS_ROUTE = 'rider-exists';
+var RIDER_INFO_ROUTE = 'rider-info';
+var RIDER_CONFIRMED_MATCH_ROUTE = 'rider-confirmed-match';
 var DELETE_DRIVER_ROUTE = 'driver';
 var PUT_RIDER_ROUTE = 'rider';
 var PUT_DRIVER_ROUTE = 'driver';
@@ -102,6 +112,13 @@ var cancelDriverMatch = createConfirmCancelFn('cancel driver match: ', "get payl
 getFourDriverCancelConfirmPayloadAsArray);
 var acceptDriverMatch = createConfirmCancelFn('accept driver match: ', "get payload: ", dbQueries.dbAcceptDriverMatchFunctionString, getFourDriverCancelConfirmPayloadAsArray);
 var pauseDriverMatch = createConfirmCancelFn('pause driver match: ', "get payload: ", dbQueries.dbPauseDriverMatchFunctionString, getTwoDriverCancelConfirmPayloadAsArray);
+var driverExists = createConfirmCancelFn('driver exists: ', "get payload: ", dbQueries.dbDriverExistsFunctionString, getTwoDriverCancelConfirmPayloadAsArray);
+var driverInfo = createConfirmCancelFn('driver info: ', "get payload: ", dbQueries.dbDriverInfoFunctionString, getTwoDriverCancelConfirmPayloadAsArray);
+var driverProposedMatches = createMultipleResultsFn('driver proposed matches: ', "get payload: ", dbQueries.dbDriverProposedMatchesFunctionString, getTwoDriverCancelConfirmPayloadAsArray);
+var driverConfirmedMatches = createMultipleResultsFn('driver confirmed matches: ', "get payload: ", dbQueries.dbDriverConfirmedMatchesFunctionString, getTwoDriverCancelConfirmPayloadAsArray);
+var riderExists = createConfirmCancelFn('rider exists: ', "get payload: ", dbQueries.dbRiderExistsFunctionString, getTwoRiderCancelConfirmPayloadAsArray);
+var riderInfo = createConfirmCancelFn('rider info: ', "get payload: ", dbQueries.dbRiderInfoFunctionString, getTwoRiderCancelConfirmPayloadAsArray);
+var riderConfirmedMatch = createConfirmCancelFn('rider confirmed match: ', "get payload: ", dbQueries.dbRiderConfirmedMatchFunctionString, getTwoRiderCancelConfirmPayloadAsArray);
 var cancelRideOffer = createConfirmCancelFn('cancel ride offer: ', "delete payload: ", dbQueries.dbCancelRideOfferFunctionString, getCancelRideOfferPayloadAsArray);
 var rejectRide = createConfirmCancelFn('reject ride: ', "reject payload: ", dbQueries.dbRejectRideFunctionString, getRejectRidePayloadAsArray);
 var confirmRide = createConfirmCancelFn('confirm ride: ', "confirm payload: ", dbQueries.dbConfirmRideFunctionString, 'getConfirmRidePayloadAsArray');
@@ -114,6 +131,18 @@ function createConfirmCancelFn(resultStringText, consoleText, dbQueryFn, payload
         req.log();
         console.log(consoleText + JSON.stringify(payload, null, 4));
         postgresQueries.dbExecuteFunction(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
+    }
+    return execFn;
+}
+function createMultipleResultsFn(resultStringText, consoleText, dbQueryFn, payloadFn) {
+    function execFn(req, reply) {
+        // var payload = req.payload;
+        var payload = req.query;
+        var results = getExecResultStrings(resultStringText);
+        console.log("createMultipleResultsFn-payload: ", payload);
+        req.log();
+        console.log(consoleText + JSON.stringify(payload, null, 4));
+        postgresQueries.dbExecuteFunctionMultipleResults(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
     }
     return execFn;
 }
@@ -157,9 +186,7 @@ function getRiderPayloadAsArray(req, payload) {
         (payload.NeedWheelchair ? 'true' : 'false'),
         payload.RiderAccommodationNotes,
         (payload.RiderLegalConsent ? 'true' : 'false'),
-        (payload.RiderWillBeSafe ? 'true' : 'false'),
-        payload.RiderCollectionAddress,
-        payload.RiderDestinationAddress
+        (payload.RiderWillBeSafe ? 'true' : 'false')
     ];
 }
 function getDriverPayloadAsArray(req, payload) {
@@ -356,6 +383,13 @@ module.exports = {
     cancelDriverMatch: cancelDriverMatch,
     acceptDriverMatch: acceptDriverMatch,
     pauseDriverMatch: pauseDriverMatch,
+    driverExists: driverExists,
+    driverInfo: driverInfo,
+    driverProposedMatches: driverProposedMatches,
+    driverConfirmedMatches: driverConfirmedMatches,
+    riderExists: riderExists,
+    riderInfo: riderInfo,
+    riderConfirmedMatch: riderConfirmedMatch,
     cancelRideOffer: cancelRideOffer,
     rejectRide: rejectRide,
     confirmRide: confirmRide,
@@ -370,6 +404,13 @@ module.exports = {
     CANCEL_DRIVER_MATCH_ROUTE: CANCEL_DRIVER_MATCH_ROUTE,
     ACCEPT_DRIVER_MATCH_ROUTE: ACCEPT_DRIVER_MATCH_ROUTE,
     PAUSE_DRIVER_MATCH_ROUTE: PAUSE_DRIVER_MATCH_ROUTE,
+    DRIVER_EXISTS_ROUTE: DRIVER_EXISTS_ROUTE,
+    DRIVER_INFO_ROUTE: DRIVER_INFO_ROUTE,
+    DRIVER_PROPOSED_MATCHES_ROUTE: DRIVER_PROPOSED_MATCHES_ROUTE,
+    DRIVER_CONFIRMED_MATCHES_ROUTE: DRIVER_CONFIRMED_MATCHES_ROUTE,
+    RIDER_EXISTS_ROUTE: RIDER_EXISTS_ROUTE,
+    RIDER_INFO_ROUTE: RIDER_INFO_ROUTE,
+    RIDER_CONFIRMED_MATCH_ROUTE: RIDER_CONFIRMED_MATCH_ROUTE,
     DELETE_DRIVER_ROUTE: DELETE_DRIVER_ROUTE,
     PUT_RIDER_ROUTE: PUT_RIDER_ROUTE,
     PUT_DRIVER_ROUTE: PUT_DRIVER_ROUTE,
