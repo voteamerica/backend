@@ -213,13 +213,13 @@ var driverInfo = createConfirmCancelFn
     getTwoDriverCancelConfirmPayloadAsArray
   );
 
-var driverProposedMatches = createConfirmCancelFn 
+var driverProposedMatches = createMultipleResultsFn 
   ('driver proposed matches: ', "get payload: ", 
     dbQueries.dbDriverProposedMatchesFunctionString, 
     getTwoDriverCancelConfirmPayloadAsArray
   );
 
-var driverConfirmedMatches = createConfirmCancelFn 
+var driverConfirmedMatches = createMultipleResultsFn 
   ('driver confirmed matches: ', "get payload: ", 
     dbQueries.dbDriverConfirmedMatchesFunctionString, 
     getTwoDriverCancelConfirmPayloadAsArray
@@ -228,19 +228,19 @@ var driverConfirmedMatches = createConfirmCancelFn
 var riderExists = createConfirmCancelFn 
   ('rider exists: ', "get payload: ", 
     dbQueries.dbRiderExistsFunctionString, 
-    getTwoDriverCancelConfirmPayloadAsArray
+    getTwoRiderCancelConfirmPayloadAsArray
   );
 
 var riderInfo = createConfirmCancelFn 
   ('rider info: ', "get payload: ", 
     dbQueries.dbRiderInfoFunctionString, 
-    getTwoDriverCancelConfirmPayloadAsArray
+    getTwoRiderCancelConfirmPayloadAsArray
   );
 
 var riderConfirmedMatch = createConfirmCancelFn 
   ('rider confirmed match: ', "get payload: ", 
     dbQueries.dbRiderConfirmedMatchFunctionString, 
-    getTwoDriverCancelConfirmPayloadAsArray
+    getTwoRiderCancelConfirmPayloadAsArray
   );
 
 var cancelRideOffer = createConfirmCancelFn 
@@ -268,6 +268,28 @@ function createConfirmCancelFn
       console.log(consoleText + JSON.stringify(payload, null, 4));
 
       postgresQueries.dbExecuteFunction
+        (payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
+  }
+
+  return execFn;
+}
+
+function createMultipleResultsFn 
+  (resultStringText: string, consoleText: string, dbQueryFn: any, payloadFn: any) {
+  
+  function execFn (req, reply) {
+      // var payload = req.payload;
+      var payload = req.query;
+      
+      var results = getExecResultStrings(resultStringText);
+
+      console.log("createMultipleResultsFn-payload: ", payload);
+
+      req.log();
+
+      console.log(consoleText + JSON.stringify(payload, null, 4));
+
+      postgresQueries.dbExecuteFunctionMultipleResults
         (payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
   }
 
