@@ -44,3 +44,8 @@ select nov2016.driver_proposed_matches('2fcd0822-5fe7-4658-b92f-7056fa06feea', '
 
 select nov2016.rider_confirmed_match('8aa91abb-b7ee-4eb0-b901-0af3903b868e', 'Test');
 
+select nov2016.driver_exists('32e5cbd4-1342-4e1e-9076-0147e779a796', 'Test');
+select nov2016.driver_info('32e5cbd4-1342-4e1e-9076-0147e779a796', 'Test');
+
+-- http://localhost:8000/driver-exists?UUID=32e5cbd4-1342-4e1e-9076-0147e779a796&DriverPhone=Test
+-- http://localhost:8000/driver-info?UUID=32e5cbd4-1342-4e1e-9076-0147e779a796&DriverPhone=Test

@@ -21,6 +21,19 @@ const ACCEPT_DRIVER_MATCH_ROUTE = 'accept-driver-match';
 
 const PAUSE_DRIVER_MATCH_ROUTE  = 'pause-driver-match';
 
+
+const DRIVER_EXISTS_ROUTE = 'driver-exists';
+const DRIVER_INFO_ROUTE ='driver-info';
+
+const DRIVER_PROPOSED_MATCHES_ROUTE = 'driver-proposed-matches';
+const DRIVER_CONFIRMED_MATCHES_ROUTE = 'driver-confirmed-matches';
+
+const RIDER_EXISTS_ROUTE = 'rider-exists';
+const RIDER_INFO_ROUTE = 'rider-info';
+
+const RIDER_CONFIRMED_MATCH_ROUTE = 'rider-confirmed-match';
+
+
 const DELETE_DRIVER_ROUTE           = 'driver';
 const PUT_RIDER_ROUTE               = 'rider';
 const PUT_DRIVER_ROUTE              = 'driver';
@@ -188,6 +201,47 @@ var pauseDriverMatch = createConfirmCancelFn
     getTwoDriverCancelConfirmPayloadAsArray
   );
 
+var driverExists = createConfirmCancelFn 
+  ('driver exists: ', "get payload: ", 
+    dbQueries.dbDriverExistsFunctionString, 
+    getTwoDriverCancelConfirmPayloadAsArray
+  );
+
+var driverInfo = createConfirmCancelFn 
+  ('driver info: ', "get payload: ", 
+    dbQueries.dbDriverInfoFunctionString, 
+    getTwoDriverCancelConfirmPayloadAsArray
+  );
+
+var driverProposedMatches = createConfirmCancelFn 
+  ('driver proposed matches: ', "get payload: ", 
+    dbQueries.dbDriverProposedMatchesFunctionString, 
+    getTwoDriverCancelConfirmPayloadAsArray
+  );
+
+var driverConfirmedMatches = createConfirmCancelFn 
+  ('driver confirmed matches: ', "get payload: ", 
+    dbQueries.dbDriverConfirmedMatchesFunctionString, 
+    getTwoDriverCancelConfirmPayloadAsArray
+  );
+
+var riderExists = createConfirmCancelFn 
+  ('rider exists: ', "get payload: ", 
+    dbQueries.dbRiderExistsFunctionString, 
+    getTwoDriverCancelConfirmPayloadAsArray
+  );
+
+var riderInfo = createConfirmCancelFn 
+  ('rider info: ', "get payload: ", 
+    dbQueries.dbRiderInfoFunctionString, 
+    getTwoDriverCancelConfirmPayloadAsArray
+  );
+
+var riderConfirmedMatch = createConfirmCancelFn 
+  ('rider confirmed match: ', "get payload: ", 
+    dbQueries.dbRiderConfirmedMatchFunctionString, 
+    getTwoDriverCancelConfirmPayloadAsArray
+  );
 
 var cancelRideOffer = createConfirmCancelFn 
   ('cancel ride offer: ', "delete payload: ", dbQueries.dbCancelRideOfferFunctionString, getCancelRideOfferPayloadAsArray);
@@ -520,9 +574,21 @@ module.exports = {
   acceptDriverMatch:  acceptDriverMatch,
   pauseDriverMatch:   pauseDriverMatch,
 
+  driverExists: driverExists,
+  driverInfo: driverInfo,
+
+  driverProposedMatches: driverProposedMatches,
+  driverConfirmedMatches: driverConfirmedMatches,
+
+  riderExists: riderExists,
+  riderInfo: riderInfo,
+
+  riderConfirmedMatch: riderConfirmedMatch,
+
   cancelRideOffer: cancelRideOffer,
   rejectRide: rejectRide,
   confirmRide: confirmRide,
+  
   UNMATCHED_DRIVERS_ROUTE: UNMATCHED_DRIVERS_ROUTE,
   UNMATCHED_RIDERS_ROUTE: UNMATCHED_RIDERS_ROUTE,
   DRIVER_ROUTE: DRIVER_ROUTE,
@@ -536,6 +602,17 @@ module.exports = {
 
   ACCEPT_DRIVER_MATCH_ROUTE:  ACCEPT_DRIVER_MATCH_ROUTE,
   PAUSE_DRIVER_MATCH_ROUTE:   PAUSE_DRIVER_MATCH_ROUTE,
+
+  DRIVER_EXISTS_ROUTE: DRIVER_EXISTS_ROUTE,
+  DRIVER_INFO_ROUTE: DRIVER_INFO_ROUTE,
+
+  DRIVER_PROPOSED_MATCHES_ROUTE: DRIVER_PROPOSED_MATCHES_ROUTE,
+  DRIVER_CONFIRMED_MATCHES_ROUTE: DRIVER_CONFIRMED_MATCHES_ROUTE,
+
+  RIDER_EXISTS_ROUTE: RIDER_EXISTS_ROUTE,
+  RIDER_INFO_ROUTE: RIDER_INFO_ROUTE,
+
+  RIDER_CONFIRMED_MATCH_ROUTE: RIDER_CONFIRMED_MATCH_ROUTE,
 
   DELETE_DRIVER_ROUTE: DELETE_DRIVER_ROUTE,
   PUT_RIDER_ROUTE: PUT_RIDER_ROUTE,

@@ -11,6 +11,17 @@ module.exports = {
   dbAcceptDriverMatchFunctionString:  dbAcceptDriverMatchFunctionString,
   dbPauseDriverMatchFunctionString:   dbPauseDriverMatchFunctionString,
 
+  dbDriverExistsFunctionString: dbDriverExistsFunctionString,
+  dbDriverInfoFunctionString: dbDriverInfoFunctionString,
+
+  dbDriverProposedMatchesFunctionString: dbDriverProposedMatchesFunctionString,
+  dbDriverConfirmedMatchesFunctionString: dbDriverConfirmedMatchesFunctionString,
+
+  dbRiderExistsFunctionString: dbRiderExistsFunctionString,
+  dbRiderInfoFunctionString: dbRiderInfoFunctionString,
+  
+  dbRiderConfirmedMatchFunctionString: dbRiderConfirmedMatchFunctionString,
+
   dbGetMatchRiderQueryString:   dbGetMatchRiderQueryString,
   dbGetMatchDriverQueryString:  dbGetMatchDriverQueryString,
   dbGetMatchesQueryString:      dbGetMatchesQueryString,
@@ -62,6 +73,33 @@ function dbPauseDriverMatchFunctionString() {
   return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.PAUSE_DRIVER_MATCH_FUNCTION);
 }
 
+function dbDriverExistsFunctionString() {
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.DRIVER_EXISTS_FUNCTION);
+}
+
+function dbDriverInfoFunctionString() {
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.DRIVER_INFO_FUNCTION);
+}
+
+function dbDriverProposedMatchesFunctionString() {
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.DRIVER_PROPOSED_MATCHES_FUNCTION);
+}
+
+function dbDriverConfirmedMatchesFunctionString() {
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.DRIVER_CONFIRMED_MATCHES_FUNCTION);
+}
+
+function dbRiderExistsFunctionString() {
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.RIDER_EXISTS_FUNCTION);
+}
+
+function dbRiderInfoFunctionString() {
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.RIDER_INFO_FUNCTION);
+}
+
+function dbRiderConfirmedMatchFunctionString() {
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.RIDER_CONFIRMED_MATCH_FUNCTION);
+}
 
 function dbRejectRideFunctionString() {
   return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.REJECT_RIDE_FUNCTION);
