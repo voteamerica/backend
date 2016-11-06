@@ -51,6 +51,8 @@ select nov2016.driver_info('32e5cbd4-1342-4e1e-9076-0147e779a796', 'Test');
 -- http://localhost:8000/driver-info?UUID=32e5cbd4-1342-4e1e-9076-0147e779a796&DriverPhone=Test
 
 -- http://localhost:8000/driver-proposed-matches?UUID=32e5cbd4-1342-4e1e-9076-0147e779a796&DriverPhone=Test
+-- http://localhost:8000/driver-proposed-matches?UUID=b3c4dba0-8e71-4960-92fa-8aab43ed2275&DriverPhone=+447958110786
+
 -- http://localhost:8000/driver-confirmed-matches?UUID=32e5cbd4-1342-4e1e-9076-0147e779a796&DriverPhone=Test
 
 -- http://localhost:8000/driver-confirmed-matches?UUID=99b36528-9043-4a19-aa62-0d446a4dd925&DriverPhone=Test
@@ -60,3 +62,8 @@ http://localhost:8000/rider-exists?UUID=8aa91abb-b7ee-4eb0-b901-0af3903b868e&Rid
 http://localhost:8000/rider-info?UUID=8aa91abb-b7ee-4eb0-b901-0af3903b868e&RiderPhone=Test
 
 http://localhost:8000/rider-confirmed-match?UUID=8aa91abb-b7ee-4eb0-b901-0af3903b868e&RiderPhone=Test
+
+http://192.168.99.1:8080/self-service/?type=driver&uuid=99b36528-9043-4a19-aa62-0d446a4dd925
+
+http://192.168.99.1:8080/self-service/?type=rider&uuid=8aa91abb-b7ee-4eb0-b901-0af3903b868e
+
