@@ -346,6 +346,8 @@ function getRiderPayloadAsArray (req, payload) {
       , payload.RiderAccommodationNotes
       , (payload.RiderLegalConsent ? 'true' : 'false')
       , (payload.RiderWillBeSafe ? 'true' : 'false')
+      , payload.RiderCollectionAddress
+      , payload.RiderDestinationAddress
     ]
 }
 
