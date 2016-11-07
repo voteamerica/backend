@@ -92,16 +92,16 @@ BEGIN
 
 		IF NEW."DriverPhone" IS NOT NULL AND (position('SMS' in NEW."DriverPreferredContact") > 0)
         THEN                                                                                                               
-            v_body :=  'From CarpoolVote.com\n' 
-					|| 'Driver offer received! Ref: ' || NEW."UUID" || '\n'
-					|| 'Pick-up ZIP : ' || NEW."DriverCollectionZIP" || '\n'
-					|| 'Radius : ' || NEW."DriverCollectionRadius" || '\n'
-					|| 'Drive Times  : ' || replace(replace(replace(replace(replace(NEW."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '\n'
-					|| 'Seats : ' || NEW."SeatCount" || '\n'
-					|| 'Wheelchair accessible : ' || CASE WHEN NEW."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || '\n'
-					|| 'Phone Number : ' || NEW."DriverPhone" || '\n'
-					|| 'Self-Service portal : http://carpoolvote.com/self-service/?type=driver&uuid=' || NEW."UUID" || '\n'
-					|| 'Cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName");
+            v_body :=  'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Driver offer received! Ref: ' || NEW."UUID" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Pick-up ZIP : ' || NEW."DriverCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Radius : ' || NEW."DriverCollectionRadius" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Drive Times  : ' || replace(replace(replace(replace(replace(NEW."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || ' ' || nov2016.urlencode(chr(10))
+					|| ' Seats : ' || NEW."SeatCount" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Wheelchair accessible : ' || CASE WHEN NEW."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || ' ' || nov2016.urlencode(chr(10))
+					|| ' Phone Number : ' || NEW."DriverPhone" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Self-Service portal : http://carpoolvote.com/self-service/?type=driver&uuid=' || NEW."UUID" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName");
 					
             INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
             VALUES (NEW."DriverPhone", v_body);                                                                 
@@ -147,18 +147,18 @@ BEGIN
 
 		IF NEW."RiderPhone" IS NOT NULL AND (position('SMS' in NEW."RiderPreferredContact") > 0)                                                                               
         THEN                                                                                                               
-            v_body := 'From CarpoolVote.com\n' 
-					|| 'Ride Request received! Ref: ' || NEW."UUID" || '\n'
-					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(NEW."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '\n'
-					|| 'Pick-up : ' || COALESCE(NEW."RiderCollectionAddress" || ', ', '') || NEW."RiderCollectionZIP" || '\n'
-					|| 'Destination : ' || COALESCE(NEW."RiderDestinationAddress" || ', ', '') || NEW."RiderDropOffZIP" || '\n'
-					|| 'Party Size : ' || NEW."TotalPartySize" || '\n'
-					|| 'Wheelchair accessibility needed : ' ||  CASE WHEN NEW."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '\n'
-					|| 'Two-way trip needed : ' ||  CASE WHEN NEW."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || '\n'
-					|| 'Notes : ' ||  NEW."RiderAccommodationNotes" || '\n'
-					|| 'Phone Number : ' ||  NEW."RiderPhone" || '\n'
-					|| 'Self-Service portal : http://carpoolvote.com/self-service/?type=rider&uuid=' || NEW."UUID" || '\n'
-					|| 'Cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName");
+            v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10)) 
+					|| ' Ride Request received! Ref: ' || NEW."UUID" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(NEW."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || ' ' || nov2016.urlencode(chr(10))
+					|| ' Pick-up : ' || COALESCE(NEW."RiderCollectionAddress" || ', ', '') || NEW."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Destination : ' || COALESCE(NEW."RiderDestinationAddress" || ', ', '') || NEW."RiderDropOffZIP" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Party Size : ' || NEW."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Wheelchair accessibility needed : ' ||  CASE WHEN NEW."NeedWheelchair" THEN 'Yes' ELSE 'No' END || ' ' || nov2016.urlencode(chr(10))
+					|| ' Two-way trip needed : ' ||  CASE WHEN NEW."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || ' ' || nov2016.urlencode(chr(10))
+					|| ' Notes : ' ||  NEW."RiderAccommodationNotes" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Phone Number : ' ||  NEW."RiderPhone" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Self-Service portal : http://carpoolvote.com/self-service/?type=rider&uuid=' || NEW."UUID" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName");
 				
             INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
             VALUES (NEW."RiderPhone", v_body);                                                                 
