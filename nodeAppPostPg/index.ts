@@ -83,6 +83,48 @@ server.route({
 
 server.route({
   method: 'GET',
+  path: '/' + routeFns.DRIVER_EXISTS_ROUTE,
+  handler: routeFns.driverExists
+});
+
+server.route({
+  method: 'GET',
+  path: '/' + routeFns.DRIVER_INFO_ROUTE,
+  handler: routeFns.driverInfo
+});
+
+server.route({
+  method: 'GET',
+  path: '/' + routeFns.DRIVER_PROPOSED_MATCHES_ROUTE,
+  handler: routeFns.driverProposedMatches
+});
+
+server.route({
+  method: 'GET',
+  path: '/' + routeFns.DRIVER_CONFIRMED_MATCHES_ROUTE,
+  handler: routeFns.driverConfirmedMatches
+});
+
+server.route({
+  method: 'GET',
+  path: '/' + routeFns.RIDER_EXISTS_ROUTE,
+  handler: routeFns.riderExists
+});
+
+server.route({
+  method: 'GET',
+  path: '/' + routeFns.RIDER_INFO_ROUTE,
+  handler: routeFns.riderInfo
+});
+
+server.route({
+  method: 'GET',
+  path: '/' + routeFns.RIDER_CONFIRMED_MATCH_ROUTE,
+  handler: routeFns.riderConfirmedMatch
+});
+
+server.route({
+  method: 'GET',
   path: '/matches',
   handler: (req, reply) => {
     var results = {

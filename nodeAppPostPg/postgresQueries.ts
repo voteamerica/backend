@@ -10,6 +10,8 @@ export interface DbQueries {
                         req, reply, results);
   dbExecuteFunction (payload, pool, fnExecuteFunctionString, fnPayloadArray,
                         req, reply, results);
+  dbExecuteFunctionMultipleResults (payload, pool, fnExecuteFunctionString, fnPayloadArray,
+                        req, reply, results);
 }
 
 export { PostgresQueries };
@@ -193,7 +195,7 @@ class PostgresQueries implements DbQueries {
     });
   }
 
-  dbExecuteFunction(payload, pool, fnExecuteFunctionString, fnPayloadArray,
+  dbExecuteFunction (payload, pool, fnExecuteFunctionString, fnPayloadArray,
                         req, reply, results) {
     var queryString = fnExecuteFunctionString();
 
@@ -217,6 +219,43 @@ class PostgresQueries implements DbQueries {
 
       reply(//results.success + 
               firstRowAsString);
+    })
+    .catch(function (e) {
+      var message = e.message || '';
+      var stack = e.stack || '';
+
+      console.error(
+      // results.failure, 
+      message, stack);
+
+      reply(results.failure + message).code(500);
+    });
+  }
+
+  dbExecuteFunctionMultipleResults (payload, pool, fnExecuteFunctionString, fnPayloadArray,
+                        req, reply, results) {
+    var queryString = fnExecuteFunctionString();
+
+    console.log("executeFunctionMultipleResultsString: " + queryString);
+    pool.query(
+      queryString, 
+      fnPayloadArray(req, payload)
+      )
+    .then(function (result) {
+      var firstRowAsString = "";
+      var rowsToSend = [];
+
+      if (result !== undefined && result.rows !== undefined) {
+          // result.rows.forEach( val => console.log(val));
+          result.rows.forEach(function (val) { 
+            rowsToSend.push(val);
+          });
+
+        console.log("multiple results: ", rowsToSend);
+      }
+      console.error("executed fn multiple results: " + firstRowAsString);
+
+      reply(rowsToSend);
     })
     .catch(function (e) {
       var message = e.message || '';
