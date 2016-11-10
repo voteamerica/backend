@@ -305,12 +305,12 @@ BEGIN
 			IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 			THEN
 			
-				v_body := 'From CarpoolVote.com\n'
-					|| 'Confirmed Ride was canceled by rider. No further action needed. \n'
-					|| 'Rider : ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || '\n'
-					|| 'Pick-up location : '  ||  COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
-					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
-					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+				v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Confirmed Ride was canceled by rider. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Rider : ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Pick-up location : '  ||  COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
@@ -380,11 +380,11 @@ BEGIN
 		IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com\n'
-					|| 'Ride Request ' || ride_request_row."UUID"  || ' was canceled. No further action needed. \n'
-					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
-					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
-					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Ride Request ' || ride_request_row."UUID"  || ' was canceled. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 		
 			INSERT INTO nov2016.outgoing_sms (recipient, body)
 			VALUES (ride_request_row."RiderPhone", 
@@ -551,12 +551,12 @@ BEGIN
 		IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com\n'
-					|| 'Confirmed Ride was canceled by rider. No further action needed. \n'
-					|| 'Rider : ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || '\n'
-					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
-					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
-					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Confirmed Ride was canceled by rider. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Rider : ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
@@ -624,11 +624,11 @@ BEGIN
 		IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com\n'
-					|| 'Confirmed Ride was canceled. No further action needed. \n'
-					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
-					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
-					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Confirmed Ride was canceled. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (ride_request_row."RiderPhone", 
@@ -791,12 +791,12 @@ BEGIN
 			IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 			THEN
 		
-				v_body := 'From CarpoolVote.com\n'
-					|| 'Confirmed Ride was canceled by driver. No further action needed. \n'
-					|| 'Driver : ' || drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" || '\n'
-					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
-					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
-					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+				v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Confirmed Ride was canceled by driver. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Driver : ' || drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (ride_request_row."RiderPhone", 
@@ -871,11 +871,11 @@ BEGIN
 		IF drive_offer_row."DriverPhone" IS NOT NULL
 		THEN
 		
-			v_body := 'From CarpoolVote.com\n'
-					|| 'Drive Offer ' || drive_offer_row."UUID" ||  ' was canceled. No further action needed. \n'
-					|| 'Pick-up ZIP : ' || drive_offer_row."DriverCollectionZIP" || '\n'
-					|| 'Radius : ' || drive_offer_row."DriverCollectionRadius" || '\n'
-					|| 'Drive Times : ' || replace(replace(replace(replace(replace(drive_offer_row."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-'); 
+			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Drive Offer ' || drive_offer_row."UUID" ||  ' was canceled. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Pick-up ZIP : ' || drive_offer_row."DriverCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Radius : ' || drive_offer_row."DriverCollectionRadius" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Drive Times : ' || replace(replace(replace(replace(replace(drive_offer_row."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-'); 
 			
 			INSERT INTO nov2016.outgoing_sms (recipient, body)
 			VALUES (drive_offer_row."DriverPhone", 
@@ -1043,12 +1043,12 @@ BEGIN
 		IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com\n'
-					|| 'Confirmed Ride was canceled by driver. No further action needed. \n'
-					|| 'Driver : ' ||  drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName"  || '\n'
-					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
-					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
-					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Confirmed Ride was canceled by driver. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Driver : ' ||  drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName"  || ' ' || nov2016.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (ride_request_row."RiderPhone", 
@@ -1115,12 +1115,12 @@ BEGIN
 		IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com\n'
-					|| 'Confirmed Ride was canceled. No further action needed. \n'
-					|| 'Rider : ' ||  ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || '\n'
-					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
-					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
-					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Confirmed Ride was canceled. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Rider : ' ||  ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || ' ' || nov2016.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
@@ -1314,12 +1314,12 @@ BEGIN
 		IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com\n'
-					|| 'Match is confirmed. No further action needed. \n'
-					|| 'Rider : ' ||  ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || '\n'
-					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
-					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
-					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Match is confirmed. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Rider : ' ||  ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || ' ' || nov2016.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
@@ -1366,13 +1366,13 @@ BEGIN
 		v_step := 'S8';
 		IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 		THEN
-			v_body := 'From CarpoolVote.com\n'
-					|| 'Match is confirmed by driver. No further action needed. \n'
-					|| 'Driver : ' ||  drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" || '\n'
-					|| 'Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '\n'
-					|| 'Destination : ' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || '\n'
-					|| 'Party Size : ' || ride_request_row."TotalPartySize" || '\n'
-					|| 'Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Match is confirmed by driver. No further action needed.'|| ' ' || nov2016.urlencode(chr(10))
+					|| ' Driver : ' ||  drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" || ' ' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Destination : ' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || ' ' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || ' ' || nov2016.urlencode(chr(10))
+					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (ride_request_row."RiderPhone", 

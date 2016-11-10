@@ -629,9 +629,9 @@ BEGIN
 			IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 			THEN
 			
-				g_sms_body := 'From CarpoolVote.com\n' 
-						|| 'New matches are available.\n'
-				        || 'Visit the self-service page for details http://carpoolvote.com/self-service/?type=driver&uuid=' || drive_offer_row."UUID";			
+				g_sms_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10)) 
+						|| ' New matches are available.' || ' ' || nov2016.urlencode(chr(10))
+				        || ' Visit the self-service page for details http://carpoolvote.com/self-service/?type=driver&uuid=' || drive_offer_row."UUID";			
 			
 				INSERT INTO nov2016.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
