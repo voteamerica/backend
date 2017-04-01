@@ -1,7 +1,7 @@
 #!/usr/bin/python3.5
 import os
 import sys
-import requests
+import requestsnov
 import psycopg2
 
 
@@ -20,7 +20,7 @@ except:
 	exit
 
 cur = conn.cursor()
-cur.execute("""SELECT value from nov2016.params where name='reports_mailing_list'""")
+cur.execute("""SELECT value from carpoolvote.params where name='reports_mailing_list'""")
 
 rows = cur.fetchall()
 

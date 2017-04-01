@@ -18,7 +18,7 @@ fi
 echo $PGDATABASE 
 
 psql -h /tmp $PGDATABASE <<RPT
-select * from stage.vw_drive_offer where "UUID"='${id}'
+select * from carpoolvote.vw_drive_offer where "UUID"='${id}'
 RPT
 
 

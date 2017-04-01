@@ -1,15 +1,15 @@
-DROP FUNCTION nov2016.queue_email_notif() cascade;
+DROP FUNCTION carpoolvote.queue_email_notif() cascade;
 
-CREATE OR REPLACE FUNCTION nov2016.queue_email_notif()
+CREATE OR REPLACE FUNCTION carpoolvote.queue_email_notif()
   RETURNS trigger AS
 $BODY$                                                                                                                  
 DECLARE                                                                                                                    
  
- v_subject nov2016.outgoing_email.subject%TYPE;                                                                            
- v_body nov2016.outgoing_email.body%TYPE;                                                                                  
- v_html_header nov2016.outgoing_email.body%TYPE;
- v_html_body   nov2016.outgoing_email.body%TYPE;
- v_html_footer nov2016.outgoing_email.body%TYPE;
+ v_subject carpoolvote.outgoing_email.subject%TYPE;                                                                            
+ v_body carpoolvote.outgoing_email.body%TYPE;                                                                                  
+ v_html_header carpoolvote.outgoing_email.body%TYPE;
+ v_html_body   carpoolvote.outgoing_email.body%TYPE;
+ v_html_footer carpoolvote.outgoing_email.body%TYPE;
  
 BEGIN                                                                                                                      
 
@@ -54,7 +54,7 @@ BEGIN
 	v_html_footer := '</html>';	
 
     -- triggered by submitting a drive offer form                                                                          
-    IF TG_TABLE_NAME = 'websubmission_driver' and TG_TABLE_SCHEMA='stage'                                                  
+    IF TG_TABLE_NAME = 'driver' and TG_TABLE_SCHEMA='carpoolvote'                                                  
     THEN                                                                                                                   
 
         IF NEW."DriverEmail" IS NOT NULL                                                                                   
@@ -78,7 +78,7 @@ BEGIN
 			|| '</table>'
 			|| '</p>'
 			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || NEW."UUID" || '">Self-Service Portal</a></p>'
-			|| '<p><a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName") ||  '">Cancel this offer</a></p>'  -- yes, this is correct, the API uses DriverPhone as parameter, and one can pass a phone number or a last name
+			|| '<p><a href="'|| 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || carpoolvote.urlencode(NEW."DriverLastName") ||  '">Cancel this offer</a></p>'  -- yes, this is correct, the API uses DriverPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
@@ -86,29 +86,29 @@ BEGIN
 			v_body := v_html_header || v_html_body || v_html_footer;
 
 
-            INSERT INTO nov2016.outgoing_email (recipient, subject, body)                                             
+            INSERT INTO carpoolvote.outgoing_email (recipient, subject, body)                                             
             VALUES (NEW."DriverEmail", v_subject, v_body);                                                                 
         END IF;                                                                                                            
 
 		IF NEW."DriverPhone" IS NOT NULL AND (position('SMS' in NEW."DriverPreferredContact") > 0)
         THEN                                                                                                               
-            v_body :=  'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Driver offer received! Ref: ' || NEW."UUID" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Pick-up ZIP : ' || NEW."DriverCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Radius : ' || NEW."DriverCollectionRadius" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Drive Times  : ' || replace(replace(replace(replace(replace(NEW."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || ' ' || nov2016.urlencode(chr(10))
-					|| ' Seats : ' || NEW."SeatCount" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Wheelchair accessible : ' || CASE WHEN NEW."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || ' ' || nov2016.urlencode(chr(10))
-					|| ' Phone Number : ' || NEW."DriverPhone" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Self-Service portal : http://carpoolvote.com/self-service/?type=driver&uuid=' || NEW."UUID" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || nov2016.urlencode(NEW."DriverLastName");
+            v_body :=  'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Driver offer received! Ref: ' || NEW."UUID" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up ZIP : ' || NEW."DriverCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Radius : ' || NEW."DriverCollectionRadius" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Drive Times  : ' || replace(replace(replace(replace(replace(NEW."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Seats : ' || NEW."SeatCount" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Wheelchair accessible : ' || CASE WHEN NEW."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Phone Number : ' || NEW."DriverPhone" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Self-Service portal : http://carpoolvote.com/self-service/?type=driver&uuid=' || NEW."UUID" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || NEW."UUID" || '&DriverPhone=' || carpoolvote.urlencode(NEW."DriverLastName");
 					
-            INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
+            INSERT INTO carpoolvote.outgoing_sms (recipient, body)                                             
             VALUES (NEW."DriverPhone", v_body);                                                                 
         END IF;                                                                                                            
 		
     -- triggered by submitting a ride request form                                                                         
-    ELSIF TG_TABLE_NAME = 'websubmission_rider' and TG_TABLE_SCHEMA='stage'                                                
+    ELSIF TG_TABLE_NAME = 'rider' and TG_TABLE_SCHEMA='carpoolvote'                                                
     THEN                                                                                                                   
         IF NEW."RiderEmail" IS NOT NULL                                                                                    
         THEN                                                                                                               
@@ -135,32 +135,32 @@ BEGIN
 			|| '</table>'
 			|| '</p>'
 			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || NEW."UUID" || '">Self-Service Portal</a></p>'
-			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName") ||  '">Cancel this request</a></p>' -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
+			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || carpoolvote.urlencode(NEW."RiderLastName") ||  '">Cancel this request</a></p>' -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
 
 			v_body := v_html_header || v_html_body || v_html_footer;
-            INSERT INTO nov2016.outgoing_email (recipient, subject, body)                                             
+            INSERT INTO carpoolvote.outgoing_email (recipient, subject, body)                                             
             VALUES (NEW."RiderEmail", v_subject, v_body);                                                                  
         END IF;
 
 		IF NEW."RiderPhone" IS NOT NULL AND (position('SMS' in NEW."RiderPreferredContact") > 0)                                                                               
         THEN                                                                                                               
-            v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10)) 
-					|| ' Ride Request received! Ref: ' || NEW."UUID" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(NEW."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || ' ' || nov2016.urlencode(chr(10))
-					|| ' Pick-up : ' || COALESCE(NEW."RiderCollectionAddress" || ', ', '') || NEW."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Destination : ' || COALESCE(NEW."RiderDestinationAddress" || ', ', '') || NEW."RiderDropOffZIP" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Party Size : ' || NEW."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Wheelchair accessibility needed : ' ||  CASE WHEN NEW."NeedWheelchair" THEN 'Yes' ELSE 'No' END || ' ' || nov2016.urlencode(chr(10))
-					|| ' Two-way trip needed : ' ||  CASE WHEN NEW."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || ' ' || nov2016.urlencode(chr(10))
-					|| ' Notes : ' ||  NEW."RiderAccommodationNotes" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Phone Number : ' ||  NEW."RiderPhone" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Self-Service portal : http://carpoolvote.com/self-service/?type=rider&uuid=' || NEW."UUID" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || nov2016.urlencode(NEW."RiderLastName");
+            v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10)) 
+					|| ' Ride Request received! Ref: ' || NEW."UUID" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(NEW."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up : ' || COALESCE(NEW."RiderCollectionAddress" || ', ', '') || NEW."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Destination : ' || COALESCE(NEW."RiderDestinationAddress" || ', ', '') || NEW."RiderDropOffZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Party Size : ' || NEW."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Wheelchair accessibility needed : ' ||  CASE WHEN NEW."NeedWheelchair" THEN 'Yes' ELSE 'No' END || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Two-way trip needed : ' ||  CASE WHEN NEW."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Notes : ' ||  NEW."RiderAccommodationNotes" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Phone Number : ' ||  NEW."RiderPhone" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Self-Service portal : http://carpoolvote.com/self-service/?type=rider&uuid=' || NEW."UUID" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || NEW."UUID" || '&RiderPhone=' || carpoolvote.urlencode(NEW."RiderLastName");
 				
-            INSERT INTO nov2016.outgoing_sms (recipient, body)                                             
+            INSERT INTO carpoolvote.outgoing_sms (recipient, body)                                             
             VALUES (NEW."RiderPhone", v_body);                                                                 
         END IF;                    
 		
@@ -171,16 +171,16 @@ END;
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.queue_email_notif()
+ALTER FUNCTION carpoolvote.queue_email_notif()
   OWNER TO carpool_admins;
 
 
   
-CREATE TRIGGER send_email_notif_ins_driver_trg AFTER INSERT ON stage.websubmission_driver FOR EACH ROW EXECUTE PROCEDURE nov2016.queue_email_notif();
-CREATE TRIGGER send_email_notif_ins_rider_trg AFTER INSERT ON stage.websubmission_rider FOR EACH ROW EXECUTE PROCEDURE nov2016.queue_email_notif();
+CREATE TRIGGER send_email_notif_ins_driver_trg AFTER INSERT ON carpoolvote.driver FOR EACH ROW EXECUTE PROCEDURE carpoolvote.queue_email_notif();
+CREATE TRIGGER send_email_notif_ins_rider_trg AFTER INSERT ON carpoolvote.rider FOR EACH ROW EXECUTE PROCEDURE carpoolvote.queue_email_notif();
 
 
-REVOKE ALL ON SEQUENCE nov2016.outgoing_sms_id_seq FROM PUBLIC;
-REVOKE ALL ON SEQUENCE nov2016.outgoing_sms_id_seq FROM carpool_admins;
-GRANT ALL ON SEQUENCE nov2016.outgoing_sms_id_seq TO carpool_admins;
-GRANT SELECT,USAGE ON SEQUENCE nov2016.outgoing_sms_id_seq TO carpool_web;
+REVOKE ALL ON SEQUENCE carpoolvote.outgoing_sms_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE carpoolvote.outgoing_sms_id_seq FROM carpool_admins;
+GRANT ALL ON SEQUENCE carpoolvote.outgoing_sms_id_seq TO carpool_admins;
+GRANT SELECT,USAGE ON SEQUENCE carpoolvote.outgoing_sms_id_seq TO carpool_web;

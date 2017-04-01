@@ -1,49 +1,303 @@
 -- actions by rider
---nov2016.rider_cancel_ride_request(UUID, phone number or lastname ?)
---nov2016.rider_cancel_confirmed_match(UUID_driver, UUID_rider, score, rider’s phone number or rider’s lastname ?)
+--carpoolvote.rider_cancel_ride_request(UUID, phone number or lastname ?)
+--carpoolvote.rider_cancel_confirmed_match(UUID_driver, UUID_rider, score, rider’s phone number or rider’s lastname ?)
 
 -- actions by driver
---nov2016.driver_cancel_drive_offer(UUID, phone number or lastname ?)
---nov2016.driver_cancel_confirmed_match(UUID_driver, UUID_rider, driverr’s phone number or driver’s lastname ?)
---nov2016.driver_confirm_match(UUID_driver, UUID_rider, score, driver’s phone number or driver’s lastname ?)
---nov2016.driver_pause_match(UUID, phone number or lastname ?)
+--carpoolvote.driver_cancel_drive_offer(UUID, phone number or lastname ?)
+--carpoolvote.driver_cancel_confirmed_match(UUID_driver, UUID_rider, driverr’s phone number or driver’s lastname ?)
+--carpoolvote.driver_confirm_match(UUID_driver, UUID_rider, score, driver’s phone number or driver’s lastname ?)
+--carpoolvote.driver_pause_match(UUID, phone number or lastname ?)
 
 -- functions return character varying with explanatory text of error condition. Empty string if success
 
 
--- Common function to update state of ride request record
 
-CREATE OR REPLACE FUNCTION nov2016.get_param_value(a_param_name character varying)
-  RETURNS character varying AS
+-- Common function to update status of ride request record
+
+SET search_path = carpoolvote, pg_catalog;
+
+
+-- 
+-- submit_new_rider
+-- return codes : 
+-- -1 : ERROR - Generic Error
+-- 0  : SUCCESS
+-- 1  : ERROR - Input is disabled
+-- 2  : ERROR - Input validation
+CREATE OR REPLACE FUNCTION carpoolvote.submit_new_rider(
+	a_IPAddress character varying,
+    a_RiderFirstName character varying,
+    a_RiderLastName character varying,
+    a_RiderEmail character varying,
+    a_RiderPhone character varying,
+    a_RiderCollectionZIP character varying,
+    a_RiderDropOffZIP character varying,
+    a_AvailableRideTimesLocal character varying,
+    a_TotalPartySize integer,
+    a_TwoWayTripNeeded boolean,
+    a_RiderIsVulnerable boolean,
+    a_RiderWillNotTalkPolitics boolean,
+    a_PleaseStayInTouch boolean,
+    a_NeedWheelchair boolean,
+    a_RiderPreferredContact character varying,
+    a_RiderAccommodationNotes character varying,
+    a_RiderLegalConsent boolean,
+    a_RiderWillBeSafe boolean,
+    a_RiderCollectionAddress character varying,
+    a_RiderDestinationAddress character varying,
+	OUT out_uuid character varying,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT) AS
 $BODY$
 DECLARE
+	v_step character varying(200);
+BEGIN	
 
-v_env nov2016.params.value%TYPE;
+	IF  LOWER(COALESCE(carpoolvote.get_param_value('input.rider.enabled'), 'false')) = LOWER('false')
+	THEN
+	    out_uuid := '';
+		out_error_code := 1;
+		out_error_text := 'Submission of new Rider is disabled.';
+		RETURN;
+	END IF;
+	
+	
 
-BEGIN
+	BEGIN
+	
+		out_uuid := carpoolvote.gen_random_uuid();
+		
+		IF (a_IPAddress is null) or (length(a_IPAddress) = 0) THEN
+			out_uuid := '';
+			out_error_code := 2;
+			out_error_text := 'Invalid IPAddress';
+			RETURN;
+		END IF;
+		
+		IF (a_AvailableRideTimesLocal is null) or (length(a_AvailableRideTimesLocal) = 0) THEN
+			out_uuid := '';
+			out_error_code := 2;
+			out_error_text := 'Invalid AvailableRideTimesLocal';
+			RETURN;
+		END IF;
+		
+		IF (a_TotalPartySize is null) or (a_TotalPartySize <= 0) THEN
+			out_uuid := '';
+			out_error_code := 2;
+			out_error_text := 'Invalid TotalPartySize';
+			RETURN;
+		END IF;
+		
+		IF (a_RiderPreferredContact is null) or (a_RiderPreferredContact != 'SMS' and a_RiderPreferredContact != 'Email' and a_RiderPreferredContact != 'Phone')
+		THEN
+			out_uuid := '';
+			out_error_code := 2;
+			out_error_text := 'Invalid RiderPreferredContact (SMS/Email/Phone)';
+			RETURN;
+		END IF;
+		
 
-v_env := NULL;
+		INSERT INTO carpoolvote.rider(
+		"UUID", "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail", "RiderPhone", "RiderCollectionZIP",
+		"RiderDropOffZIP", "AvailableRideTimesLocal", "TotalPartySize", "TwoWayTripNeeded", "RiderIsVulnerable",
+		"RiderWillNotTalkPolitics", "PleaseStayInTouch", "NeedWheelchair", "RiderPreferredContact",
+		"RiderAccommodationNotes", "RiderLegalConsent", "RiderWillBeSafe", "RiderCollectionAddress", "RiderDestinationAddress")
+		VALUES (
+		out_uuid, a_IPAddress, a_RiderFirstName, a_RiderLastName, a_RiderEmail, a_RiderPhone, a_RiderCollectionZIP,
+		a_RiderDropOffZIP, a_AvailableRideTimesLocal, a_TotalPartySize, a_TwoWayTripNeeded, a_RiderIsVulnerable,
+		a_RiderWillNotTalkPolitics, a_PleaseStayInTouch, a_NeedWheelchair, a_RiderPreferredContact,
+		a_RiderAccommodationNotes, a_RiderLegalConsent, a_RiderWillBeSafe, a_RiderCollectionAddress, a_RiderDestinationAddress);
+	
+		out_error_code := 0;
+		out_error_text := '';
+	
+	
+		RETURN;
+	EXCEPTION WHEN OTHERS
+	THEN
 
-BEGIN
-	SELECT value INTO v_env FROM nov2016.params WHERE name=a_param_name;
-EXCEPTION WHEN OTHERS
-THEN
-	v_env := NULL;
-END;
+		out_error_code := -1;
+		out_error_text := 'Unexpected exception (' || SQLSTATE || ')' || SQLERRM;
+	
+		RETURN;
+	END;
+	
 
-RETURN v_env;
+	
+END  
 
-END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.get_param_value(character varying)
+ALTER FUNCTION carpoolvote.submit_new_rider(character varying,
+    character varying, character varying,
+    character varying, character varying, character varying, character varying,
+    character varying, integer, boolean, boolean, boolean, boolean, boolean,
+    character varying, character varying, boolean, boolean, character varying,
+    character varying,out character varying, out integer, out text)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.get_param_value(character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.get_param_value(character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider(	character varying,
+    character varying, character varying,
+    character varying, character varying, character varying, character varying,
+    character varying, integer, boolean, boolean, boolean, boolean, boolean,
+    character varying, character varying, boolean, boolean, character varying,
+    character varying,out character varying, out integer, out text) TO carpool_web;
+	
+GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider( character varying,
+    character varying, character varying,
+    character varying, character varying, character varying, character varying,
+    character varying, integer, boolean, boolean, boolean, boolean, boolean,
+    character varying, character varying, boolean, boolean, character varying,
+    character varying,out character varying, out integer, out text) TO carpool_role;
+	
 
+-- 
+-- 
+-- submit_new_driver
+-- return codes : 
+-- -1 : ERROR - Generic Error
+-- 0  : SUCCESS
+-- 1  : ERROR - Input is disabled
+-- 2  : ERROR - Input validation
+CREATE OR REPLACE FUNCTION carpoolvote.submit_new_driver(
+	a_IPAddress character varying,
+	a_DriverCollectionZIP character varying,
+	a_DriverCollectionRadius integer,
+	a_AvailableDriveTimesLocal character varying,
+	a_DriverCanLoadRiderWithWheelchair boolean,
+	a_SeatCount integer,
+	a_DriverLicenseNumber character varying,
+	a_DriverFirstName character varying,
+	a_DriverLastName character varying,
+	a_DriverEmail character varying,
+	a_DriverPhone character varying,
+	a_DrivingOnBehalfOfOrganization boolean,
+	a_DrivingOBOOrganizationName character varying,
+	a_RidersCanSeeDriverDetails boolean,
+	a_DriverWillNotTalkPolitics boolean,
+	a_PleaseStayInTouch boolean,
+	a_DriverPreferredContact character varying,
+	a_DriverWillTakeCare boolean,
+	OUT out_uuid character varying,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT) AS
+$BODY$
+DECLARE
+	v_step character varying(200);
+BEGIN	
 
-CREATE OR REPLACE FUNCTION nov2016.update_ride_request_state(
+	IF  LOWER(COALESCE(carpoolvote.get_param_value('input.driver.enabled'), 'false')) = LOWER('false')
+	THEN
+	    out_uuid := '';
+		out_error_code := 1;
+		out_error_text := 'Submission of new Driver is disabled.';
+		RETURN;
+	END IF;
+	
+	
+
+	BEGIN
+	
+		out_uuid := carpoolvote.gen_random_uuid();
+		
+		IF (a_IPAddress is null) or (length(a_IPAddress) = 0) THEN
+			out_uuid := '';
+			out_error_code := 2;
+			out_error_text := 'Invalid IPAddress';
+			RETURN;
+		END IF;
+		
+		IF (a_AvailableDriveTimesLocal is null) or (length(a_AvailableDriveTimesLocal) = 0) THEN
+			out_uuid := '';
+			out_error_code := 2;
+			out_error_text := 'Invalid AvailableDriveTimesLocal';
+			RETURN;
+		END IF;
+		
+		IF (a_DriverCollectionRadius is null) or (a_DriverCollectionRadius <= 0) THEN
+			out_uuid := '';
+			out_error_code := 2;
+			out_error_text := 'Invalid DriverCollectionRadius';
+			RETURN;
+		END IF;
+
+		IF (a_SeatCount is null) or (a_SeatCount <= 0) THEN
+			out_uuid := '';
+			out_error_code := 2;
+			out_error_text := 'Invalid SeatCount';
+			RETURN;
+		END IF;
+		
+		IF (a_DriverPreferredContact is null) or (a_DriverPreferredContact != 'SMS' and a_DriverPreferredContact != 'Email' and a_DriverPreferredContact != 'Phone')
+		THEN
+			out_uuid := '';
+			out_error_code := 2;
+			out_error_text := 'Invalid DriverPreferredContact (SMS/Email/Phone)';
+			RETURN;
+		END IF;
+		
+
+		INSERT INTO carpoolvote.driver(
+		"UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", "AvailableDriveTimesLocal", 
+		"DriverCanLoadRiderWithWheelchair", "SeatCount", "DriverLicenseNumber", 
+		"DriverFirstName", "DriverLastName", "DriverEmail", "DriverPhone",
+		"DrivingOnBehalfOfOrganization", "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails",
+		"DriverWillNotTalkPolitics", "PleaseStayInTouch", "DriverPreferredContact", "DriverWillTakeCare")
+		VALUES (
+		out_uuid, 
+		a_IPAddress, a_DriverCollectionZIP, a_DriverCollectionRadius, a_AvailableDriveTimesLocal, 
+		a_DriverCanLoadRiderWithWheelchair, a_SeatCount, a_DriverLicenseNumber, 
+		a_DriverFirstName, a_DriverLastName, a_DriverEmail, a_DriverPhone,
+		a_DrivingOnBehalfOfOrganization, a_DrivingOBOOrganizationName, a_RidersCanSeeDriverDetails,
+		a_DriverWillNotTalkPolitics, a_PleaseStayInTouch, a_DriverPreferredContact, a_DriverWillTakeCare
+		);
+	
+		out_error_code := 0;
+		out_error_text := '';
+	
+		RETURN;
+	EXCEPTION WHEN OTHERS
+	THEN
+
+		out_error_code := -1;
+		out_error_text := 'Unexpected exception (' || SQLSTATE || ')' || SQLERRM;
+	
+		RETURN;
+	END;
+	
+
+	
+END  
+
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION carpoolvote.submit_new_driver(
+	character varying, character varying, integer, character varying,
+	boolean, integer, character varying, character varying, character varying,
+	character varying, character varying, boolean, character varying,
+	boolean, boolean, boolean, character varying, boolean,
+	OUT character varying, OUT INTEGER, OUT TEXT)
+  OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_driver(	
+character varying, character varying, integer, character varying,
+	boolean, integer, character varying, character varying, character varying,
+	character varying, character varying, boolean, character varying,
+	boolean, boolean, boolean, character varying, boolean,
+	OUT character varying, OUT INTEGER, OUT TEXT) TO carpool_web;
+	
+GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_driver( 
+character varying, character varying, integer, character varying,
+	boolean, integer, character varying, character varying, character varying,
+	character varying, character varying, boolean, character varying,
+	boolean, boolean, boolean, character varying, boolean,
+	OUT character varying, OUT INTEGER, OUT TEXT) TO carpool_role;
+	
+
+	
+	
+
+CREATE OR REPLACE FUNCTION carpoolvote.update_ride_request_status(
     a_UUID character varying(50)	)
   RETURNS character varying AS
 $BODY$
@@ -54,34 +308,34 @@ BEGIN
 	BEGIN
 	v_step := 'S1';
 	
-	-- If there is at least one match in MatchConfirmed state -> MatchConfirmed
+	-- If there is at least one match in MatchConfirmed status -> MatchConfirmed
 	IF EXISTS ( 
 		SELECT 1
-		FROM nov2016.match
+		FROM carpoolvote.match
 		WHERE uuid_rider = a_UUID
-		AND state='MatchConfirmed'
+		AND status='MatchConfirmed'
 	)
 	THEN	
 		v_step := 'S2';
-		UPDATE stage.websubmission_rider
-		SET state='MatchConfirmed'
+		UPDATE carpoolvote.rider
+		SET status='MatchConfirmed'
 		WHERE "UUID" = a_UUID;
 	ELSIF EXISTS (   -- If there is at least one match in MatchProposed or MatchConfirmed -> MatchProposed
 		SELECT 1
-		FROM nov2016.match
+		FROM carpoolvote.match
 		WHERE uuid_rider = a_UUID
-		AND state = 'MatchProposed'
+		AND status = 'MatchProposed'
 	)
 	THEN
 		v_step := 'S3';
-		UPDATE stage.websubmission_rider
-		SET state='MatchProposed'
+		UPDATE carpoolvote.rider
+		SET status='MatchProposed'
 		WHERE "UUID" = a_UUID;
 	
 	ELSE               -- default, is Pending
 		v_step := 'S4';
-		UPDATE stage.websubmission_rider
-		SET state='Pending'
+		UPDATE carpoolvote.rider
+		SET status='Pending'
 		WHERE "UUID" = a_UUID;
 		
 	END IF;
@@ -90,8 +344,8 @@ BEGIN
 	
 	EXCEPTION WHEN OTHERS
 	THEN
-		RAISE NOTICE 'Exception occurred during processing: update_ride_request_state,%', v_step;
-		return 'Exception occurred during processing: update_ride_request_state,' || v_step;
+		RAISE NOTICE 'Exception occurred during processing: update_ride_request_status,%', v_step;
+		return 'Exception occurred during processing: update_ride_request_status,' || v_step;
 	END;
 			
 END  
@@ -99,14 +353,14 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.update_ride_request_state(character varying)
+ALTER FUNCTION carpoolvote.update_ride_request_status(character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.update_ride_request_state(character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.update_ride_request_state(character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.update_ride_request_status(character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.update_ride_request_status(character varying) TO carpool_role;
 
 
--- Common function to update state of drive offer record
-CREATE OR REPLACE FUNCTION nov2016.update_drive_offer_state(
+-- Common function to update status of drive offer record
+CREATE OR REPLACE FUNCTION carpoolvote.update_drive_offer_status(
     a_UUID character varying(50)	)
   RETURNS character varying AS
 $BODY$
@@ -117,34 +371,34 @@ BEGIN
 	BEGIN
 	v_step := 'S1';
 	
-	-- If there is at least one match in MatchConfirmed state -> MatchConfirmed
+	-- If there is at least one match in MatchConfirmed status -> MatchConfirmed
 	IF EXISTS ( 
 		SELECT 1
-		FROM nov2016.match
+		FROM carpoolvote.match
 		WHERE uuid_driver = a_UUID
-		AND state='MatchConfirmed'
+		AND status='MatchConfirmed'
 	)
 	THEN	
 		v_step := 'S2';
-		UPDATE stage.websubmission_driver
-		SET state='MatchConfirmed'
+		UPDATE carpoolvote.driver
+		SET status='MatchConfirmed'
 		WHERE "UUID" = a_UUID;
 	ELSIF EXISTS (   -- If there is at least one match in MatchProposed or MatchConfirmed -> MatchProposed
 		SELECT 1
-		FROM nov2016.match
+		FROM carpoolvote.match
 		WHERE uuid_driver = a_UUID
-		AND state = 'MatchProposed'
+		AND status = 'MatchProposed'
 	)
 	THEN
 		v_step := 'S3';
-		UPDATE stage.websubmission_driver
-		SET state='MatchProposed'
+		UPDATE carpoolvote.driver
+		SET status='MatchProposed'
 		WHERE "UUID" = a_UUID;
 	
 	ELSE               -- default, is Pending
 		v_step := 'S4';
-		UPDATE stage.websubmission_driver
-		SET state='Pending'
+		UPDATE carpoolvote.driver
+		SET status='Pending'
 		WHERE "UUID" = a_UUID;
 		
 	END IF;
@@ -153,8 +407,8 @@ BEGIN
 	
 	EXCEPTION WHEN OTHERS
 	THEN
-		RAISE NOTICE 'Exception occurred during processing: update_drive_offer_state,%', v_step;
-		return 'Exception occurred during processing: update_drive_offer_state,' || v_step;
+		RAISE NOTICE 'Exception occurred during processing: update_drive_offer_status,%', v_step;
+		return 'Exception occurred during processing: update_drive_offer_status,' || v_step;
 	END;
 			
 END  
@@ -162,33 +416,33 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.update_drive_offer_state(character varying)
+ALTER FUNCTION carpoolvote.update_drive_offer_status(character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.update_drive_offer_state(character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.update_drive_offer_state(character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.update_drive_offer_status(character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.update_drive_offer_status(character varying) TO carpool_role;
 
 
 --------------------------------------------------------
 -- USER STORY 003 - RIDER cancels ride request
 --------------------------------------------------------
-CREATE OR REPLACE FUNCTION nov2016.rider_cancel_ride_request(
+CREATE OR REPLACE FUNCTION carpoolvote.rider_cancel_ride_request(
     a_UUID character varying(50),
     confirmation_parameter character varying(255))
   RETURNS character varying AS
 $BODY$
 
 DECLARE                                                   
-	ride_request_row stage.websubmission_rider%ROWTYPE;
-	drive_offer_row stage.websubmission_driver%ROWTYPE;
-	match_row nov2016.match%ROWTYPE;
+	ride_request_row carpoolvote.rider%ROWTYPE;
+	drive_offer_row carpoolvote.driver%ROWTYPE;
+	match_row carpoolvote.match%ROWTYPE;
 	v_step character varying(200);
 	v_return_text character varying(200);
 	
-	v_subject nov2016.outgoing_email.subject%TYPE;                                                                            
-	v_body nov2016.outgoing_email.body%TYPE;                                                                                  
-	v_html_header nov2016.outgoing_email.body%TYPE;
-	v_html_body   nov2016.outgoing_email.body%TYPE;
-	v_html_footer nov2016.outgoing_email.body%TYPE;
+	v_subject carpoolvote.outgoing_email.subject%TYPE;                                                                            
+	v_body carpoolvote.outgoing_email.body%TYPE;                                                                                  
+	v_html_header carpoolvote.outgoing_email.body%TYPE;
+	v_html_body   carpoolvote.outgoing_email.body%TYPE;
+	v_html_footer carpoolvote.outgoing_email.body%TYPE;
 
 BEGIN 
 
@@ -236,7 +490,7 @@ BEGIN
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
-	FROM stage.websubmission_rider r
+	FROM carpoolvote.rider r
 	WHERE r."UUID" = a_UUID
 	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
 		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
@@ -250,19 +504,19 @@ BEGIN
 	BEGIN
 		v_step := 'S0';
 		SELECT * INTO ride_request_row
-		FROM stage.websubmission_rider
+		FROM carpoolvote.rider
 		WHERE "UUID" = a_UUID;
 	
 		v_step := 'S1';
-		FOR match_row IN SELECT * FROM nov2016.match
+		FOR match_row IN SELECT * FROM carpoolvote.match
 			WHERE uuid_rider = a_UUID
-			AND state = 'MatchConfirmed'
+			AND status = 'MatchConfirmed'
 		
 		LOOP
 		
 			v_step := 'S2';
 			SELECT * INTO drive_offer_row
-			FROM stage.websubmission_driver
+			FROM carpoolvote.driver
 			WHERE "UUID" = match_row.uuid_driver;
 		
 			v_step := 'S3';   -- Cancellation Notification to confirmed drivers
@@ -296,7 +550,7 @@ BEGIN
 
 				v_body := v_html_header || v_html_body || v_html_footer;
 
-				INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+				INSERT INTO carpoolvote.outgoing_email (recipient, subject, body)
 				VALUES (drive_offer_row."DriverEmail", 
 				v_subject, 
 				v_body);
@@ -305,26 +559,26 @@ BEGIN
 			IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 			THEN
 			
-				v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Confirmed Ride was canceled by rider. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Rider : ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Pick-up location : '  ||  COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+				v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Confirmed Ride was canceled by rider. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Rider : ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up location : '  ||  COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				INSERT INTO carpoolvote.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
 				v_body);
 			END IF;
 
 			v_step := 'S4';
-			UPDATE nov2016.match
-			SET state = 'Canceled'
+			UPDATE carpoolvote.match
+			SET status = 'Canceled'
 			WHERE uuid_rider = match_row.uuid_rider
 			AND uuid_driver = match_row.uuid_driver;
 			
 			v_step := 'S5';
-			v_return_text := nov2016.update_drive_offer_state(match_row.uuid_driver);
+			v_return_text := carpoolvote.update_drive_offer_status(match_row.uuid_driver);
 			IF  v_return_text != ''
 			THEN
 				v_step := v_step || ' ' || v_return_text;
@@ -334,14 +588,14 @@ BEGIN
 		END LOOP;
 		
 		v_step := 'S6';
-		UPDATE nov2016.match
-		SET state = 'Canceled'
+		UPDATE carpoolvote.match
+		SET status = 'Canceled'
 		WHERE uuid_rider = a_UUID;
 		
 		v_step := 'S7';
 		-- Update Ride Request to Canceled
-		UPDATE stage.websubmission_rider
-		SET state='Canceled'
+		UPDATE carpoolvote.rider
+		SET status='Canceled'
 		WHERE "UUID" = a_UUID;
 		
 		
@@ -371,7 +625,7 @@ BEGIN
 			
 			v_body := v_html_header || v_html_body || v_html_footer;
 			
-			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			INSERT INTO carpoolvote.outgoing_email (recipient, subject, body)
 			VALUES (ride_request_row."RiderEmail", 
 			v_subject, 
 			v_body);
@@ -380,13 +634,13 @@ BEGIN
 		IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Ride Request ' || ride_request_row."UUID"  || ' was canceled. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Ride Request ' || ride_request_row."UUID"  || ' was canceled. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 		
-			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			INSERT INTO carpoolvote.outgoing_sms (recipient, body)
 			VALUES (ride_request_row."RiderPhone", 
 			v_body);
 		END IF;
@@ -403,17 +657,17 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.rider_cancel_ride_request(character varying, character varying)
+ALTER FUNCTION carpoolvote.rider_cancel_ride_request(character varying, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.rider_cancel_ride_request(character varying, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.rider_cancel_ride_request(character varying, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_ride_request(character varying, character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_ride_request(character varying, character varying) TO carpool_role;
 
 
 
 --------------------------------------------------------
 -- USER STORY 004 - RIDER cancels a confirmed match
 --------------------------------------------------------
-CREATE OR REPLACE FUNCTION nov2016.rider_cancel_confirmed_match(
+CREATE OR REPLACE FUNCTION carpoolvote.rider_cancel_confirmed_match(
     a_UUID_driver character varying(50),
 	a_UUID_rider character varying(50),
 	a_score smallint,
@@ -422,17 +676,17 @@ CREATE OR REPLACE FUNCTION nov2016.rider_cancel_confirmed_match(
 $BODY$
 
 DECLARE                                                   
-	ride_request_row stage.websubmission_rider%ROWTYPE;
-	drive_offer_row stage.websubmission_driver%ROWTYPE;
-	match_row nov2016.match%ROWTYPE;
+	ride_request_row carpoolvote.rider%ROWTYPE;
+	drive_offer_row carpoolvote.driver%ROWTYPE;
+	match_row carpoolvote.match%ROWTYPE;
 	v_step character varying(200);
 	v_return_text character varying(200);
 	
-	v_subject nov2016.outgoing_email.subject%TYPE;                                                                            
-	v_body nov2016.outgoing_email.body%TYPE;                                                                                  
-	v_html_header nov2016.outgoing_email.body%TYPE;
-	v_html_body   nov2016.outgoing_email.body%TYPE;
-	v_html_footer nov2016.outgoing_email.body%TYPE;
+	v_subject carpoolvote.outgoing_email.subject%TYPE;                                                                            
+	v_body carpoolvote.outgoing_email.body%TYPE;                                                                                  
+	v_html_header carpoolvote.outgoing_email.body%TYPE;
+	v_html_body   carpoolvote.outgoing_email.body%TYPE;
+	v_html_footer carpoolvote.outgoing_email.body%TYPE;
 
 BEGIN 
 
@@ -480,11 +734,11 @@ BEGIN
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
-	FROM nov2016.match m, stage.websubmission_rider r
+	FROM carpoolvote.match m, carpoolvote.rider r
 	WHERE m.uuid_driver = a_UUID_driver
 	AND m.uuid_rider = a_UUID_rider
 	AND m.score = a_score
-	AND m.state = 'MatchConfirmed'   -- We can cancel only a Confirmed match
+	AND m.status = 'MatchConfirmed'   -- We can cancel only a Confirmed match
 	AND m.uuid_rider = r."UUID"
 	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
 		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
@@ -496,19 +750,19 @@ BEGIN
 
 	BEGIN
 		v_step := 'S0';
-		UPDATE nov2016.match
-		SET state='Canceled'
+		UPDATE carpoolvote.match
+		SET status='Canceled'
 		WHERE uuid_rider = a_UUID_rider
 		AND uuid_driver = a_UUID_driver
 		AND score = a_score;
 	
 		v_step := 'S1';
 		SELECT * INTO drive_offer_row
-		FROM stage.websubmission_driver
+		FROM carpoolvote.driver
 		WHERE "UUID" = a_UUID_driver;	
 		
 		SELECT * INTO ride_request_row
-		FROM stage.websubmission_rider
+		FROM carpoolvote.rider
 		WHERE "UUID" = a_UUID_rider;	
 
 		
@@ -542,7 +796,7 @@ BEGIN
 
 				v_body := v_html_header || v_html_body || v_html_footer;
 
-				INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+				INSERT INTO carpoolvote.outgoing_email (recipient, subject, body)
 				VALUES (drive_offer_row."DriverEmail", 
 				v_subject, 
 				v_body);
@@ -551,14 +805,14 @@ BEGIN
 		IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Confirmed Ride was canceled by rider. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Rider : ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Confirmed Ride was canceled by rider. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Rider : ' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				INSERT INTO carpoolvote.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
 				v_body);
 		END IF;
@@ -566,7 +820,7 @@ BEGIN
 
 
 		v_step := 'S3';
-		v_return_text := nov2016.update_drive_offer_state(a_UUID_driver);
+		v_return_text := carpoolvote.update_drive_offer_status(a_UUID_driver);
 		IF  v_return_text != ''
 		THEN
 			v_step := v_step || ' ' || v_return_text;
@@ -574,7 +828,7 @@ BEGIN
 		END IF;
 	
 		v_step := 'S4';
-		v_return_text := nov2016.update_ride_request_state(a_UUID_rider);
+		v_return_text := carpoolvote.update_ride_request_status(a_UUID_rider);
 		IF  v_return_text != ''
 		THEN
 			v_step := v_step || ' ' || v_return_text;
@@ -607,14 +861,14 @@ BEGIN
 			|| '<p>No further action is needed from you.</p>'
 			|| '<p>We will try to find another suitable driver.</p>'
 			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
-			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
+			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || carpoolvote.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
 			
 			v_body := v_html_header || v_html_body || v_html_footer;
 
-			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			INSERT INTO carpoolvote.outgoing_email (recipient, subject, body)
 			VALUES (ride_request_row."RiderEmail", 
 			v_subject, 
 			v_body);
@@ -624,13 +878,13 @@ BEGIN
 		IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Confirmed Ride was canceled. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Confirmed Ride was canceled. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				INSERT INTO carpoolvote.outgoing_sms (recipient, body)
 				VALUES (ride_request_row."RiderPhone", 
 				v_body);
 		END IF;
@@ -647,32 +901,32 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying)
+ALTER FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying) TO carpool_role;
 
 --------------------------------------------------------
 -- USER STORY 013 - DRIVER cancels driver offer
 --------------------------------------------------------
-CREATE OR REPLACE FUNCTION nov2016.driver_cancel_drive_offer(
+CREATE OR REPLACE FUNCTION carpoolvote.driver_cancel_drive_offer(
     a_UUID character varying(50),
     confirmation_parameter character varying(255))
   RETURNS character varying AS
 $BODY$
 
 DECLARE                                                   
-	ride_request_row stage.websubmission_rider%ROWTYPE;
-	drive_offer_row stage.websubmission_driver%ROWTYPE;
-	match_row nov2016.match%ROWTYPE;
+	ride_request_row carpoolvote.rider%ROWTYPE;
+	drive_offer_row carpoolvote.driver%ROWTYPE;
+	match_row carpoolvote.match%ROWTYPE;
 	v_step character varying(200);
 	v_return_text character varying(200);
 	
-	v_subject nov2016.outgoing_email.subject%TYPE;                                                                            
-	v_body nov2016.outgoing_email.body%TYPE;                                                                                  
-	v_html_header nov2016.outgoing_email.body%TYPE;
-	v_html_body   nov2016.outgoing_email.body%TYPE;
-	v_html_footer nov2016.outgoing_email.body%TYPE;
+	v_subject carpoolvote.outgoing_email.subject%TYPE;                                                                            
+	v_body carpoolvote.outgoing_email.body%TYPE;                                                                                  
+	v_html_header carpoolvote.outgoing_email.body%TYPE;
+	v_html_body   carpoolvote.outgoing_email.body%TYPE;
+	v_html_footer carpoolvote.outgoing_email.body%TYPE;
 
 BEGIN 
 
@@ -720,7 +974,7 @@ BEGIN
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
-	FROM stage.websubmission_driver r
+	FROM carpoolvote.driver r
 	WHERE r."UUID" = a_UUID
 	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
 		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
@@ -733,19 +987,19 @@ BEGIN
 	BEGIN
 		v_step := 'S0';
 		SELECT * INTO drive_offer_row
-		FROM stage.websubmission_driver
+		FROM carpoolvote.driver
 		WHERE "UUID" = a_UUID;	
 	
 		v_step := 'S1';
-		FOR match_row IN SELECT * FROM nov2016.match
+		FOR match_row IN SELECT * FROM carpoolvote.match
 			WHERE uuid_driver = a_UUID
-			AND state = 'MatchConfirmed'
+			AND status = 'MatchConfirmed'
 		
 		LOOP
 		
 			v_step := 'S2';
 			SELECT * INTO ride_request_row
-			FROM stage.websubmission_rider
+			FROM carpoolvote.rider
 			WHERE "UUID" = match_row.uuid_rider;	
 		
 			v_step := 'S3';
@@ -773,14 +1027,14 @@ BEGIN
 				|| '<p>Concerning this ride, no further action is needed from you.</p>'
 				|| '<p>We will try to find another suitable driver.</p>'
 				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
-				|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
+				|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || carpoolvote.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 				|| '<p>Warm wishes</p>'
 				|| '<p>The CarpoolVote.com team.</p>'
 				|| '</body>';
 
 				v_body := v_html_header || v_html_body || v_html_footer;
 
-				INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+				INSERT INTO carpoolvote.outgoing_email (recipient, subject, body)
 				VALUES (ride_request_row."RiderEmail", 
 				v_subject, 
 				v_body);
@@ -791,14 +1045,14 @@ BEGIN
 			IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 			THEN
 		
-				v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Confirmed Ride was canceled by driver. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Driver : ' || drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+				v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Confirmed Ride was canceled by driver. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Driver : ' || drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				INSERT INTO carpoolvote.outgoing_sms (recipient, body)
 				VALUES (ride_request_row."RiderPhone", 
 				v_body);
 			END IF;
@@ -806,13 +1060,13 @@ BEGIN
 			
 
 			v_step := 'S4';
-			UPDATE nov2016.match
-			SET state = 'Canceled'
+			UPDATE carpoolvote.match
+			SET status = 'Canceled'
 			WHERE uuid_rider = match_row.uuid_rider
 			AND uuid_driver = match_row.uuid_driver;
 			
 			v_step := 'S5';
-			v_return_text := nov2016.update_ride_request_state(match_row.uuid_rider);
+			v_return_text := carpoolvote.update_ride_request_status(match_row.uuid_rider);
 			IF  v_return_text != ''
 			THEN
 				v_step := v_step || ' ' || v_return_text;
@@ -822,14 +1076,14 @@ BEGIN
 		END LOOP;
 		
 		v_step := 'S6';
-		UPDATE nov2016.match
-		SET state = 'Canceled'
+		UPDATE carpoolvote.match
+		SET status = 'Canceled'
 		WHERE uuid_driver = a_UUID;
 		
 		v_step := 'S7';
 		-- Update Drive Offer to Canceled
-		UPDATE stage.websubmission_driver
-		SET state='Canceled'
+		UPDATE carpoolvote.driver
+		SET status='Canceled'
 		WHERE "UUID" = a_UUID;
 
 		-- Send cancellation notice to driver
@@ -862,7 +1116,7 @@ BEGIN
 			v_body := v_html_header || v_html_body || v_html_footer;
 
 
-            INSERT INTO nov2016.outgoing_email (recipient, subject, body)                                             
+            INSERT INTO carpoolvote.outgoing_email (recipient, subject, body)                                             
             VALUES (drive_offer_row."DriverEmail", v_subject, v_body);                                                                 
 			
 		END IF;
@@ -871,13 +1125,13 @@ BEGIN
 		IF drive_offer_row."DriverPhone" IS NOT NULL
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Drive Offer ' || drive_offer_row."UUID" ||  ' was canceled. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Pick-up ZIP : ' || drive_offer_row."DriverCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Radius : ' || drive_offer_row."DriverCollectionRadius" || ' ' || nov2016.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Drive Offer ' || drive_offer_row."UUID" ||  ' was canceled. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up ZIP : ' || drive_offer_row."DriverCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Radius : ' || drive_offer_row."DriverCollectionRadius" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Drive Times : ' || replace(replace(replace(replace(replace(drive_offer_row."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-'); 
 			
-			INSERT INTO nov2016.outgoing_sms (recipient, body)
+			INSERT INTO carpoolvote.outgoing_sms (recipient, body)
 			VALUES (drive_offer_row."DriverPhone", 
 			v_body);
 		END IF;
@@ -895,15 +1149,15 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.driver_cancel_drive_offer(character varying, character varying)
+ALTER FUNCTION carpoolvote.driver_cancel_drive_offer(character varying, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.driver_cancel_drive_offer(character varying, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.driver_cancel_drive_offer(character varying, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_drive_offer(character varying, character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_drive_offer(character varying, character varying) TO carpool_role;
 
 --------------------------------------------------------
 -- USER STORY 014 - DRIVER cancels confirmed match
 --------------------------------------------------------
-CREATE OR REPLACE FUNCTION nov2016.driver_cancel_confirmed_match(
+CREATE OR REPLACE FUNCTION carpoolvote.driver_cancel_confirmed_match(
     a_UUID_driver character varying(50),
 	a_UUID_rider character varying(50),
 	a_score smallint,
@@ -912,17 +1166,17 @@ CREATE OR REPLACE FUNCTION nov2016.driver_cancel_confirmed_match(
 $BODY$
 
 DECLARE                                                   
-    ride_request_row stage.websubmission_rider%ROWTYPE;
-	drive_offer_row stage.websubmission_driver%ROWTYPE;
-	match_row nov2016.match%ROWTYPE;
+    ride_request_row carpoolvote.rider%ROWTYPE;
+	drive_offer_row carpoolvote.driver%ROWTYPE;
+	match_row carpoolvote.match%ROWTYPE;
 	v_step character varying(200);
 	v_return_text character varying(200);
 	
-	v_subject nov2016.outgoing_email.subject%TYPE;                                                                            
-	v_body nov2016.outgoing_email.body%TYPE;                                                                                  
-	v_html_header nov2016.outgoing_email.body%TYPE;
-	v_html_body   nov2016.outgoing_email.body%TYPE;
-	v_html_footer nov2016.outgoing_email.body%TYPE;
+	v_subject carpoolvote.outgoing_email.subject%TYPE;                                                                            
+	v_body carpoolvote.outgoing_email.body%TYPE;                                                                                  
+	v_html_header carpoolvote.outgoing_email.body%TYPE;
+	v_html_body   carpoolvote.outgoing_email.body%TYPE;
+	v_html_footer carpoolvote.outgoing_email.body%TYPE;
 
 BEGIN 
 
@@ -970,10 +1224,10 @@ BEGIN
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
-	FROM nov2016.match m, stage.websubmission_driver r
+	FROM carpoolvote.match m, carpoolvote.driver r
 	WHERE m.uuid_driver = a_UUID_driver
 	AND m.uuid_rider = a_UUID_rider
-	AND m.state = 'MatchConfirmed'   -- We can confirmed only a 
+	AND m.status = 'MatchConfirmed'   -- We can confirmed only a 
 	AND m.uuid_driver = r."UUID"
 	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
 		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
@@ -985,19 +1239,19 @@ BEGIN
 
 	BEGIN
 		v_step := 'S0';
-		UPDATE nov2016.match
-		SET state='Canceled'
+		UPDATE carpoolvote.match
+		SET status='Canceled'
 		WHERE uuid_rider = a_UUID_rider
 		AND uuid_driver = a_UUID_driver
 		AND score = a_score;
 	
 		v_step := 'S1';
 		SELECT * INTO ride_request_row
-		FROM stage.websubmission_rider
+		FROM carpoolvote.rider
 		WHERE "UUID" = a_UUID_rider;	
 
 		SELECT * INTO drive_offer_row
-		FROM stage.websubmission_driver
+		FROM carpoolvote.driver
 		WHERE "UUID" = a_UUID_driver;	
 
 		
@@ -1026,14 +1280,14 @@ BEGIN
 			|| '<p>Concerning this ride, no further action is needed from you.</p>'
 			|| '<p>We will try to find another suitable driver.</p>'
 			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
-			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
+			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || carpoolvote.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
 
 			v_body := v_html_header || v_html_body || v_html_footer;
 
-			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			INSERT INTO carpoolvote.outgoing_email (recipient, subject, body)
 			VALUES (ride_request_row."RiderEmail", 
 			v_subject, 
 			v_body);
@@ -1043,21 +1297,21 @@ BEGIN
 		IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Confirmed Ride was canceled by driver. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Driver : ' ||  drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName"  || ' ' || nov2016.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Confirmed Ride was canceled by driver. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Driver : ' ||  drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName"  || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				INSERT INTO carpoolvote.outgoing_sms (recipient, body)
 				VALUES (ride_request_row."RiderPhone", 
 				v_body);
 		END IF;
 		
 		
 		v_step := 'S3';
-		v_return_text := nov2016.update_drive_offer_state(a_UUID_driver);
+		v_return_text := carpoolvote.update_drive_offer_status(a_UUID_driver);
 		IF  v_return_text != ''
 		THEN
 			v_step := v_step || ' ' || v_return_text;
@@ -1065,7 +1319,7 @@ BEGIN
 		END IF;
 	
 		v_step := 'S4';
-		v_return_text := nov2016.update_ride_request_state(a_UUID_rider);
+		v_return_text := carpoolvote.update_ride_request_status(a_UUID_rider);
 		IF  v_return_text != ''
 		THEN
 			v_step := v_step || ' ' || v_return_text;
@@ -1098,14 +1352,14 @@ BEGIN
 			|| '<p>No further action is needed from you.</p>'
 			|| '<p>We hope you can still are still able to help another rider.</p>'
 			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
-			|| '<p>If are no longer able to offer a ride, please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">cancel this Drive Offer</a></p>'
+			|| '<p>If are no longer able to offer a ride, please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || carpoolvote.urlencode(drive_offer_row."DriverLastName") ||  '">cancel this Drive Offer</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
 			
 			v_body := v_html_header || v_html_body || v_html_footer;
 
-			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			INSERT INTO carpoolvote.outgoing_email (recipient, subject, body)
 			VALUES (drive_offer_row."DriverEmail", 
 			v_subject, 
 			v_body);
@@ -1115,14 +1369,14 @@ BEGIN
 		IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Confirmed Ride was canceled. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Rider : ' ||  ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || ' ' || nov2016.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Confirmed Ride was canceled. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Rider : ' ||  ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				INSERT INTO carpoolvote.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
 				v_body);
 		END IF;		
@@ -1138,15 +1392,15 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying)
+ALTER FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying) TO carpool_role;
 
 --------------------------------------------------------
 -- USER STORY 015 - DRIVER confirms match
 --------------------------------------------------------
-CREATE OR REPLACE FUNCTION nov2016.driver_confirm_match(
+CREATE OR REPLACE FUNCTION carpoolvote.driver_confirm_match(
     a_UUID_driver character varying(50),
 	a_UUID_rider character varying(50),
 	a_score smallint,
@@ -1155,28 +1409,28 @@ CREATE OR REPLACE FUNCTION nov2016.driver_confirm_match(
 $BODY$
 
 DECLARE                                                   
-    ride_request_row stage.websubmission_rider%ROWTYPE;
-	drive_offer_row stage.websubmission_driver%ROWTYPE;
-	match_row nov2016.match%ROWTYPE;
+    ride_request_row carpoolvote.rider%ROWTYPE;
+	drive_offer_row carpoolvote.driver%ROWTYPE;
+	match_row carpoolvote.match%ROWTYPE;
 	v_step character varying(200); 
 	v_return_text character varying(200);	
 	
-	v_subject nov2016.outgoing_email.subject%TYPE;                                                                            
-	v_body nov2016.outgoing_email.body%TYPE;                                                                                  
-	v_html_header nov2016.outgoing_email.body%TYPE;
-	v_html_body   nov2016.outgoing_email.body%TYPE;
-	v_html_footer nov2016.outgoing_email.body%TYPE;
+	v_subject carpoolvote.outgoing_email.subject%TYPE;                                                                            
+	v_body carpoolvote.outgoing_email.body%TYPE;                                                                                  
+	v_html_header carpoolvote.outgoing_email.body%TYPE;
+	v_html_body   carpoolvote.outgoing_email.body%TYPE;
+	v_html_footer carpoolvote.outgoing_email.body%TYPE;
 
 BEGIN 
 
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
-	FROM nov2016.match m, stage.websubmission_driver r
+	FROM carpoolvote.match m, carpoolvote.driver r
 	WHERE m.uuid_driver = a_UUID_driver
 	AND m.uuid_rider = a_UUID_rider
 	AND m.score = a_score
-	AND m.state = 'MatchProposed'   -- We can confirmed only a 
+	AND m.status = 'MatchProposed'   -- We can confirmed only a 
 	AND m.uuid_driver = r."UUID"
 	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
 		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
@@ -1229,14 +1483,14 @@ BEGIN
 	
 	BEGIN
 		v_step := 'S1';
-		UPDATE nov2016.match
-		SET state='MatchConfirmed'
+		UPDATE carpoolvote.match
+		SET status='MatchConfirmed'
 		WHERE uuid_rider = a_UUID_rider
 		AND uuid_driver = a_UUID_driver
 		AND score = a_score;
 	
 		v_step := 'S2, ' || a_UUID_driver;
-		v_return_text := nov2016.update_drive_offer_state(a_UUID_driver);
+		v_return_text := carpoolvote.update_drive_offer_status(a_UUID_driver);
 		IF  v_return_text != ''
 		THEN
 			v_step := v_step || ' ' || v_return_text;
@@ -1245,7 +1499,7 @@ BEGIN
 		END IF;
 	
 		v_step := 'S3, ' || a_UUID_rider;
-		v_return_text := nov2016.update_ride_request_state(a_UUID_rider);
+		v_return_text := carpoolvote.update_ride_request_status(a_UUID_rider);
 		IF  v_return_text != ''
 		THEN
 			v_step := v_step || ' ' || v_return_text;
@@ -1255,14 +1509,14 @@ BEGIN
 		
 		v_step := 'S3';
 		SELECT * INTO ride_request_row
-		FROM stage.websubmission_rider
+		FROM carpoolvote.rider
 		WHERE "UUID" = a_UUID_rider;	
 		
 	
 		v_step := 'S4';
 		-- send confirmation notice to driver
 		SELECT * INTO drive_offer_row
-		FROM stage.websubmission_driver
+		FROM carpoolvote.driver
 		WHERE "UUID" = a_UUID_driver;	
 		
 		v_step := 'S5';
@@ -1292,19 +1546,19 @@ BEGIN
 			|| '</table>'
 			|| '</p>'
 			|| '<p>If you can no longer drive ' || drive_offer_row."DriverFirstName" || ', please let us know and '
-			|| '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-driver-match?UUID_driver=' || a_UUID_driver 
+			|| '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-driver-match?UUID_driver=' || a_UUID_driver 
 			|| '&UUID_rider=' || a_UUID_rider 
 			|| '&Score=' || a_score 
-			|| '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName" ) || '">cancel this ride match only</a></p>'
+			|| '&DriverPhone=' || carpoolvote.urlencode(drive_offer_row."DriverLastName" ) || '">cancel this ride match only</a></p>'
 			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || drive_offer_row."UUID" || '">Self-Service Portal</a></p>'
-			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || nov2016.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel this Drive Offer</a></p>'
+			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || carpoolvote.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel this Drive Offer</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
 
 			v_body := v_html_header || v_html_body || v_html_footer;
 
-			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			INSERT INTO carpoolvote.outgoing_email (recipient, subject, body)
 			VALUES (drive_offer_row."DriverEmail", 
 			v_subject, 
 			v_body);
@@ -1314,14 +1568,14 @@ BEGIN
 		IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Match is confirmed. No further action needed.' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Rider : ' ||  ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || ' ' || nov2016.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || nov2016.urlencode(chr(10))
-					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || nov2016.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Match is confirmed. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Rider : ' ||  ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				INSERT INTO carpoolvote.outgoing_sms (recipient, body)
 				VALUES (drive_offer_row."DriverPhone", 
 				v_body);
 		END IF;		
@@ -1345,19 +1599,19 @@ BEGIN
 			|| CASE WHEN drive_offer_row."DriverPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(drive_offer_row."DriverPreferredContact" LIKE '%SMS%',false) THEN '(*)' else ' ' END || 'SMS/Text: ' || drive_offer_row."DriverPhone"  ELSE ' ' END || '<br/>'
 			|| '(*) = Preferred Method</p>'
 			|| '<p>If you would prefer to have a different driver, please let us know, and '
-			|| '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-rider-match?UUID_driver=' || a_UUID_driver 
+			|| '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-rider-match?UUID_driver=' || a_UUID_driver 
 			|| '&UUID_rider=' || a_UUID_rider 
 			|| '&Score=' || a_score 
-			|| '&RiderPhone=' || nov2016.urlencode( ride_request_row."RiderLastName") || '">cancel this ride match only</a></p>'   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
+			|| '&RiderPhone=' || carpoolvote.urlencode( ride_request_row."RiderLastName") || '">cancel this ride match only</a></p>'   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || ride_request_row."UUID" || '">Self-Service Portal</a></p>'
-			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(nov2016.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || nov2016.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
+			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || ride_request_row."UUID" || '&RiderPhone=' || carpoolvote.urlencode(ride_request_row."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
 			|| '</body>';
 		
 			v_body := v_html_header || v_html_body || v_html_footer;
 		
-			INSERT INTO nov2016.outgoing_email (recipient, subject, body)
+			INSERT INTO carpoolvote.outgoing_email (recipient, subject, body)
 			VALUES (ride_request_row."RiderEmail", 
 			v_subject, 
 			v_html_body);
@@ -1366,15 +1620,15 @@ BEGIN
 		v_step := 'S8';
 		IF ride_request_row."RiderPhone" IS NOT NULL AND (position('SMS' in ride_request_row."RiderPreferredContact") > 0)
 		THEN
-			v_body := 'From CarpoolVote.com' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Match is confirmed by driver. No further action needed.'|| ' ' || nov2016.urlencode(chr(10))
-					|| ' Driver : ' ||  drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" || ' ' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Destination : ' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || ' ' || ' ' || nov2016.urlencode(chr(10))
-					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || ' ' || nov2016.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Match is confirmed by driver. No further action needed.'|| ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Driver : ' ||  drive_offer_row."DriverFirstName" || ' ' || drive_offer_row."DriverLastName" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Destination : ' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Party Size : ' || ride_request_row."TotalPartySize" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO nov2016.outgoing_sms (recipient, body)
+				INSERT INTO carpoolvote.outgoing_sms (recipient, body)
 				VALUES (ride_request_row."RiderPhone", 
 				v_body);
 		END IF;		
@@ -1393,23 +1647,23 @@ BEGIN
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.driver_confirm_match(character varying, character varying, smallint, character varying)
+ALTER FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, smallint, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.driver_confirm_match(character varying, character varying, smallint, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.driver_confirm_match(character varying, character varying, smallint, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, smallint, character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, smallint, character varying) TO carpool_role;
 
 
 --------------------------------------------------------
 -- USER STORY 016 - DRIVER pauses match
 --------------------------------------------------------
-CREATE OR REPLACE FUNCTION nov2016.driver_pause_match(
+CREATE OR REPLACE FUNCTION carpoolvote.driver_pause_match(
     a_UUID character varying(50),
     confirmation_parameter character varying(255))
   RETURNS character varying AS
 $BODY$
 
 DECLARE                                                   
-	drive_offer_row stage.websubmission_driver%ROWTYPE;
+	drive_offer_row carpoolvote.driver%ROWTYPE;
 	v_step character varying(200); 
 	v_return_text character varying(200);	
 	
@@ -1418,7 +1672,7 @@ BEGIN
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
-	FROM stage.websubmission_driver r
+	FROM carpoolvote.driver r
 	WHERE r."UUID" = a_UUID
 	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
 		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
@@ -1430,7 +1684,7 @@ BEGIN
 
 	BEGIN
 		v_step := 'S1';
-		UPDATE stage.websubmission_driver
+		UPDATE carpoolvote.driver
 			SET "ReadyToMatch" = False
 			WHERE "UUID" = a_UUID;
 			
@@ -1447,7 +1701,7 @@ BEGIN
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.driver_pause_match(character varying, character varying)
+ALTER FUNCTION carpoolvote.driver_pause_match(character varying, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.driver_pause_match(character varying, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.driver_pause_match(character varying, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_pause_match(character varying, character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_pause_match(character varying, character varying) TO carpool_role;

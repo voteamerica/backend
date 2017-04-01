@@ -17,7 +17,7 @@ fi
 echo $PGDATABASE $LIMIT
 
 psql -h /tmp $PGDATABASE <<RPT
-select * from stage.vw_ride_request order by last_updated_ts desc $LIMIT
+select * from carpoolvote.vw_ride_request order by last_updated_ts desc $LIMIT
 RPT
 
 

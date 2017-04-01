@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION nov2016.urlencode(in_str text, OUT _result text)
+CREATE OR REPLACE FUNCTION carpoolvote.urlencode(in_str text, OUT _result text)
     STRICT IMMUTABLE AS $urlencode$
 DECLARE
     _i      int4;
@@ -30,6 +30,6 @@ BEGIN
 END;
 $urlencode$ LANGUAGE plpgsql;
 
-ALTER FUNCTION nov2016.urlencode(text, out text)  OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION  nov2016.urlencode(text, out text) TO carpool_role;
-GRANT EXECUTE ON FUNCTION  nov2016.urlencode(text, out text) TO carpool_web_role;
+ALTER FUNCTION carpoolvote.urlencode(text, out text)  OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION  carpoolvote.urlencode(text, out text) TO carpool_role;
+GRANT EXECUTE ON FUNCTION  carpoolvote.urlencode(text, out text) TO carpool_web_role;

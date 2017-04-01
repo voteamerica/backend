@@ -1,15 +1,15 @@
-﻿-- Function: nov2016.driver_exists(character varying, character varying)
+﻿-- Function: carpoolvote.driver_exists(character varying, character varying)
 
--- DROP FUNCTION nov2016.driver_exists(character varying, character varying);
+-- DROP FUNCTION carpoolvote.driver_exists(character varying, character varying);
 
-CREATE OR REPLACE FUNCTION nov2016.driver_exists(
+CREATE OR REPLACE FUNCTION carpoolvote.driver_exists(
     a_uuid character varying,
     confirmation_parameter character varying)
   RETURNS character varying AS
 $BODY$
 
 DECLARE                                                   
-	drive_offer_row stage.websubmission_driver%ROWTYPE;
+	drive_offer_row carpoolvote.driver%ROWTYPE;
 	v_step character varying(200); 
 	v_return_text character varying(200);	
 	
@@ -18,7 +18,7 @@ BEGIN
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
-	FROM stage.websubmission_driver r
+	FROM carpoolvote.driver r
 	WHERE r."UUID" = a_UUID
 	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
 		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
@@ -35,43 +35,43 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.driver_exists(character varying, character varying)
+ALTER FUNCTION carpoolvote.driver_exists(character varying, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.driver_exists(character varying, character varying) TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.driver_exists(character varying, character varying) TO public;
-GRANT EXECUTE ON FUNCTION nov2016.driver_exists(character varying, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.driver_exists(character varying, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_exists(character varying, character varying) TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_exists(character varying, character varying) TO public;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_exists(character varying, character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_exists(character varying, character varying) TO carpool_role;
 
 
--- Function: nov2016.rider_exists(character varying, character varying)
+-- Function: carpoolvote.rider_exists(character varying, character varying)
 
--- DROP FUNCTION nov2016.rider_exists(character varying, character varying);
+-- DROP FUNCTION carpoolvote.rider_exists(character varying, character varying);
 
-CREATE OR REPLACE FUNCTION nov2016.rider_exists(
+CREATE OR REPLACE FUNCTION carpoolvote.rider_exists(
     a_uuid character varying,
     confirmation_parameter character varying)
   RETURNS character varying AS
 $BODY$
 
 DECLARE                                                   
-	ride_request_row stage.websubmission_rider%ROWTYPE;
-	drive_offer_row stage.websubmission_driver%ROWTYPE;
-	match_row nov2016.match%ROWTYPE;
+	ride_request_row carpoolvote.rider%ROWTYPE;
+	drive_offer_row carpoolvote.driver%ROWTYPE;
+	match_row carpoolvote.match%ROWTYPE;
 	v_step character varying(200);
 	v_return_text character varying(200);
 	
-	v_subject nov2016.outgoing_email.subject%TYPE;                                                                            
-	v_body nov2016.outgoing_email.body%TYPE;                                                                                  
-	v_html_header nov2016.outgoing_email.body%TYPE;
-	v_html_body   nov2016.outgoing_email.body%TYPE;
-	v_html_footer nov2016.outgoing_email.body%TYPE;
+	v_subject carpoolvote.outgoing_email.subject%TYPE;                                                                            
+	v_body carpoolvote.outgoing_email.body%TYPE;                                                                                  
+	v_html_header carpoolvote.outgoing_email.body%TYPE;
+	v_html_body   carpoolvote.outgoing_email.body%TYPE;
+	v_html_footer carpoolvote.outgoing_email.body%TYPE;
 
 BEGIN 
 
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
-	FROM stage.websubmission_rider r
+	FROM carpoolvote.rider r
 	WHERE r."UUID" = a_UUID
 	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
 		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
@@ -88,40 +88,40 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.rider_exists(character varying, character varying)
+ALTER FUNCTION carpoolvote.rider_exists(character varying, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.rider_exists(character varying, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.rider_exists(character varying, character varying) TO carpool_role;
-GRANT EXECUTE ON FUNCTION nov2016.rider_exists(character varying, character varying) TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.rider_exists(character varying, character varying) TO public;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_exists(character varying, character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_exists(character varying, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_exists(character varying, character varying) TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_exists(character varying, character varying) TO public;
 
 
-CREATE OR REPLACE FUNCTION nov2016.rider_info(
+CREATE OR REPLACE FUNCTION carpoolvote.rider_info(
     a_uuid character varying,
     confirmation_parameter character varying)
   RETURNS json AS
 $BODY$
 
 DECLARE                                                   
-	ride_request_row stage.websubmission_rider%ROWTYPE;
-	drive_offer_row stage.websubmission_driver%ROWTYPE;
-	match_row nov2016.match%ROWTYPE;
+	ride_request_row carpoolvote.rider%ROWTYPE;
+	drive_offer_row carpoolvote.driver%ROWTYPE;
+	match_row carpoolvote.match%ROWTYPE;
 	v_step character varying(200);
 	v_return_text character varying(200);
 	
-	v_subject nov2016.outgoing_email.subject%TYPE;                                                                            
-	v_body nov2016.outgoing_email.body%TYPE;                                                                                  
-	v_html_header nov2016.outgoing_email.body%TYPE;
-	v_html_body   nov2016.outgoing_email.body%TYPE;
-	v_html_footer nov2016.outgoing_email.body%TYPE;
-	r_row stage.websubmission_rider%ROWTYPE;
+	v_subject carpoolvote.outgoing_email.subject%TYPE;                                                                            
+	v_body carpoolvote.outgoing_email.body%TYPE;                                                                                  
+	v_html_header carpoolvote.outgoing_email.body%TYPE;
+	v_html_body   carpoolvote.outgoing_email.body%TYPE;
+	v_html_footer carpoolvote.outgoing_email.body%TYPE;
+	r_row carpoolvote.rider%ROWTYPE;
 
 BEGIN 
 
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
-	FROM stage.websubmission_rider r
+	FROM carpoolvote.rider r
 	WHERE r."UUID" = a_UUID
 	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
 		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
@@ -139,7 +139,7 @@ BEGIN
         SELECT * INTO
             r_row
         FROM
-            stage.websubmission_rider
+            carpoolvote.rider
         WHERE
             "UUID" = a_uuid;
 
@@ -151,36 +151,36 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.rider_info(character varying, character varying)
+ALTER FUNCTION carpoolvote.rider_info(character varying, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.rider_info(character varying, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.rider_info(character varying, character varying) TO carpool_role;
-GRANT EXECUTE ON FUNCTION nov2016.rider_info(character varying, character varying) TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.rider_info(character varying, character varying) TO public;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_info(character varying, character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_info(character varying, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_info(character varying, character varying) TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_info(character varying, character varying) TO public;
 
 
--- Function: nov2016.driver_info(character varying, character varying)
+-- Function: carpoolvote.driver_info(character varying, character varying)
 
--- DROP FUNCTION nov2016.driver_info(character varying, character varying);
+-- DROP FUNCTION carpoolvote.driver_info(character varying, character varying);
 
-CREATE OR REPLACE FUNCTION nov2016.driver_info(
+CREATE OR REPLACE FUNCTION carpoolvote.driver_info(
     a_uuid character varying,
     confirmation_parameter character varying)
   RETURNS json AS
 $BODY$
 
 DECLARE                                                   
-	drive_offer_row stage.websubmission_driver%ROWTYPE;
+	drive_offer_row carpoolvote.driver%ROWTYPE;
 	v_step character varying(200); 
 	v_return_text character varying(200);	
-	d_row stage.websubmission_driver%ROWTYPE;
+	d_row carpoolvote.driver%ROWTYPE;
 	
 BEGIN 
 
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
-	FROM stage.websubmission_driver r
+	FROM carpoolvote.driver r
 	WHERE r."UUID" = a_UUID
 	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
 		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
@@ -194,7 +194,7 @@ BEGIN
        SELECT * INTO
            d_row
        FROM
-           stage.websubmission_driver
+           carpoolvote.driver
        WHERE
            "UUID" = a_uuid;
 
@@ -205,73 +205,73 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.driver_info(character varying, character varying)
+ALTER FUNCTION carpoolvote.driver_info(character varying, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.driver_info(character varying, character varying) TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.driver_info(character varying, character varying) TO public;
-GRANT EXECUTE ON FUNCTION nov2016.driver_info(character varying, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.driver_info(character varying, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_info(character varying, character varying) TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_info(character varying, character varying) TO public;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_info(character varying, character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_info(character varying, character varying) TO carpool_role;
 
-DROP VIEW nov2016.vw_driver_matches;
+DROP VIEW carpoolvote.vw_driver_matches;
 
-CREATE VIEW nov2016.vw_driver_matches 
+CREATE VIEW carpoolvote.vw_driver_matches 
 AS
     SELECT 
-        nov2016.match."state" AS "matchState", 
+        carpoolvote.match."state" AS "matchState", 
     "uuid_driver", "uuid_rider", "score", "UUID", "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail", "RiderPhone", "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesUTC", "TotalPartySize", "TwoWayTripNeeded", "RiderIsVulnerable", "RiderWillNotTalkPolitics", "PleaseStayInTouch", "NeedWheelchair", "RiderPreferredContact", "RiderAccommodationNotes", "RiderLegalConsent", "ReadyToMatch", 
-    stage.websubmission_rider."state", 
+    carpoolvote.rider."state", 
     "state_info", "RiderWillBeSafe", "AvailableRideTimesLocal", "RiderCollectionAddress", "RiderDestinationAddress"
- FROM nov2016.match
+ FROM carpoolvote.match
     INNER JOIN 
-        stage.websubmission_rider on 
-        stage.websubmission_rider."UUID" = nov2016.match.uuid_rider;
+        carpoolvote.rider on 
+        carpoolvote.rider."UUID" = carpoolvote.match.uuid_rider;
 
-ALTER TABLE nov2016.vw_driver_matches
+ALTER TABLE carpoolvote.vw_driver_matches
   OWNER TO carpool_admins;
-GRANT ALL ON TABLE nov2016.vw_driver_matches TO carpool_admins;
-GRANT SELECT, UPDATE, INSERT ON TABLE nov2016.vw_driver_matches TO carpool_web_role;
-GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE nov2016.vw_driver_matches TO carpool_role;
-GRANT SELECT ON nov2016.vw_driver_matches TO carpool_web;
+GRANT ALL ON TABLE carpoolvote.vw_driver_matches TO carpool_admins;
+GRANT SELECT, UPDATE, INSERT ON TABLE carpoolvote.vw_driver_matches TO carpool_web_role;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE carpoolvote.vw_driver_matches TO carpool_role;
+GRANT SELECT ON carpoolvote.vw_driver_matches TO carpool_web;
 
 
-DROP VIEW nov2016.vw_rider_matches;
+DROP VIEW carpoolvote.vw_rider_matches;
 
-CREATE VIEW nov2016.vw_rider_matches 
+CREATE VIEW carpoolvote.vw_rider_matches 
 AS
 --     SELECT 
---         nov2016.match."state" AS "matchState", 
+--         carpoolvote.match."state" AS "matchState", 
 --     "uuid_driver", "uuid_rider", "score", "UUID", "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail", "RiderPhone", "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesUTC", "TotalPartySize", "TwoWayTripNeeded", "RiderIsVulnerable", "RiderWillNotTalkPolitics", "PleaseStayInTouch", "NeedWheelchair", "RiderPreferredContact", "RiderAccommodationNotes", "RiderLegalConsent", "ReadyToMatch", 
---     stage.websubmission_rider."state", 
+--     carpoolvote.rider."state", 
 --     "state_info", "RiderWillBeSafe", "AvailableRideTimesLocal", "RiderCollectionAddress", "RiderDestinationAddress"
---  FROM nov2016.match
+--  FROM carpoolvote.match
 --     INNER JOIN 
---         stage.websubmission_rider on 
---         stage.websubmission_rider."UUID" = nov2016.match.uuid_rider;
+--         carpoolvote.rider on 
+--         carpoolvote.rider."UUID" = carpoolvote.match.uuid_rider;
 
 
 	SELECT 
-nov2016.match."state" AS "matchState", "uuid_driver", "uuid_rider", "score", "UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", "AvailableDriveTimesUTC", "DriverCanLoadRiderWithWheelchair", "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", "DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization", "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics", "ReadyToMatch", "PleaseStayInTouch", 
-stage.websubmission_driver."state", 
+carpoolvote.match."state" AS "matchState", "uuid_driver", "uuid_rider", "score", "UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", "AvailableDriveTimesUTC", "DriverCanLoadRiderWithWheelchair", "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", "DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization", "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics", "ReadyToMatch", "PleaseStayInTouch", 
+carpoolvote.driver."state", 
 "state_info", "DriverPreferredContact", "DriverWillTakeCare", "AvailableDriveTimesLocal"
-	FROM nov2016.match
+	FROM carpoolvote.match
     INNER JOIN 
-        stage.websubmission_driver on 
-        stage.websubmission_driver."UUID" = nov2016.match.uuid_driver;
+        carpoolvote.driver on 
+        carpoolvote.driver."UUID" = carpoolvote.match.uuid_driver;
 
-ALTER TABLE nov2016.vw_rider_matches
+ALTER TABLE carpoolvote.vw_rider_matches
   OWNER TO carpool_admins;
-GRANT ALL ON TABLE nov2016.vw_rider_matches TO carpool_admins;
-GRANT SELECT, UPDATE, INSERT ON TABLE nov2016.vw_rider_matches TO carpool_web_role;
-GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE nov2016.vw_rider_matches TO carpool_role;
-GRANT SELECT ON nov2016.vw_rider_matches TO carpool_web;
+GRANT ALL ON TABLE carpoolvote.vw_rider_matches TO carpool_admins;
+GRANT SELECT, UPDATE, INSERT ON TABLE carpoolvote.vw_rider_matches TO carpool_web_role;
+GRANT SELECT, UPDATE, INSERT, DELETE ON TABLE carpoolvote.vw_rider_matches TO carpool_role;
+GRANT SELECT ON carpoolvote.vw_rider_matches TO carpool_web;
 
 
 
--- Function: nov2016.driver_proposed_matches(character varying, character varying)
+-- Function: carpoolvote.driver_proposed_matches(character varying, character varying)
 
--- DROP FUNCTION nov2016.driver_proposed_matches(character varying, character varying);
+-- DROP FUNCTION carpoolvote.driver_proposed_matches(character varying, character varying);
 
-CREATE OR REPLACE FUNCTION nov2016.driver_proposed_matches(
+CREATE OR REPLACE FUNCTION carpoolvote.driver_proposed_matches(
     a_uuid character varying,
     confirmation_parameter character varying)
   RETURNS setof json AS
@@ -283,7 +283,7 @@ $BODY$
         SELECT row_to_json(s)
         FROM ( 
             SELECT * from
-            nov2016.vw_driver_matches
+            carpoolvote.vw_driver_matches
         WHERE
                 uuid_driver = a_uuid
             AND "matchState" = 'MatchProposed'
@@ -295,18 +295,18 @@ $BODY$
 --   LANGUAGE plpgsql VOLATILE
     LANGUAGE sql stable
   COST 100;
-ALTER FUNCTION nov2016.driver_proposed_matches(character varying, character varying)
+ALTER FUNCTION carpoolvote.driver_proposed_matches(character varying, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.driver_proposed_matches(character varying, character varying) TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.driver_proposed_matches(character varying, character varying) TO public;
-GRANT EXECUTE ON FUNCTION nov2016.driver_proposed_matches(character varying, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.driver_proposed_matches(character varying, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_proposed_matches(character varying, character varying) TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_proposed_matches(character varying, character varying) TO public;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_proposed_matches(character varying, character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_proposed_matches(character varying, character varying) TO carpool_role;
 
--- Function: nov2016.driver_confirmed_matches(character varying, character varying)
+-- Function: carpoolvote.driver_confirmed_matches(character varying, character varying)
 
--- DROP FUNCTION nov2016.driver_confirmed_matches(character varying, character varying);
+-- DROP FUNCTION carpoolvote.driver_confirmed_matches(character varying, character varying);
 
-CREATE OR REPLACE FUNCTION nov2016.driver_confirmed_matches(
+CREATE OR REPLACE FUNCTION carpoolvote.driver_confirmed_matches(
     a_uuid character varying,
     confirmation_parameter character varying)
   RETURNS setof json AS
@@ -319,7 +319,7 @@ $BODY$
 	-- input validation
 	-- IF NOT EXISTS (
 	-- SELECT 1 
-	-- FROM stage.websubmission_driver r
+	-- FROM carpoolvote.driver r
 	-- WHERE r."UUID" = a_UUID
 	-- AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
 	-- 	OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
@@ -333,7 +333,7 @@ $BODY$
     --     SELECT * INTO
     --         d_row
     --     FROM
-    --         nov2016.vw_driver_matches
+    --         carpoolvote.vw_driver_matches
     --     WHERE
     --             uuid_driver = a_uuid
     --         AND "matchState" = 'MatchConfirmed';
@@ -344,7 +344,7 @@ $BODY$
         SELECT row_to_json(s)
         FROM ( 
             SELECT * from
-            nov2016.vw_driver_matches
+            carpoolvote.vw_driver_matches
         WHERE
                 uuid_driver = a_uuid
             AND "matchState" = 'MatchConfirmed'
@@ -356,32 +356,32 @@ $BODY$
 --   LANGUAGE plpgsql VOLATILE
 	LANGUAGE sql stable
   COST 100;
-ALTER FUNCTION nov2016.driver_confirmed_matches(character varying, character varying)
+ALTER FUNCTION carpoolvote.driver_confirmed_matches(character varying, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.driver_confirmed_matches(character varying, character varying) TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.driver_confirmed_matches(character varying, character varying) TO public;
-GRANT EXECUTE ON FUNCTION nov2016.driver_confirmed_matches(character varying, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.driver_confirmed_matches(character varying, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirmed_matches(character varying, character varying) TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirmed_matches(character varying, character varying) TO public;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirmed_matches(character varying, character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirmed_matches(character varying, character varying) TO carpool_role;
 
--- Function: nov2016.rider_confirmed_match(character varying, character varying)
+-- Function: carpoolvote.rider_confirmed_match(character varying, character varying)
 
--- DROP FUNCTION nov2016.rider_confirmed_match(character varying, character varying);
+-- DROP FUNCTION carpoolvote.rider_confirmed_match(character varying, character varying);
 
-CREATE OR REPLACE FUNCTION nov2016.rider_confirmed_match(
+CREATE OR REPLACE FUNCTION carpoolvote.rider_confirmed_match(
     a_uuid character varying,
     confirmation_parameter character varying)
   RETURNS json AS
 $BODY$
 
 DECLARE                                                   
-	r_row nov2016.vw_rider_matches%ROWTYPE;
+	r_row carpoolvote.vw_rider_matches%ROWTYPE;
 
 BEGIN 
 
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
-	FROM stage.websubmission_rider r
+	FROM carpoolvote.rider r
 	WHERE r."UUID" = a_UUID
 	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
 		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
@@ -394,7 +394,7 @@ BEGIN
         SELECT * INTO
             r_row
         FROM
-            nov2016.vw_rider_matches
+            carpoolvote.vw_rider_matches
         WHERE
                 uuid_rider = a_uuid
             AND "matchState" = 'MatchConfirmed';
@@ -408,10 +408,10 @@ $BODY$
    LANGUAGE plpgsql VOLATILE
 	-- LANGUAGE sql stable
   COST 100;
-ALTER FUNCTION nov2016.rider_confirmed_match(character varying, character varying)
+ALTER FUNCTION carpoolvote.rider_confirmed_match(character varying, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.rider_confirmed_match(character varying, character varying) TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.rider_confirmed_match(character varying, character varying) TO public;
-GRANT EXECUTE ON FUNCTION nov2016.rider_confirmed_match(character varying, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION nov2016.rider_confirmed_match(character varying, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_confirmed_match(character varying, character varying) TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_confirmed_match(character varying, character varying) TO public;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_confirmed_match(character varying, character varying) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_confirmed_match(character varying, character varying) TO carpool_role;
 
