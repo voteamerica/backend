@@ -51,6 +51,12 @@ CREATE OR REPLACE FUNCTION carpoolvote.submit_new_rider(
 $BODY$
 DECLARE
 	v_step character varying(200);
+	ride_times_rider text[];
+	b_rider_all_times_expired  boolean := TRUE;
+	rider_time text;
+	start_ride_time timestamp without time zone;
+	end_ride_time timestamp without time zone;
+
 BEGIN	
 
 	IF  LOWER(COALESCE(carpoolvote.get_param_value('input.rider.enabled'), 'false')) = LOWER('false')
@@ -70,21 +76,83 @@ BEGIN
 		IF (a_IPAddress is null) or (length(a_IPAddress) = 0) THEN
 			out_uuid := '';
 			out_error_code := 2;
-			out_error_text := 'Invalid IPAddress';
+			out_error_text := 'Invalid IPAddress: ' || a_IPAddress;
 			RETURN;
 		END IF;
 		
 		IF (a_AvailableRideTimesLocal is null) or (length(a_AvailableRideTimesLocal) = 0) THEN
 			out_uuid := '';
 			out_error_code := 2;
-			out_error_text := 'Invalid AvailableRideTimesLocal';
+			out_error_text := 'Invalid AvailableRideTimesLocal: ' || a_AvailableRideTimesLocal;
 			RETURN;
 		END IF;
-		
+	
+		-- split AvailableRideTimesLocal in individual time intervals
+		ride_times_rider := string_to_array(a_AvailableRideTimesLocal, '|');
+		b_rider_all_times_expired := TRUE;  -- Assumes all expired
+		FOREACH rider_time IN ARRAY ride_times_rider
+		LOOP
+			BEGIN
+				-- each time interval is in ISO8601 format					
+				-- new format without timezone : 2016-10-01T02:00/2016-10-01T03:00
+				start_ride_time :=  (substring(rider_time from 1 for (position ('/' in rider_time)-1)))::timestamp without time zone;
+				end_ride_time :=    (substring(rider_time from position ('/' in rider_time)))::timestamp without time zone;
+				
+				IF start_ride_time > end_ride_time
+				THEN
+					out_uuid := '';
+					out_error_code := 2;
+					out_error_text := 'Invalid value in AvailableRideTimes:' || rider_time;
+					RETURN;
+				ELSE
+					IF end_ride_time > now()   ----   --[NOW]--[S]--[E]   : not expired
+					THEN                       ----   --[S]---[NOW]--[E]  : not expired
+												      --[S]--[E]----[NOW] : expired
+						b_rider_all_times_expired := FALSE;
+					END IF;
+				END IF;
+			EXCEPTION WHEN OTHERS
+			THEN				
+				out_uuid := '';
+				out_error_code := 2;
+				out_error_text := 'Invalid value in AvailableRideTimes:' || rider_time;
+				RETURN;
+			END;
+			
+			IF b_rider_all_times_expired
+			THEN
+				out_uuid := '';
+				out_error_code := 2;
+				out_error_text := 'All AvailableRideTimes are expired';
+				RETURN;
+			END IF;
+							
+		END LOOP;
+
+	
+		-- zip code verification
+		IF NOT EXISTS
+			(SELECT 1 FROM carpoolvote.zip_codes z where z.zip = a_RiderCollectionZIP AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
+		THEN
+			out_uuid := '';
+			out_error_code := 2;
+			out_error_text := 'Invalid/Not Found RiderCollectionZIP:' || a_RiderCollectionZIP;
+			RETURN;
+		END IF;
+
+		IF NOT EXISTS 
+			(SELECT 1 FROM carpoolvote.zip_codes z WHERE z.zip = a_RiderDropOffZIP AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
+		THEN
+			out_uuid := '';
+			out_error_code := 2;
+			out_error_text := 'Invalid/Not Found RiderDropOffZIP:' || a_RiderDropOffZIP;
+			RETURN;
+		END IF;	
+	
 		IF (a_TotalPartySize is null) or (a_TotalPartySize <= 0) THEN
 			out_uuid := '';
 			out_error_code := 2;
-			out_error_text := 'Invalid TotalPartySize';
+			out_error_text := 'Invalid TotalPartySize: ' || a_TotalPartySize;
 			RETURN;
 		END IF;
 		
@@ -141,7 +209,7 @@ GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider(	character varying,
     character varying, character varying, character varying, character varying,
     character varying, integer, boolean, boolean, boolean, boolean, boolean,
     character varying, character varying, boolean, boolean, character varying,
-    character varying,out character varying, out integer, out text) TO carpool_web;
+    character varying,out character varying, out integer, out text) TO carpool_web_role;
 	
 GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider( character varying,
     character varying, character varying,
@@ -184,6 +252,11 @@ CREATE OR REPLACE FUNCTION carpoolvote.submit_new_driver(
 $BODY$
 DECLARE
 	v_step character varying(200);
+	ride_times_driver text[];
+	driver_time text;
+	start_drive_time timestamp without time zone;
+	end_drive_time timestamp without time zone;
+	b_driver_all_times_expired boolean := TRUE;
 BEGIN	
 
 	IF  LOWER(COALESCE(carpoolvote.get_param_value('input.driver.enabled'), 'false')) = LOWER('false')
@@ -194,8 +267,6 @@ BEGIN
 		RETURN;
 	END IF;
 	
-	
-
 	BEGIN
 	
 		out_uuid := carpoolvote.gen_random_uuid();
@@ -203,16 +274,74 @@ BEGIN
 		IF (a_IPAddress is null) or (length(a_IPAddress) = 0) THEN
 			out_uuid := '';
 			out_error_code := 2;
-			out_error_text := 'Invalid IPAddress';
+			out_error_text := 'Invalid IPAddress: ' || a_IPAddress;
 			RETURN;
 		END IF;
+		
+		IF NOT EXISTS 
+			(SELECT 1 FROM carpoolvote.zip_codes z where z.zip = a_DriverCollectionZIP AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
+		THEN
+			out_uuid := '';
+			out_error_code := 2;
+			out_error_text := 'Invalid/Not Found DriverCollectionZIP:' || a_DriverCollectionZIP;
+			RETURN;
+		END IF; 	
+
 		
 		IF (a_AvailableDriveTimesLocal is null) or (length(a_AvailableDriveTimesLocal) = 0) THEN
 			out_uuid := '';
 			out_error_code := 2;
-			out_error_text := 'Invalid AvailableDriveTimesLocal';
+			out_error_text := 'Invalid AvailableDriveTimesLocal: ' || a_AvailableDriveTimesLocal;
 			RETURN;
 		END IF;
+		
+		
+		
+		-- split AvailableDriveTimesLocal in individual time intervals
+ 		-- FORMAT should be like this 
+ 		-- 2016-10-01T02:00/2016-10-01T03:00|2016-10-01T02:00/2016-10-01T03:00|2016-10-01T02:00/2016-10-01T03:00
+ 		ride_times_driver := string_to_array(drive_offer_row."AvailableDriveTimesLocal", '|');
+		b_driver_all_times_expired := TRUE;
+ 		FOREACH driver_time IN ARRAY ride_times_driver
+		LOOP
+			BEGIN
+				-- each time interval is in ISO8601 format
+				-- new format without timezone : 2016-10-01T02:00/2016-10-01T03:00
+				start_drive_time :=  (substring(driver_time from 1 for (position ('/' in driver_time)-1)))::timestamp without time zone;
+				end_drive_time :=    (substring(driver_time from position ('/' in driver_time)))::timestamp without time zone;
+			
+				IF start_drive_time > end_drive_time
+				THEN
+					out_uuid := '';
+					out_error_code := 2;
+					out_error_text := 'Invalid value in AvailableDriveTimes:' || driver_time;
+					RETURN;
+				ELSE
+					IF end_drive_time > now()   ----   --[NOW]--[S]--[E]   : not expired
+					THEN                        ----   --[S]---[NOW]--[E]  : not expired
+					   							       --[S]--[E]----[NOW] : expired
+						b_driver_all_times_expired := FALSE;
+					END IF;
+				END IF;
+							
+			EXCEPTION WHEN OTHERS
+			THEN
+				out_uuid := '';
+				out_error_code := 2;
+				out_error_text := 'Invalid value in AvailableDriveTimes :' || driver_time;
+				RETURN;
+			END;
+		
+			IF b_driver_all_times_expired
+			THEN
+				out_uuid := '';
+				out_error_code := 2;
+				out_error_text := 'All AvailableDriveTimes are expired';
+				RETURN;
+			END IF;		
+		END LOOP;		
+
+		
 		
 		IF (a_DriverCollectionRadius is null) or (a_DriverCollectionRadius <= 0) THEN
 			out_uuid := '';
@@ -284,7 +413,7 @@ character varying, character varying, integer, character varying,
 	boolean, integer, character varying, character varying, character varying,
 	character varying, character varying, boolean, character varying,
 	boolean, boolean, boolean, character varying, boolean,
-	OUT character varying, OUT INTEGER, OUT TEXT) TO carpool_web;
+	OUT character varying, OUT INTEGER, OUT TEXT) TO carpool_web_role;
 	
 GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_driver( 
 character varying, character varying, integer, character varying,
@@ -294,6 +423,68 @@ character varying, character varying, integer, character varying,
 	OUT character varying, OUT INTEGER, OUT TEXT) TO carpool_role;
 	
 
+-- 
+-- 
+-- submit_new_helper
+-- return codes : 
+-- -1 : ERROR - Generic Error
+-- 0  : SUCCESS
+-- 1  : ERROR - Input is disabled
+-- 2  : ERROR - Input validation
+CREATE OR REPLACE FUNCTION carpoolvote.submit_new_helper(
+    a_helpername character varying,
+    a_helperemail character varying,
+    a_helpercapability character varying[],
+	OUT out_uuid character varying,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT) AS
+$BODY$
+DECLARE
+	v_step character varying(200);
+BEGIN	
+	
+	BEGIN
+	
+		out_uuid := carpoolvote.gen_random_uuid();
+	
+		INSERT INTO carpoolvote.helper(
+			"UUID", helpername, helperemail, helpercapability)
+		VALUES(
+			out_uuid, a_helpername, a_helperemail, a_helpercapability
+		);
+		
+		out_error_code := 0;
+		out_error_text := '';
+	
+		RETURN;
+		
+	
+	EXCEPTION WHEN OTHERS
+	THEN
+
+		out_error_code := -1;
+		out_error_text := 'Unexpected exception (' || SQLSTATE || ')' || SQLERRM;
+	
+		RETURN;
+	END;
+	
+	
+END  
+
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION carpoolvote.submit_new_helper(
+    character varying, character varying, character varying[],
+	OUT character varying, OUT INTEGER, OUT TEXT)
+  OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_helper(	
+	character varying, character varying, character varying[],
+	OUT character varying, OUT INTEGER, OUT TEXT) TO carpool_web_role;
+	
+GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_helper( 
+	character varying, character varying, character varying[],
+	OUT character varying, OUT INTEGER, OUT TEXT) TO carpool_role;
 	
 	
 

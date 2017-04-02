@@ -3165,12 +3165,14 @@ ALTER TABLE driver OWNER TO carpool_admins;
 --
 
 CREATE TABLE helper (
-    "timestamp" timestamp without time zone DEFAULT now() NOT NULL,
+	"UUID" character varying(50) DEFAULT gen_random_uuid() NOT NULL,
     helpername character varying(100) NOT NULL,
     helperemail character varying(250) NOT NULL,
     helpercapability character varying(500)[],
-    sweep_status_id integer DEFAULT '-1'::integer NOT NULL,
-    "UUID" character varying(50) DEFAULT gen_random_uuid() NOT NULL
+	status character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
+    created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    status_info text
 );
 
 
@@ -3955,8 +3957,6 @@ GRANT ALL ON FUNCTION fct_modified_column() TO carpool_web_role;
 REVOKE ALL ON FUNCTION get_param_value(a_param_name character varying) FROM PUBLIC;
 REVOKE ALL ON FUNCTION get_param_value(a_param_name character varying) FROM carpool_admins;
 GRANT ALL ON FUNCTION get_param_value(a_param_name character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION get_param_value(a_param_name character varying) TO PUBLIC;
-GRANT ALL ON FUNCTION get_param_value(a_param_name character varying) TO carpool_web;
 GRANT ALL ON FUNCTION get_param_value(a_param_name character varying) TO carpool_role;
 
 
@@ -3978,9 +3978,8 @@ GRANT ALL ON FUNCTION perform_match() TO PUBLIC;
 REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
 REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
 GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web_role;
 GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
-GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
 
 
 --
@@ -3990,10 +3989,8 @@ GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varyi
 REVOKE ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
 REVOKE ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
 GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_web_role;
 GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
-GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
-
 
 --
 -- Name: rider_confirmed_match(character varying, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
@@ -4002,8 +3999,7 @@ GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confir
 REVOKE ALL ON FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
 REVOKE ALL ON FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
 GRANT ALL ON FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
-GRANT ALL ON FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) TO carpool_web_role;
 GRANT ALL ON FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
 
 
@@ -4014,8 +4010,7 @@ GRANT ALL ON FUNCTION rider_confirmed_match(a_uuid character varying, confirmati
 REVOKE ALL ON FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
 REVOKE ALL ON FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
 GRANT ALL ON FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
-GRANT ALL ON FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) TO carpool_web_role;
 GRANT ALL ON FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
 
 
@@ -4026,8 +4021,7 @@ GRANT ALL ON FUNCTION rider_exists(a_uuid character varying, confirmation_parame
 REVOKE ALL ON FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
 REVOKE ALL ON FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
 GRANT ALL ON FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
-GRANT ALL ON FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) TO carpool_web_role;
 GRANT ALL ON FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
 
 
@@ -4038,8 +4032,7 @@ GRANT ALL ON FUNCTION rider_info(a_uuid character varying, confirmation_paramete
 REVOKE ALL ON FUNCTION update_drive_offer_status(a_uuid character varying) FROM PUBLIC;
 REVOKE ALL ON FUNCTION update_drive_offer_status(a_uuid character varying) FROM carpool_admins;
 GRANT ALL ON FUNCTION update_drive_offer_status(a_uuid character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION update_drive_offer_status(a_uuid character varying) TO PUBLIC;
-GRANT ALL ON FUNCTION update_drive_offer_status(a_uuid character varying) TO carpool_web;
+GRANT ALL ON FUNCTION update_drive_offer_status(a_uuid character varying) TO carpool_web_role;
 GRANT ALL ON FUNCTION update_drive_offer_status(a_uuid character varying) TO carpool_role;
 
 
@@ -4050,8 +4043,7 @@ GRANT ALL ON FUNCTION update_drive_offer_status(a_uuid character varying) TO car
 REVOKE ALL ON FUNCTION update_ride_request_status(a_uuid character varying) FROM PUBLIC;
 REVOKE ALL ON FUNCTION update_ride_request_status(a_uuid character varying) FROM carpool_admins;
 GRANT ALL ON FUNCTION update_ride_request_status(a_uuid character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION update_ride_request_status(a_uuid character varying) TO PUBLIC;
-GRANT ALL ON FUNCTION update_ride_request_status(a_uuid character varying) TO carpool_web;
+GRANT ALL ON FUNCTION update_ride_request_status(a_uuid character varying) TO carpool_web_role;
 GRANT ALL ON FUNCTION update_ride_request_status(a_uuid character varying) TO carpool_role;
 
 
@@ -4062,7 +4054,6 @@ GRANT ALL ON FUNCTION update_ride_request_status(a_uuid character varying) TO ca
 REVOKE ALL ON FUNCTION urlencode(in_str text, OUT _result text) FROM PUBLIC;
 REVOKE ALL ON FUNCTION urlencode(in_str text, OUT _result text) FROM carpool_admins;
 GRANT ALL ON FUNCTION urlencode(in_str text, OUT _result text) TO carpool_admins;
-GRANT ALL ON FUNCTION urlencode(in_str text, OUT _result text) TO PUBLIC;
 GRANT ALL ON FUNCTION urlencode(in_str text, OUT _result text) TO carpool_role;
 GRANT ALL ON FUNCTION urlencode(in_str text, OUT _result text) TO carpool_web_role;
 
@@ -4074,17 +4065,8 @@ GRANT ALL ON FUNCTION urlencode(in_str text, OUT _result text) TO carpool_web_ro
 REVOKE ALL ON TABLE driver FROM PUBLIC;
 REVOKE ALL ON TABLE driver FROM carpool_admins;
 GRANT ALL ON TABLE driver TO carpool_admins;
-GRANT SELECT,INSERT,UPDATE ON TABLE driver TO carpool_web_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE driver TO carpool_role;
-
-
---
--- Name: driver.UUID; Type: ACL; Schema: carpoolvote; Owner: carpool_admins
---
-
-REVOKE ALL("UUID") ON TABLE driver FROM PUBLIC;
-REVOKE ALL("UUID") ON TABLE driver FROM carpool_admins;
-GRANT SELECT("UUID") ON TABLE driver TO carpool_web;
+GRANT INSERT ON TABLE driver TO carpool_web_role;
 
 
 --
@@ -4094,8 +4076,8 @@ GRANT SELECT("UUID") ON TABLE driver TO carpool_web;
 REVOKE ALL ON TABLE helper FROM PUBLIC;
 REVOKE ALL ON TABLE helper FROM carpool_admins;
 GRANT ALL ON TABLE helper TO carpool_admins;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE helper TO carpool_role;
 GRANT INSERT ON TABLE helper TO carpool_web_role;
-GRANT ALL ON TABLE helper TO carpool_role;
 
 
 --
@@ -4183,8 +4165,6 @@ REVOKE ALL ON TABLE params FROM PUBLIC;
 REVOKE ALL ON TABLE params FROM carpool_admins;
 GRANT ALL ON TABLE params TO carpool_admins;
 GRANT SELECT ON TABLE params TO carpool_role;
-GRANT SELECT ON TABLE params TO carpool_web_role;
-
 
 --
 -- Name: rider; Type: ACL; Schema: carpoolvote; Owner: carpool_admins
@@ -4193,17 +4173,8 @@ GRANT SELECT ON TABLE params TO carpool_web_role;
 REVOKE ALL ON TABLE rider FROM PUBLIC;
 REVOKE ALL ON TABLE rider FROM carpool_admins;
 GRANT ALL ON TABLE rider TO carpool_admins;
-GRANT SELECT,INSERT,UPDATE ON TABLE rider TO carpool_web_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rider TO carpool_role;
-
-
---
--- Name: rider.UUID; Type: ACL; Schema: carpoolvote; Owner: carpool_admins
---
-
-REVOKE ALL("UUID") ON TABLE rider FROM PUBLIC;
-REVOKE ALL("UUID") ON TABLE rider FROM carpool_admins;
-GRANT SELECT("UUID") ON TABLE rider TO carpool_web;
+GRANT INSERT ON TABLE rider TO carpool_web_role;
 
 
 --
@@ -4223,9 +4194,8 @@ GRANT SELECT ON TABLE vw_drive_offer TO carpool_role;
 REVOKE ALL ON TABLE vw_driver_matches FROM PUBLIC;
 REVOKE ALL ON TABLE vw_driver_matches FROM carpool_admins;
 GRANT ALL ON TABLE vw_driver_matches TO carpool_admins;
-GRANT SELECT,INSERT,UPDATE ON TABLE vw_driver_matches TO carpool_web_role;
+GRANT SELECT ON TABLE vw_driver_matches TO carpool_web_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE vw_driver_matches TO carpool_role;
-GRANT SELECT ON TABLE vw_driver_matches TO carpool_web;
 
 
 --
@@ -4245,9 +4215,8 @@ GRANT SELECT ON TABLE vw_ride_request TO carpool_role;
 REVOKE ALL ON TABLE vw_rider_matches FROM PUBLIC;
 REVOKE ALL ON TABLE vw_rider_matches FROM carpool_admins;
 GRANT ALL ON TABLE vw_rider_matches TO carpool_admins;
-GRANT SELECT,INSERT,UPDATE ON TABLE vw_rider_matches TO carpool_web_role;
+GRANT SELECT ON TABLE vw_rider_matches TO carpool_web_role;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE vw_rider_matches TO carpool_role;
-GRANT SELECT ON TABLE vw_rider_matches TO carpool_web;
 
 
 --

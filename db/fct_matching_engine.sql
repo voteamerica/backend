@@ -104,8 +104,8 @@ BEGIN
 			
 
 			BEGIN
-				-- DriverCollectionZIP
-				-- DriverCollectionRadius
+				-- RiderCollectionZIP
+				-- RiderDropOffZIP
 			
 				SELECT * INTO zip_pickup FROM carpoolvote.zip_codes WHERE zip=ride_request_row."RiderCollectionZIP";
 				SELECT * INTO zip_dropoff FROM carpoolvote.zip_codes WHERE zip=ride_request_row."RiderDropOffZIP";
