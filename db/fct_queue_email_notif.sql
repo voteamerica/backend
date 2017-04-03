@@ -1,4 +1,3 @@
-DROP FUNCTION carpoolvote.queue_email_notif() cascade;
 
 CREATE OR REPLACE FUNCTION carpoolvote.queue_email_notif()
   RETURNS trigger AS
@@ -178,6 +177,7 @@ ALTER FUNCTION carpoolvote.queue_email_notif()
   
 CREATE TRIGGER send_email_notif_ins_driver_trg AFTER INSERT ON carpoolvote.driver FOR EACH ROW EXECUTE PROCEDURE carpoolvote.queue_email_notif();
 CREATE TRIGGER send_email_notif_ins_rider_trg AFTER INSERT ON carpoolvote.rider FOR EACH ROW EXECUTE PROCEDURE carpoolvote.queue_email_notif();
+
 
 
 REVOKE ALL ON SEQUENCE carpoolvote.outgoing_sms_id_seq FROM PUBLIC;

@@ -667,3 +667,9 @@ $BODY$
 ALTER FUNCTION carpoolvote.perform_match()
   OWNER TO carpool_admins;
 GRANT EXECUTE ON FUNCTION carpoolvote.perform_match() TO carpool_role;
+REVOKE ALL ON FUNCTION carpoolvote.perform_match() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION carpoolvote.perform_match() TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.perform_match() TO carpool_role;
+
+
+

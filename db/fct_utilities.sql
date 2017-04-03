@@ -32,10 +32,12 @@ BEGIN
 END;
 $urlencode$ LANGUAGE plpgsql;
 
+
 ALTER FUNCTION carpoolvote.urlencode(text, out text)  OWNER TO carpool_admins;
+REVOKE ALL ON FUNCTION urlencode(in_str text, OUT _result text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION  carpoolvote.urlencode(text, out text) TO carpool_role;
 GRANT EXECUTE ON FUNCTION  carpoolvote.urlencode(text, out text) TO carpool_web_role;
-
+GRANT EXECUTE ON FUNCTION  carpoolvote.urlencode(text, out text) TO carpool_admins;
 
 
 CREATE OR REPLACE FUNCTION carpoolvote.get_param_value(a_param_name character varying)
@@ -46,15 +48,8 @@ DECLARE
 v_env carpoolvote.params.value%TYPE;
 
 BEGIN
-
-v_env := NULL;
-
-BEGIN
-	SELECT value INTO v_env FROM carpoolvote.params WHERE name=a_param_name;
-EXCEPTION WHEN OTHERS
-THEN
 	v_env := NULL;
-END;
+	SELECT value INTO v_env FROM carpoolvote.params WHERE name=a_param_name;
 
 RETURN v_env;
 
@@ -64,9 +59,10 @@ $BODY$
   COST 100;
 ALTER FUNCTION carpoolvote.get_param_value(character varying)
   OWNER TO carpool_admins;
+REVOKE ALL ON FUNCTION get_param_value(a_param_name character varying) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION carpoolvote.get_param_value(character varying) TO carpool_web;
 GRANT EXECUTE ON FUNCTION carpoolvote.get_param_value(character varying) TO carpool_role;
-
+GRANT EXECUTE ON FUNCTION carpoolvote.get_param_value(character varying) TO carpool_admins;
 
 
 --
@@ -98,3 +94,4 @@ REVOKE ALL ON FUNCTION carpoolvote.distance(lat1 double precision, lon1 double p
 GRANT ALL ON FUNCTION carpoolvote.distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) TO carpool_admins;
 GRANT ALL ON FUNCTION carpoolvote.distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) TO PUBLIC;
 GRANT ALL ON FUNCTION carpoolvote.distance(lat1 double precision, lon1 double precision, lat2 double precision, lon2 double precision) TO carpool_role;
+

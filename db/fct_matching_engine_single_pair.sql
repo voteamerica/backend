@@ -439,3 +439,16 @@ $BODY$
 ALTER FUNCTION carpoolvote.evaluate_match_single_pair(character varying, character varying)
   OWNER TO carpool_admins;
 GRANT EXECUTE ON FUNCTION carpoolvote.evaluate_match_single_pair(character varying, character varying) TO carpool_role;
+
+
+
+--
+-- Name: evaluate_match_single_pair(character varying, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION evaluate_match_single_pair(arg_uuid_driver character varying, arg_uuid_rider character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION evaluate_match_single_pair(arg_uuid_driver character varying, arg_uuid_rider character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION evaluate_match_single_pair(arg_uuid_driver character varying, arg_uuid_rider character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION evaluate_match_single_pair(arg_uuid_driver character varying, arg_uuid_rider character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION evaluate_match_single_pair(arg_uuid_driver character varying, arg_uuid_rider character varying) TO carpool_role;
+

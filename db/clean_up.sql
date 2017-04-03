@@ -6,3 +6,4 @@ DELETE FROM carpoolvote.outgoing_email;
 DELETE FROM carpoolvote.outgoing_sms;
 DELETE FROM carpoolvote.rider;
 DELETE FROM carpoolvote.driver;
+DELETE FROM carpoolvote.helper;

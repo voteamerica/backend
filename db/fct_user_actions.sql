@@ -59,17 +59,15 @@ DECLARE
 
 BEGIN	
 
-	IF  LOWER(COALESCE(carpoolvote.get_param_value('input.rider.enabled'), 'false')) = LOWER('false')
-	THEN
-	    out_uuid := '';
-		out_error_code := 1;
-		out_error_text := 'Submission of new Rider is disabled.';
-		RETURN;
-	END IF;
-	
-	
-
 	BEGIN
+
+		IF  LOWER(COALESCE(carpoolvote.get_param_value('input.rider.enabled'), 'false')) = LOWER('false')
+		THEN
+			out_uuid := '';
+			out_error_code := 1;
+			out_error_text := 'Submission of new Rider is disabled.';
+			RETURN;
+		END IF;
 	
 		out_uuid := carpoolvote.gen_random_uuid();
 		
@@ -258,16 +256,16 @@ DECLARE
 	end_drive_time timestamp without time zone;
 	b_driver_all_times_expired boolean := TRUE;
 BEGIN	
-
-	IF  LOWER(COALESCE(carpoolvote.get_param_value('input.driver.enabled'), 'false')) = LOWER('false')
-	THEN
-	    out_uuid := '';
-		out_error_code := 1;
-		out_error_text := 'Submission of new Driver is disabled.';
-		RETURN;
-	END IF;
 	
 	BEGIN
+
+		IF  LOWER(COALESCE(carpoolvote.get_param_value('input.driver.enabled'), 'false')) = LOWER('false')
+		THEN
+			out_uuid := '';
+			out_error_code := 1;
+			out_error_text := 'Submission of new Driver is disabled.';
+			RETURN;
+		END IF;
 	
 		out_uuid := carpoolvote.gen_random_uuid();
 		
@@ -300,7 +298,7 @@ BEGIN
 		-- split AvailableDriveTimesLocal in individual time intervals
  		-- FORMAT should be like this 
  		-- 2016-10-01T02:00/2016-10-01T03:00|2016-10-01T02:00/2016-10-01T03:00|2016-10-01T02:00/2016-10-01T03:00
- 		ride_times_driver := string_to_array(drive_offer_row."AvailableDriveTimesLocal", '|');
+ 		ride_times_driver := string_to_array(a_AvailableDriveTimesLocal, '|');
 		b_driver_all_times_expired := TRUE;
  		FOREACH driver_time IN ARRAY ride_times_driver
 		LOOP
@@ -442,8 +440,17 @@ $BODY$
 DECLARE
 	v_step character varying(200);
 BEGIN	
+
 	
 	BEGIN
+
+		IF  LOWER(COALESCE(carpoolvote.get_param_value('input.helper.enabled'), 'false')) = LOWER('false')
+		THEN
+			out_uuid := '';
+			out_error_code := 1;
+			out_error_text := 'Submission of new Helper is disabled.';
+			RETURN;
+		END IF;
 	
 		out_uuid := carpoolvote.gen_random_uuid();
 	
@@ -1896,3 +1903,488 @@ ALTER FUNCTION carpoolvote.driver_pause_match(character varying, character varyi
   OWNER TO carpool_admins;
 GRANT EXECUTE ON FUNCTION carpoolvote.driver_pause_match(character varying, character varying) TO carpool_web;
 GRANT EXECUTE ON FUNCTION carpoolvote.driver_pause_match(character varying, character varying) TO carpool_role;
+
+
+
+CREATE FUNCTION driver_confirmed_matches(a_uuid character varying, confirmation_parameter character varying) RETURNS SETOF json
+    LANGUAGE sql STABLE
+    AS $$
+
+-- DECLARE                                                   
+
+-- BEGIN 
+
+	-- input validation
+	-- IF NOT EXISTS (
+	-- SELECT 1 
+	-- FROM carpoolvote.driver r
+	-- WHERE r."UUID" = a_UUID
+	-- AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
+	-- 	OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
+	-- 		= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	-- )
+	-- THEN
+	-- 	-- return 'No Drive Offer found for those parameters';
+    --     RETURN row_to_json(d_row);
+	-- END IF;
+
+    --     SELECT * INTO
+    --         d_row
+    --     FROM
+    --         carpoolvote.vw_driver_matches
+    --     WHERE
+    --             uuid_driver = a_uuid
+    --         AND "matchStatus" = 'MatchConfirmed';
+    --         -- AND "matchStatus" = 'Canceled';
+
+    --    RETURN row_to_json(d_row);
+
+        SELECT row_to_json(s)
+        FROM ( 
+            SELECT * from
+            carpoolvote.vw_driver_matches
+        WHERE
+                uuid_driver = a_uuid
+            AND "matchStatus" = 'MatchConfirmed'
+        ) s ;
+
+-- END  
+
+$$;
+
+
+ALTER FUNCTION carpoolvote.driver_confirmed_matches(a_uuid character varying, confirmation_parameter character varying) OWNER TO carpool_admins;
+
+--
+-- Name: driver_exists(character varying, character varying); Type: FUNCTION; Schema: carpoolvote; Owner: carpool_admins
+--
+
+CREATE FUNCTION driver_exists(a_uuid character varying, confirmation_parameter character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE                                                   
+	drive_offer_row carpoolvote.driver%ROWTYPE;
+	v_step character varying(200); 
+	v_return_text character varying(200);	
+	
+BEGIN 
+
+	-- input validation
+	IF NOT EXISTS (
+	SELECT 1 
+	FROM carpoolvote.driver r
+	WHERE r."UUID" = a_UUID
+	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
+		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
+			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	)
+	THEN
+		return 'No Drive Offer found for those parameters';
+	END IF;
+
+	return '';
+	
+END  
+
+$$;
+
+
+ALTER FUNCTION carpoolvote.driver_exists(a_uuid character varying, confirmation_parameter character varying) OWNER TO carpool_admins;
+
+--
+-- Name: driver_info(character varying, character varying); Type: FUNCTION; Schema: carpoolvote; Owner: carpool_admins
+--
+
+CREATE FUNCTION driver_info(a_uuid character varying, confirmation_parameter character varying) RETURNS json
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE                                                   
+	drive_offer_row carpoolvote.driver%ROWTYPE;
+	v_step character varying(200); 
+	v_return_text character varying(200);	
+	d_row carpoolvote.driver%ROWTYPE;
+	
+BEGIN 
+
+	-- input validation
+	IF NOT EXISTS (
+	SELECT 1 
+	FROM carpoolvote.driver r
+	WHERE r."UUID" = a_UUID
+	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
+		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
+			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	)
+	THEN
+		-- return 'No Drive Offer found for those parameters';
+       RETURN row_to_json(d_row);
+	END IF;
+
+       SELECT * INTO
+           d_row
+       FROM
+           carpoolvote.driver
+       WHERE
+           "UUID" = a_uuid;
+
+       RETURN row_to_json(d_row);
+	
+END  
+
+$$;
+
+
+ALTER FUNCTION carpoolvote.driver_info(a_uuid character varying, confirmation_parameter character varying) OWNER TO carpool_admins;
+
+
+--
+-- Name: driver_proposed_matches(character varying, character varying); Type: FUNCTION; Schema: carpoolvote; Owner: carpool_admins
+--
+
+CREATE FUNCTION driver_proposed_matches(a_uuid character varying, confirmation_parameter character varying) RETURNS SETOF json
+    LANGUAGE sql STABLE
+    AS $$
+
+-- DECLARE                                                   
+--BEGIN 
+
+        SELECT row_to_json(s)
+        FROM ( 
+            SELECT * from
+            carpoolvote.vw_driver_matches
+        WHERE
+                uuid_driver = a_uuid
+            AND "matchStatus" = 'MatchProposed'
+        ) s ;
+
+--END  
+
+$$;
+
+
+ALTER FUNCTION carpoolvote.driver_proposed_matches(a_uuid character varying, confirmation_parameter character varying) OWNER TO carpool_admins;
+
+
+--
+-- Name: rider_confirmed_match(character varying, character varying); Type: FUNCTION; Schema: carpoolvote; Owner: carpool_admins
+--
+
+CREATE FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) RETURNS json
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE                                                   
+	r_row carpoolvote.vw_rider_matches%ROWTYPE;
+
+BEGIN 
+
+	-- input validation
+	IF NOT EXISTS (
+	SELECT 1 
+	FROM carpoolvote.rider r
+	WHERE r."UUID" = a_UUID
+	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
+		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
+			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	)
+	THEN
+        RETURN row_to_json(r_row);
+	END IF;
+
+        SELECT * INTO
+            r_row
+        FROM
+            carpoolvote.vw_rider_matches
+        WHERE
+                uuid_rider = a_uuid
+            AND "matchStatus" = 'MatchConfirmed';
+            -- AND "matchStatus" = 'Canceled';
+
+       RETURN row_to_json(r_row);
+
+END  
+
+$$;
+
+
+ALTER FUNCTION carpoolvote.rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) OWNER TO carpool_admins;
+
+--
+-- Name: rider_exists(character varying, character varying); Type: FUNCTION; Schema: carpoolvote; Owner: carpool_admins
+--
+
+CREATE FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE                                                   
+	ride_request_row carpoolvote.rider%ROWTYPE;
+	drive_offer_row carpoolvote.driver%ROWTYPE;
+	match_row carpoolvote.match%ROWTYPE;
+	v_step character varying(200);
+	v_return_text character varying(200);
+	
+	v_subject carpoolvote.outgoing_email.subject%TYPE;                                                                            
+	v_body carpoolvote.outgoing_email.body%TYPE;                                                                                  
+	v_html_header carpoolvote.outgoing_email.body%TYPE;
+	v_html_body   carpoolvote.outgoing_email.body%TYPE;
+	v_html_footer carpoolvote.outgoing_email.body%TYPE;
+
+BEGIN 
+
+	-- input validation
+	IF NOT EXISTS (
+	SELECT 1 
+	FROM carpoolvote.rider r
+	WHERE r."UUID" = a_UUID
+	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
+		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
+			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	)
+	THEN
+		return 'No Ride Request found for those parameters';
+	END IF;
+
+	return '';	
+	
+END  
+
+$$;
+
+
+ALTER FUNCTION carpoolvote.rider_exists(a_uuid character varying, confirmation_parameter character varying) OWNER TO carpool_admins;
+
+--
+-- Name: rider_info(character varying, character varying); Type: FUNCTION; Schema: carpoolvote; Owner: carpool_admins
+--
+
+CREATE FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) RETURNS json
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE                                                   
+	ride_request_row carpoolvote.rider%ROWTYPE;
+	drive_offer_row carpoolvote.driver%ROWTYPE;
+	match_row carpoolvote.match%ROWTYPE;
+	v_step character varying(200);
+	v_return_text character varying(200);
+	
+	v_subject carpoolvote.outgoing_email.subject%TYPE;                                                                            
+	v_body carpoolvote.outgoing_email.body%TYPE;                                                                                  
+	v_html_header carpoolvote.outgoing_email.body%TYPE;
+	v_html_body   carpoolvote.outgoing_email.body%TYPE;
+	v_html_footer carpoolvote.outgoing_email.body%TYPE;
+	r_row carpoolvote.rider%ROWTYPE;
+
+BEGIN 
+
+	-- input validation
+	IF NOT EXISTS (
+	SELECT 1 
+	FROM carpoolvote.rider r
+	WHERE r."UUID" = a_UUID
+	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
+		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
+			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	)
+	THEN
+		-- return 'No Ride Request found for those parameters';
+       RETURN row_to_json(r_row);
+	END IF;
+
+	-- return '';
+
+
+    --BEGIN
+        SELECT * INTO
+            r_row
+        FROM
+            carpoolvote.rider
+        WHERE
+            "UUID" = a_uuid;
+
+        RETURN row_to_json(r_row);
+    --END	
+	
+END  
+
+$$;
+
+
+ALTER FUNCTION carpoolvote.rider_info(a_uuid character varying, confirmation_parameter character varying) OWNER TO carpool_admins;
+
+
+
+--
+-- Name: driver_cancel_confirmed_match(character varying, character varying, smallint, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
+GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
+
+
+--
+-- Name: driver_cancel_drive_offer(character varying, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
+
+
+--
+-- Name: driver_confirm_match(character varying, character varying, smallint, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
+GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
+
+
+--
+-- Name: driver_confirmed_matches(character varying, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION driver_confirmed_matches(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_confirmed_matches(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_confirmed_matches(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_confirmed_matches(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION driver_confirmed_matches(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION driver_confirmed_matches(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+
+
+--
+-- Name: driver_exists(character varying, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION driver_exists(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_exists(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_exists(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_exists(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION driver_exists(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION driver_exists(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+
+
+--
+-- Name: driver_info(character varying, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION driver_info(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_info(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_info(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_info(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION driver_info(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION driver_info(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+
+
+--
+-- Name: driver_pause_match(character varying, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION driver_pause_match(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_pause_match(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_pause_match(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_pause_match(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION driver_pause_match(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION driver_pause_match(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+
+
+--
+-- Name: driver_proposed_matches(character varying, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION driver_proposed_matches(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_proposed_matches(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_proposed_matches(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_proposed_matches(a_uuid character varying, confirmation_parameter character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION driver_proposed_matches(a_uuid character varying, confirmation_parameter character varying) TO carpool_web;
+GRANT ALL ON FUNCTION driver_proposed_matches(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+
+
+--
+-- Name: rider_cancel_confirmed_match(character varying, character varying, smallint, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web_role;
+GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
+
+
+--
+-- Name: rider_cancel_ride_request(character varying, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_web_role;
+GRANT ALL ON FUNCTION rider_cancel_ride_request(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+
+--
+-- Name: rider_confirmed_match(character varying, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) TO carpool_web_role;
+GRANT ALL ON FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+
+
+--
+-- Name: rider_exists(character varying, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) TO carpool_web_role;
+GRANT ALL ON FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+
+
+--
+-- Name: rider_info(character varying, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) TO carpool_web_role;
+GRANT ALL ON FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) TO carpool_role;
+
+
+--
+-- Name: update_drive_offer_status(character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION update_drive_offer_status(a_uuid character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION update_drive_offer_status(a_uuid character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION update_drive_offer_status(a_uuid character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION update_drive_offer_status(a_uuid character varying) TO carpool_web_role;
+GRANT ALL ON FUNCTION update_drive_offer_status(a_uuid character varying) TO carpool_role;
+
+
+--
+-- Name: update_ride_request_status(character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION update_ride_request_status(a_uuid character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION update_ride_request_status(a_uuid character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION update_ride_request_status(a_uuid character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION update_ride_request_status(a_uuid character varying) TO carpool_web_role;
+GRANT ALL ON FUNCTION update_ride_request_status(a_uuid character varying) TO carpool_role;
+
