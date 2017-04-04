@@ -987,6 +987,7 @@ GRANT SELECT ON TABLE vw_unmatched_riders_details TO carpool_web_role;
 
 REVOKE ALL ON TABLE zip_codes FROM PUBLIC;
 REVOKE ALL ON TABLE zip_codes FROM carpool_admins;
+GRANT SELECT ON TABLE zip_codes TO carpool_web_role;
 GRANT ALL ON TABLE zip_codes TO carpool_admins;
 GRANT ALL ON TABLE zip_codes TO carpool_role;
 
