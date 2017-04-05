@@ -57,83 +57,44 @@ DECLARE
 	start_ride_time timestamp without time zone;
 	end_ride_time timestamp without time zone;
 
+	a_ip inet;
 BEGIN	
+
+	out_uuid := '';
+	select carpoolvote.f_SUCCESS() into out_error_code;
+	out_error_text := '';
 
 	BEGIN
 
 		IF  LOWER(COALESCE(carpoolvote.get_param_value('input.rider.enabled'), 'false')) = LOWER('false')
 		THEN
-			out_uuid := '';
-			out_error_code := 1;
+			select carpoolvote.f_INPUT_DISABLED() into out_error_code;
 			out_error_text := 'Submission of new Rider is disabled.';
 			RETURN;
 		END IF;
 	
-		out_uuid := carpoolvote.gen_random_uuid();
-		
-		IF (a_IPAddress is null) or (length(a_IPAddress) = 0) THEN
-			out_uuid := '';
-			out_error_code := 2;
+		BEGIN
+			SELECT inet(a_IPAddress) into a_ip;
+		EXCEPTION WHEN invalid_text_representation
+		THEN
+			select carpoolvote.f_INPUT_VAL_ERROR() into out_error_code;
 			out_error_text := 'Invalid IPAddress: ' || a_IPAddress;
 			RETURN;
-		END IF;
+		END;
 		
-		IF (a_AvailableRideTimesLocal is null) or (length(a_AvailableRideTimesLocal) = 0) THEN
-			out_uuid := '';
-			out_error_code := 2;
-			out_error_text := 'Invalid AvailableRideTimesLocal: ' || a_AvailableRideTimesLocal;
+		
+		SELECT * FROM carpoolvote.validate_availabletimeslocal(a_AvailableRideTimesLocal) into out_error_code, out_error_text;
+		IF out_error_code <> 0
+		THEN
 			RETURN;
 		END IF;
-	
-		-- split AvailableRideTimesLocal in individual time intervals
-		ride_times_rider := string_to_array(a_AvailableRideTimesLocal, '|');
-		b_rider_all_times_expired := TRUE;  -- Assumes all expired
-		FOREACH rider_time IN ARRAY ride_times_rider
-		LOOP
-			BEGIN
-				-- each time interval is in ISO8601 format					
-				-- new format without timezone : 2016-10-01T02:00/2016-10-01T03:00
-				start_ride_time :=  (substring(rider_time from 1 for (position ('/' in rider_time)-1)))::timestamp without time zone;
-				end_ride_time :=    (substring(rider_time from position ('/' in rider_time)))::timestamp without time zone;
-				
-				IF start_ride_time > end_ride_time
-				THEN
-					out_uuid := '';
-					out_error_code := 2;
-					out_error_text := 'Invalid value in AvailableRideTimes:' || rider_time;
-					RETURN;
-				ELSE
-					IF end_ride_time > now()   ----   --[NOW]--[S]--[E]   : not expired
-					THEN                       ----   --[S]---[NOW]--[E]  : not expired
-												      --[S]--[E]----[NOW] : expired
-						b_rider_all_times_expired := FALSE;
-					END IF;
-				END IF;
-			EXCEPTION WHEN OTHERS
-			THEN				
-				out_uuid := '';
-				out_error_code := 2;
-				out_error_text := 'Invalid value in AvailableRideTimes:' || rider_time;
-				RETURN;
-			END;
-			
-			IF b_rider_all_times_expired
-			THEN
-				out_uuid := '';
-				out_error_code := 2;
-				out_error_text := 'All AvailableRideTimes are expired';
-				RETURN;
-			END IF;
-							
-		END LOOP;
 
 	
 		-- zip code verification
 		IF NOT EXISTS
 			(SELECT 1 FROM carpoolvote.zip_codes z where z.zip = a_RiderCollectionZIP AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
 		THEN
-			out_uuid := '';
-			out_error_code := 2;
+			select carpoolvote.f_INPUT_VAL_ERROR() into out_error_code;
 			out_error_text := 'Invalid/Not Found RiderCollectionZIP:' || a_RiderCollectionZIP;
 			RETURN;
 		END IF;
@@ -141,28 +102,25 @@ BEGIN
 		IF NOT EXISTS 
 			(SELECT 1 FROM carpoolvote.zip_codes z WHERE z.zip = a_RiderDropOffZIP AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
 		THEN
-			out_uuid := '';
-			out_error_code := 2;
+			select carpoolvote.f_INPUT_VAL_ERROR() into out_error_code;
 			out_error_text := 'Invalid/Not Found RiderDropOffZIP:' || a_RiderDropOffZIP;
 			RETURN;
 		END IF;	
 	
 		IF (a_TotalPartySize is null) or (a_TotalPartySize <= 0) THEN
-			out_uuid := '';
-			out_error_code := 2;
+			select carpoolvote.f_INPUT_VAL_ERROR() into out_error_code;
 			out_error_text := 'Invalid TotalPartySize: ' || a_TotalPartySize;
 			RETURN;
 		END IF;
 		
 		IF (a_RiderPreferredContact is null) or (a_RiderPreferredContact != 'SMS' and a_RiderPreferredContact != 'Email' and a_RiderPreferredContact != 'Phone')
 		THEN
-			out_uuid := '';
-			out_error_code := 2;
+			select carpoolvote.f_INPUT_VAL_ERROR() into out_error_code;
 			out_error_text := 'Invalid RiderPreferredContact (SMS/Email/Phone)';
 			RETURN;
 		END IF;
 		
-
+		out_uuid := carpoolvote.gen_random_uuid();
 		INSERT INTO carpoolvote.rider(
 		"UUID", "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail", "RiderPhone", "RiderCollectionZIP",
 		"RiderDropOffZIP", "AvailableRideTimesLocal", "TotalPartySize", "TwoWayTripNeeded", "RiderIsVulnerable",
@@ -174,24 +132,22 @@ BEGIN
 		a_RiderWillNotTalkPolitics, a_PleaseStayInTouch, a_NeedWheelchair, a_RiderPreferredContact,
 		a_RiderAccommodationNotes, a_RiderLegalConsent, a_RiderWillBeSafe, a_RiderCollectionAddress, a_RiderDestinationAddress);
 	
-		out_error_code := 0;
+		select carpoolvote.f_SUCCESS() into out_error_code;
 		out_error_text := '';
 	
 	
 		RETURN;
 	EXCEPTION WHEN OTHERS
 	THEN
-
-		out_error_code := -1;
+		out_uuid := '';
+		select carpoolvote.f_EXECUTION_ERROR() into out_error_code;
 		out_error_text := 'Unexpected exception (' || SQLSTATE || ')' || SQLERRM;
-	
 		RETURN;
 	END;
 	
 
 	
 END  
-
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
@@ -249,121 +205,66 @@ CREATE OR REPLACE FUNCTION carpoolvote.submit_new_driver(
 	OUT out_error_text TEXT) AS
 $BODY$
 DECLARE
-	v_step character varying(200);
-	ride_times_driver text[];
-	driver_time text;
-	start_drive_time timestamp without time zone;
-	end_drive_time timestamp without time zone;
-	b_driver_all_times_expired boolean := TRUE;
+	a_ip inet;
 BEGIN	
+	
+	out_uuid := '';
+	out_error_code := 0;
+	out_error_text := '';
 	
 	BEGIN
 
 		IF  LOWER(COALESCE(carpoolvote.get_param_value('input.driver.enabled'), 'false')) = LOWER('false')
 		THEN
-			out_uuid := '';
-			out_error_code := 1;
+			select carpoolvote.f_INPUT_DISABLED() into out_error_code;
 			out_error_text := 'Submission of new Driver is disabled.';
 			RETURN;
 		END IF;
 	
-		out_uuid := carpoolvote.gen_random_uuid();
-		
-		IF (a_IPAddress is null) or (length(a_IPAddress) = 0) THEN
-			out_uuid := '';
-			out_error_code := 2;
+		BEGIN
+			SELECT inet(a_IPAddress) into a_ip;
+		EXCEPTION WHEN invalid_text_representation
+		THEN
+			select carpoolvote.f_INPUT_VAL_ERROR() into out_error_code;
 			out_error_text := 'Invalid IPAddress: ' || a_IPAddress;
 			RETURN;
-		END IF;
+		END;
 		
 		IF NOT EXISTS 
 			(SELECT 1 FROM carpoolvote.zip_codes z where z.zip = a_DriverCollectionZIP AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
 		THEN
-			out_uuid := '';
-			out_error_code := 2;
+			select carpoolvote.f_INPUT_VAL_ERROR() into out_error_code;
 			out_error_text := 'Invalid/Not Found DriverCollectionZIP:' || a_DriverCollectionZIP;
 			RETURN;
 		END IF; 	
 
-		
-		IF (a_AvailableDriveTimesLocal is null) or (length(a_AvailableDriveTimesLocal) = 0) THEN
-			out_uuid := '';
-			out_error_code := 2;
-			out_error_text := 'Invalid AvailableDriveTimesLocal: ' || a_AvailableDriveTimesLocal;
+		SELECT * FROM carpoolvote.validate_availabletimeslocal(a_AvailableDriveTimesLocal) into out_error_code, out_error_text;
+		IF out_error_code <> 0
+		THEN
 			RETURN;
 		END IF;
 		
 		
-		
-		-- split AvailableDriveTimesLocal in individual time intervals
- 		-- FORMAT should be like this 
- 		-- 2016-10-01T02:00/2016-10-01T03:00|2016-10-01T02:00/2016-10-01T03:00|2016-10-01T02:00/2016-10-01T03:00
- 		ride_times_driver := string_to_array(a_AvailableDriveTimesLocal, '|');
-		b_driver_all_times_expired := TRUE;
- 		FOREACH driver_time IN ARRAY ride_times_driver
-		LOOP
-			BEGIN
-				-- each time interval is in ISO8601 format
-				-- new format without timezone : 2016-10-01T02:00/2016-10-01T03:00
-				start_drive_time :=  (substring(driver_time from 1 for (position ('/' in driver_time)-1)))::timestamp without time zone;
-				end_drive_time :=    (substring(driver_time from position ('/' in driver_time)))::timestamp without time zone;
-			
-				IF start_drive_time > end_drive_time
-				THEN
-					out_uuid := '';
-					out_error_code := 2;
-					out_error_text := 'Invalid value in AvailableDriveTimes:' || driver_time;
-					RETURN;
-				ELSE
-					IF end_drive_time > now()   ----   --[NOW]--[S]--[E]   : not expired
-					THEN                        ----   --[S]---[NOW]--[E]  : not expired
-					   							       --[S]--[E]----[NOW] : expired
-						b_driver_all_times_expired := FALSE;
-					END IF;
-				END IF;
-							
-			EXCEPTION WHEN OTHERS
-			THEN
-				out_uuid := '';
-				out_error_code := 2;
-				out_error_text := 'Invalid value in AvailableDriveTimes :' || driver_time;
-				RETURN;
-			END;
-		
-			IF b_driver_all_times_expired
-			THEN
-				out_uuid := '';
-				out_error_code := 2;
-				out_error_text := 'All AvailableDriveTimes are expired';
-				RETURN;
-			END IF;		
-		END LOOP;		
-
-		
-		
 		IF (a_DriverCollectionRadius is null) or (a_DriverCollectionRadius <= 0) THEN
-			out_uuid := '';
-			out_error_code := 2;
+			select carpoolvote.f_INPUT_VAL_ERROR() into out_error_code;
 			out_error_text := 'Invalid DriverCollectionRadius';
 			RETURN;
 		END IF;
 
 		IF (a_SeatCount is null) or (a_SeatCount <= 0) THEN
-			out_uuid := '';
-			out_error_code := 2;
+			select carpoolvote.f_INPUT_VAL_ERROR() into out_error_code;
 			out_error_text := 'Invalid SeatCount';
 			RETURN;
 		END IF;
 		
 		IF (a_DriverPreferredContact is null) or (a_DriverPreferredContact != 'SMS' and a_DriverPreferredContact != 'Email' and a_DriverPreferredContact != 'Phone')
 		THEN
-			out_uuid := '';
-			out_error_code := 2;
+			select carpoolvote.f_INPUT_VAL_ERROR() into out_error_code;
 			out_error_text := 'Invalid DriverPreferredContact (SMS/Email/Phone)';
 			RETURN;
 		END IF;
 		
-
+		out_uuid := carpoolvote.gen_random_uuid();
 		INSERT INTO carpoolvote.driver(
 		"UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", "AvailableDriveTimesLocal", 
 		"DriverCanLoadRiderWithWheelchair", "SeatCount", "DriverLicenseNumber", 
@@ -385,10 +286,9 @@ BEGIN
 		RETURN;
 	EXCEPTION WHEN OTHERS
 	THEN
-
-		out_error_code := -1;
+		out_uuid := '';
+		select carpoolvote.f_EXECUTION_ERROR() into out_error_code;
 		out_error_text := 'Unexpected exception (' || SQLSTATE || ')' || SQLERRM;
-	
 		RETURN;
 	END;
 	
@@ -441,13 +341,16 @@ DECLARE
 	v_step character varying(200);
 BEGIN	
 
+	out_uuid := '';
+	select carpoolvote.f_SUCCESS() into out_error_code;
+	out_error_text := '';
 	
 	BEGIN
 
 		IF  LOWER(COALESCE(carpoolvote.get_param_value('input.helper.enabled'), 'false')) = LOWER('false')
 		THEN
-			out_uuid := '';
-			out_error_code := 1;
+			
+			select carpoolvote.f_INPUT_DISABLED() into out_error_code;
 			out_error_text := 'Submission of new Helper is disabled.';
 			RETURN;
 		END IF;
@@ -460,7 +363,7 @@ BEGIN
 			out_uuid, a_helpername, a_helperemail, a_helpercapability
 		);
 		
-		out_error_code := 0;
+		select carpoolvote.f_SUCCESS() into out_error_code;
 		out_error_text := '';
 	
 		RETURN;
@@ -468,10 +371,9 @@ BEGIN
 	
 	EXCEPTION WHEN OTHERS
 	THEN
-
-		out_error_code := -1;
+		out_uuid := '';
+		select carpoolvote.f_EXECUTION_ERROR() into out_error_code;
 		out_error_text := 'Unexpected exception (' || SQLSTATE || ')' || SQLERRM;
-	
 		RETURN;
 	END;
 	
@@ -622,11 +524,17 @@ GRANT EXECUTE ON FUNCTION carpoolvote.update_drive_offer_status(character varyin
 
 --------------------------------------------------------
 -- USER STORY 003 - RIDER cancels ride request
+-- return codes : 
+-- -1 : ERROR - Generic Error
+-- 0  : SUCCESS
+-- 2  : ERROR - Input validation
 --------------------------------------------------------
 CREATE OR REPLACE FUNCTION carpoolvote.rider_cancel_ride_request(
     a_UUID character varying(50),
-    confirmation_parameter character varying(255))
-  RETURNS character varying AS
+    confirmation_parameter character varying(255),
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT)
+  AS
 $BODY$
 
 DECLARE                                                   
@@ -644,6 +552,9 @@ DECLARE
 
 BEGIN 
 
+	out_error_code := 0;
+	out_error_text := '';
+	
 	v_html_header := '<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
 		|| '<html>' 
 		|| '<head>'
@@ -695,7 +606,9 @@ BEGIN
 			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
 	)
 	THEN
-		return 'No Ride Request found for those parameters';
+		out_error_code := 2;
+		out_error_text := 'No Ride Request found for those parameters'
+		return;
 	END IF;
 
 	
@@ -843,11 +756,13 @@ BEGIN
 			v_body);
 		END IF;
 		
-		return '';
+		return;
     
 	EXCEPTION WHEN OTHERS 
 	THEN
-		RETURN 'Exception occurred during processing: rider_cancel_ride_request,' || v_step;
+		out_error_code := -1;
+		out_error_text := 'Exception occurred during processing: rider_cancel_ride_request,' || v_step;
+		RETURN;
 	END;
 	
 END  
@@ -855,22 +770,33 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION carpoolvote.rider_cancel_ride_request(character varying, character varying)
-  OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_ride_request(character varying, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_ride_request(character varying, character varying) TO carpool_role;
+ALTER FUNCTION carpoolvote.rider_cancel_ride_request(
+	character varying, character varying,
+	out integer, out text) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_ride_request(
+	character varying, character varying,
+	out integer, out text) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_ride_request(
+	character varying, character varying,
+	out integer, out text) TO carpool_role;
 
 
 
 --------------------------------------------------------
 -- USER STORY 004 - RIDER cancels a confirmed match
+-- return codes : 
+-- -1 : ERROR - Generic Error
+-- 0  : SUCCESS
+-- 2  : ERROR - Input validation
 --------------------------------------------------------
 CREATE OR REPLACE FUNCTION carpoolvote.rider_cancel_confirmed_match(
     a_UUID_driver character varying(50),
 	a_UUID_rider character varying(50),
 	a_score smallint,
-    confirmation_parameter character varying(255))
-  RETURNS character varying AS
+    confirmation_parameter character varying(255),
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT)
+  AS
 $BODY$
 
 DECLARE                                                   
@@ -888,6 +814,9 @@ DECLARE
 
 BEGIN 
 
+	out_error_code := 0;
+	out_error_text := '';
+	
 	v_html_header := '<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
 		|| '<html>' 
 		|| '<head>'
@@ -943,7 +872,9 @@ BEGIN
 			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
 	)
 	THEN
-		return 'No Confirmed Match found for those parameters.';
+		out_error_code := 2;
+		out_error_text := 'No Confirmed Match found for those parameters.';
+		return ;
 	END IF;
 
 	BEGIN
@@ -1087,30 +1018,40 @@ BEGIN
 				v_body);
 		END IF;
 				
-		return '';
+		return;
 	
 	EXCEPTION WHEN OTHERS 
 	THEN
-		RETURN 'Exception occurred during processing: rider_cancel_confirmed_match,' || v_step;
+		out_error_code := -1;
+		out_error_text := 'Exception occurred during processing: rider_cancel_confirmed_match,' || v_step;
+		RETURN;
 	END;
-	
+
 END  
 
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying)
-  OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying) TO carpool_role;
+ALTER FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying,
+	out integer, out text) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying,
+	out integer, out text) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying,
+	out integer, out text) TO carpool_role;
 
 --------------------------------------------------------
 -- USER STORY 013 - DRIVER cancels driver offer
+-- return codes : 
+-- -1 : ERROR - Generic Error
+-- 0  : SUCCESS
+-- 2  : ERROR - Input validation
 --------------------------------------------------------
 CREATE OR REPLACE FUNCTION carpoolvote.driver_cancel_drive_offer(
     a_UUID character varying(50),
-    confirmation_parameter character varying(255))
-  RETURNS character varying AS
+    confirmation_parameter character varying(255),
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT)
+	AS
 $BODY$
 
 DECLARE                                                   
@@ -1128,6 +1069,9 @@ DECLARE
 
 BEGIN 
 
+	out_error_code := 0;
+	out_error_text := '';
+	
 	v_html_header := '<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
 		|| '<html>' 
 		|| '<head>'
@@ -1179,7 +1123,9 @@ BEGIN
 			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
 	)
 	THEN
-		return 'No Drive Offer found for those parameters';
+		out_error_code := 2;
+		out_error_text := 'No Drive Offer found for those parameters';
+		return;
 	END IF;
 
 	BEGIN
@@ -1335,11 +1281,13 @@ BEGIN
 		END IF;
 		
 		
-		return '';
+		return;
     	
 	EXCEPTION WHEN OTHERS 
 	THEN
-		RETURN 'Exception occurred during processing: driver_cancel_drive_offer,' || v_step;
+		out_error_code := -1;
+		out_error_text := 'Exception occurred during processing: driver_cancel_drive_offer,' || v_step;
+		RETURN;
 	END;
 
 END  
@@ -1347,20 +1295,28 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION carpoolvote.driver_cancel_drive_offer(character varying, character varying)
-  OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_drive_offer(character varying, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_drive_offer(character varying, character varying) TO carpool_role;
+ALTER FUNCTION carpoolvote.driver_cancel_drive_offer(character varying, character varying,
+	out integer, out text) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_drive_offer(character varying, character varying,
+	out integer, out text) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_drive_offer(character varying, character varying,
+	out integer, out text) TO carpool_role;
 
 --------------------------------------------------------
 -- USER STORY 014 - DRIVER cancels confirmed match
+-- return codes : 
+-- -1 : ERROR - Generic Error
+-- 0  : SUCCESS
+-- 2  : ERROR - Input validation
 --------------------------------------------------------
 CREATE OR REPLACE FUNCTION carpoolvote.driver_cancel_confirmed_match(
     a_UUID_driver character varying(50),
 	a_UUID_rider character varying(50),
 	a_score smallint,
-    confirmation_parameter character varying(255))
-  RETURNS character varying AS
+    confirmation_parameter character varying(255),
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT)
+	AS
 $BODY$
 
 DECLARE                                                   
@@ -1378,6 +1334,9 @@ DECLARE
 
 BEGIN 
 
+	out_error_code := 0;
+	out_error_text := '';
+	
 	v_html_header := '<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
 		|| '<html>' 
 		|| '<head>'
@@ -1432,7 +1391,9 @@ BEGIN
 			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
 	)
 	THEN
-		return 'No Confirmed Match found for those parameters.';
+		out_error_code := 2;
+		out_error_text := 'No Confirmed Match found for those parameters.';
+		return;
 	END IF;
 
 	BEGIN
@@ -1578,11 +1539,13 @@ BEGIN
 				VALUES (drive_offer_row."DriverPhone", 
 				v_body);
 		END IF;		
-		return '';
+		return;
 	
 	EXCEPTION WHEN OTHERS 
 	THEN
-		RETURN 'Exception occurred during processing: driver_cancel_confirmed_match,' || v_step;
+		out_error_code := -1;
+		out_error_text := 'Exception occurred during processing: driver_cancel_confirmed_match,' || v_step;
+		RETURN;
 	END;
 
 END  
@@ -1590,20 +1553,28 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying)
-  OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying) TO carpool_role;
+ALTER FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying,
+	out integer, out text) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying,
+	out integer, out text) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying,
+	out integer, out text) TO carpool_role;
 
 --------------------------------------------------------
 -- USER STORY 015 - DRIVER confirms match
+-- return codes : 
+-- -1 : ERROR - Generic Error
+-- 0  : SUCCESS
+-- 2  : ERROR - Input validation
 --------------------------------------------------------
 CREATE OR REPLACE FUNCTION carpoolvote.driver_confirm_match(
     a_UUID_driver character varying(50),
 	a_UUID_rider character varying(50),
 	a_score smallint,
-    confirmation_parameter character varying(255))
-  RETURNS character varying AS
+    confirmation_parameter character varying(255),
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT)
+	AS
 $BODY$
 
 DECLARE                                                   
@@ -1621,6 +1592,10 @@ DECLARE
 
 BEGIN 
 
+
+	out_error_code := 0;
+	out_error_text := '';
+
 	-- input validation
 	IF NOT EXISTS (
 	SELECT 1 
@@ -1635,7 +1610,9 @@ BEGIN
 			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
 	)
 	THEN
-		return 'No Match can be confirmed with those parameters';
+		out_error_code := 2;
+		out_error_text := 'No Match can be confirmed with those parameters';
+		return;
 	END IF;
 
 	v_html_header := '<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
@@ -1832,11 +1809,13 @@ BEGIN
 		END IF;		
 
 		
-		return '';
+		return;
 	
 	EXCEPTION WHEN OTHERS 
 	THEN
-		RETURN 'Exception occurred during processing: driver_confirm_match,' || v_step;
+		out_error_code := -1;
+		out_error_text := 'Exception occurred during processing: driver_confirm_match,' || v_step;
+		RETURN;
 	END;
 
 
@@ -1845,19 +1824,27 @@ BEGIN
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, smallint, character varying)
-  OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, smallint, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, smallint, character varying) TO carpool_role;
+ALTER FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, smallint, character varying,
+	out integer, out text) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, smallint, character varying,
+	out integer, out text) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, smallint, character varying,
+	out integer, out text) TO carpool_role;
 
 
 --------------------------------------------------------
 -- USER STORY 016 - DRIVER pauses match
+-- return codes : 
+-- -1 : ERROR - Generic Error
+-- 0  : SUCCESS
+-- 2  : ERROR - Input validation
 --------------------------------------------------------
 CREATE OR REPLACE FUNCTION carpoolvote.driver_pause_match(
     a_UUID character varying(50),
-    confirmation_parameter character varying(255))
-  RETURNS character varying AS
+    confirmation_parameter character varying(255),
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT)
+	AS
 $BODY$
 
 DECLARE                                                   
@@ -1866,6 +1853,9 @@ DECLARE
 	v_return_text character varying(200);	
 	
 BEGIN 
+
+	out_error_code := 0;
+	out_error_text := '';
 
 	-- input validation
 	IF NOT EXISTS (
@@ -1877,7 +1867,9 @@ BEGIN
 			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
 	)
 	THEN
-		return 'No Drive Offer found for those parameters';
+		out_error_code := 2;
+		out_error_text := 'No Drive Offer found for those parameters'
+		return;
 	END IF;
 
 	BEGIN
@@ -1886,11 +1878,13 @@ BEGIN
 			SET "ReadyToMatch" = False
 			WHERE "UUID" = a_UUID;
 			
-		return '';
+		return;
 	
 	EXCEPTION WHEN OTHERS 
 	THEN
-		RETURN 'Exception occurred during processing: driver_pause_match,' || v_step;
+		out_error_code := -1;
+		out_error_text := 'Exception occurred during processing: driver_pause_match,' || v_step;
+		RETURN;
 	END;
 
 
@@ -1899,14 +1893,16 @@ BEGIN
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION carpoolvote.driver_pause_match(character varying, character varying)
-  OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_pause_match(character varying, character varying) TO carpool_web;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_pause_match(character varying, character varying) TO carpool_role;
+ALTER FUNCTION carpoolvote.driver_pause_match(character varying, character varying,
+	out integer, out text) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_pause_match(character varying, character varying,
+	out integer, out text) TO carpool_web;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_pause_match(character varying, character varying,
+	out integer, out text) TO carpool_role;
 
 
 
-CREATE FUNCTION driver_confirmed_matches(a_uuid character varying, confirmation_parameter character varying) RETURNS SETOF json
+CREATE OR REPLACE FUNCTION driver_confirmed_matches(a_uuid character varying, confirmation_parameter character varying) RETURNS SETOF json
     LANGUAGE sql STABLE
     AS $$
 
@@ -1959,7 +1955,7 @@ ALTER FUNCTION carpoolvote.driver_confirmed_matches(a_uuid character varying, co
 -- Name: driver_exists(character varying, character varying); Type: FUNCTION; Schema: carpoolvote; Owner: carpool_admins
 --
 
-CREATE FUNCTION driver_exists(a_uuid character varying, confirmation_parameter character varying) RETURNS character varying
+CREATE OR REPLACE FUNCTION driver_exists(a_uuid character varying, confirmation_parameter character varying) RETURNS character varying
     LANGUAGE plpgsql
     AS $$
 
@@ -1996,7 +1992,7 @@ ALTER FUNCTION carpoolvote.driver_exists(a_uuid character varying, confirmation_
 -- Name: driver_info(character varying, character varying); Type: FUNCTION; Schema: carpoolvote; Owner: carpool_admins
 --
 
-CREATE FUNCTION driver_info(a_uuid character varying, confirmation_parameter character varying) RETURNS json
+CREATE OR REPLACE FUNCTION driver_info(a_uuid character varying, confirmation_parameter character varying) RETURNS json
     LANGUAGE plpgsql
     AS $$
 
@@ -2043,7 +2039,7 @@ ALTER FUNCTION carpoolvote.driver_info(a_uuid character varying, confirmation_pa
 -- Name: driver_proposed_matches(character varying, character varying); Type: FUNCTION; Schema: carpoolvote; Owner: carpool_admins
 --
 
-CREATE FUNCTION driver_proposed_matches(a_uuid character varying, confirmation_parameter character varying) RETURNS SETOF json
+CREATE OR REPLACE FUNCTION driver_proposed_matches(a_uuid character varying, confirmation_parameter character varying) RETURNS SETOF json
     LANGUAGE sql STABLE
     AS $$
 
@@ -2071,7 +2067,7 @@ ALTER FUNCTION carpoolvote.driver_proposed_matches(a_uuid character varying, con
 -- Name: rider_confirmed_match(character varying, character varying); Type: FUNCTION; Schema: carpoolvote; Owner: carpool_admins
 --
 
-CREATE FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) RETURNS json
+CREATE OR REPLACE FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) RETURNS json
     LANGUAGE plpgsql
     AS $$
 
@@ -2115,7 +2111,7 @@ ALTER FUNCTION carpoolvote.rider_confirmed_match(a_uuid character varying, confi
 -- Name: rider_exists(character varying, character varying); Type: FUNCTION; Schema: carpoolvote; Owner: carpool_admins
 --
 
-CREATE FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) RETURNS character varying
+CREATE OR REPLACE FUNCTION rider_exists(a_uuid character varying, confirmation_parameter character varying) RETURNS character varying
     LANGUAGE plpgsql
     AS $$
 
@@ -2160,7 +2156,7 @@ ALTER FUNCTION carpoolvote.rider_exists(a_uuid character varying, confirmation_p
 -- Name: rider_info(character varying, character varying); Type: FUNCTION; Schema: carpoolvote; Owner: carpool_admins
 --
 
-CREATE FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) RETURNS json
+CREATE OR REPLACE FUNCTION rider_info(a_uuid character varying, confirmation_parameter character varying) RETURNS json
     LANGUAGE plpgsql
     AS $$
 
