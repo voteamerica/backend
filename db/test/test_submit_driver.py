@@ -2,11 +2,11 @@ import pytest
 import pgdb
                      
 @pytest.fixture
-def pgdbConn(dbhost, dbname, username):
-    return pgdb.connect(dbhost + ':' + dbname + ':' + username)
+def pgdbConn(dbhost, db, frontenduser):
+    return pgdb.connect(dbhost + ':' + db + ':' + frontenduser)
 
       
-def generic_insert(conn, args):
+def generic_driver_insert(conn, args):
     cursor=conn.cursor()
     cursor.execute("""
 SELECT * from carpoolvote.submit_new_driver (
@@ -56,7 +56,7 @@ def test_insert_driver_000_all_valid(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -89,7 +89,7 @@ def test_insert_driver_001_IPAddress_invalid(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -122,7 +122,7 @@ def test_insert_driver_002_DriverCollectionZIP_invalid_empty(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -155,7 +155,7 @@ def test_insert_driver_003_DriverCollectionZIP_invalid_not_exists(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -188,7 +188,7 @@ def test_insert_driver_004_DriverCollectionZIP_invalid_not_number(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -221,7 +221,7 @@ def test_insert_driver_005_DriverCollectionRadius_invalid_zero(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -254,7 +254,7 @@ def test_insert_driver_006_DriverCollectionRadius_invalid_negative(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -287,7 +287,7 @@ def test_insert_driver_007_AvailableDriveTimesLocal_invalid_empty(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -320,7 +320,7 @@ def test_insert_driver_008_AvailableDriveTimesLocal_invalid_incomplete(pgdbConn)
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -353,7 +353,7 @@ def test_insert_driver_009_AvailableDriveTimesLocal_invalid_incomplete(pgdbConn)
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -386,7 +386,7 @@ def test_insert_driver_010_AvailableDriveTimesLocal_invalid_incomplete(pgdbConn)
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -419,7 +419,7 @@ def test_insert_driver_011_AvailableDriveTimesLocal_invalid_chronology(pgdbConn)
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -452,7 +452,7 @@ def test_insert_driver_012_AvailableDriveTimesLocal_invalid_past(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -488,7 +488,7 @@ def test_insert_driver_013_SeatCount_invalid_zero(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -522,7 +522,7 @@ def test_insert_driver_014_SeatCount_invalid_zero(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -555,7 +555,7 @@ def test_insert_driver_015_DriverLicenseNumber_invalid_huge(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -588,7 +588,7 @@ def test_insert_driver_016_DriverPreferredContact_valid_SMS(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -621,7 +621,7 @@ def test_insert_driver_017_DriverPreferredContact_valid_Email(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -654,7 +654,7 @@ def test_insert_driver_018_DriverPreferredContact_valid_Phone(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -687,7 +687,7 @@ def test_insert_driver_019_DriverPreferredContact_invalid(pgdbConn):
         'DriverWillTakeCare' : 'True'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_driver_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']

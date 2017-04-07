@@ -2,11 +2,11 @@ import pytest
 import pgdb
                      
 @pytest.fixture
-def pgdbConn(dbhost, dbname, username):
-    return pgdb.connect(dbhost + ':' + dbname + ':' + username)
+def pgdbConn(dbhost, db, frontenduser):
+    return pgdb.connect(dbhost + ':' + db + ':' + frontenduser)
 
     
-def generic_insert(conn, args):
+def generic_rider_insert(conn, args):
     cursor=conn.cursor()
     cursor.execute("""
 SELECT * from carpoolvote.submit_new_rider (
@@ -61,7 +61,7 @@ def test_insert_rider_000_all_valid(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -97,7 +97,7 @@ def test_insert_rider_001_IPAddress_invalid(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -132,7 +132,7 @@ def test_insert_rider_002_RiderCollectionZIP_invalid_empty(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -167,7 +167,7 @@ def test_insert_rider_003_RiderCollectionZIP_invalid_not_exists(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -203,7 +203,7 @@ def test_insert_rider_004_RiderCollectionZIP_invalid_not_number(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -238,7 +238,7 @@ def test_insert_rider_005_RiderDropOffZIP_invalid_empty(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -273,7 +273,7 @@ def test_insert_rider_006_RiderDropOffZIP_invalid_not_found(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -308,7 +308,7 @@ def test_insert_rider_007_RiderDropOffZIP_invalid_not_number(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -343,7 +343,7 @@ def test_insert_rider_008_AvailableRideTimesLocal_empty(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -379,7 +379,7 @@ def test_insert_rider_009_AvailableRideTimesLocal_invalid_incomplete(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -415,7 +415,7 @@ def test_insert_rider_010_AvailableRideTimesLocal_invalid_incomplete(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -450,7 +450,7 @@ def test_insert_rider_011_AvailableRideTimesLocal_invalid_incomplete(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -485,7 +485,7 @@ def test_insert_rider_012_AvailableRideTimesLocal_invalid_chronology(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -521,7 +521,7 @@ def test_insert_rider_013_AvailableRideTimesLocal_invalid_past(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -559,7 +559,7 @@ def test_insert_rider_014_TotalPartySize_invalid_zero(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -595,7 +595,7 @@ def test_insert_rider_015_TotalPartySize_invalid_negative(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -630,7 +630,7 @@ def test_insert_rider_016_RiderPreferredContact_valid_SMS(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -665,7 +665,7 @@ def test_insert_rider_017_RiderPreferredContact_valid_Email(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']
@@ -700,7 +700,7 @@ def test_insert_rider_018_RiderPreferredContact_valid_Phone(pgdbConn):
         'RiderDestinationAddress' : 'at the polls'
         }
     
-    results = generic_insert(pgdbConn, args)
+    results = generic_rider_insert(pgdbConn, args)
     uuid=results['uuid']
     error_code=results['error_code']
     error_text=results['error_text']

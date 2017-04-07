@@ -35,6 +35,18 @@ GRANT carpool_role TO carpool_match_engine;
 COMMENT ON ROLE carpool_match_engine IS 'Login for the Carpool Vote Match Engine to use to connect to the DB.';
 
 
+-- Role: carpool_admin
+
+-- DROP ROLE carpool_admin;
+
+CREATE ROLE carpool_admin LOGIN
+  ENCRYPTED PASSWORD 'md515dfbe205495e280d4859e3a43fad938'
+  NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+GRANT carpool_admins TO carpool_admin;
+COMMENT ON ROLE carpool_admin IS 'Carpool Admin User';
+
+
+
 -- Role: carpool_web
 
 -- DROP ROLE carpool_web;

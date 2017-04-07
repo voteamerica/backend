@@ -2,8 +2,8 @@ import pytest
 import pgdb
                      
 @pytest.fixture
-def pgdbConn(dbhost, dbname, username):
-    return pgdb.connect(dbhost + ':' + dbname + ':' + username)
+def pgdbConn(dbhost, db, frontenduser):
+    return pgdb.connect(dbhost + ':' + db + ':' + frontenduser)
 
 def test_insert_helper(pgdbConn):
     cursor=pgdbConn.cursor()

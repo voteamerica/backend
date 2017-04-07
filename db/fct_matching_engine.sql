@@ -90,13 +90,13 @@ BEGIN
 		
 		
 		FOR ride_request_row in SELECT * from carpoolvote.rider r
-			WHERE r.state in ('Pending','MatchProposed')
+			WHERE r.status in ('Pending','MatchProposed')
 		LOOP
 		
 			IF length(ride_request_row."AvailableRideTimesLocal") = 0
 			THEN
 				UPDATE carpoolvote.rider 
-				SET state='Failed', state_info='Invalid AvailableRideTimes'
+				SET status='Failed', status_info='Invalid AvailableRideTimes'
 				WHERE "UUID"=ride_request_row."UUID";
 				
 				b_rider_validated := FALSE;
@@ -113,7 +113,7 @@ BEGIN
 			EXCEPTION WHEN OTHERS
 			THEN
 				UPDATE carpoolvote.rider 
-				SET state='Failed', state_info='Unknown/Invalid RiderCollectionZIP or RiderDropOffZIP'
+				SET status='Failed', status_info='Unknown/Invalid RiderCollectionZIP or RiderDropOffZIP'
 				WHERE "UUID"=ride_request_row."UUID";
 				
 				b_rider_validated := FALSE;
@@ -122,7 +122,7 @@ BEGIN
 			IF ride_request_row."TotalPartySize" = 0
 			THEN
 				UPDATE carpoolvote.rider 
-				SET state='Failed', state_info='Invalid TotalPartySize'
+				SET status='Failed', status_info='Invalid TotalPartySize'
 				WHERE "UUID"=ride_request_row."UUID";
 				
 				b_rider_validated := FALSE;
@@ -133,7 +133,7 @@ BEGIN
 				(SELECT 1 FROM carpoolvote.zip_codes z where z.zip = ride_request_row."RiderCollectionZIP" AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
 			THEN
 				UPDATE carpoolvote.rider 
-				SET state='Failed', state_info='Invalid/Not Found RiderCollectionZIP:' || ride_request_row."RiderCollectionZIP"
+				SET status='Failed', status_info='Invalid/Not Found RiderCollectionZIP:' || ride_request_row."RiderCollectionZIP"
 				WHERE "UUID"=ride_request_row."UUID";
 				b_rider_validated := FALSE;
 			END IF;
@@ -142,7 +142,7 @@ BEGIN
 				(SELECT 1 FROM carpoolvote.zip_codes z WHERE z.zip = ride_request_row."RiderDropOffZIP" AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
 			THEN
 				UPDATE carpoolvote.rider 
-				SET state='Failed', state_info='Invalid/Not Found RiderDropOffZIP:' || ride_request_row."RiderDropOffZIP"
+				SET status='Failed', status_info='Invalid/Not Found RiderDropOffZIP:' || ride_request_row."RiderDropOffZIP"
 				WHERE "UUID"=ride_request_row."UUID";
 				b_rider_validated := FALSE;
 			END IF;	
@@ -161,7 +161,7 @@ BEGIN
 					IF start_ride_time > end_ride_time
 					THEN
 						UPDATE carpoolvote.rider 
-						SET state='Failed', state_info='Invalid value in AvailableRideTimes:' || rider_time
+						SET status='Failed', status_info='Invalid value in AvailableRideTimes:' || rider_time
 						WHERE "UUID"=ride_request_row."UUID";
 				
 						b_rider_validated := FALSE;
@@ -176,7 +176,7 @@ BEGIN
 				EXCEPTION WHEN OTHERS
 				THEN				
 					UPDATE carpoolvote.rider
-					SET state='Failed', state_info='Invalid value in AvailableRideTimes:' || rider_time
+					SET status='Failed', status_info='Invalid value in AvailableRideTimes:' || rider_time
 					WHERE "UUID"=ride_request_row."UUID";
 
 					b_rider_validated := FALSE;
@@ -185,7 +185,7 @@ BEGIN
 				IF b_rider_all_times_expired
 				THEN
 					UPDATE carpoolvote.rider r
-					SET state='Expired', state_info='All AvailableRideTimes are expired'
+					SET status='Expired', status_info='All AvailableRideTimes are expired'
 					WHERE "UUID"=ride_request_row."UUID";
 
 					v_expired_count := v_expired_count +1;
@@ -199,7 +199,7 @@ BEGIN
 			THEN
 			
  				FOR drive_offer_row in SELECT * from carpoolvote.driver d
- 					WHERE state IN ('Pending','MatchProposed','MatchConfirmed')
+ 					WHERE status IN ('Pending','MatchProposed','MatchConfirmed')
 					AND d."ReadyToMatch" = true
  					AND ((ride_request_row."NeedWheelchair"=true AND d."DriverCanLoadRiderWithWheelchair" = true) -- driver must be able to transport wheelchair if rider needs it
  						OR ride_request_row."NeedWheelchair"=false)   -- but a driver equipped for wheelchair may drive someone who does not need one
@@ -215,7 +215,7 @@ BEGIN
  					IF length(drive_offer_row."AvailableDriveTimesLocal") = 0
  					THEN
  						UPDATE carpoolvote.driver 
- 						SET state='Failed', state_info='Invalid AvailableDriveTimes'
+ 						SET status='Failed', status_info='Invalid AvailableDriveTimes'
  						WHERE "UUID"=drive_offer_row."UUID";
  				
  						b_driver_validated := false;
@@ -225,7 +225,7 @@ BEGIN
 						(SELECT 1 FROM carpoolvote.zip_codes z where z.zip = drive_offer_row."DriverCollectionZIP" AND z.latitude_numeric IS NOT NULL AND z.longitude_numeric IS NOT NULL)
 					THEN
 						UPDATE carpoolvote.driver 
-						SET state='Failed', state_info='Invalid/Not Found DriverCollectionZIP:' || drive_offer_row."DriverCollectionZIP"
+						SET status='Failed', status_info='Invalid/Not Found DriverCollectionZIP:' || drive_offer_row."DriverCollectionZIP"
 						WHERE "UUID"=drive_offer_row."UUID";
 						b_driver_validated := FALSE;
 					END IF; 	
@@ -235,7 +235,7 @@ BEGIN
  					EXCEPTION WHEN OTHERS
  					THEN
  						UPDATE carpoolvote.driver 
- 						SET state='Failed', state_info='Invalid DriverCollectionZIP'
+ 						SET status='Failed', status_info='Invalid DriverCollectionZIP'
  						WHERE "UUID"=drive_offer_row."UUID";
  					
  						b_driver_validated := FALSE;
@@ -257,7 +257,7 @@ BEGIN
 							IF start_drive_time > end_drive_time
 							THEN
 								UPDATE carpoolvote.driver 
-								SET state='Failed', state_info='Invalid value in AvailableDriveTimes:' || driver_time
+								SET status='Failed', status_info='Invalid value in AvailableDriveTimes:' || driver_time
 								WHERE "UUID"=drive_offer_row."UUID";
 				
 								b_driver_validated := FALSE;
@@ -273,7 +273,7 @@ BEGIN
 						EXCEPTION WHEN OTHERS
 						THEN
 							UPDATE carpoolvote.driver 
-							SET state='Failed', state_info='Invalid value in AvailableDriveTimes :' || driver_time
+							SET status='Failed', status_info='Invalid value in AvailableDriveTimes :' || driver_time
 							WHERE "UUID"=drive_offer_row."UUID";
 
 							b_driver_validated := FALSE;
@@ -283,7 +283,7 @@ BEGIN
 						IF b_driver_all_times_expired
 						THEN
 							UPDATE carpoolvote.driver
-							SET state='Expired', state_info='All AvailableDriveTimes are expired'
+							SET status='Expired', status_info='All AvailableDriveTimes are expired'
 							WHERE "UUID"=drive_offer_row."UUID";
 
 							v_expired_count := v_expired_count +1;
@@ -447,7 +447,7 @@ BEGIN
                                             END IF;
                                         
                                         ELSE
-											INSERT INTO carpoolvote.match (uuid_rider, uuid_driver, score, state)
+											INSERT INTO carpoolvote.match (uuid_rider, uuid_driver, score, status)
 												VALUES (
 													ride_request_row."UUID",               --pkey
 													drive_offer_row."UUID",                --pkey 
@@ -459,14 +459,14 @@ BEGIN
                                                 VALUES (drive_offer_row."UUID", ride_request_row."UUID", match_points_with_time);
 																						
 											UPDATE carpoolvote.rider r
-											SET state='MatchProposed'
+											SET status='MatchProposed'
 											WHERE r."UUID" = ride_request_row."UUID";
 
 											-- If already MatchConfirmed, keep it as is
 											UPDATE carpoolvote.driver d
-												SET state='MatchProposed'
+												SET status='MatchProposed'
 												WHERE d."UUID" = drive_offer_row."UUID"
-                                                AND state='Pending';
+                                                AND status='Pending';
 											
 											v_proposed_count := v_proposed_count +1;
                                             
@@ -572,13 +572,13 @@ BEGIN
 				v_html_body := v_html_body 
                     || '<tr>' 
                     || '<td class="' || v_row_style || '">' ||
-                        CASE WHEN g_record.state='MatchProposed' THEN '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/accept-driver-match' 
+                        CASE WHEN g_record.status='MatchProposed' THEN '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/accept-driver-match' 
                             || '?UUID_driver=' || drive_offer_row."UUID"
                             || '&UUID_rider=' || g_record.uuid_rider
                             || '&Score=' || g_record.score
                             || '&DriverPhone=' || carpoolvote.urlencode(drive_offer_row."DriverLastName" )   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
                             || '">Accept</a>'
-                        ELSE g_record.state END || '</td>'
+                        ELSE g_record.status END || '</td>'
                     || '<td class="' || v_row_style || '">' || g_record.score || '</td>'
                     || '<td class="' || v_row_style || '">' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '</td>'
                     || '<td class="' || v_row_style || '">' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || '</td>'
@@ -669,7 +669,6 @@ ALTER FUNCTION carpoolvote.perform_match()
 GRANT EXECUTE ON FUNCTION carpoolvote.perform_match() TO carpool_role;
 REVOKE ALL ON FUNCTION carpoolvote.perform_match() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION carpoolvote.perform_match() TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.perform_match() TO carpool_role;
 
 
 
