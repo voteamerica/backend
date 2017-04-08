@@ -23,6 +23,14 @@ carpool_web_role  : privileges to perform action supported by front end
 echo "\d+ carpoolvote.*" | psql -d <DB name>
 
 
+
+-- return codes (out_error_code) : 
+-- -1  : ERROR - Generic Error
+--  0  : SUCCESS
+--  1  : ERROR - Input is disabled
+--  2  : ERROR - Input validation
+
+
 --- USER INPUT : drivers, riders, helpers ---
 echo "\df carpoolvote.submit_new*" | psql -d <DB name>
 
@@ -30,9 +38,14 @@ submit_new_driver(...,  OUT out_uuid character varying, OUT out_error_code integ
 submit_new_rider (...,  OUT out_uuid character varying, OUT out_error_code integer, OUT out_error_text text)
 submit_new_helper(...,  OUT out_uuid character varying, OUT out_error_code integer, OUT out_error_text text)
 
--- return codes (out_error_code) : 
--- -1  : ERROR - Generic Error
---  0  : SUCCESS
---  1  : ERROR - Input is disabled
---  2  : ERROR - Input validation
+-- actions by rider  ----
+rider_cancel_ride_request(UUID, phone number or lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
+rider_cancel_confirmed_match(UUID_driver, UUID_rider, score, rider’s phone number or rider’s lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
+
+-- actions by driver -----
+driver_cancel_drive_offer(UUID, phone number or lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
+driver_cancel_confirmed_match(UUID_driver, UUID_rider, score, driverr’s phone number or driver’s lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
+driver_confirm_match(UUID_driver, UUID_rider, score, driver’s phone number or driver’s lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
+driver_pause_match(UUID, phone number or lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
+
 

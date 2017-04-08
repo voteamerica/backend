@@ -1,7 +1,10 @@
-CREATE OR REPLACE FUNCTION carpoolvote.perform_match()
-  RETURNS character varying AS
+CREATE OR REPLACE FUNCTION carpoolvote.perform_match(OUT out_error_code integer, OUT out_error_text text)
+AS
 $BODY$
 DECLARE
+
+v_temp_error_code integer := 0;
+v_temp_error_text text := '';
 
 run_now carpoolvote.match_engine_scheduler.need_run_flag%TYPE;
 
@@ -46,22 +49,12 @@ zip_dropoff carpoolvote.zip_codes%ROWTYPE; -- Rider's dropoff
 distance_origin_pickup double precision;  -- From driver origin to rider pickup point
 distance_origin_dropoff double precision; -- From driver origin to rider drop off point
 
-g_uuid_driver character varying(50);
-g_uuid_rider  character varying(50);
-g_record record;
-g_email_body text;
-g_sms_body text;
-
-v_subject carpoolvote.outgoing_email.subject%TYPE;                                                                            
-v_body carpoolvote.outgoing_email.body%TYPE;                                                                                  
-v_html_header carpoolvote.outgoing_email.body%TYPE;
-v_html_body   carpoolvote.outgoing_email.body%TYPE;
-v_html_footer carpoolvote.outgoing_email.body%TYPE;
-
-v_loop_cnt integer;
-v_row_style text;
+v_record record;
 
 BEGIN
+	out_error_code := carpoolvote.f_SUCCESS();
+	out_error_text := '';
+
 
 	run_now := true;
 	--BEGIN
@@ -493,156 +486,18 @@ BEGIN
 			
 		END LOOP; -- for each ride request
 
-        v_html_header := '<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
-		|| '<html>' 
-		|| '<head>'
-		|| '<meta http-equiv="content-type" content="text/html; charset=UTF-8">'
-		|| '<style type="text/css">'
-		|| '.evenRow {'
-		|| '  font-family:Monospace;'
-		|| '  border-bottom: black thin;'
-		|| '  border-top: black thin;'
-		|| '  border-right: black thin;'
-		|| '  border-left: black thin;'	
-		|| '  border-collapse: collapse;'
-		|| '  margin: 0.4em;'
-		|| '  background-color: #F0F0F0'
-		|| '}'
-		|| '.oddRow {'
-		|| '  font-family:Monospace;'
-		|| '	border-bottom: black thin;'
-		|| '	border-top: black thin;'
-		|| '	border-right: black thin;'
-		|| '	border-left: black thin;'	
-		|| '	border-collapse: collapse;'
-		|| '  margin: 0.4em;'
-		|| '  background-color: #E0E0E0'
-		|| '}'
-		|| '.warnRow {'
-		|| '  font-family:Monospace;'
-		|| '	border-bottom: black thin;'
-		|| '	border-top: black thin;'
-		|| '	border-right: black thin;'
-		|| '	border-left: black thin;'	
-		|| '	border-collapse: collapse;'
-		|| '  margin: 0.4em;'
-		|| '  background-color: #FF9933'
-		|| '}'
-		|| '</style>'
-		|| '</head>'; 
-
-        v_html_footer := '</html>';	
-
-		
 		-- send notifications to driver only. Riders will be waiting to be contacted
-		FOR drive_offer_row IN SELECT * FROM carpoolvote.driver d
-								WHERE d."UUID" IN (SELECT DISTINCT uuid_driver FROM match_notifications_buffer)
+		FOR v_record IN SELECT DISTINCT uuid_driver FROM match_notifications_buffer
 		LOOP
-		
-            v_html_body := '<body>'
-            || '<p>Dear ' || drive_offer_row."DriverFirstName" ||  ' ' || drive_offer_row."DriverLastName" || ', <p>' 
-            || '<p>Great news - we found riders who match your criteria!</p>'
-            || '<p><table>'
-            || '<tr>' 
-            || '<td class="oddRow">Action</td>' 
-            || '<td class="oddRow">Score (best=600)</td>' 
-            || '<td class="oddRow">Pick-up location</td>'
-            || '<td class="oddRow">Destination</td>'
-            || '<td class="oddRow">Preferred Ride Times</td>'
-            || '<td class="oddRow">Party Size</td>'
-            || '<td class="oddRow">Wheelchair accessibility needed</td>'
-            || '<td class="oddRow">Two-way trip needed</td>'
-            || '<td class="oddRow">Notes</td>'
-            || '<td class="oddRow">Name</td>'
-            || '<td class="oddRow">Email (*=preferred)</td>'
-            || '<td class="oddRow">Phone Number (*)=preferred</td>'
-            || '</tr>';
-
-			--RAISE NOTICE 'BODY 1 : %', v_html_body;
-			
-            v_loop_cnt := 0;
-			FOR g_record IN SELECT * FROM carpoolvote.match m 
-									WHERE m.uuid_driver = drive_offer_row."UUID" order by score desc
-			LOOP
-                v_row_style := CASE WHEN v_loop_cnt % 2 =1 THEN 'oddRow' else 'evenRow' END;
-					
-				SELECT * INTO ride_request_row FROM carpoolvote.rider r
-												WHERE r."UUID" = g_record.uuid_rider;
-
-				v_html_body := v_html_body 
-                    || '<tr>' 
-                    || '<td class="' || v_row_style || '">' ||
-                        CASE WHEN g_record.status='MatchProposed' THEN '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/accept-driver-match' 
-                            || '?UUID_driver=' || drive_offer_row."UUID"
-                            || '&UUID_rider=' || g_record.uuid_rider
-                            || '&Score=' || g_record.score
-                            || '&DriverPhone=' || carpoolvote.urlencode(drive_offer_row."DriverLastName" )   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
-                            || '">Accept</a>'
-                        ELSE g_record.status END || '</td>'
-                    || '<td class="' || v_row_style || '">' || g_record.score || '</td>'
-                    || '<td class="' || v_row_style || '">' || COALESCE(ride_request_row."RiderCollectionAddress" || ', ', '') || ride_request_row."RiderCollectionZIP" || '</td>'
-                    || '<td class="' || v_row_style || '">' || COALESCE(ride_request_row."RiderDestinationAddress" || ', ', '') || ride_request_row."RiderDropOffZIP" || '</td>'
-                    || '<td class="' || v_row_style || '">' || replace(replace(replace(replace(replace(ride_request_row."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-')  || '</td>'
-                    || '<td class="' || v_row_style || '">' || ride_request_row."TotalPartySize" || '</td>'
-                    || '<td class="' || v_row_style || '">' || CASE WHEN ride_request_row."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td>'
-                    || '<td class="' || v_row_style || '">' || CASE WHEN ride_request_row."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || '</td>'
-                    || '<td class="' || v_row_style || '">' || COALESCE (ride_request_row."RiderAccommodationNotes", ' ') || '</td>'
-                    || '<td class="' || v_row_style || '">' || ride_request_row."RiderFirstName" || ' ' || ride_request_row."RiderLastName"  || '</td>'
-                    || '<td class="' || v_row_style || '">' || COALESCE(ride_request_row."RiderEmail", ' ') || CASE WHEN coalesce(ride_request_row."RiderPreferredContact" LIKE '%Email%',false) THEN '(*)' else ' ' END || '</td>'
-                    || '<td class="' || v_row_style || '">' || COALESCE(ride_request_row."RiderPhone", ' ') || CASE WHEN coalesce(ride_request_row."RiderPreferredContact" LIKE '%Phone%', false) THEN '(*)' Else ' ' END || '</td>'
-                    || '</tr>';
-                
-				--RAISE NOTICE 'BODY 2 : % % %', v_html_body, v_row_style, ride_request_row."UUID";
 				
-				
-				v_loop_cnt := v_loop_cnt + 1;
-			END LOOP;
-			
-			
-			--RAISE NOTICE 'BODY 3 : %', v_html_body;
-			
-            v_html_body := v_html_body || '</table></p>'
-                || '<p>If you do not wish to accept the proposed rides, you do not need to do anything. A match is only confirmed once you have accepted it.</p>'
-				|| '<p>If you do not with to receive future notifications about new proposed matches for this Driver Offer, please <a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/pause-match-driver?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || carpoolvote.urlencode(drive_offer_row."DriverLastName") ||  '">click here</a></p>'            
-                || '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || drive_offer_row."UUID" || '&DriverPhone=' || carpoolvote.urlencode(drive_offer_row."DriverLastName") ||  '">Cancel your Drive Offer</a></p>'
-                || '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || drive_offer_row."UUID" || '">self-service portal</a>.</p>'
-				|| '<p>Warm wishes</p>'
-                || '<p>The CarpoolVote.com team.</p>'
-                || '</body>';
-
-            v_body := v_html_header || v_html_body || v_html_footer;
-			--RAISE NOTICE 	'%', drive_offer_row."UUID";
-			--RAISE NOTICE '%', v_body;
-			--RAISE NOTICE '%', v_html_header;
-			--RAISE NOTICE '%', v_html_body;
-			--RAISE NOTICE '%', v_html_footer;
-			
-			IF drive_offer_row."DriverEmail" IS NOT NULL
+			SELECT * FROM carpoolvote.notify_driver_new_available_matches(v_record.uuid_driver) INTO v_temp_error_code, v_temp_error_text;
+			IF v_temp_error_code <> carpoolvote.f_SUCCESS()
 			THEN
-				INSERT INTO carpoolvote.outgoing_email (recipient, subject, body)
-				VALUES (drive_offer_row."DriverEmail", 
-				'Proposed rider match update!   --- [' || drive_offer_row."UUID" || ']', 
-				v_body);
-				
+				out_error_code := carpool.f_EXECUTION_ERROR();
+				out_error_text := out_error_text || ' | ' || v_temp_error_text;
+				RAISE NOTICE 'Error while generating notifications for uuid=% : %', uuid, v_temp_error_text; 
 			END IF;
-				
-			IF drive_offer_row."DriverPhone" IS NOT NULL AND (position('SMS' in drive_offer_row."DriverPreferredContact") > 0)
-			THEN
-			
-				g_sms_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10)) 
-						|| ' New matches are available.' || ' ' || carpoolvote.urlencode(chr(10))
-				        || ' Visit the self-service page for details http://carpoolvote.com/self-service/?type=driver&uuid=' || drive_offer_row."UUID";			
-			
-				INSERT INTO carpoolvote.outgoing_sms (recipient, body)
-				VALUES (drive_offer_row."DriverPhone", 
-				g_sms_body);
-			
-			END IF;
-
-			
 		END LOOP;
-		
-
 		
 		v_end_ts := now();
 		-- Update activity log
@@ -659,16 +514,14 @@ BEGIN
 		
 	END IF;
 	
-	return '';
+	RETURN;
 END
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100;
-ALTER FUNCTION carpoolvote.perform_match()
-  OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.perform_match() TO carpool_role;
-REVOKE ALL ON FUNCTION carpoolvote.perform_match() FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION carpoolvote.perform_match() TO carpool_admins;
+  LANGUAGE plpgsql VOLATILE;
+ALTER FUNCTION carpoolvote.perform_match(OUT integer, OUT text) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.perform_match(OUT integer, OUT text) TO carpool_role;
+REVOKE ALL ON FUNCTION carpoolvote.perform_match(OUT integer, OUT text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION carpoolvote.perform_match(OUT integer, OUT text) TO carpool_admins;
 
 
 

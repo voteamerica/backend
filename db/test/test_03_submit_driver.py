@@ -31,7 +31,6 @@ SELECT * from carpoolvote.submit_new_driver (
 )
 """, args)
     results=cursor.fetchone()
-    conn.commit()
     return {'uuid' : results[0], 'error_code' : results[1], 'error_text' : results[2]}
     
 def test_insert_driver_000_all_valid(pgdbConn):

@@ -196,6 +196,7 @@ The matching engine resets the flag at the end of its execution';
 
 CREATE TABLE outgoing_email (
     id integer NOT NULL,
+	uuid character varying(50) NOT NULL,
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     status character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
@@ -235,6 +236,7 @@ ALTER SEQUENCE outgoing_email_id_seq OWNED BY outgoing_email.id;
 
 CREATE TABLE outgoing_sms (
     id integer NOT NULL,
+	uuid character varying(50) NOT NULL,
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     status character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
@@ -783,7 +785,7 @@ REVOKE ALL ON TABLE driver FROM PUBLIC;
 REVOKE ALL ON TABLE driver FROM carpool_admins;
 GRANT ALL ON TABLE driver TO carpool_admins;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE driver TO carpool_role;
-GRANT SELECT,INSERT ON TABLE driver TO carpool_web_role;
+GRANT SELECT,INSERT,UPDATE ON TABLE driver TO carpool_web_role;
 
 
 --
@@ -891,7 +893,7 @@ REVOKE ALL ON TABLE rider FROM PUBLIC;
 REVOKE ALL ON TABLE rider FROM carpool_admins;
 GRANT ALL ON TABLE rider TO carpool_admins;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rider TO carpool_role;
-GRANT SELECT, INSERT ON TABLE rider TO carpool_web_role;
+GRANT SELECT,INSERT,UPDATE ON TABLE rider TO carpool_web_role;
 
 
 --

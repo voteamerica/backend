@@ -26,8 +26,8 @@ def cleanup(pgdbConnAdmin):
     cursor.execute("DELETE FROM carpoolvote.rider")
     cursor.execute("DELETE FROM carpoolvote.driver")
     cursor.execute("DELETE FROM carpoolvote.helper")
-    
     pgdbConnAdmin.commit()
+    
 
 def getMatcherActivityStats(pgdbConnMatchEngine):
     cursor = pgdbConnMatchEngine.cursor()
@@ -52,7 +52,7 @@ def test_match_001_nothing_to_match(pgdbConnAdmin, pgdbConnMatchEngine):
     assert match_stats['proposed_count']==0
     assert match_stats['error_count']==0
     assert match_stats['expired_count']==0
-    pgdbConnMatchEngine.rollback()
+    pgdbConnMatchEngine.commit()
     
 def test_match_002_perfect_match(pgdbConnAdmin, pgdbConnMatchEngine, pgdbConnWeb):
     cleanup(pgdbConnAdmin)
@@ -87,7 +87,7 @@ def test_match_002_perfect_match(pgdbConnAdmin, pgdbConnMatchEngine, pgdbConnWeb
     error_text=results['error_text']
     
     assert len(uuid_rider)>0
-    
+        
     driver_args = {
         'IPAddress' : '127.0.0.1',
         'DriverCollectionZIP' : '90210',
@@ -116,6 +116,7 @@ def test_match_002_perfect_match(pgdbConnAdmin, pgdbConnMatchEngine, pgdbConnWeb
     
     assert len(uuid_driver)>0
     
+    pgdbConnWeb.commit()
     
     cursor = pgdbConnMatchEngine.cursor()
     cursor.execute("SELECT * FROM carpoolvote.perform_match()")
@@ -129,5 +130,5 @@ def test_match_002_perfect_match(pgdbConnAdmin, pgdbConnMatchEngine, pgdbConnWeb
     match_record = getMatchRecord(pgdbConnMatchEngine, uuid_rider, uuid_driver)
     assert match_record['status'] == 'MatchProposed'
     
-    pgdbConnMatchEngine.rollback()
+    pgdbConnMatchEngine.commit()
     
