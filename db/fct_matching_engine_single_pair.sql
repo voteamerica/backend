@@ -1,16 +1,16 @@
-CREATE OR REPLACE FUNCTION nov2016.evaluate_match_single_pair(arg_uuid_driver character varying, arg_uuid_rider character varying)
+CREATE OR REPLACE FUNCTION carpoolvote.evaluate_match_single_pair(arg_uuid_driver character varying, arg_uuid_rider character varying)
   RETURNS character varying AS
 $BODY$
 DECLARE
 
-run_now nov2016.match_engine_scheduler.need_run_flag%TYPE;
+run_now carpoolvote.match_engine_scheduler.need_run_flag%TYPE;
 
-v_start_ts nov2016.match_engine_activity_log.start_ts%TYPE;
-v_end_ts nov2016.match_engine_activity_log.end_ts%TYPE;
-v_evaluated_pairs nov2016.match_engine_activity_log.evaluated_pairs%TYPE;
-v_proposed_count nov2016.match_engine_activity_log.proposed_count%TYPE;
-v_error_count nov2016.match_engine_activity_log.error_count%TYPE;
-v_expired_count nov2016.match_engine_activity_log.expired_count%TYPE;
+v_start_ts carpoolvote.match_engine_activity_log.start_ts%TYPE;
+v_end_ts carpoolvote.match_engine_activity_log.end_ts%TYPE;
+v_evaluated_pairs carpoolvote.match_engine_activity_log.evaluated_pairs%TYPE;
+v_proposed_count carpoolvote.match_engine_activity_log.proposed_count%TYPE;
+v_error_count carpoolvote.match_engine_activity_log.error_count%TYPE;
+v_expired_count carpoolvote.match_engine_activity_log.expired_count%TYPE;
 
 b_rider_all_times_expired  boolean := TRUE;
 b_rider_validated boolean := TRUE;
@@ -19,8 +19,8 @@ b_driver_validated boolean := TRUE;
 
 RADIUS_MAX_ALLOWED integer := 100;
 
-drive_offer_row stage.websubmission_driver%ROWTYPE;
-ride_request_row stage.websubmission_rider%ROWTYPE;
+drive_offer_row carpoolvote.driver%ROWTYPE;
+ride_request_row carpoolvote.rider%ROWTYPE;
 cnt integer;
 match_points integer;
 time_criteria_points integer;
@@ -36,9 +36,9 @@ end_ride_time timestamp with time zone;
 start_drive_time timestamp with time zone;
 end_drive_time timestamp with time zone;
 
-zip_origin nov2016.zip_codes%ROWTYPE;  -- Driver's origin
-zip_pickup nov2016.zip_codes%ROWTYPE;  -- Rider's pickup
-zip_dropoff nov2016.zip_codes%ROWTYPE; -- Rider's dropoff
+zip_origin carpoolvote.zip_codes%ROWTYPE;  -- Driver's origin
+zip_pickup carpoolvote.zip_codes%ROWTYPE;  -- Rider's pickup
+zip_dropoff carpoolvote.zip_codes%ROWTYPE; -- Rider's dropoff
 
 distance_origin_pickup double precision;  -- From driver origin to rider pickup point
 distance_origin_dropoff double precision; -- From driver origin to rider drop off point
@@ -53,12 +53,12 @@ BEGIN
 
 	run_now := true;
 	--BEGIN
-	--	INSERT INTO nov2016.match_engine_scheduler VALUES(true);
+	--	INSERT INTO carpoolvote.match_engine_scheduler VALUES(true);
 	--EXCEPTION WHEN OTHERS
 	--THEN
 		-- ignore
 	--END;
-	--SELECT need_run_flag INTO run_now from nov2016.match_engine_scheduler LIMIT 1;
+	--SELECT need_run_flag INTO run_now from carpoolvote.match_engine_scheduler LIMIT 1;
 	IF run_now
 	THEN
 
@@ -73,13 +73,13 @@ BEGIN
 
 		
 		
-		FOR ride_request_row in SELECT * from stage.websubmission_rider r
+		FOR ride_request_row in SELECT * from carpoolvote.rider r
 			WHERE r.state in ('Pending','MatchProposed') AND r."UUID" like arg_uuid_rider || '%'
 		LOOP
 		
 			IF length(ride_request_row."AvailableRideTimesUTC") = 0
 			THEN
-				UPDATE stage.websubmission_rider 
+				UPDATE carpoolvote.rider 
 				SET state='Failed', state_info='Invalid AvailableRideTimes'
 				WHERE "UUID"=ride_request_row."UUID";
 				
@@ -91,12 +91,12 @@ BEGIN
 				-- DriverCollectionZIP
 				-- DriverCollectionRadius
 			
-				SELECT * INTO zip_pickup FROM nov2016.zip_codes WHERE zip=ride_request_row."RiderCollectionZIP";
-				SELECT * INTO zip_dropoff FROM nov2016.zip_codes WHERE zip=ride_request_row."RiderDropOffZIP";
+				SELECT * INTO zip_pickup FROM carpoolvote.zip_codes WHERE zip=ride_request_row."RiderCollectionZIP";
+				SELECT * INTO zip_dropoff FROM carpoolvote.zip_codes WHERE zip=ride_request_row."RiderDropOffZIP";
 			
 			EXCEPTION WHEN OTHERS
 			THEN
-				UPDATE stage.websubmission_rider 
+				UPDATE carpoolvote.rider 
 				SET state='Failed', state_info='Unknown/Invalid RiderCollectionZIP or RiderDropOffZIP'
 				WHERE "UUID"=ride_request_row."UUID";
 				
@@ -105,7 +105,7 @@ BEGIN
 			
 			IF ride_request_row."TotalPartySize" = 0
 			THEN
-				UPDATE stage.websubmission_rider 
+				UPDATE carpoolvote.rider 
 				SET state='Failed', state_info='Invalid TotalPartySize'
 				WHERE "UUID"=ride_request_row."UUID";
 				
@@ -126,7 +126,7 @@ BEGIN
 					
 					IF start_ride_time > end_ride_time
 					THEN
-						UPDATE stage.websubmission_rider 
+						UPDATE carpoolvote.rider 
 						SET state='Failed', state_info='Invalid value in AvailableRideTimes:' || rider_time
 						WHERE "UUID"=ride_request_row."UUID";
 				
@@ -141,7 +141,7 @@ BEGIN
 					END IF;
 				EXCEPTION WHEN OTHERS
 				THEN				
-					UPDATE stage.websubmission_rider
+					UPDATE carpoolvote.rider
 					SET state='Failed', state_info='Invalid value in AvailableRideTimes:' || rider_time
 					WHERE "UUID"=ride_request_row."UUID";
 
@@ -150,7 +150,7 @@ BEGIN
 				
 				IF b_rider_all_times_expired
 				THEN
-					UPDATE stage.websubmission_rider r
+					UPDATE carpoolvote.rider r
 					SET state='Expired', state_info='All AvailableRideTimes are expired'
 					WHERE "UUID"=ride_request_row."UUID";
 
@@ -164,7 +164,7 @@ BEGIN
 			IF b_rider_validated
 			THEN
 			
- 				FOR drive_offer_row in SELECT * from stage.websubmission_driver d
+ 				FOR drive_offer_row in SELECT * from carpoolvote.driver d
  					WHERE state IN ('Pending','MatchProposed','MatchConfirmed')
  					AND ((ride_request_row."NeedWheelchair"=true AND d."DriverCanLoadRiderWithWheelchair" = true) -- driver must be able to transport wheelchair if rider needs it
  						OR ride_request_row."NeedWheelchair"=false)   -- but a driver equipped for wheelchair may drive someone who does not need one
@@ -174,7 +174,7 @@ BEGIN
  
  					IF length(drive_offer_row."AvailableDriveTimesUTC") = 0
  					THEN
- 						UPDATE stage.websubmission_driver 
+ 						UPDATE carpoolvote.driver 
  						SET state='Failed', state_info='Invalid AvailableDriveTimes'
  						WHERE "UUID"=drive_offer_row."UUID";
  				
@@ -182,10 +182,10 @@ BEGIN
  					END IF;
  
  					BEGIN
- 						SELECT * INTO zip_origin FROM nov2016.zip_codes WHERE zip=drive_offer_row."DriverCollectionZIP";
+ 						SELECT * INTO zip_origin FROM carpoolvote.zip_codes WHERE zip=drive_offer_row."DriverCollectionZIP";
  					EXCEPTION WHEN OTHERS
  					THEN
- 						UPDATE stage.websubmission_driver 
+ 						UPDATE carpoolvote.driver 
  						SET state='Failed', state_info='Invalid DriverCollectionZIP'
  						WHERE "UUID"=drive_offer_row."UUID";
  					
@@ -209,7 +209,7 @@ BEGIN
 							
 							IF start_drive_time > end_drive_time
 							THEN
-								UPDATE stage.websubmission_driver 
+								UPDATE carpoolvote.driver 
 								SET state='Failed', state_info='Invalid value in AvailableDriveTimes:' || driver_time
 								WHERE "UUID"=drive_offer_row."UUID";
 				
@@ -225,7 +225,7 @@ BEGIN
 							
 						EXCEPTION WHEN OTHERS
 						THEN
-							UPDATE stage.websubmission_driver 
+							UPDATE carpoolvote.driver 
 							SET state='Failed', state_info='Invalid value in AvailableDriveTimes :' || driver_time
 							WHERE "UUID"=drive_offer_row."UUID";
 
@@ -235,7 +235,7 @@ BEGIN
 		
 						IF b_driver_all_times_expired
 						THEN
-							UPDATE stage.websubmission_driver
+							UPDATE carpoolvote.driver
 							SET state='Expired', state_info='All AvailableDriveTimes are expired'
 							WHERE "UUID"=drive_offer_row."UUID";
 
@@ -251,13 +251,13 @@ BEGIN
 						match_points := 0;
 				
 						-- Compare RiderCollectionZIP with DriverCollectionZIP / DriverCollectionRadius
-						distance_origin_pickup := nov2016.distance(
+						distance_origin_pickup := carpoolvote.distance(
 									zip_origin.latitude_numeric,
 									zip_origin.longitude_numeric,
 									zip_pickup.latitude_numeric,
 									zip_pickup.longitude_numeric);
 						
-						distance_origin_dropoff := nov2016.distance(
+						distance_origin_dropoff := carpoolvote.distance(
 									zip_origin.latitude_numeric,
 									zip_origin.longitude_numeric,
 									zip_dropoff.latitude_numeric,
@@ -374,14 +374,14 @@ BEGIN
 											
 											-- The state of the ride request is 
 											
-											UPDATE stage.websubmission_rider r
+											UPDATE carpoolvote.rider r
 											SET state='MatchProposed'
 											WHERE r."UUID" = ride_request_row."UUID";
 
 											-- If already MatchConfirmed, keep it as is
 											IF drive_offer_row.state = 'Pending'
 											THEN
-												UPDATE stage.websubmission_driver d
+												UPDATE carpoolvote.driver d
 												SET state='MatchProposed'
 												WHERE d."UUID" = drive_offer_row."UUID";
 											END IF;
@@ -418,14 +418,14 @@ BEGIN
 		
 		--v_end_ts := now();
 		-- Update activity log
-		--INSERT INTO nov2016.match_engine_activity_log (
+		--INSERT INTO carpoolvote.match_engine_activity_log (
 				--start_ts, end_ts , evaluated_pairs,
 				--proposed_count, error_count, expired_count)
 		--VALUES(v_start_ts, v_end_ts, v_evaluated_pairs,
 				--v_proposed_count, v_error_count, v_expired_count);
 		
 		-- Update scheduler
-		-- UPDATE nov2016.match_engine_scheduler set need_run_flag = false;
+		-- UPDATE carpoolvote.match_engine_scheduler set need_run_flag = false;
 		
 		
 		
@@ -436,6 +436,19 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION nov2016.evaluate_match_single_pair(character varying, character varying)
+ALTER FUNCTION carpoolvote.evaluate_match_single_pair(character varying, character varying)
   OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION nov2016.evaluate_match_single_pair(character varying, character varying) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.evaluate_match_single_pair(character varying, character varying) TO carpool_role;
+
+
+
+--
+-- Name: evaluate_match_single_pair(character varying, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON FUNCTION evaluate_match_single_pair(arg_uuid_driver character varying, arg_uuid_rider character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION evaluate_match_single_pair(arg_uuid_driver character varying, arg_uuid_rider character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION evaluate_match_single_pair(arg_uuid_driver character varying, arg_uuid_rider character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION evaluate_match_single_pair(arg_uuid_driver character varying, arg_uuid_rider character varying) TO PUBLIC;
+GRANT ALL ON FUNCTION evaluate_match_single_pair(arg_uuid_driver character varying, arg_uuid_rider character varying) TO carpool_role;
+

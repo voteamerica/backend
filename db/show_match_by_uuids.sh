@@ -23,7 +23,7 @@ fi
 echo $PGDATABASE 
 
 psql -h /tmp $PGDATABASE <<RPT
-select * from nov2016.match where uuid_rider='$2' and uuid_driver='$1';
+select * from carpoolvote.match where uuid_rider='$2' and uuid_driver='$1';
 RPT
 
 

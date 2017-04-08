@@ -12,27 +12,27 @@ echo $PGDATABASE
 
 echo "DRIVERS" 
 psql -h /tmp $PGDATABASE <<RPT
-select count(*) , state from stage.websubmission_driver group by state;
+select count(*) , state from carpoolvote.driver group by state;
 RPT
 
 echo "RIDERS"
 psql -h /tmp $PGDATABASE <<RPT
-select count(*) , state from stage.websubmission_rider group by state;
+select count(*) , state from carpoolvote.rider group by state;
 RPT
 
 echo "MATCHES" 
 psql -h /tmp $PGDATABASE <<RPT
-select count(*) , state from nov2016.match group by state;
+select count(*) , state from carpoolvote.match group by state;
 RPT
 
 echo "EMAILS"
 psql -h /tmp $PGDATABASE <<RPT
-select count(*) , state from nov2016.outgoing_email group by state;
+select count(*) , state from carpoolvote.outgoing_email group by state;
 RPT
 
 echo "SMS"
 psql -h /tmp $PGDATABASE <<RPT
-select count(*) , state from nov2016.outgoing_sms group by state;
+select count(*) , state from carpoolvote.outgoing_sms group by state;
 RPT
 
 

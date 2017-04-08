@@ -9,6 +9,9 @@ fi
 
 createdb $1 \
 && psql -h /tmp $1 < carpool_roles.sql \
+&& psql -h /tmp $1 < carpool_schema_bootstrap.sql \
 && psql -h /tmp $1 < carpool_schema.sql \
-&& pg_restore -h /tmp -d $1 -a carpool_static_data.dat 
+&& psql -h /tmp $1 < carpool_static_data.sql \
+&& psql -h /tmp $1 < carpool_params_data.sql \
+&& ./load_functions.sh $1
 

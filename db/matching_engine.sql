@@ -3,7 +3,7 @@ $$
 
 BEGIN
 
-	PERFORM nov2016.perform_match();
+	PERFORM carpoolvote.perform_match();
 
 END;
 $$

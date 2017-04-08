@@ -17,7 +17,7 @@ fi
 echo $PGDATABASE $LIMIT
 
 psql -h /tmp $PGDATABASE <<RPT
-select * from nov2016.match_engine_activity_log order by start_ts desc $LIMIT
+select * from carpoolvote.match_engine_activity_log order by start_ts desc $LIMIT
 RPT
 
 
