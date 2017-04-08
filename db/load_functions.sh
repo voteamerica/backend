@@ -8,7 +8,7 @@ then
 fi
 
 psql -h /tmp $1 < fct_utilities.sql \
-&& psql -h /tmp $1 < fct_queue_email_notif.sql \
+&& psql -h /tmp $1 < fct_outbound_notifications.sql \
 && psql -h /tmp $1 < fct_user_actions.sql \
 && psql -h /tmp $1 < fct_matching_engine.sql
 

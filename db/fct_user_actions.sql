@@ -131,11 +131,9 @@ BEGIN
 		a_RiderDropOffZIP, a_AvailableRideTimesLocal, a_TotalPartySize, a_TwoWayTripNeeded, a_RiderIsVulnerable,
 		a_RiderWillNotTalkPolitics, a_PleaseStayInTouch, a_NeedWheelchair, a_RiderPreferredContact,
 		a_RiderAccommodationNotes, a_RiderLegalConsent, a_RiderWillBeSafe, a_RiderCollectionAddress, a_RiderDestinationAddress);
-	
-		select carpoolvote.f_SUCCESS() into out_error_code;
-		out_error_text := '';
-	
-	
+
+		SELECT * FROM carpoolvote.notify_new_rider(out_uuid) INTO out_error_code, out_error_text;
+		
 		RETURN;
 	EXCEPTION WHEN OTHERS
 	THEN
@@ -279,15 +277,14 @@ BEGIN
 		a_DrivingOnBehalfOfOrganization, a_DrivingOBOOrganizationName, a_RidersCanSeeDriverDetails,
 		a_DriverWillNotTalkPolitics, a_PleaseStayInTouch, a_DriverPreferredContact, a_DriverWillTakeCare
 		);
-	
-		out_error_code := 0;
-		out_error_text := '';
+		
+		SELECT * FROM carpoolvote.notify_new_driver(out_uuid) INTO out_error_code, out_error_text;
 	
 		RETURN;
 	EXCEPTION WHEN OTHERS
 	THEN
 		out_uuid := '';
-		select carpoolvote.f_EXECUTION_ERROR() into out_error_code;
+		out_error_code := carpoolvote.f_EXECUTION_ERROR();
 		out_error_text := 'Unexpected exception (' || SQLSTATE || ')' || SQLERRM;
 		RETURN;
 	END;

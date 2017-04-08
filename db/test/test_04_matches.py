@@ -1,7 +1,7 @@
 import pytest
 import pgdb
-from test_submit_driver import generic_driver_insert
-from test_submit_rider import generic_rider_insert
+from test_03_submit_driver import generic_driver_insert
+from test_02_submit_rider import generic_rider_insert
                      
 @pytest.fixture
 def pgdbConnMatchEngine(dbhost, db, matchengineuser):

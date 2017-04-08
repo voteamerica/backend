@@ -267,6 +267,7 @@ ALTER TABLE outgoing_sms_id_seq OWNER TO carpool_admins;
 ALTER SEQUENCE outgoing_sms_id_seq OWNED BY outgoing_sms.id;
 
 
+
 --
 -- Name: params; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
 --
@@ -782,7 +783,7 @@ REVOKE ALL ON TABLE driver FROM PUBLIC;
 REVOKE ALL ON TABLE driver FROM carpool_admins;
 GRANT ALL ON TABLE driver TO carpool_admins;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE driver TO carpool_role;
-GRANT INSERT ON TABLE driver TO carpool_web_role;
+GRANT SELECT,INSERT ON TABLE driver TO carpool_web_role;
 
 
 --
@@ -890,7 +891,7 @@ REVOKE ALL ON TABLE rider FROM PUBLIC;
 REVOKE ALL ON TABLE rider FROM carpool_admins;
 GRANT ALL ON TABLE rider TO carpool_admins;
 GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE rider TO carpool_role;
-GRANT INSERT ON TABLE rider TO carpool_web_role;
+GRANT SELECT, INSERT ON TABLE rider TO carpool_web_role;
 
 
 --
