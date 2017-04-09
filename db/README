@@ -49,3 +49,29 @@ driver_confirm_match(UUID_driver, UUID_rider, score, driver’s phone number or 
 driver_pause_match(UUID, phone number or lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
 
 
+-- State transitions ---
+
+[0]    -----> submit_new_driver [1] driver : Pending [OK]
+[0]    -----> submit_new_rider  [2] rider : Pending [OK]
+[0]    -----> submit_new_helper [3] 
+
+[1][2] -----> match             [4] match : MatchProposed, driver : MatchProposed, rider : MatchProposed [OK]
+
+[1]    -----> driver_cancel_drive_offer  [5]  driver : Canceled [OK]
+[2]    -----> rider_cancel_ride_request  [6]  rider : Canceled  [OK]
+
+[4]    -----> driver_cancel_drive_offer  [7]  match : Canceled, driver : Canceled, rider : Pending/MatchProposed
+[4]    -----> rider_cancel_ride_request  [8]  match : Canceled, driver : Pending/MatchProposed, rider : Canceled
+
+[5]    -----> driver_cancel_drive_offer  [5]  driver : Canceled [OK]
+[6]    -----> rider_cancel_ride_request  [6]  rider : Canceled  [OK]
+
+[4]    -----> driver_confirm_match       [9]  match : MatchConfirmed, driver : MatchConfirmed, rider : MatchConfirmed [OK]
+
+[9]    -----> driver_cancel_confirmed_match [10]  match : Canceled, driver : MatchProposed/Pending, rider : MatchProposed/Pending
+[9]    -----> rider_cancel_confirmed_match  [11]  match : Canceled, driver : MatchProposed/Pending, rider : MatchProposed/Pending
+[10]   -----> driver_cancel_drive_offer  [5]
+[11]   -----> rider_cancel_ride_request  [6]
+
+[9]    -----> driver_cancel_drive_offer  [5]
+[9]    -----> rider_cancel_ride_request  [6]

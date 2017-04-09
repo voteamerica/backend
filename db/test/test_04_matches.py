@@ -128,7 +128,15 @@ def test_match_002_perfect_match(pgdbConnAdmin, pgdbConnMatchEngine, pgdbConnWeb
 
     
     match_record = getMatchRecord(pgdbConnMatchEngine, uuid_rider, uuid_driver)
-    assert match_record['status'] == 'MatchProposed'
-    
+    assert match_record['status'] == 'MatchProposed'    
     pgdbConnMatchEngine.commit()
     
+    cursor = pgdbConnWeb.cursor()
+    cursor.execute("""SELECT status FROM carpoolvote.driver WHERE "UUID"=%(uuid)s """, {'uuid' : uuid_driver})
+    results = cursor.fetchone()
+    assert results[0] == 'MatchProposed'
+    
+    cursor.execute("""SELECT status FROM carpoolvote.rider WHERE "UUID"=%(uuid)s """, {'uuid' : uuid_rider})
+    results = cursor.fetchone()
+    assert results[0] == 'MatchProposed'
+
