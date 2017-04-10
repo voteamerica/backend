@@ -1,11 +1,10 @@
 // location of db names 
 
-const SCHEMA_NAME           = 'stage';
-const SCHEMA_NOV2016_NAME   = 'nov2016';
+const SCHEMA_NAME           = 'carpoolvote';
 
-const DRIVER_TABLE  = 'websubmission_driver';
-const RIDER_TABLE   = 'websubmission_rider';
-const HELPER_TABLE  = 'websubmission_helper';
+const DRIVER_TABLE  = 'driver';
+const RIDER_TABLE   = 'rider';
+const HELPER_TABLE  = 'helper';
 const MATCH_TABLE   = 'match';
 
 const UNMATCHED_DRIVERS_VIEW  = 'vw_unmatched_drivers';
@@ -42,7 +41,6 @@ const CONFIRM_RIDE_FUNCTION       = 'confirm_ride($1, $2)';
 // for db carpool
 module.exports = {
   SCHEMA_NAME:          SCHEMA_NAME,
-  SCHEMA_NOV2016_NAME:  SCHEMA_NOV2016_NAME,
 
   UNMATCHED_DRIVERS_VIEW: UNMATCHED_DRIVERS_VIEW,
   UNMATCHED_RIDERS_VIEW: UNMATCHED_RIDERS_VIEW,

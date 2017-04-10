@@ -50,55 +50,55 @@ function dbGetInsertClause (tableName) {
 
 // exec fns
 function dbCancelRideRequestFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.CANCEL_RIDE_REQUEST_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.CANCEL_RIDE_REQUEST_FUNCTION);
 }
 
 function dbCancelRiderMatchFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.CANCEL_RIDER_MATCH_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.CANCEL_RIDER_MATCH_FUNCTION);
 }
 
 function dbCancelDriveOfferFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.CANCEL_DRIVE_OFFER_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.CANCEL_DRIVE_OFFER_FUNCTION);
 }
 
 function dbCancelDriverMatchFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.CANCEL_DRIVER_MATCH_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.CANCEL_DRIVER_MATCH_FUNCTION);
 }
 
 function dbAcceptDriverMatchFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.ACCEPT_DRIVER_MATCH_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.ACCEPT_DRIVER_MATCH_FUNCTION);
 }
 
 function dbPauseDriverMatchFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.PAUSE_DRIVER_MATCH_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.PAUSE_DRIVER_MATCH_FUNCTION);
 }
 
 function dbDriverExistsFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.DRIVER_EXISTS_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_EXISTS_FUNCTION);
 }
 
 function dbDriverInfoFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.DRIVER_INFO_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_INFO_FUNCTION);
 }
 
 function dbDriverProposedMatchesFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.DRIVER_PROPOSED_MATCHES_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_PROPOSED_MATCHES_FUNCTION);
 }
 
 function dbDriverConfirmedMatchesFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.DRIVER_CONFIRMED_MATCHES_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_CONFIRMED_MATCHES_FUNCTION);
 }
 
 function dbRiderExistsFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.RIDER_EXISTS_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.RIDER_EXISTS_FUNCTION);
 }
 
 function dbRiderInfoFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.RIDER_INFO_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.RIDER_INFO_FUNCTION);
 }
 
 function dbRiderConfirmedMatchFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.RIDER_CONFIRMED_MATCH_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.RIDER_CONFIRMED_MATCH_FUNCTION);
 }
 
 function dbRejectRideFunctionString() {
@@ -115,7 +115,7 @@ function dbCancelRideOfferFunctionString() {
 
 // select from table/views
 function dbGetMatchesQueryString () {
-  return dbSelectFromString(dbDefs.SCHEMA_NOV2016_NAME, dbDefs.MATCH_TABLE);
+  return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.MATCH_TABLE);
 }
 
 function dbGetQueryString () {
@@ -176,17 +176,17 @@ function dbGetInsertHelperString() {
 
 // custom items, due to be revised
 function dbGetMatchRiderQueryString (rider_uuid) {
-  return 'SELECT * FROM nov2016.match inner join stage.websubmission_rider ' +
-    'on (nov2016.match.uuid_rider = stage.websubmission_rider."UUID") ' +
-    'inner join stage.websubmission_driver ' + 
-    'on (nov2016.match.uuid_driver = stage.websubmission_driver."UUID") ' +
+  return 'SELECT * FROM nov2016.match inner join carpoolvote.rider ' +
+    'on (nov2016.match.uuid_rider = carpoolvote.rider."UUID") ' +
+    'inner join carpoolvote.driver ' + 
+    'on (nov2016.match.uuid_driver = carpoolvote.driver."UUID") ' +
     'where nov2016.match.uuid_rider = ' + " '" + rider_uuid + "' ";
 }
 
 function dbGetMatchDriverQueryString (driver_uuid) {
-  return 'SELECT * FROM nov2016.match inner join stage.websubmission_rider ' +
-    'on (nov2016.match.uuid_rider = stage.websubmission_rider."UUID") ' +
-    'inner join stage.websubmission_driver ' + 
-    'on (nov2016.match.uuid_driver = stage.websubmission_driver."UUID") ' +
+  return 'SELECT * FROM nov2016.match inner join carpoolvote.rider ' +
+    'on (nov2016.match.uuid_rider = carpoolvote.rider."UUID") ' +
+    'inner join carpoolvote.driver ' + 
+    'on (nov2016.match.uuid_driver = carpoolvote.driver."UUID") ' +
     'where nov2016.match.uuid_driver = ' + " '" + driver_uuid + "' ";
 }

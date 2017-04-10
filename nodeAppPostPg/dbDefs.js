@@ -1,9 +1,8 @@
 // location of db names 
-var SCHEMA_NAME = 'stage';
-var SCHEMA_NOV2016_NAME = 'nov2016';
-var DRIVER_TABLE = 'websubmission_driver';
-var RIDER_TABLE = 'websubmission_rider';
-var HELPER_TABLE = 'websubmission_helper';
+var SCHEMA_NAME = 'carpoolvote';
+var DRIVER_TABLE = 'driver';
+var RIDER_TABLE = 'rider';
+var HELPER_TABLE = 'helper';
 var MATCH_TABLE = 'match';
 var UNMATCHED_DRIVERS_VIEW = 'vw_unmatched_drivers';
 var UNMATCHED_RIDERS_VIEW = 'vw_unmatched_riders';
@@ -28,7 +27,6 @@ var CONFIRM_RIDE_FUNCTION = 'confirm_ride($1, $2)';
 // for db carpool
 module.exports = {
     SCHEMA_NAME: SCHEMA_NAME,
-    SCHEMA_NOV2016_NAME: SCHEMA_NOV2016_NAME,
     UNMATCHED_DRIVERS_VIEW: UNMATCHED_DRIVERS_VIEW,
     UNMATCHED_RIDERS_VIEW: UNMATCHED_RIDERS_VIEW,
     DRIVER_TABLE: DRIVER_TABLE,
