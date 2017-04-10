@@ -31,6 +31,7 @@ SELECT * from carpoolvote.submit_new_driver (
 )
 """, args)
     results=cursor.fetchone()
+    conn.commit()
     return {'uuid' : results[0], 'error_code' : results[1], 'error_text' : results[2]}
     
 def test_insert_driver_000_all_valid(pgdbConn):
@@ -65,6 +66,11 @@ def test_insert_driver_000_all_valid(pgdbConn):
     assert len(uuid)>0
         
     pgdbConn.commit()
+    
+    cursor = pgdbConn.cursor()
+    cursor.execute("""SELECT status FROM carpoolvote.driver WHERE "UUID"=%(uuid)s """, {'uuid' : uuid})
+    results = cursor.fetchone()
+    assert results[0] == 'Pending'
 
 def test_insert_driver_001_IPAddress_invalid(pgdbConn):
     args = {

@@ -68,9 +68,13 @@ def test_insert_rider_000_all_valid(pgdbConn):
     
     assert len(error_text)==0
     assert error_code==0
-    assert len(uuid)>0
-        
+    assert len(uuid)>0        
     pgdbConn.commit()
+    
+    cursor = pgdbConn.cursor()
+    cursor.execute("""SELECT status FROM carpoolvote.rider WHERE "UUID"=%(uuid)s """, {'uuid' : uuid})
+    results = cursor.fetchone()
+    assert results[0] == 'Pending'
 
 
 def test_insert_rider_001_IPAddress_invalid(pgdbConn):

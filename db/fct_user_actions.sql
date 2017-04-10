@@ -442,8 +442,7 @@ BEGIN
 		v_step := 'S3';
 		UPDATE carpoolvote.rider
 		SET status='MatchProposed'
-		WHERE "UUID" = a_UUID;
-	
+		WHERE "UUID" = a_UUID;	
 	ELSE               -- default, is Pending
 		v_step := 'S4';
 		UPDATE carpoolvote.rider
@@ -584,17 +583,18 @@ BEGIN
 		v_step := 'S1';
 		FOR match_row IN SELECT * FROM carpoolvote.match m
 			WHERE m.uuid_rider = a_uuid_rider
-			AND m.status = 'MatchConfirmed'
 		
 		LOOP
-		
 			v_step := 'S2';
-			SELECT * INTO drive_offer_row
-			FROM carpoolvote.driver
-			WHERE "UUID" = match_row.uuid_driver;
-		
-			v_step := 'S3';   -- Cancellation Notification to confirmed drivers
-			SELECT * FROM carpoolvote.notify_driver_ride_cancelled_by_rider(drive_offer_row."UUID", a_uuid_rider) INTO out_error_code, out_error_text;
+			IF match_row.status = 'MatchConfirmed'
+			THEN
+				SELECT * INTO drive_offer_row
+				FROM carpoolvote.driver
+				WHERE "UUID" = match_row.uuid_driver;
+				
+				v_step := 'S3';   -- Cancellation Notification to confirmed drivers
+				SELECT * FROM carpoolvote.notify_driver_ride_cancelled_by_rider(drive_offer_row."UUID", a_uuid_rider) INTO out_error_code, out_error_text;
+			END IF;
 			
 			v_step := 'S4';
 			UPDATE carpoolvote.match
@@ -817,18 +817,17 @@ BEGIN
 		v_step := 'S1';
 		FOR match_row IN SELECT * FROM carpoolvote.match
 			WHERE uuid_driver = a_UUID
-			AND status = 'MatchConfirmed'
 		
 		LOOP
-		
 			v_step := 'S2';
-			SELECT * INTO ride_request_row
-			FROM carpoolvote.rider
-			WHERE "UUID" = match_row.uuid_rider;	
-		
-			v_step := 'S3';
-			SELECT * FROM carpoolvote.notify_rider_drive_cancelled_by_driver(drive_offer_row."UUID", ride_request_row."UUID") INTO out_error_code, out_error_text;
-			
+			IF match_row.status = 'MatchConfirmed'
+			THEN
+				SELECT * INTO ride_request_row
+				FROM carpoolvote.rider
+				WHERE "UUID" = match_row.uuid_rider;	
+				v_step := 'S3';
+				SELECT * FROM carpoolvote.notify_rider_drive_cancelled_by_driver(drive_offer_row."UUID", ride_request_row."UUID") INTO out_error_code, out_error_text;
+			END IF;
 
 			v_step := 'S4';
 			UPDATE carpoolvote.match
