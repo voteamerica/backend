@@ -133,6 +133,34 @@ var PostgresQueries = (function () {
             reply(results.failure + ': ' + message).code(500);
         });
     };
+	
+	PostgresQueries.prototype.dbExecuteCarpoolAPIFunction = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
+        var queryString = fnExecuteFunctionString();
+        console.log("executeFunctionString: " + queryString);
+        pool.query(queryString, fnPayloadArray(req, payload))
+            .then(function (result) {
+            var firstRow = "";
+            if (result !== undefined && result.rows !== undefined) {
+                // result.rows.forEach( val => console.log(val));
+                result.rows.forEach(function (val) {
+                    return console.log("exec fn: " + val);
+                });
+                firstRow = result.rows[0];
+            }
+            console.error("executed fn: " + firstRow);
+            reply(//results.success + 
+            firstRow);
+        })
+            .catch(function (e) {
+            var message = e.message || '';
+            var stack = e.stack || '';
+            console.error(
+            // results.failure, 
+            message, stack);
+            reply(results.failure + message).code(500);
+        });
+    };
+	
     PostgresQueries.prototype.dbExecuteFunction = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
         console.log("executeFunctionString: " + queryString);

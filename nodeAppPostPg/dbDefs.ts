@@ -5,6 +5,10 @@ const SCHEMA_NAME           = 'carpoolvote';
 const DRIVER_TABLE  = 'driver';
 const RIDER_TABLE   = 'rider';
 const HELPER_TABLE  = 'helper';
+const SUBMIT_DRIVER_FN = 'submit_new_driver';
+const SUBMIT_RIDER_FN = 'submit_new_rider';
+const SUBMIT_HELPER_FN = 'submit_new_helper';
+
 const MATCH_TABLE   = 'match';
 
 const UNMATCHED_DRIVERS_VIEW  = 'vw_unmatched_drivers';

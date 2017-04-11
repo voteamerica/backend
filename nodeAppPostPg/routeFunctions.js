@@ -54,21 +54,21 @@ function logPostDriver(req) {
     console.log("driver zip: " + payload.DriverCollectionZIP);
     req.log();
 }
-var postDriver = createPostFn(DRIVER_ROUTE, dbQueries.dbGetInsertDriverString, getDriverPayloadAsArray, logPostDriver);
+var postDriver = createPostFn(DRIVER_ROUTE, dbQueries.dbGetSubmitDriverString, getDriverPayloadAsArray, logPostDriver);
 function logPost(req) {
     req.log();
 }
 function createPostFn(resultStringText, dbQueryFn, payloadFn, logFn) {
     function postFn(req, reply) {
         var payload = req.payload;
-        var results = getInsertResultStrings(resultStringText);
+        var results = getExecResultStrings(resultStringText);
         if (logFn !== undefined) {
             logFn(req);
         }
         else {
             logPost(req);
         }
-        postgresQueries.dbInsertData(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
+        postgresQueries.dbExecuteCarpoolAPIFunction(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
     }
     return postFn;
 }
@@ -81,13 +81,13 @@ function logPostRider(req) {
     console.log("rider payload: " + JSON.stringify(payload, null, 4));
     console.log("rider zip: " + payload.RiderCollectionZIP);
 }
-var postRider = createPostFn(RIDER_ROUTE, dbQueries.dbGetInsertRiderString, getRiderPayloadAsArray, logPostRider);
+var postRider = createPostFn(RIDER_ROUTE, dbQueries.dbGetSubmitRiderString, getRiderPayloadAsArray, logPostRider);
 function logPostHelper(req) {
     var payload = req.payload;
     req.log();
     console.log("helper payload: " + JSON.stringify(payload, null, 4));
 }
-var postHelper = createPostFn(HELPER_ROUTE, dbQueries.dbGetInsertHelperString, getHelperPayloadAsArray, logPostHelper);
+var postHelper = createPostFn(HELPER_ROUTE, dbQueries.dbGetSubmitHelperString, getHelperPayloadAsArray, logPostHelper);
 function getUnmatchedDrivers(req, reply) {
     var results = {
         success: 'GET unmatched drivers: ',
@@ -146,7 +146,7 @@ function createMultipleResultsFn(resultStringText, consoleText, dbQueryFn, paylo
     }
     return execFn;
 }
-var getInsertResultStrings = createResultStringFn(' row inserted', ' row insert failed');
+//var getInsertResultStrings = createResultStringFn(' row inserted', ' row insert failed');
 var getExecResultStrings = createResultStringFn(' fn called: ', ' fn call failed: ');
 function createResultStringFn(successText, failureText) {
     function getResultStrings(tableName) {

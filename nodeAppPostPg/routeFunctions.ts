@@ -80,7 +80,7 @@ function logPostDriver (req) {
 var postDriver = 
   createPostFn 
   (DRIVER_ROUTE, 
-    dbQueries.dbGetInsertDriverString, 
+    dbQueries.dbGetSubmitDriverString, 
     getDriverPayloadAsArray, logPostDriver);
 
 function logPost (req) {
@@ -93,7 +93,7 @@ function createPostFn
   
   function postFn (req, reply) {
     var payload = req.payload;
-    var results = getInsertResultStrings(resultStringText);
+    var results = getExecResultStrings(resultStringText);
 
     if (logFn !== undefined) {
       logFn(req);
@@ -102,7 +102,7 @@ function createPostFn
       logPost(req);
     }
 
-    postgresQueries.dbInsertData(payload, rfPool, dbQueryFn, 
+    postgresQueries.dbExecuteFunction(payload, rfPool, dbQueryFn, 
                   payloadFn,
                   req, reply, results);
   }
@@ -126,7 +126,7 @@ function logPostRider (req) {
 var postRider = 
   createPostFn 
   (RIDER_ROUTE, 
-    dbQueries.dbGetInsertRiderString, 
+    dbQueries.dbGetSubmitRiderString, 
     getRiderPayloadAsArray, logPostRider);
 
 function logPostHelper (req) {
@@ -140,7 +140,7 @@ function logPostHelper (req) {
 var postHelper = 
   createPostFn 
   (HELPER_ROUTE, 
-    dbQueries.dbGetInsertHelperString, 
+    dbQueries.dbGetSubmitHelperString, 
     getHelperPayloadAsArray, logPostHelper);
 
 function getUnmatchedDrivers (req, reply) {
