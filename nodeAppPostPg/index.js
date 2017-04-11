@@ -190,8 +190,8 @@ server.register({
             throw err;
         }
         console.log("Server running at: " + server.info.uri + " \n");
-        console.log("driver ins: " + dbQueries.dbGetInsertDriverString());
-        console.log("rider ins: " + dbQueries.dbGetInsertRiderString());
+        console.log("driver ins: " + dbQueries.dbGetSubmitDriverString());
+        console.log("rider ins: " + dbQueries.dbGetSubmitRiderString());
         console.log("cancel ride fn: " + dbQueries.dbCancelRideRequestFunctionString());
         console.log("reject ride fn: " + dbQueries.dbRejectRideFunctionString());
         console.log("ops interval:" + logOptions.ops.interval);
