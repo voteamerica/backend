@@ -3,6 +3,9 @@ var SCHEMA_NAME = 'carpoolvote';
 var DRIVER_TABLE = 'driver';
 var RIDER_TABLE = 'rider';
 var HELPER_TABLE = 'helper';
+var SUBMIT_DRIVER_FN = 'submit_new_driver';
+var SUBMIT_RIDER_FN = 'submit_new_rider';
+var SUBMIT_HELPER_FN = 'submit_new_helper';
 var MATCH_TABLE = 'match';
 var UNMATCHED_DRIVERS_VIEW = 'vw_unmatched_drivers';
 var UNMATCHED_RIDERS_VIEW = 'vw_unmatched_riders';
@@ -32,6 +35,9 @@ module.exports = {
     DRIVER_TABLE: DRIVER_TABLE,
     RIDER_TABLE: RIDER_TABLE,
     HELPER_TABLE: HELPER_TABLE,
+    SUBMIT_DRIVER_FN : SUBMIT_DRIVER_FN,
+    SUBMIT_RIDER_FN : SUBMIT_RIDER_FN,
+    SUBMIT_HELPER_FN : SUBMIT_HELPER_FN,
     MATCH_TABLE: MATCH_TABLE,
     CANCEL_RIDE_REQUEST_FUNCTION: CANCEL_RIDE_REQUEST_FUNCTION,
     CANCEL_RIDER_MATCH_FUNCTION: CANCEL_RIDER_MATCH_FUNCTION,

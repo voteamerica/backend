@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python
 import os
 import sys
 import requests
@@ -20,7 +20,7 @@ except:
 	exit
 
 cur = conn.cursor()
-cur.execute("""SELECT id, recipient, subject, body from nov2016.outgoing_email where state='Pending' order by created_ts asc """)
+cur.execute("""SELECT id, recipient, subject, body from carpoolvote.outgoing_email where status='Pending' order by created_ts asc """)
 
 rows = cur.fetchall()
 
@@ -38,12 +38,12 @@ for row in rows:
 	print ('Body:   {0}'.format(request.text))
 
 	if request.status_code == 200:
-		cur.execute("""UPDATE nov2016.outgoing_email
-						SET state='Sent', emission_info = '200 - OK' 
+		cur.execute("""UPDATE carpoolvote.outgoing_email
+						SET status='Sent', emission_info = '200 - OK' 
 						WHERE id = %s""", (row[0],))
 	else:
-		cur.execute("""UPDATE nov2016.outgoing_email
-						SET state='Failed', emission_info = %s 
+		cur.execute("""UPDATE carpoolvote.outgoing_email
+						SET status='Failed', emission_info = %s 
 						WHERE id = %s""", ("{0}: {1}".format(request.status_code,request.text), "{0}".format(row[0]), ))
 
 	conn.commit()

@@ -80,7 +80,7 @@ function logPostDriver (req) {
 var postDriver = 
   createPostFn 
   (DRIVER_ROUTE, 
-    dbQueries.dbGetInsertDriverString, 
+    dbQueries.dbGetSubmitDriverString, 
     getDriverPayloadAsArray, logPostDriver);
 
 function logPost (req) {
@@ -93,7 +93,7 @@ function createPostFn
   
   function postFn (req, reply) {
     var payload = req.payload;
-    var results = getInsertResultStrings(resultStringText);
+    var results = getExecResultStrings(resultStringText);
 
     if (logFn !== undefined) {
       logFn(req);
@@ -102,7 +102,7 @@ function createPostFn
       logPost(req);
     }
 
-    postgresQueries.dbInsertData(payload, rfPool, dbQueryFn, 
+    postgresQueries.dbExecuteFunction(payload, rfPool, dbQueryFn, 
                   payloadFn,
                   req, reply, results);
   }
@@ -126,7 +126,7 @@ function logPostRider (req) {
 var postRider = 
   createPostFn 
   (RIDER_ROUTE, 
-    dbQueries.dbGetInsertRiderString, 
+    dbQueries.dbGetSubmitRiderString, 
     getRiderPayloadAsArray, logPostRider);
 
 function logPostHelper (req) {
@@ -140,7 +140,7 @@ function logPostHelper (req) {
 var postHelper = 
   createPostFn 
   (HELPER_ROUTE, 
-    dbQueries.dbGetInsertHelperString, 
+    dbQueries.dbGetSubmitHelperString, 
     getHelperPayloadAsArray, logPostHelper);
 
 function getUnmatchedDrivers (req, reply) {
@@ -296,7 +296,7 @@ function createMultipleResultsFn
   return execFn;
 }
 
-var getInsertResultStrings  = createResultStringFn(' row inserted', ' row insert failed'); 
+//var getInsertResultStrings  = createResultStringFn(' row inserted', ' row insert failed'); 
 var getExecResultStrings    = createResultStringFn(' fn called: ', ' fn call failed: '); 
 
 function createResultStringFn (successText, failureText) {
@@ -323,57 +323,54 @@ function getHelperPayloadAsArray (req, payload) {
     ]
 }
 
-function getRiderPayloadAsArray (req, payload) {
-	var ip = getClientAddress(req);
-	
+function getRiderPayloadAsArray(req, payload) {
+    var ip = getClientAddress(req);
     return [
-      ip, 
-      payload.RiderFirstName, 
-      payload.RiderLastName, 
-      payload.RiderEmail,
-      payload.RiderPhone, 
-      payload.RiderCollectionZIP, 
-      payload.RiderDropOffZIP, 
-      payload.AvailableRideTimesJSON // this one should be in local time as passed along by the forms
-        
-      , payload.TotalPartySize
-      , (payload.TwoWayTripNeeded ? 'true' : 'false')
-      , payload.RiderPreferredContact
-      , (payload.RiderIsVulnerable ? 'true' : 'false')
-      , (payload.RiderWillNotTalkPolitics ? 'true' : 'false')
-      , (payload.PleaseStayInTouch ? 'true' : 'false')
-      , (payload.NeedWheelchair ? 'true' : 'false')
-      , payload.RiderAccommodationNotes
-      , (payload.RiderLegalConsent ? 'true' : 'false')
-      , (payload.RiderWillBeSafe ? 'true' : 'false')
-      , payload.RiderCollectionAddress
-      , payload.RiderDestinationAddress
-    ]
+        ip,
+        payload.RiderFirstName,
+        payload.RiderLastName,
+        payload.RiderEmail,
+        payload.RiderPhone,
+        payload.RiderCollectionZIP,
+        payload.RiderDropOffZIP,
+        payload.AvailableRideTimesJSON // this one should be in local time as passed along by the forms
+        ,
+        payload.TotalPartySize,
+        (payload.TwoWayTripNeeded ? 'true' : 'false'),
+		(payload.RiderIsVulnrable ? 'true' : 'false'),        
+        (payload.RiderWillNotTalkPolitics ? 'true' : 'false'),
+        (payload.PleaseStayInTouch ? 'true' : 'false'),
+        (payload.NeedWheelchair ? 'true' : 'false'),
+		payload.RiderPreferredContact,
+        payload.RiderAccommodationNotes,
+        (payload.RiderLegalConsent ? 'true' : 'false'),
+        (payload.RiderWillBeSafe ? 'true' : 'false'),
+        payload.RiderCollectionAddress,
+        payload.RiderDestinationAddress
+    ];
 }
-
-function getDriverPayloadAsArray (req, payload) {
-  var ip = getClientAddress(req);
-	
+function getDriverPayloadAsArray(req, payload) {
+    var ip = getClientAddress(req);
     return [
-      ip, 
-      payload.DriverCollectionZIP, 
-      payload.DriverCollectionRadius, 
-      payload.AvailableDriveTimesJSON,   // this one should be in local time as passed along by the forms         
-      (payload.DriverCanLoadRiderWithWheelchair ? 'true'  : 'false'),
-      payload.SeatCount,
-      payload.DriverFirstName,
-      payload.DriverLastName,
-      payload.DriverEmail, 
-      payload.DriverPhone,
-       (payload.DrivingOnBehalfOfOrganization ? 'true' : 'false')
-      , payload.DrivingOBOOrganizationName 
-      , (payload.RidersCanSeeDriverDetails ? 'true' : 'false')
-      , (payload.DriverWillNotTalkPolitics ? 'true' : 'false')
-      , (payload.PleaseStayInTouch ? 'true' : 'false')
-      , payload.DriverLicenceNumber,
+        ip,
+        payload.DriverCollectionZIP,
+        payload.DriverCollectionRadius,
+        payload.AvailableDriveTimesJSON,
+        (payload.DriverCanLoadRiderWithWheelchair ? 'true' : 'false'),
+        payload.SeatCount,
+		payload.DriverLicenceNumber,
+        payload.DriverFirstName,
+        payload.DriverLastName,
+        payload.DriverEmail,
+        payload.DriverPhone,
+        (payload.DrivingOnBehalfOfOrganization ? 'true' : 'false'),
+        payload.DrivingOBOOrganizationName,
+        (payload.RidersCanSeeDriverDetails ? 'true' : 'false'),
+        (payload.DriverWillNotTalkPolitics ? 'true' : 'false'),
+        (payload.PleaseStayInTouch ? 'true' : 'false'),
         payload.DriverPreferredContact,
         (payload.DriverWillTakeCare ? 'true' : 'false')
-    ]
+    ];
 }
 
 // for all two param Rider fns
