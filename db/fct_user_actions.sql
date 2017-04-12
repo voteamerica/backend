@@ -11,6 +11,33 @@
 -- functions return out_error_code=0 in case of success. If <>0, out_error_text contains error description
 
 
+-- State transitions ---
+
+-- [0]    -----> submit_new_driver [1] driver : Pending [OK]
+-- [0]    -----> submit_new_rider  [2] rider : Pending [OK]
+-- [0]    -----> submit_new_helper [3] 
+
+-- [1][2] -----> match             [4] match : MatchProposed, driver : MatchProposed, rider : MatchProposed [OK]
+
+-- [1]    -----> driver_cancel_drive_offer  [5]  driver : Canceled [OK]
+-- [2]    -----> rider_cancel_ride_request  [6]  rider : Canceled  [OK]
+
+-- [4]    -----> driver_cancel_drive_offer  [7]  match : Canceled, driver : Canceled, rider : Pending/MatchProposed [OK]
+-- [4]    -----> rider_cancel_ride_request  [8]  match : Canceled, driver : Pending/MatchProposed, rider : Canceled
+
+-- [5]    -----> driver_cancel_drive_offer  [5]  driver : Canceled [OK]
+-- [6]    -----> rider_cancel_ride_request  [6]  rider : Canceled  [OK]
+
+-- [4]    -----> driver_confirm_match       [9]  match : MatchConfirmed, driver : MatchConfirmed, rider : MatchConfirmed [OK]
+
+-- [9]    -----> driver_cancel_confirmed_match [10]  match : Canceled, driver : MatchProposed/Pending, rider : MatchProposed/Pending [OK]
+-- [9]    -----> rider_cancel_confirmed_match  [11]  match : Canceled, driver : MatchProposed/Pending, rider : MatchProposed/Pending [OK]
+-- [10]   -----> driver_cancel_drive_offer  [5] [OK]
+-- [11]   -----> rider_cancel_ride_request  [6] [OK]
+
+-- [9]    -----> driver_cancel_drive_offer  [5] [OK]
+-- [9]    -----> rider_cancel_ride_request  [6]  match : Canceled, rider : Canceled, driver : Pending [OK]
+
 -- Common function to update status of ride request record
 
 SET search_path = carpoolvote, pg_catalog;
@@ -117,12 +144,8 @@ BEGIN
 		END IF;
 		
 		v_step := 'S7';
-		IF (a_RiderPreferredContact is null) or (a_RiderPreferredContact != 'SMS' and a_RiderPreferredContact != 'Email' and a_RiderPreferredContact != 'Phone')
-		THEN
-			out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
-			out_error_text := 'Invalid RiderPreferredContact (SMS/Email/Phone)';
-			RETURN;
-		END IF;
+		-- Preferred contact method validation
+		-- skipped
 		
 		v_step := 'S8';
 		out_uuid := carpoolvote.gen_random_uuid();
@@ -268,12 +291,9 @@ BEGIN
 		END IF;
 		
 		v_step := 'S7';
-		IF (a_DriverPreferredContact is null) or (a_DriverPreferredContact != 'SMS' and a_DriverPreferredContact != 'Email' and a_DriverPreferredContact != 'Phone')
-		THEN
-			out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
-			out_error_text := 'Invalid DriverPreferredContact (SMS/Email/Phone)';
-			RETURN;
-		END IF;
+		-- Preferred contact method validation
+		-- skipped
+		
 		
 		v_step := 'S8';
 		out_uuid := carpoolvote.gen_random_uuid();
