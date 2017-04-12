@@ -341,7 +341,7 @@ function getRiderPayloadAsArray(req, payload) {
         (payload.RiderWillNotTalkPolitics ? 'true' : 'false'),
         (payload.PleaseStayInTouch ? 'true' : 'false'),
         (payload.NeedWheelchair ? 'true' : 'false'),
-		payload.RiderPreferredContact,
+		payload.RiderPreferredContact.toString(),
         payload.RiderAccommodationNotes,
         (payload.RiderLegalConsent ? 'true' : 'false'),
         (payload.RiderWillBeSafe ? 'true' : 'false'),
@@ -368,7 +368,7 @@ function getDriverPayloadAsArray(req, payload) {
         (payload.RidersCanSeeDriverDetails ? 'true' : 'false'),
         (payload.DriverWillNotTalkPolitics ? 'true' : 'false'),
         (payload.PleaseStayInTouch ? 'true' : 'false'),
-        payload.DriverPreferredContact,
+        payload.DriverPreferredContact.toString(),
         (payload.DriverWillTakeCare ? 'true' : 'false')
     ];
 }
