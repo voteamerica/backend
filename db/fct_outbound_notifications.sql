@@ -1,4 +1,37 @@
 ----------------------------------------------------------
+-- determines the status of the outgoing sms when it's inserted
+-- default is 'Pending'
+-- But if parameter outgoing_sms_whitelist.enabled is true,
+-- and the phone number is not found in the sms_whitelist table
+-- the record is inserted with status 'Blocked'
+----------------------------------------------------------
+CREATE OR REPLACE FUNCTION carpoolvote.outgoing_sms_insert_status(
+	in_phone_number carpoolvote.outgoing_sms.recipient%TYPE ) 
+RETURNS character varying AS
+$BODY$
+BEGIN
+
+
+
+IF EXISTS (
+	SELECT 1 FROM carpoolvote.sms_whitelist
+	WHERE regexp_replace( regexp_replace(COALESCE(phone_number, ''),'(\D)', '', 'g'), '^1', '', 'g')  -- strips everything that is not numeric and the first one 
+			= regexp_replace( regexp_replace(COALESCE(in_phone_number, ''),'(\D)', '', 'g'), '^1', '', 'g') -- strips everything that is not numeric and the first one 
+	UNION
+	SELECT 1 FROM carpoolvote.params
+	WHERE name = 'outgoing_sms_whitelist.enabled' and value = 'false'   -- white list must be explicitly turned off
+) THEN
+	RETURN 'Pending';
+ELSE
+	RETURN 'Blocked';
+END IF;
+
+END
+$BODY$
+  LANGUAGE plpgsql VOLATILE;
+
+
+----------------------------------------------------------
 -- Common function to return HTML header
 ----------------------------------------------------------
 CREATE OR REPLACE FUNCTION carpoolvote.notifications_html_header() 
@@ -130,8 +163,8 @@ BEGIN
 					|| ' Self-Service portal : http://carpoolvote.com/self-service/?type=driver&uuid=' || v_driver_record."UUID" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || v_driver_record."UUID" || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName");
 					
-            INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body)                                             
-            VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body);                                                                 
+            INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)                                             
+            VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));                                                                 
         END IF;                                                                                                            
 		
 		RETURN;
@@ -224,8 +257,8 @@ BEGIN
 					|| ' Self-Service portal : http://carpoolvote.com/self-service/?type=rider&uuid=' || v_rider_record."UUID" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || v_rider_record."UUID" || '&RiderPhone=' || carpoolvote.urlencode(v_rider_record."RiderLastName");
 				
-            INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body)                                             
-            VALUES (v_rider_record."RiderPhone",v_rider_record."UUID",  v_body);                                                                 
+            INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)                                             
+            VALUES (v_rider_record."RiderPhone",v_rider_record."UUID",  v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));                                                                 
         END IF;                    
 		
 		RETURN;
@@ -366,8 +399,8 @@ BEGIN
 						|| ' New matches are available.' || ' ' || carpoolvote.urlencode(chr(10))
 				        || ' Visit the self-service page for details http://carpoolvote.com/self-service/?type=driver&uuid=' || v_driver_record."UUID";			
 			
-				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body)
-				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body);
+				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
+				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
 			
 			END IF;
 		
@@ -462,8 +495,8 @@ BEGIN
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body)
-				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body);
+				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
+				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
 			END IF;
 
 		RETURN;
@@ -546,8 +579,8 @@ BEGIN
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 		
-			INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body)
-			VALUES (v_rider_record."RiderPhone", uuid_rider, v_body);
+			INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
+			VALUES (v_rider_record."RiderPhone", uuid_rider, v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
 		END IF;
 		
 		RETURN;
@@ -639,8 +672,8 @@ BEGIN
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body)
-				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body);
+				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
+				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));
 		END IF;
 
 		RETURN;
@@ -733,8 +766,8 @@ BEGIN
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body)
-				VALUES (v_rider_record."RiderPhone", v_rider_record."UUID", v_body);
+				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
+				VALUES (v_rider_record."RiderPhone", v_rider_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
 		END IF;
 				
 		
@@ -822,8 +855,8 @@ BEGIN
 					|| ' Radius : ' || v_driver_record."DriverCollectionRadius" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Drive Times : ' || replace(replace(replace(replace(replace(v_driver_record."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-'); 
 			
-			INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body)
-			VALUES (v_driver_record."DriverPhone", uuid_driver, v_body);
+			INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
+			VALUES (v_driver_record."DriverPhone", uuid_driver, v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));
 		END IF;
 		
 
@@ -918,8 +951,8 @@ BEGIN
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body)
-				VALUES (v_rider_record."RiderPhone", uuid_rider, v_body);
+				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
+				VALUES (v_rider_record."RiderPhone", uuid_rider, v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
 			END IF;
 			
 		RETURN;
@@ -1014,8 +1047,8 @@ BEGIN
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body)
-				VALUES (v_driver_record."DriverPhone", uuid_driver, v_body);
+				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
+				VALUES (v_driver_record."DriverPhone", uuid_driver, v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));
 		END IF;		
 
 		RETURN;
@@ -1108,8 +1141,8 @@ BEGIN
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body)
-				VALUES (v_rider_record."RiderPhone", uuid_rider, v_body);
+				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
+				VALUES (v_rider_record."RiderPhone", uuid_rider, v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
 		END IF;
 				
 		
@@ -1212,8 +1245,8 @@ BEGIN
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body)
-				VALUES (v_driver_record."DriverPhone", uuid_driver, v_body);
+				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
+				VALUES (v_driver_record."DriverPhone", uuid_driver, v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));
 		END IF;		
 
 		RETURN;
@@ -1304,8 +1337,8 @@ BEGIN
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
 			
-				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body)
-				VALUES (v_rider_record."RiderPhone", uuid_rider, v_body);
+				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
+				VALUES (v_rider_record."RiderPhone", uuid_rider, v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
 		END IF;		
 
 		RETURN;
