@@ -24,6 +24,7 @@ input.driver.enabled	true
 input.rider.enabled	true
 input.helper.enabled	true
 api_environment	live
+outgoing_sms_whitelist.enabled	true
 \.
 
 

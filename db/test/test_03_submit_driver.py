@@ -670,35 +670,3 @@ def test_insert_driver_018_DriverPreferredContact_valid_Phone(pgdbConn):
         
     pgdbConn.commit()
 
-def test_insert_driver_019_DriverPreferredContact_invalid(pgdbConn):
-    args = {
-        'IPAddress' : '127.0.0.1',
-        'DriverCollectionZIP' : '90210',
-        'DriverCollectionRadius' : '10',
-        'AvailableDriveTimesLocal' : '2018-10-01T02:00/2018-10-01T03:00|2019-10-01T02:00/2019-10-01T03:00',
-        'DriverCanLoadRiderWithWheelchair' : 'True',
-        'SeatCount' : '10',
-        'DriverLicenseNumber' : '',
-        'DriverFirstName' : '',
-        'DriverLastName' : 'Doe',
-        'DriverEmail' : 'john.doe@mail.com',
-        'DriverPhone' : '555-555-5555',
-        'DrivingOnBehalfOfOrganization' : 'True',
-        'DrivingOBOOrganizationName' : 'Good Org',
-        'RidersCanSeeDriverDetails' : 'False',
-        'DriverWillNotTalkPolitics' : 'True',
-        'PleaseStayInTouch' : 'True',
-        'DriverPreferredContact' : 'Junk',
-        'DriverWillTakeCare' : 'True'
-        }
-    
-    results = generic_driver_insert(pgdbConn, args)
-    uuid=results['uuid']
-    error_code=results['error_code']
-    error_text=results['error_text']
-    
-    assert len(error_text)>0
-    assert error_code==2
-    assert len(uuid)==0
-        
-    pgdbConn.commit()

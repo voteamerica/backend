@@ -240,7 +240,7 @@ CREATE TABLE outgoing_sms (
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     status character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
-    recipient character varying(15) NOT NULL,
+    recipient character varying(20) NOT NULL,
     body text NOT NULL,
     emission_info text
 );
@@ -319,7 +319,7 @@ CREATE TABLE rider (
 ALTER TABLE rider OWNER TO carpool_admins;
 
 --
--- Name: tz_dst_offset; Type: TABLE; Schema: carpoolvote; Owner: eric
+-- Name: tz_dst_offset; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
 --
 
 CREATE TABLE tz_dst_offset (
@@ -330,7 +330,7 @@ CREATE TABLE tz_dst_offset (
 );
 
 
-ALTER TABLE tz_dst_offset OWNER TO eric;
+ALTER TABLE tz_dst_offset OWNER TO carpool_admins;
 
 --
 -- Name: usstate; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
@@ -343,6 +343,24 @@ CREATE TABLE usstate (
 
 
 ALTER TABLE usstate OWNER TO carpool_admins;
+
+
+
+CREATE TABLE carpoolvote.sms_whitelist
+(
+  phone_number character varying(20) NOT NULL,
+  CONSTRAINT sms_whitelist_pk PRIMARY KEY (phone_number)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE carpoolvote.sms_whitelist
+  OWNER TO carpool_admins;
+GRANT ALL ON TABLE carpoolvote.sms_whitelist TO carpool_admins;
+GRANT SELECT, UPDATE ON TABLE carpoolvote.sms_whitelist TO carpool_role;
+COMMENT ON TABLE carpoolvote.sms_whitelist
+  IS 'lists the phone numbers which we can send SMS to';
+
 
 --
 -- Name: vw_drive_offer; Type: VIEW; Schema: carpoolvote; Owner: carpool_admins
@@ -653,7 +671,7 @@ ALTER TABLE ONLY rider
 
 
 --
--- Name: tz_dst_offset_pkey; Type: CONSTRAINT; Schema: carpoolvote; Owner: eric
+-- Name: tz_dst_offset_pkey; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
 --
 
 ALTER TABLE ONLY tz_dst_offset

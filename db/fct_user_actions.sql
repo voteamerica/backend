@@ -43,6 +43,29 @@
 SET search_path = carpoolvote, pg_catalog;
 
 
+CREATE OR REPLACE FUNCTION carpoolvote.validate_name_or_phone(
+	a_confirmation_parameter character varying,
+	a_last_name character varying,
+	a_phone_number character varying
+	) RETURNS boolean AS
+$BODY$
+BEGIN
+
+RETURN (LOWER(a_last_name) = LOWER(a_confirmation_parameter)
+		OR (regexp_replace( regexp_replace(COALESCE(a_phone_number, ''),'(\D)', '', 'g'), '^1', '', 'g')  -- strips everything that is not numeric and the first one 
+			= regexp_replace( regexp_replace(COALESCE(a_confirmation_parameter, ''),'(\D)', '', 'g'), '^1', '', 'g'))); -- strips everything that is not numeric and the first one 
+END
+$BODY$
+  LANGUAGE plpgsql VOLATILE;
+ALTER FUNCTION carpoolvote.validate_name_or_phone(character varying, character varying, character varying)
+	OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.validate_name_or_phone(	character varying, character varying, character varying) 
+	TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.validate_name_or_phone( character varying, character varying, character varying)
+	TO carpool_role;
+
+  
+  
 -- 
 -- submit_new_rider
 -- return codes : 
@@ -584,9 +607,7 @@ BEGIN
 	SELECT 1 
 	FROM carpoolvote.rider r
 	WHERE r."UUID" = a_uuid_rider
-	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
-		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
-			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."RiderLastName", r."RiderPhone")
 	)
 	THEN
 		out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
@@ -711,9 +732,7 @@ BEGIN
 	AND m.score = a_score
 	AND m.status = 'MatchConfirmed'   -- We can cancel only a Confirmed match
 	AND m.uuid_rider = r."UUID"
-	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
-		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
-			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."RiderLastName", r."RiderPhone")
 	)
 	THEN
 		out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
@@ -818,9 +837,7 @@ BEGIN
 	SELECT 1 
 	FROM carpoolvote.driver r
 	WHERE r."UUID" = a_UUID
-	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
-		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
-			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."DriverLastName", r."DriverPhone")
 	)
 	THEN
 		out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
@@ -938,9 +955,7 @@ BEGIN
 	AND m.uuid_rider = a_UUID_rider
 	AND m.status = 'MatchConfirmed'   -- We can confirmed only a 
 	AND m.uuid_driver = r."UUID"
-	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
-		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
-			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."DriverLastName", r."DriverPhone")
 	)
 	THEN
 		out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
@@ -1053,9 +1068,7 @@ BEGIN
 	AND m.score = a_score
 	AND m.status = 'MatchProposed'   -- We can confirmed only a 
 	AND m.uuid_driver = r."UUID"
-	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
-		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
-			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."DriverLastName", r."DriverPhone")
 	)
 	THEN
 		out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
@@ -1173,9 +1186,7 @@ BEGIN
 	SELECT 1 
 	FROM carpoolvote.driver r
 	WHERE r."UUID" = uuid_driver
-	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
-		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
-			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."DriverLastName", r."DriverPhone")
 	)
 	THEN
 		out_error_code := 2;
@@ -1216,35 +1227,6 @@ CREATE OR REPLACE FUNCTION driver_confirmed_matches(a_uuid character varying, co
     LANGUAGE sql STABLE
     AS $$
 
--- DECLARE                                                   
-
--- BEGIN 
-
-	-- input validation
-	-- IF NOT EXISTS (
-	-- SELECT 1 
-	-- FROM carpoolvote.driver r
-	-- WHERE r."UUID" = a_UUID
-	-- AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
-	-- 	OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
-	-- 		= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
-	-- )
-	-- THEN
-	-- 	-- return 'No Drive Offer found for those parameters';
-    --     RETURN row_to_json(d_row);
-	-- END IF;
-
-    --     SELECT * INTO
-    --         d_row
-    --     FROM
-    --         carpoolvote.vw_driver_matches
-    --     WHERE
-    --             uuid_driver = a_uuid
-    --         AND "matchStatus" = 'MatchConfirmed';
-    --         -- AND "matchStatus" = 'Canceled';
-
-    --    RETURN row_to_json(d_row);
-
         SELECT row_to_json(s)
         FROM ( 
             SELECT * from
@@ -1253,8 +1235,6 @@ CREATE OR REPLACE FUNCTION driver_confirmed_matches(a_uuid character varying, co
                 uuid_driver = a_uuid
             AND "matchStatus" = 'MatchConfirmed'
         ) s ;
-
--- END  
 
 $$;
 
@@ -1281,9 +1261,7 @@ BEGIN
 	SELECT 1 
 	FROM carpoolvote.driver r
 	WHERE r."UUID" = a_UUID
-	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
-		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
-			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."DriverLastName", r."DriverPhone")
 	)
 	THEN
 		return 'No Drive Offer found for those parameters';
@@ -1319,9 +1297,7 @@ BEGIN
 	SELECT 1 
 	FROM carpoolvote.driver r
 	WHERE r."UUID" = a_UUID
-	AND (LOWER(r."DriverLastName") = LOWER(confirmation_parameter)
-		OR (regexp_replace(COALESCE(r."DriverPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
-			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."DriverLastName", r."DriverPhone")
 	)
 	THEN
 		-- return 'No Drive Offer found for those parameters';
@@ -1377,7 +1353,7 @@ ALTER FUNCTION carpoolvote.driver_proposed_matches(a_uuid character varying, con
 -- Name: rider_confirmed_match(character varying, character varying); Type: FUNCTION; Schema: carpoolvote; Owner: carpool_admins
 --
 
-CREATE OR REPLACE FUNCTION rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) RETURNS json
+CREATE OR REPLACE FUNCTION carpoolvote.rider_confirmed_match(a_uuid character varying, confirmation_parameter character varying) RETURNS json
     LANGUAGE plpgsql
     AS $$
 
@@ -1391,9 +1367,7 @@ BEGIN
 	SELECT 1 
 	FROM carpoolvote.rider r
 	WHERE r."UUID" = a_UUID
-	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
-		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
-			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."RiderLastName", r."RiderPhone")
 	)
 	THEN
         RETURN row_to_json(r_row);
@@ -1445,9 +1419,7 @@ BEGIN
 	SELECT 1 
 	FROM carpoolvote.rider r
 	WHERE r."UUID" = a_UUID
-	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
-		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
-			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."RiderLastName", r."RiderPhone")
 	)
 	THEN
 		return 'No Ride Request found for those parameters';
@@ -1491,9 +1463,7 @@ BEGIN
 	SELECT 1 
 	FROM carpoolvote.rider r
 	WHERE r."UUID" = a_UUID
-	AND (LOWER(r."RiderLastName") = LOWER(confirmation_parameter)
-		OR (regexp_replace(COALESCE(r."RiderPhone", ''), '(^(\D)*1)?\D', '', 'g')  -- strips everything that is not numeric and the first one 
-			= regexp_replace(COALESCE(confirmation_parameter, ''), '(^(\D)*1)?\D', '', 'g'))) -- strips everything that is not numeric and the first one 
+	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."RiderLastName", r."RiderPhone")
 	)
 	THEN
 		-- return 'No Ride Request found for those parameters';

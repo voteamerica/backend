@@ -8,7 +8,7 @@ interface TwilioConfig {
 
 interface SMSMessage {
   id: Number,
-  state: String;
+  status: String;
   body: String;
   phoneNumber: String; 
 }
@@ -43,8 +43,7 @@ var pool = new Pool({
   idleTimeoutMillis: 2000 //close idle clients after 2 seconds
 });
 
-// var SCHEMA_NAME = 'stage';
-var SCHEMA_NAME = 'nov2016';
+var SCHEMA_NAME = 'carpoolvote';
 
 const OUTGOING_EMAIL_TABLE    = 'outgoing_email';
 const OUTGOING_SMS_TABLE      = 'outgoing_sms';
@@ -62,7 +61,7 @@ function dbGetOutgoingEmailString() {
   return 'SELECT * FROM '
           + SCHEMA_NAME + '.' 
           + OUTGOING_EMAIL_TABLE
-          + ' WHERE state=' + " '" + 'Pending' + "' ";
+          + ' WHERE status=' + " '" + 'Pending' + "' ";
       ;
 }
 
@@ -70,7 +69,7 @@ function dbGetOutgoingSmsString() {
   return 'SELECT * FROM '
           + SCHEMA_NAME + '.' 
           + OUTGOING_SMS_TABLE
-          + ' WHERE state=' + " '" + 'Pending' + "' ";
+          + ' WHERE status=' + " '" + 'Pending' + "' ";
       ;
 }
 
@@ -102,7 +101,7 @@ function dbGetItemsToSend(pool, executeFunctionArray) {
 
         var message: SMSMessage = {
           id:           smsMessage.id,
-          state:        smsMessage.state,
+          status:        smsMessage.state,
           body:         smsMessage.body,
           phoneNumber:  smsMessage.recipient
         };
@@ -159,12 +158,12 @@ function sendSms (id: Number, to: String, message: String) {
 
 function dbUpdateSentString (tableName) {
   return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
-          ' SET state=' + " '" + 'Sent' + "' WHERE id=$1";
+          ' SET status=' + " '" + 'Sent' + "' WHERE id=$1";
 }
 
 function dbUpdateFailedString (tableName) {
   return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
-          ' SET state=' + " '" + 'Failed' + "' WHERE id=$1";
+          ' SET status=' + " '" + 'Failed' + "' WHERE id=$1";
 }
 
 function dbUpdateMessageItemStatus(id, pool, fnUpdateString) {
