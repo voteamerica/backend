@@ -240,7 +240,7 @@ CREATE TABLE outgoing_sms (
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     status character varying(30) DEFAULT 'Pending'::character varying NOT NULL,
-    recipient character varying(15) NOT NULL,
+    recipient character varying(20) NOT NULL,
     body text NOT NULL,
     emission_info text
 );

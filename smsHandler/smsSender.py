@@ -22,7 +22,7 @@ except:
 	exit
 
 cur = conn.cursor()
-cur.execute("""SELECT id, recipient, body from nov2016.outgoing_sms where state='Pending' order by created_ts asc """)
+cur.execute("""SELECT id, recipient, body from carpoolvote.outgoing_sms where status='Pending' order by created_ts asc """)
 
 rows = cur.fetchall()
 
@@ -38,13 +38,13 @@ for row in rows:
 		message = client.messages.create(body=row[2], to=phone_number, from_=twilio_number)
 		print(message.sid)
 
-		cur.execute("""UPDATE nov2016.outgoing_sms
-						SET state='Sent', emission_info = %s 
+		cur.execute("""UPDATE carpoolvote.outgoing_sms
+						SET status='Sent', emission_info = %s 
 						WHERE id = %s""", (message.sid, row[0],))
 		conn.commit()
 	except TwilioRestException as err:
-		cur.execute("""UPDATE nov2016.outgoing_sms
-						SET state='Failed', emission_info = %s 
+		cur.execute("""UPDATE carpoolvote.outgoing_sms
+						SET status='Failed', emission_info = %s 
 						WHERE id = %s""", ("{0}".format(err), "{0}".format(row[0]), ))
 		conn.commit()
 	

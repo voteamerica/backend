@@ -19,8 +19,7 @@ var Pool = require('pg').Pool;
 var pool = new Pool({
     idleTimeoutMillis: 2000 //close idle clients after 2 seconds
 });
-// var SCHEMA_NAME = 'stage';
-var SCHEMA_NAME = 'nov2016';
+var SCHEMA_NAME = 'carpoolvote';
 var OUTGOING_EMAIL_TABLE = 'outgoing_email';
 var OUTGOING_SMS_TABLE = 'outgoing_sms';
 var currentFunction = 0;
@@ -34,14 +33,14 @@ function dbGetOutgoingEmailString() {
     return 'SELECT * FROM '
         + SCHEMA_NAME + '.'
         + OUTGOING_EMAIL_TABLE
-        + ' WHERE state=' + " '" + 'Pending' + "' ";
+        + ' WHERE status=' + " '" + 'Pending' + "' ";
     ;
 }
 function dbGetOutgoingSmsString() {
     return 'SELECT * FROM '
         + SCHEMA_NAME + '.'
         + OUTGOING_SMS_TABLE
-        + ' WHERE state=' + " '" + 'Pending' + "' ";
+        + ' WHERE status=' + " '" + 'Pending' + "' ";
     ;
 }
 function dbGetItemsToSend(pool, executeFunctionArray) {
@@ -64,7 +63,7 @@ function dbGetItemsToSend(pool, executeFunctionArray) {
                 console.log("message: " + smsMessageOutput);
                 var message = {
                     id: smsMessage.id,
-                    state: smsMessage.state,
+                    status: smsMessage.status,
                     body: smsMessage.body,
                     phoneNumber: smsMessage.recipient
                 };
@@ -108,11 +107,11 @@ function sendSms(id, to, message) {
 ;
 function dbUpdateSentString(tableName) {
     return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
-        ' SET state=' + " '" + 'Sent' + "' WHERE id=$1";
+        ' SET status=' + " '" + 'Sent' + "' WHERE id=$1";
 }
 function dbUpdateFailedString(tableName) {
     return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
-        ' SET state=' + " '" + 'Failed' + "' WHERE id=$1";
+        ' SET status=' + " '" + 'Failed' + "' WHERE id=$1";
 }
 function dbUpdateMessageItemStatus(id, pool, fnUpdateString) {
     var updateString = fnUpdateString();
