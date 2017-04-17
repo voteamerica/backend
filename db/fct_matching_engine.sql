@@ -21,15 +21,15 @@ b_driver_all_times_expired boolean := TRUE;
 b_driver_validated boolean := TRUE;
 
 RADIUS_MAX_ALLOWED integer := 100;
-BEYOND_RADIUS_TOLERANCE integer := 20;
+BEYOND_RADIUS_TOLERANCE integer := 10;
 
 drive_offer_row carpoolvote.driver%ROWTYPE;
 ride_request_row carpoolvote.rider%ROWTYPE;
 cnt integer;
-match_points integer;
-match_points_with_time integer;
-time_criteria_points integer;
+v_score integer;
 v_existing_score integer;
+v_pair_rank integer;
+v_status text;
 
 ride_times_rider text[];
 ride_times_driver text[];
@@ -55,6 +55,8 @@ BEGIN
 	out_error_code := carpoolvote.f_SUCCESS();
 	out_error_text := '';
 
+	RADIUS_MAX_ALLOWED := COALESCE(carpoolvote.get_param_value('radius.max'), '100')::int;
+	BEYOND_RADIUS_TOLERANCE := COALESCE(carpoolvote.get_param_value('radius.tolerance'), '10')::int;
 
 	run_now := true;
 	--BEGIN
@@ -69,8 +71,7 @@ BEGIN
 
 		CREATE TEMPORARY TABLE match_notifications_buffer (
 		 uuid_driver character varying(50) NOT NULL,
-		 uuid_rider character varying(50) NOT NULL,
-		 score smallint
+		 uuid_rider character varying(50) NOT NULL
 		);
 	
 		-- Initialize Counters
@@ -288,8 +289,20 @@ BEGIN
 					IF 	b_driver_validated
 					THEN
 				
-						match_points := 0;
-				
+						v_score := 0;
+						v_pair_rank := 2;
+
+						-- vulnerable rider matching
+						IF ride_request_row."RiderIsVulnerable" = false
+						THEN
+							v_pair_rank := v_pair_rank +1;
+						ELSIF ride_request_row."RiderIsVulnerable" = true 
+							AND drive_offer_row."DrivingOnBehalfOfOrganization" 
+						THEN
+							v_pair_rank := v_pair_rank +1;
+						END IF;
+						
+						
 						-- Compare RiderCollectionZIP with DriverCollectionZIP / DriverCollectionRadius
 						distance_origin_pickup := carpoolvote.distance(
 									zip_origin.latitude_numeric,
@@ -307,40 +320,14 @@ BEGIN
 						--RAISE NOTICE 'distance_origin_pickup=%', distance_origin_pickup;
 						--RAISE NOTICE 'distance_origin_dropoff=%', distance_origin_pickup;
 						
-						IF distance_origin_pickup < RADIUS_MAX_ALLOWED AND distance_origin_dropoff < RADIUS_MAX_ALLOWED
-							AND distance_origin_pickup < (drive_offer_row."DriverCollectionRadius" + BEYOND_RADIUS_TOLERANCE)
+						IF distance_origin_pickup < (drive_offer_row."DriverCollectionRadius" + BEYOND_RADIUS_TOLERANCE)
 							AND distance_origin_dropoff < (drive_offer_row."DriverCollectionRadius" + BEYOND_RADIUS_TOLERANCE)
 						THEN
-
-							-- driver/rider distance ranking
-							IF distance_origin_pickup <= drive_offer_row."DriverCollectionRadius" 
-								AND distance_origin_dropoff <= drive_offer_row."DriverCollectionRadius"
+							IF v_pair_rank = 3
 							THEN
-								match_points := match_points + 200 
-									- distance_origin_pickup  -- closest distance gets more points 
-									- distance_origin_dropoff ;
-							END IF; 
-							
-							--RAISE NOTICE 'D-%, R-%, distance ranking Score=%', 
-										--drive_offer_row."UUID", 
-										--ride_request_row."UUID", 
-										--match_points;
-			
-							
-							-- vulnerable rider matching
-							IF ride_request_row."RiderIsVulnerable" = false
-							THEN
-								match_points := match_points + 200;
-							ELSIF ride_request_row."RiderIsVulnerable" = true 
-								AND drive_offer_row."DrivingOnBehalfOfOrganization" 
-							THEN
-								match_points := match_points + 200;
+								v_pair_rank := 4;
 							END IF;
-					
-							--RAISE NOTICE 'D-%, R-%, vulnerable ranking Score=%', 
-										--drive_offer_row."UUID", 
-										--ride_request_row."UUID", 
-										--match_points;
+							v_score = distance_origin_pickup;
 			
 							-- time matching
 							-- Each combination of rider time and driver time can give a potential match
@@ -357,35 +344,31 @@ BEGIN
 									end_ride_time :=    (substring(rider_time from position ('/' in rider_time)))::timestamp without time zone;
 					
 									-- each time interval is in ISO8601 format
-									-- 2016-10-23T10:00:00-0500/2016-10-23T11:00:00-0500
+									-- new format without timezone : 2016-10-01T02:00/2016-10-01T03:00
 									start_drive_time :=  (substring(driver_time from 1 for (position ('/' in driver_time)-1)))::timestamp without time zone;
 									end_drive_time :=    (substring(driver_time from position ('/' in driver_time)))::timestamp without time zone;
 
 									
 									
-									time_criteria_points := 200;
 									
 									IF end_drive_time < start_ride_time       -- [ddddd]  [rrrrrr]
 										OR end_ride_time < start_drive_time   -- [rrrrr]  [dddddd]
 									THEN
 										-- we're totally disconnected
 										
-										IF end_drive_time < start_ride_time
-										THEN
+										-- If driver has the ability to carry a rider who needs a wheelchair,
+										-- and if they're both willing to drive/ride the same day (no matter the time)
+										-- then we grant them rank 5
 										
-											-- substracts one point per minute the driver is outside the rider interval
-											time_criteria_points := 
-												time_criteria_points - abs(EXTRACT(EPOCH FROM (start_ride_time - end_drive_time))) / 60;
-										ELSIF end_ride_time < start_drive_time
+										IF ride_request_row."NeedWheelchair" = true AND drive_offer_row."DriverCanLoadRiderWithWheelchair" = true 
+											AND EXTRACT(DOY FROM start_ride_time) = EXTRACT(DOY FROM start_drive_time)
 										THEN
-											time_criteria_points := 
-												time_criteria_points - abs(EXTRACT(EPOCH FROM (start_drive_time - end_ride_time))) / 60;
+											IF v_pair_rank = 4
+											THEN
+												v_pair_rank := 5;
+											END IF;
 										END IF;
-										
-										if time_criteria_points < 0
-										THEN
-											time_criteria_points := 0; 
-										END IF;
+									
 										
 									-- ELSIF start_drive_time < start_ride_time  -- [ddd[rdrdrdrdrd]ddd] 
 										-- AND end_drive_time > end_ride_time
@@ -403,71 +386,82 @@ BEGIN
 										-- AND end_drive_time < end_ride_time
 									-- THEN
 										-- -- We're completely in the interval
+									ELSE
+										IF v_pair_rank = 4
+										THEN
+											v_pair_rank := 5;
+										END IF;
 									END IF;
 									
-                                    match_points_with_time := match_points + time_criteria_points;
                                     
 									--RAISE NOTICE 'D-%, R-%, time ranking ranking Score=%', 
 										--drive_offer_row."UUID", 
 										--ride_request_row."UUID", 
-										--match_points_with_time;
-									
-									IF match_points_with_time >= 300
+										--v_score;
+										
+									IF v_pair_rank >= 4
 									THEN
+									
+										IF v_pair_rank = 4
+										THEN
+											v_status='ExtendedMatch';
+										ELSE
+											v_status='MatchProposed';
+										END IF;
+									
                                         IF EXISTS (
                                             SELECT 1 FROM match_notifications_buffer
                                                 WHERE uuid_rider = ride_request_row."UUID"
                                                 AND uuid_driver = drive_offer_row."UUID")
                                         THEN
-                                        
-                                            UPDATE match_notifications_buffer
-                                            SET score = match_points_with_time
+											-- maybe new match is higher rank
+											UPDATE carpoolvote.match
+                                            SET status = v_status
                                             WHERE uuid_rider = ride_request_row."UUID"
                                             AND uuid_driver = drive_offer_row."UUID"
-                                            AND score < match_points_with_time;
+                                            AND status <> 'MatchProposed' AND status <> v_status;
                                             
-                                            -- new match only if score if higher 
-                                            IF FOUND THEN
-                                                UPDATE carpoolvote.match
-                                                SET score = match_points_with_time
-                                                WHERE uuid_rider = ride_request_row."UUID"
-                                                AND uuid_driver = drive_offer_row."UUID"
-                                                AND score < match_points_with_time;
+											IF FOUND THEN
+												v_proposed_count := v_proposed_count +1;
+                                                RAISE NOTICE 'Better Match, Rider=%, Driver=%, Score=%, Rank=%',
+														ride_request_row."UUID", drive_offer_row."UUID", v_score, v_pair_rank;
+											END IF;
                                                 
-                                                RAISE NOTICE 'Better Proposed Match, Rider=%, Driver=%, Score=%',
-														ride_request_row."UUID", drive_offer_row."UUID", match_points_with_time;
-                                                
-                                            END IF;
                                         
                                         ELSE
 											INSERT INTO carpoolvote.match (uuid_rider, uuid_driver, score, status)
 												VALUES (
 													ride_request_row."UUID",               --pkey
 													drive_offer_row."UUID",                --pkey 
-													match_points_with_time,                --pkey
-													'MatchProposed'
+													v_score,
+													v_status
 												);
 
-											INSERT INTO match_notifications_buffer (uuid_driver, uuid_rider, score)
-                                                VALUES (drive_offer_row."UUID", ride_request_row."UUID", match_points_with_time);
-																						
-											UPDATE carpoolvote.rider r
-											SET status='MatchProposed'
-											WHERE r."UUID" = ride_request_row."UUID";
+											INSERT INTO match_notifications_buffer (uuid_driver, uuid_rider)
+                                                VALUES (drive_offer_row."UUID", ride_request_row."UUID");
 
-											-- If already MatchConfirmed, keep it as is
-											UPDATE carpoolvote.driver d
+											IF v_status = 'MatchProposed'
+											THEN
+												UPDATE carpoolvote.rider r
+												SET status='MatchProposed'
+												WHERE r."UUID" = ride_request_row."UUID";
+
+												-- If already MatchConfirmed, keep it as is
+												UPDATE carpoolvote.driver d
 												SET status='MatchProposed'
 												WHERE d."UUID" = drive_offer_row."UUID"
                                                 AND status='Pending';
 											
-											v_proposed_count := v_proposed_count +1;
+												v_proposed_count := v_proposed_count +1;
                                             
-                                            RAISE NOTICE 'Proposed Match, Rider=%, Driver=%, Score=%',
-                                                ride_request_row."UUID", drive_offer_row."UUID", match_points_with_time;
+												RAISE NOTICE 'Proposed Match, Rider=%, Driver=%, Score=%, Rank=%',
+													ride_request_row."UUID", drive_offer_row."UUID", v_score, v_pair_rank;
+											ELSE
+												RAISE NOTICE 'Extended Match, Rider=%, Driver=%, Score=%, Rank=%',
+													ride_request_row."UUID", drive_offer_row."UUID", v_score, v_pair_rank;
+											END IF;
                                         END IF;
-										                 
-									 
+
 									END IF;
 									
 								END LOOP;

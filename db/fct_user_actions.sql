@@ -300,7 +300,8 @@ BEGIN
 		END IF;
 		
 		v_step := 'S5';
-		IF (a_DriverCollectionRadius is null) or (a_DriverCollectionRadius <= 0) THEN
+		IF (a_DriverCollectionRadius is null) or (a_DriverCollectionRadius <= 0) 
+		or (COALESCE(carpoolvote.get_param_value('radius.max'), '100')::int < a_DriverCollectionRadius) THEN
 			out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
 			out_error_text := 'Invalid DriverCollectionRadius';
 			RETURN;
