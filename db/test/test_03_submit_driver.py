@@ -270,6 +270,45 @@ def test_insert_driver_006_DriverCollectionRadius_invalid_negative(pgdbConn):
         
     pgdbConn.commit()
     
+def test_insert_driver_006b_DriverCollectionRadius_over_limit(pgdbConn):
+
+    
+    cursor=pgdbConn.cursor()
+    cursor.execute(""" SELECT value::int FROM carpoolvote.params WHERE name='radius.max' """)
+    results=cursor.fetchone()
+    limit_radius = results[0]
+    args = {
+        'IPAddress' : '127.0.0.1',
+        'DriverCollectionZIP' : '90210',
+        'DriverCollectionRadius' : limit_radius+10,
+        'AvailableDriveTimesLocal' : '2018-10-01T02:00/2018-10-01T03:00|2019-10-01T02:00/2019-10-01T03:00',
+        'DriverCanLoadRiderWithWheelchair' : 'True',
+        'SeatCount' : '10',
+        'DriverLicenseNumber' : '',
+        'DriverFirstName' : 'John',
+        'DriverLastName' : 'Doe',
+        'DriverEmail' : 'john.doe@mail.com',
+        'DriverPhone' : '555-555-5555',
+        'DrivingOnBehalfOfOrganization' : 'True',
+        'DrivingOBOOrganizationName' : 'Good Org',
+        'RidersCanSeeDriverDetails' : 'False',
+        'DriverWillNotTalkPolitics' : 'True',
+        'PleaseStayInTouch' : 'True',
+        'DriverPreferredContact' : 'SMS',
+        'DriverWillTakeCare' : 'True'
+        }
+    
+    results = generic_driver_insert(pgdbConn, args)
+    uuid=results['uuid']
+    error_code=results['error_code']
+    error_text=results['error_text']
+    
+    assert len(error_text)>0
+    assert error_code==2
+    assert len(uuid)==0
+        
+    pgdbConn.commit()
+    
 def test_insert_driver_007_AvailableDriveTimesLocal_invalid_empty(pgdbConn):
     args = {
         'IPAddress' : '127.0.0.1',

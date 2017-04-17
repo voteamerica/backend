@@ -358,6 +358,7 @@ ALTER TABLE carpoolvote.sms_whitelist
   OWNER TO carpool_admins;
 GRANT ALL ON TABLE carpoolvote.sms_whitelist TO carpool_admins;
 GRANT SELECT, UPDATE ON TABLE carpoolvote.sms_whitelist TO carpool_role;
+GRANT SELECT ON TABLE carpoolvote.sms_whitelist TO carpool_web_role;
 COMMENT ON TABLE carpoolvote.sms_whitelist
   IS 'lists the phone numbers which we can send SMS to';
 
@@ -635,7 +636,7 @@ ALTER TABLE ONLY match_engine_activity_log
 --
 
 ALTER TABLE ONLY match
-    ADD CONSTRAINT match_pkey PRIMARY KEY (uuid_driver, uuid_rider, score);
+    ADD CONSTRAINT match_pkey PRIMARY KEY (uuid_driver, uuid_rider);
 
 
 --

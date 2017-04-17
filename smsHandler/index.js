@@ -48,10 +48,10 @@ function dbGetItemsToSend(pool, executeFunctionArray) {
     if (currentFunction >= executeFunctionArray.length) {
         currentFunction = 0;
     }
-    console.log("array len : " + executeFunctionArray.length);
-    console.log("fn index: " + currentFunction);
+    //console.log("array len : " + executeFunctionArray.length);
+    //console.log("fn index: " + currentFunction);
     var queryString = fnExecuteFunction();
-    console.log("queryString: " + queryString);
+    //console.log("queryString: " + queryString);
     pool
         .query(queryString)
         .then(function (result) {
@@ -94,28 +94,30 @@ function sendSms(id, to, message) {
         from: cfg.sendingNumber
     }, function (err, data) {
         if (err) {
-            console.error('Could not notify user');
+			var errString = err.status + " (" + err.code + ") " + err.message;
+			console.log(errString);
             // update table status
-            dbUpdateMessageItemStatus(id, pool, dbUpdateFailedString);
-            return console.error(err);
-        }
-        // update table status
-        dbUpdateMessageItemStatus(id, pool, dbUpdateSentString);
-        console.log('User notified');
+            dbUpdateMessageItemStatus(id, pool, dbUpdateFailedString, errString);
+        } else {
+			console.log (data.sid);
+			console.log (message);
+			dbUpdateMessageItemStatus(id, pool, dbUpdateSentString, "");
+		}
+
     });
 }
 ;
 function dbUpdateSentString(tableName) {
-    return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
-        ' SET status=' + " '" + 'Sent' + "' WHERE id=$1";
+    return "UPDATE " + SCHEMA_NAME + "." + OUTGOING_SMS_TABLE + 
+	" SET status='Sent' , emission_info=$2 WHERE id=$1";
 }
 function dbUpdateFailedString(tableName) {
-    return 'UPDATE ' + SCHEMA_NAME + '.' + OUTGOING_SMS_TABLE +
-        ' SET status=' + " '" + 'Failed' + "' WHERE id=$1";
+    return "UPDATE " + SCHEMA_NAME + "." + OUTGOING_SMS_TABLE + 
+	" SET status='Failed' , emission_info=$2 WHERE id=$1";
 }
-function dbUpdateMessageItemStatus(id, pool, fnUpdateString) {
+function dbUpdateMessageItemStatus(id, pool, fnUpdateString, emission_info) {
     var updateString = fnUpdateString();
-    pool.query(updateString, [id])
+    pool.query(updateString, [id, emission_info])
         .then(function (result) {
         var displayResult = result || '';
         try {

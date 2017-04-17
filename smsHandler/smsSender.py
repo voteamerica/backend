@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python
 import os
 import sys
 import requests
@@ -30,9 +30,7 @@ client = TwilioRestClient(account_sid, auth_token)
 
 for row in rows:
 	print (row[1] + ' ' + row[2] + '\n')
-	phone_number = row[1].replace("-","").replace(" ", "").replace("(", "").replace(")", "").replace("+", "")
-	if not phone_number.startswith("1"):
-		phone_number = "1" + phone_number
+	phone_number = row[1].replace("-","").replace(" ", "").replace("(", "").replace(")", "").replace(".", "")
 	print (phone_number)
 	try:
 		message = client.messages.create(body=row[2], to=phone_number, from_=twilio_number)

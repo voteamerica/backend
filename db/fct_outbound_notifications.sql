@@ -313,7 +313,7 @@ BEGIN
 				|| '<p><table>'
 				|| '<tr>' 
 				|| '<td class="oddRow">Action</td>' 
-				|| '<td class="oddRow">Score (best=600)</td>' 
+				--|| '<td class="oddRow">Score (best=600)</td>' 
 				|| '<td class="oddRow">Pick-up location</td>'
 				|| '<td class="oddRow">Destination</td>'
 				|| '<td class="oddRow">Preferred Ride Times</td>'
@@ -330,7 +330,7 @@ BEGIN
 			
             v_loop_cnt := 0;
 			FOR v_record IN SELECT * FROM carpoolvote.match m 
-									WHERE m.uuid_driver = v_driver_record."UUID" order by score desc
+									WHERE m.uuid_driver = v_driver_record."UUID" order by score asc
 			LOOP
                 v_row_style := CASE WHEN v_loop_cnt % 2 =1 THEN 'oddRow' else 'evenRow' END;
 					
@@ -347,7 +347,7 @@ BEGIN
                             || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName" )   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
                             || '">Accept</a>'
                         ELSE v_record.status END || '</td>'
-                    || '<td class="' || v_row_style || '">' || v_record.score || '</td>'
+                    --|| '<td class="' || v_row_style || '">' || v_record.score || '</td>'
                     || '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td>'
                     || '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || '</td>'
                     || '<td class="' || v_row_style || '">' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-')  || '</td>'
