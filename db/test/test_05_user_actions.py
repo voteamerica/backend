@@ -386,8 +386,8 @@ def test_user_actions_005_rider_cancels_ride_request_email_only(pgdbConnAdmin, p
     pgdbConnMatchEngine.commit()
     
     cursor = pgdbConnWeb.cursor()
-    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(score)s::smallint, %(confirm)s)", 
-    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'score' : match_record['score'], 'confirm' : driver_args['DriverLastName']})
+    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
+    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'confirm' : driver_args['DriverLastName']})
     results = cursor.fetchone()
     assert len(results[1]) == 0
     assert results[0] == 0
@@ -407,8 +407,8 @@ def test_user_actions_005_rider_cancels_ride_request_email_only(pgdbConnAdmin, p
     assert results[0] == 'MatchConfirmed'
     
     # Cannot match an already matched record
-    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(score)s::smallint, %(confirm)s)", 
-    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'score' : match_record['score'], 'confirm' : driver_args['DriverLastName']})
+    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
+    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'confirm' : driver_args['DriverLastName']})
     results = cursor.fetchone()
     assert len(results[1])> 0
     assert results[0] == 2
@@ -598,8 +598,8 @@ def test_user_actions_007_driver_confirm_match(pgdbConnAdmin, pgdbConnMatchEngin
     pgdbConnMatchEngine.commit()
     
     cursor = pgdbConnWeb.cursor()
-    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(score)s::smallint, %(confirm)s)", 
-    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'score' : match_record['score'], 'confirm' : driver_args['DriverLastName']})
+    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
+    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'confirm' : driver_args['DriverLastName']})
     results = cursor.fetchone()
     assert len(results[1]) == 0
     assert results[0] == 0
@@ -619,8 +619,8 @@ def test_user_actions_007_driver_confirm_match(pgdbConnAdmin, pgdbConnMatchEngin
     assert results[0] == 'MatchConfirmed'
     
     # Cannot match an already matched record
-    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(score)s::smallint, %(confirm)s)", 
-    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'score' : match_record['score'], 'confirm' : driver_args['DriverLastName']})
+    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
+    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'confirm' : driver_args['DriverLastName']})
     results = cursor.fetchone()
     assert len(results[1])> 0
     assert results[0] == 2
@@ -772,8 +772,8 @@ def test_user_actions_008_driver_cancels_confirmed_match(pgdbConnAdmin, pgdbConn
     assert match_record['status'] == 'MatchProposed'   
     
     cursor = pgdbConnWeb.cursor()
-    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(score)s::smallint, %(confirm)s)", 
-    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'score' : match_record['score'], 'confirm' : driver_args['DriverLastName']})
+    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
+    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'confirm' : driver_args['DriverLastName']})
     results = cursor.fetchone()
     assert len(results[1]) == 0
     assert results[0] == 0
@@ -794,24 +794,24 @@ def test_user_actions_008_driver_cancels_confirmed_match(pgdbConnAdmin, pgdbConn
     
    
     # Cannot confirm and already confirmed match
-    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(score)s::smallint, %(confirm)s)", 
-    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'score' : match_record['score'], 'confirm' : driver_args['DriverLastName']})
+    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
+    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'confirm' : driver_args['DriverLastName']})
     results = cursor.fetchone()
     assert len(results[1])> 0
     assert results[0] == 2
     pgdbConnWeb.commit()
     
     # A 2nd Driver is not able to confirm an already confirmed ride request
-    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(score)s::smallint, %(confirm)s)", 
-    {'uuid_driver' : uuid_driver2, 'uuid_rider' : uuid_rider, 'score' : match_record['score'], 'confirm' : driver_args2['DriverLastName']})
+    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
+    {'uuid_driver' : uuid_driver2, 'uuid_rider' : uuid_rider, 'confirm' : driver_args2['DriverLastName']})
     results = cursor.fetchone()
     assert len(results[1]) > 0
     assert results[0] == 2
     pgdbConnWeb.commit()
 
     # Same driver confirms 2nd rider
-    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(score)s::smallint, %(confirm)s)", 
-    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider2, 'score' : match_record['score'], 'confirm' : driver_args['DriverLastName']})
+    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
+    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider2, 'confirm' : driver_args['DriverLastName']})
     results = cursor.fetchone()
     assert len(results[1]) == 0
     assert results[0] == 0
@@ -848,8 +848,8 @@ def test_user_actions_008_driver_cancels_confirmed_match(pgdbConnAdmin, pgdbConn
     
     
     # Now driver cancels one match
-    cursor.execute("SELECT * FROM carpoolvote.driver_cancel_confirmed_match(%(uuid_driver)s, %(uuid_rider)s, %(score)s::smallint, %(confirm)s)", 
-    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider2, 'score' : match_record['score'], 'confirm' : driver_args['DriverLastName']})
+    cursor.execute("SELECT * FROM carpoolvote.driver_cancel_confirmed_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
+    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider2, 'confirm' : driver_args['DriverLastName']})
     results = cursor.fetchone()
     assert len(results[1]) == 0
     assert results[0] == 0
@@ -1041,8 +1041,8 @@ def test_user_actions_009_rider_cancels_confirmed_match(pgdbConnAdmin, pgdbConnM
     pgdbConnMatchEngine.commit()
     
     cursor = pgdbConnWeb.cursor()
-    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(score)s::smallint, %(confirm)s)", 
-    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'score' : match_record['score'], 'confirm' : driver_args['DriverLastName']})
+    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
+    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'confirm' : driver_args['DriverLastName']})
     results = cursor.fetchone()
     assert len(results[1]) == 0
     assert results[0] == 0
@@ -1053,8 +1053,8 @@ def test_user_actions_009_rider_cancels_confirmed_match(pgdbConnAdmin, pgdbConnM
     pgdbConnMatchEngine.commit()
     
     # Cannot match an already matched record
-    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(score)s::smallint, %(confirm)s)", 
-    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'score' : match_record['score'], 'confirm' : driver_args['DriverLastName']})
+    cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
+    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'confirm' : driver_args['DriverLastName']})
     results = cursor.fetchone()
     assert len(results[1])> 0
     assert results[0] == 2
@@ -1063,8 +1063,8 @@ def test_user_actions_009_rider_cancels_confirmed_match(pgdbConnAdmin, pgdbConnM
     # Match is confirmed.
     
     # Now driver cancels the match
-    cursor.execute("SELECT * FROM carpoolvote.rider_cancel_confirmed_match(%(uuid_driver)s, %(uuid_rider)s, %(score)s::smallint, %(confirm)s)", 
-    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'score' : match_record['score'], 'confirm' : rider_args['RiderLastName']})
+    cursor.execute("SELECT * FROM carpoolvote.rider_cancel_confirmed_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
+    {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'confirm' : rider_args['RiderLastName']})
     results = cursor.fetchone()
     assert len(results[1]) == 0
     assert results[0] == 0

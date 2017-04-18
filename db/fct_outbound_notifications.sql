@@ -312,8 +312,7 @@ BEGIN
 				|| '<p>Great news - we found riders who match your criteria!</p>'
 				|| '<p><table>'
 				|| '<tr>' 
-				|| '<td class="oddRow">Action</td>' 
-				--|| '<td class="oddRow">Score (best=600)</td>' 
+				|| '<td class="oddRow">Action</td>'
 				|| '<td class="oddRow">Pick-up location</td>'
 				|| '<td class="oddRow">Destination</td>'
 				|| '<td class="oddRow">Preferred Ride Times</td>'
@@ -343,11 +342,9 @@ BEGIN
                         CASE WHEN v_record.status='MatchProposed' THEN '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/accept-driver-match' 
                             || '?UUID_driver=' || v_driver_record."UUID"
                             || '&UUID_rider=' || v_record.uuid_rider
-                            || '&Score=' || v_record.score
                             || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName" )   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
                             || '">Accept</a>'
                         ELSE v_record.status END || '</td>'
-                    --|| '<td class="' || v_row_style || '">' || v_record.score || '</td>'
                     || '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td>'
                     || '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || '</td>'
                     || '<td class="' || v_row_style || '">' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-')  || '</td>'
@@ -1170,7 +1167,6 @@ GRANT EXECUTE ON FUNCTION carpoolvote.notify_rider_confirmed_match_cancelled_by_
 CREATE OR REPLACE FUNCTION carpoolvote.notify_driver_match_confirmed_by_driver(
 	uuid_driver character varying(50),
 	uuid_rider character varying(50),
-	a_score smallint,
 	OUT out_error_code INTEGER,
 	OUT out_error_text TEXT) AS
 $BODY$                                                                                                                  
@@ -1221,7 +1217,6 @@ BEGIN
 			|| '<p>If you can no longer drive ' || v_driver_record."DriverFirstName" || ', please let us know and '
 			|| '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-driver-match?UUID_driver=' || uuid_driver 
 			|| '&UUID_rider=' || uuid_rider 
-			|| '&Score=' || a_score 
 			|| '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName" ) || '">cancel this ride match only</a></p>'
 			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || v_driver_record."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || v_driver_record."UUID" || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName") ||  '">Cancel this Drive Offer</a></p>'
@@ -1260,10 +1255,10 @@ BEGIN
 END;    
 $BODY$
   LANGUAGE plpgsql VOLATILE;
-ALTER FUNCTION carpoolvote.notify_driver_match_confirmed_by_driver(character varying, character varying, smallint, OUT integer, out text) OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.notify_driver_match_confirmed_by_driver(character varying, character varying, smallint, OUT integer, out text) TO carpool_role;
-GRANT EXECUTE ON FUNCTION carpoolvote.notify_driver_match_confirmed_by_driver(character varying, character varying, smallint, OUT integer, out text) TO carpool_web_role;
-GRANT EXECUTE ON FUNCTION carpoolvote.notify_driver_match_confirmed_by_driver(character varying, character varying, smallint , OUT integer, out text) TO carpool_admins;
+ALTER FUNCTION carpoolvote.notify_driver_match_confirmed_by_driver(character varying, character varying, OUT integer, out text) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.notify_driver_match_confirmed_by_driver(character varying, character varying, OUT integer, out text) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.notify_driver_match_confirmed_by_driver(character varying, character varying, OUT integer, out text) TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.notify_driver_match_confirmed_by_driver(character varying, character varying, OUT integer, out text) TO carpool_admins;
 
 ---------------------------------------------------------------------
 -- USER STORY 015
@@ -1272,7 +1267,6 @@ GRANT EXECUTE ON FUNCTION carpoolvote.notify_driver_match_confirmed_by_driver(ch
 CREATE OR REPLACE FUNCTION carpoolvote.notify_rider_match_confirmed_by_driver(
 	uuid_driver character varying(50),
 	uuid_rider character varying(50),
-	a_score smallint,
 	OUT out_error_code INTEGER,
 	OUT out_error_text TEXT) AS
 $BODY$                                                                                                                  
@@ -1313,7 +1307,6 @@ BEGIN
 			|| '<p>If you would prefer to have a different driver, please let us know, and '
 			|| '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-rider-match?UUID_driver=' || uuid_driver 
 			|| '&UUID_rider=' || uuid_rider 
-			|| '&Score=' || a_score 
 			|| '&RiderPhone=' || carpoolvote.urlencode( v_rider_record."RiderLastName") || '">cancel this ride match only</a></p>'   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || v_rider_record."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || v_rider_record."UUID" || '&RiderPhone=' || carpoolvote.urlencode(v_rider_record."RiderLastName") ||  '">cancel this Ride Request</a></p>'
@@ -1352,7 +1345,7 @@ BEGIN
 END;    
 $BODY$
   LANGUAGE plpgsql VOLATILE;
-ALTER FUNCTION carpoolvote.notify_rider_match_confirmed_by_driver(character varying, character varying, smallint, OUT integer, out text) OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.notify_rider_match_confirmed_by_driver(character varying, character varying, smallint, OUT integer, out text) TO carpool_role;
-GRANT EXECUTE ON FUNCTION carpoolvote.notify_rider_match_confirmed_by_driver(character varying, character varying, smallint, OUT integer, out text) TO carpool_web_role;
-GRANT EXECUTE ON FUNCTION carpoolvote.notify_rider_match_confirmed_by_driver(character varying, character varying, smallint, OUT integer, out text) TO carpool_admins;
+ALTER FUNCTION carpoolvote.notify_rider_match_confirmed_by_driver(character varying, character varying, OUT integer, out text) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.notify_rider_match_confirmed_by_driver(character varying, character varying, OUT integer, out text) TO carpool_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.notify_rider_match_confirmed_by_driver(character varying, character varying, OUT integer, out text) TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.notify_rider_match_confirmed_by_driver(character varying, character varying, OUT integer, out text) TO carpool_admins;

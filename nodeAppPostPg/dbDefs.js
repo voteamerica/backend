@@ -10,10 +10,10 @@ var MATCH_TABLE = 'match';
 var UNMATCHED_DRIVERS_VIEW = 'vw_unmatched_drivers';
 var UNMATCHED_RIDERS_VIEW = 'vw_unmatched_riders';
 var CANCEL_RIDE_REQUEST_FUNCTION = 'rider_cancel_ride_request($1, $2)';
-var CANCEL_RIDER_MATCH_FUNCTION = 'rider_cancel_confirmed_match($1, $2, $3, $4)';
+var CANCEL_RIDER_MATCH_FUNCTION = 'rider_cancel_confirmed_match($1, $2, $3)';
 var CANCEL_DRIVE_OFFER_FUNCTION = 'driver_cancel_drive_offer($1, $2)';
-var CANCEL_DRIVER_MATCH_FUNCTION = 'driver_cancel_confirmed_match($1, $2, $3, $4)';
-var ACCEPT_DRIVER_MATCH_FUNCTION = 'driver_confirm_match($1, $2, $3, $4)';
+var CANCEL_DRIVER_MATCH_FUNCTION = 'driver_cancel_confirmed_match($1, $2, $3)';
+var ACCEPT_DRIVER_MATCH_FUNCTION = 'driver_confirm_match($1, $2, $3)';
 var PAUSE_DRIVER_MATCH_FUNCTION = 'driver_pause_match($1, $2)';
 // self service 
 var DRIVER_EXISTS_FUNCTION = 'driver_exists($1, $2)';
