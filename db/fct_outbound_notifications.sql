@@ -313,6 +313,7 @@ BEGIN
 				|| '<p><table>'
 				|| '<tr>' 
 				|| '<td class="oddRow">Action</td>'
+				|| '<td class="oddRow">Status</td>'
 				|| '<td class="oddRow">Pick-up location</td>'
 				|| '<td class="oddRow">Destination</td>'
 				|| '<td class="oddRow">Preferred Ride Times</td>'
@@ -329,7 +330,7 @@ BEGIN
 			
             v_loop_cnt := 0;
 			FOR v_record IN SELECT * FROM carpoolvote.match m 
-									WHERE m.uuid_driver = v_driver_record."UUID" order by score asc
+									WHERE m.uuid_driver = v_driver_record."UUID" AND status <> 'ExtendedMatch' order by score asc
 			LOOP
                 v_row_style := CASE WHEN v_loop_cnt % 2 =1 THEN 'oddRow' else 'evenRow' END;
 					
@@ -339,12 +340,24 @@ BEGIN
 				v_html_body := v_html_body 
                     || '<tr>' 
                     || '<td class="' || v_row_style || '">' ||
-                        CASE WHEN v_record.status='MatchProposed' THEN '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/accept-driver-match' 
+                        CASE
+						WHEN v_record.status='MatchProposed' THEN '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/accept-driver-match' 
                             || '?UUID_driver=' || v_driver_record."UUID"
                             || '&UUID_rider=' || v_record.uuid_rider
                             || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName" )   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
                             || '">Accept</a>'
-                        ELSE v_record.status END || '</td>'
+						WHEN v_record.status='MatchConfirmed' THEN '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-driver-match' 
+                            || '?UUID_driver=' || v_driver_record."UUID"
+                            || '&UUID_rider=' || v_record.uuid_rider
+                            || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName" )   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
+                            || '">Cancel</a>'
+                        ELSE '' END || '</td>'
+					|| '<td class="' || v_row_style || '">' ||
+					CASE 
+					WHEN v_record.status='MatchProposed' THEN 'Proposed'
+					WHEN v_record.status='ExtendedMatch' THEN 'Extra'
+					WHEN v_record.status='MatchConfirmed' THEN 'Confirmed'
+					ELSE v_record.status END || '</td>'
                     || '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td>'
                     || '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || '</td>'
                     || '<td class="' || v_row_style || '">' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-')  || '</td>'
