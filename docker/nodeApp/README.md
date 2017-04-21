@@ -1,13 +1,25 @@
-# node app Docker file
+#
+# create docker machine for node app
+#
 
-## build image
-## docker build -t carpool .
+## FOLDER 
+# cd VM_share/Jon/Documents/GitHub/voteUSbackend/docker/pg-auto
 
-## run this from the host folder containing the github carpool backend
+## build IMAGE
+## docker build -t carpool --build-arg CACHEBUST=$(date +%s) --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-1 .
+
+## FOLDER 
+# cd VM_share/Jon/Documents/GitHub/voteUSbackend
+
+## create MACHINE
+## (links to postgres docker machine)
+## docker run --rm --entrypoint /usr/src/app/backend/docker/nodeApp/expo-start.sh -it --link cp-pg-svr -p 8000:8000 -p 5858:5858 -p 8080:8080 -v $(pwd):/usr/src/app/backend -v node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/ carpool /bin/bash
+#
+## docker run --entrypoint /usr/src/app/backend/docker/nodeApp/expo-bash.sh -it --link cp-pg-svr -p 8000:8000 -p 5858:5858 -p 8080:8080 -v $(pwd):/usr/src/app/backend -v node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/ carpool /bin/bash
+## docker run --entrypoint="" -it --link cp-pg-svr -p 8000:8000 -p 5858:5858 -p 8080:8080 -v $(pwd):/usr/src/app/backend -v node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/ carpool /bin/bash
 
 ## docker run -it --link cp-pg-svr -p 8000:8000 -p 5858:5858 -p 8080:8080 -v $(pwd):/usr/src/app/backend -v node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/ carpool /bin/bash
 
-## using postgres docker machine
 ## (uses files, inc. node_modules from npm install that exist in build image)
 ## docker run -it --link cp-pg-svr -p 8000:8000 carpool /bin/bash
 

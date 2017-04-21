@@ -64,22 +64,25 @@ VOLUME /var/lib/postgresql/data
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
 
-#test start
+# create db start
 
 RUN apt-get update
 RUN apt-get install -y git
 
 ARG CACHEBUST=1
+ARG BRANCH_NAME=docker-1
+ARG REPO=https://github.com/jkbits1/backend
 
 WORKDIR /usr/src/app/
 
-RUN git clone --single-branch --branch docker-1 https://github.com/jkbits1/backend && cd /usr/src/app/backend/db && git checkout docker-1
+RUN git clone --single-branch --branch $BRANCH_NAME $REPO \
+&& cd /usr/src/app/backend/db \
+&& git checkout $BRANCH_NAME
 
 WORKDIR /usr/src/app/backend/db
 
-# RUN git checkout docker
 RUN git fetch origin
-RUN git merge origin/docker-1
+RUN git merge origin/$BRANCH_NAME
 
 # USER postgres
 
@@ -105,7 +108,7 @@ COPY create_fresh_carpool_db2.sh /docker-entrypoint-initdb.d/
 # with it, init script is in wrong folder and fails ...
 # WORKDIR /usr/src/app/
 
-#test end
+# create db end
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 

@@ -21,16 +21,20 @@ RUN apt-get install -y git
 # docker run -v $(pwd):/usr/src/app ...
 #
 
+ARG CACHEBUST=1
+ARG BRANCH_NAME=docker-1
+ARG REPO=https://github.com/jkbits1/backend
+
 WORKDIR /usr/src/app/
 
-# RUN git clone https://github.com/jkbits1/backend
-RUN git clone --single-branch --branch docker-1 https://github.com/jkbits1/backend
+RUN git clone --single-branch --branch $BRANCH_NAME $REPO \
+&& cd /usr/src/app/backend/db \
+&& git checkout $BRANCH_NAME
 
 WORKDIR /usr/src/app/backend/nodeAppPostPg
 
-RUN git checkout docker-1
 RUN git fetch origin
-RUN git merge origin/docker-1
+RUN git merge origin/$BRANCH_NAME
 
 RUN cd /usr/src/app/backend/nodeAppPostPg
 
@@ -42,7 +46,7 @@ RUN npm install
 ENV PORT=8000 PGHOST=$CP_PG_SVR_PORT_5432_TCP_ADDR PGUSER=carpool_web
 ENV PGPASSWORD=$CP_PG_SVR_ENV_POSTGRES_PASSWORD PGDATABASE=carpoolvote
 
-# ENTRYPOINT ["/usr/src/app/backend/nodeAppPostPg/scripts/expo.sh"]
+ENTRYPOINT ["/usr/src/app/backend/docker/nodeApp/expo-start.sh"]
 
 # CMD ["npm start"]
 
