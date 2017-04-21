@@ -13,7 +13,9 @@
 
 ## create MACHINE
 ## (links to postgres docker machine)
-## docker run --rm --entrypoint /usr/src/app/backend/docker/nodeApp/expo-start.sh -it --link cp-pg-svr -p 8000:8000 -p 5858:5858 -p 8080:8080 carpool /bin/bash
+## docker run --rm -it --link cp-pg-svr -p 8000:8000 carpool /bin/bash
+#
+## docker run --rm --entrypoint /usr/src/app/backend/docker/nodeApp/expo-start.sh -it --link cp-pg-svr -p 8000:8000 carpool /bin/bash
 ## docker run --rm -it --link cp-pg-svr -p 8000:8000 -p 5858:5858 -p 8080:8080 carpool /bin/bash
 ## docker run --rm --entrypoint="" -it --link cp-pg-svr -p 8000:8000 -p 5858:5858 -p 8080:8080 carpool /bin/bash
 

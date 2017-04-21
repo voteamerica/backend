@@ -16,9 +16,11 @@
 # cd VM_share/Jon/Documents/GitHub/voteUSbackend
 
 ## create MACHINE
+## docker run --name cp-pg-svr -p 5432:5432 -e POSTGRES_PASSWORD=pwd -d pgres-cp 
+# 
+# with shared volume
 ## docker run --name cp-pg-svr -p 5432:5432 -v $(pwd):/usr/src/app/backend -e POSTGRES_PASSWORD=pwd -d pgres-cp 
 
-## docker run --name cp-pg-svr -p 5432:5432 -e POSTGRES_PASSWORD=pwd -d pgres-cp 
 
 ## interactive for testing
 # docker run -it --name cp-pg-svr-test -p 5432:5432 -e POSTGRES_PASSWORD=pwd -d pgres-cp /bin/bash
