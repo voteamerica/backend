@@ -46,7 +46,9 @@ RUN npm install
 ENV PORT=8000 PGHOST=$CP_PG_SVR_PORT_5432_TCP_ADDR PGUSER=carpool_web
 ENV PGPASSWORD=$CP_PG_SVR_ENV_POSTGRES_PASSWORD PGDATABASE=carpoolvote
 
-ENTRYPOINT ["/usr/src/app/backend/docker/nodeApp/expo-start.sh"]
+COPY ./expo-start.sh /
+
+ENTRYPOINT ["/expo-start.sh"]
 
 # CMD ["npm start"]
 
