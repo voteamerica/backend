@@ -19,4 +19,4 @@ createdb carpoolvote \
 && psql carpoolvote < fct_outbound_notifications.sql \
 && psql carpoolvote < fct_user_actions.sql \
 && psql carpoolvote < fct_matching_engine.sql \
-&& psql carpoolvote < /usr/src/app/backend/docker/pg-test/alter.sql \
+&& psql carpoolvote < /usr/src/app/backend/docker/pg-auto/alter.sql \
