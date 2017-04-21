@@ -73,13 +73,13 @@ ARG CACHEBUST=1
 
 WORKDIR /usr/src/app/
 
-RUN git clone --single-branch --branch docker https://github.com/jkbits1/backend && cd /usr/src/app/backend/db && git checkout docker
+RUN git clone --single-branch --branch docker-1 https://github.com/jkbits1/backend && cd /usr/src/app/backend/db && git checkout docker-1
 
 WORKDIR /usr/src/app/backend/db
 
 # RUN git checkout docker
 RUN git fetch origin
-RUN git merge origin/docker
+RUN git merge origin/docker-1
 
 # USER postgres
 

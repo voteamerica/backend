@@ -24,13 +24,13 @@ RUN apt-get install -y git
 WORKDIR /usr/src/app/
 
 # RUN git clone https://github.com/jkbits1/backend
-RUN git clone --single-branch --branch docker https://github.com/jkbits1/backend
+RUN git clone --single-branch --branch docker-1 https://github.com/jkbits1/backend
 
 WORKDIR /usr/src/app/backend/nodeAppPostPg
 
-RUN git checkout docker
+RUN git checkout docker-1
 RUN git fetch origin
-RUN git merge origin/docker
+RUN git merge origin/docker-1
 
 RUN cd /usr/src/app/backend/nodeAppPostPg
 
