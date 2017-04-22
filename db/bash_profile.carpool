@@ -1,0 +1,6 @@
+export PGHOST='/tmp'
+export PGHOME=/opt/pgsql
+export PGDATA=/opt/pgsql_data
+export MAILGUNKEY=CHANGE_ME
+PATH=$PGHOME/bin:$PATH:$HOME/.local/bin:$HOME/bin
+export PATH

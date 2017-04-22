@@ -81,6 +81,7 @@ Vagrant.configure("2") do |config|
 	yum -y install postgresql-server.x86_64
 	yum -y install libpqxx.x86_64
 	yum -y install libpqxx-devel.x86_64
+	yum -y install python-devel.x86_64
 	yum -y install python-pip
 	yum -y install python-wheel
 	pip install --upgrade pip
@@ -88,6 +89,15 @@ Vagrant.configure("2") do |config|
 	pip install pytest
 	yum -y install npm
 	yum -y install nginx
+	
+	groupadd carpoolg
+	useradd -g carpoolg --no-user-group carpool_web
+	useradd -g carpoolg --no-user-group carpool
+	
+	mkdir /opt/carpool
+	cd /opt/carpool
+	git clone https://github.com/voteamerica/backend.git
+	chown -R carpool:carpoolg /opt/carpool
 	
 	# directory creation for postgres database
 	mkdir -p /opt/pgsql_data
@@ -97,8 +107,9 @@ Vagrant.configure("2") do |config|
 	su postgres -c 'initdb -D /opt/pgsql_data'
 	su postgres -c 'pg_ctl -D /opt/pgsql_data -l /opt/pgsql_data/serverlog start'
 	
+	
 	# this seems to return some error so lets place it last
-	npm install pm2 -g
+	#npm install pm2 -g
 
   SHELL
 end
