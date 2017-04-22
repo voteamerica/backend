@@ -10,13 +10,13 @@
 # cd VM_share/Jon/Documents/GitHub/voteUSbackend/docker/pg-auto
 
 ## build IMAGE
-## docker build -t pgres-cp --build-arg CACHEBUST=$(date +%s) --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-1 .
+## docker build -t pgres-cp --build-arg CACHEBUST=$(date +%s) --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=master .
 
 ## FOLDER 
 # cd VM_share/Jon/Documents/GitHub/voteUSbackend
 
 ## create MACHINE
-## docker run --name cp-pg-svr -p 5432:5432 -e POSTGRES_PASSWORD=pwd -d pgres-cp 
+## docker run --rm --name cp-pg-svr -p 5432:5432 -e POSTGRES_PASSWORD=pwd -d pgres-cp 
 # 
 # with shared volume
 ## docker run --name cp-pg-svr -p 5432:5432 -v $(pwd):/usr/src/app/backend -e POSTGRES_PASSWORD=pwd -d pgres-cp 
