@@ -10,7 +10,7 @@
 
 ## create MACHINE
 # https://hub.docker.com/r/grahamc/jekyll/
-# docker run --rm -it  --name gc-jekyll-svr -v $(pwd):/src -p 4000:4000 gc-jekyll jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml
+# docker run --rm -it  --name gc-jekyll-svr -v $(pwd):/usr/src/app/frontend -p 4000:4000 gc-jekyll jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml
 
 # docker run --rm -it --name gc-jekyll-svr -p 4000:4000 gc-jekyll jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml
 # docker run --rm -it --name gc-jekyll-svr -p 4000:4000 gc-jekyll /bin/bash
