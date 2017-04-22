@@ -2,6 +2,9 @@
 # create docker machine for jekyll
 #
 
+## FOLDER 
+# cd VM_share/Jon/Documents/GitHub/voteUSbackend/docker/jekyll
+
 ## docker build -t gc-jekyll --build-arg CACHEBUST=$(date +%s) --build-arg REPO=https://github.com/voteamerica/voteamerica.github.io --build-arg BRANCH_NAME=master .
 
 ## FOLDER
