@@ -7,3 +7,4 @@ export PGPASSWORD=$CP_PG_SVR_ENV_POSTGRES_PASSWORD
 export PGDATABASE=carpoolvote
 
 /bin/bash
+

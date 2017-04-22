@@ -9,3 +9,4 @@ export PGDATABASE=carpoolvote
 cd /usr/src/app/backend/nodeAppPostPg
 
 npm start
+
