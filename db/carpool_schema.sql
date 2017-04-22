@@ -6,21 +6,13 @@
 -- Dumped by pg_dump version 9.5.4
 
 SET statement_timeout = 0;
-SET lock_timeout = 0;
+--SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET row_security = off;
+--SET row_security = off;
 
---
--- Name: carpoolvote; Type: SCHEMA; Schema: -; Owner: postgres
---
-
-CREATE SCHEMA carpoolvote;
-
-
-ALTER SCHEMA carpoolvote OWNER TO postgres;
 
 SET search_path = carpoolvote, pg_catalog;
 
@@ -766,21 +758,6 @@ ALTER TABLE ONLY match
 
 ALTER TABLE ONLY match
     ADD CONSTRAINT match_uuid_rider_fkey FOREIGN KEY (uuid_rider) REFERENCES rider("UUID") ON DELETE CASCADE;
-
-
---
--- Name: carpoolvote; Type: ACL; Schema: -; Owner: postgres
---
-
-REVOKE ALL ON SCHEMA carpoolvote FROM PUBLIC;
-REVOKE ALL ON SCHEMA carpoolvote FROM postgres;
-GRANT ALL ON SCHEMA carpoolvote TO postgres;
-GRANT USAGE ON SCHEMA carpoolvote TO carpool_role;
-GRANT ALL ON SCHEMA carpoolvote TO carpool_admins;
-GRANT USAGE ON SCHEMA carpoolvote TO carpool_web_role;
-
-
-
 
 --
 -- Name: fct_modified_column(); Type: ACL; Schema: carpoolvote; Owner: carpool_admins

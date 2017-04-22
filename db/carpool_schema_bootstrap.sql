@@ -6,12 +6,12 @@
 -- Dumped by pg_dump version 9.5.4
 
 SET statement_timeout = 0;
-SET lock_timeout = 0;
+--SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET row_security = off;
+--SET row_security = off;
 
 
 --
@@ -24,6 +24,16 @@ CREATE SCHEMA carpoolvote;
 ALTER SCHEMA carpoolvote OWNER TO postgres;
 
 
+--
+-- Name: carpoolvote; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA carpoolvote FROM PUBLIC;
+REVOKE ALL ON SCHEMA carpoolvote FROM postgres;
+GRANT ALL ON SCHEMA carpoolvote TO postgres;
+GRANT USAGE ON SCHEMA carpoolvote TO carpool_role;
+GRANT ALL ON SCHEMA carpoolvote TO carpool_admins;
+GRANT USAGE ON SCHEMA carpoolvote TO carpool_web_role;
 
 
 --

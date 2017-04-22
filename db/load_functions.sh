@@ -7,9 +7,9 @@ then
         exit 1
 fi
 
-psql -U carpool_admin  -h /tmp $1 < fct_utilities.sql \
-&& psql -U carpool_admin -h /tmp $1 < fct_outbound_notifications.sql \
-&& psql -U carpool_admin -h /tmp $1 < fct_user_actions.sql \
-&& psql -U carpool_admin -h /tmp $1 < fct_matching_engine.sql
+psql -U postgres  -h /tmp $1 < fct_utilities.sql \
+&& psql -U postgres -h /tmp $1 < fct_outbound_notifications.sql \
+&& psql -U postgres -h /tmp $1 < fct_user_actions.sql \
+&& psql -U postgres -h /tmp $1 < fct_matching_engine.sql
 
 
