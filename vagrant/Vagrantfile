@@ -40,7 +40,7 @@ Vagrant.configure("2") do |config|
   # argument is a set of non-required options.
   # config.vm.synced_folder "../data", "/vagrant_data"
 
-   config.vm.synced_folder "../", "/vagrant", type: "rsync", rsync__exclude: ".git/"
+   #config.vm.synced_folder "../", "/vagrant", type: "rsync", rsync__exclude: ".git/"
   
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -73,14 +73,29 @@ Vagrant.configure("2") do |config|
   #   apt-get install -y apache2
   # SHELL
   config.vm.provision "shell", inline: <<-SHELL
-  
+	groupadd carpoolg
+	useradd -g carpoolg --no-user-group carpool_web
+	useradd -g carpoolg --no-user-group carpool_app
+	
     # package installation 
 	yum -y install epel-release
 	yum -y install wget.x86_64
-	cd /tmp && wget https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm && rpm -i --force pgdg-centos96-9.6-3.noarch.rpm
 	yum -y install net-tools.x86_64
 	yum -y install gcc.x86_64
 	yum -y install git
+	
+	
+	mkdir /opt/carpool
+	cd /opt/carpool
+	#git clone https://github.com/voteamerica/backend.
+	git clone https://github.com/dmilet/backend.git
+	chown -R carpool_app:carpoolg /opt/carpool
+	chmod g+w /opt/carpool/backend/nodeAppPostPg
+	
+	echo ". /opt/carpool/backend/db/bash_profile.carpool_app" >> /home/carpool_app/.bash_profile
+	echo ". /opt/carpool/backend/nodeAppPostPg/bash_profile.carpool_web" >> /home/carpool_web/.bash_profile
+	
+	/opt/carpool/backend/vagrant/add_postgres_repo_for_CentOS7.sh
 	yum -y install postgresql-server.x86_64
 	yum -y install postgresql-contrib.x86_64
 	yum -y install libpqxx.x86_64
@@ -93,20 +108,8 @@ Vagrant.configure("2") do |config|
 	pip install pytest
 	yum -y install npm
 	yum -y install nginx
+
 	
-	groupadd carpoolg
-	useradd -g carpoolg --no-user-group carpool_web
-	useradd -g carpoolg --no-user-group carpool_app
-	
-	mkdir /opt/carpool
-	cd /opt/carpool
-	#git clone https://github.com/voteamerica/backend.
-	git clone https://github.com/dmilet/backend.git
-	chown -R carpool_app:carpoolg /opt/carpool
-	chmod g+w /opt/carpool/backend/nodeAppPostPg
-	
-	echo ". /opt/carpool/backend/db/bash_profile.carpool_app" >> /home/carpool_app/.bash_profile
-	echo ". /opt/carpool/backend/nodeAppPostPg/bash_profile.carpool_web" >> /home/carpool_web/.bash_profile
 	
 	# directory creation for postgres database
 	mkdir -p /opt/pgsql_data
