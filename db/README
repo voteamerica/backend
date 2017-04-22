@@ -14,7 +14,7 @@ carpoolvote
 carpool_admins    : all privileges 
                     contains individual personal users whose role is to maintain the schema
 capool_role       : privileges to run the matching engine
-                    contains carpool_match_engine database user which should be used to execute the matching engine.
+                    contains carpool_app database user which should be used to execute the matching engine.
 carpool_web_role  : privileges to perform action supported by front end
                     contains the carpool_web database user which should be used by the front end to connect to the database
 
