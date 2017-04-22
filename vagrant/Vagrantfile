@@ -99,7 +99,7 @@ Vagrant.configure("2") do |config|
 	cd /opt/carpool
 	#git clone https://github.com/voteamerica/backend.
 	git clone https://github.com/dmilet/backend.git
-	chown -R carpool:carpoolg /opt/carpool
+	chown -R carpool_app:carpoolg /opt/carpool
 	chmod g+w /opt/carpool/backend/nodeAppPostPg
 	
 	echo ". /opt/carpool/backend/db/bash_profile.carpool_app" >> /home/carpool_app/.bash_profile
@@ -110,11 +110,11 @@ Vagrant.configure("2") do |config|
 	chown -R postgres:postgres /opt/pgsql_data
 	
 	# start postgres
-	su postgres -c 'initdb -D /opt/pgsql_data'
-	su postgres -c 'pg_ctl -D /opt/pgsql_data -l /opt/pgsql_data/serverlog start'
-	sleep 10
+	#su postgres -c 'initdb -D /opt/pgsql_data'
+	#su postgres -c 'pg_ctl -D /opt/pgsql_data -l /opt/pgsql_data/serverlog start'
+	#sleep 10
 	
-	su carpool -c 'cd /opt/carpool/backend/db && . bash_profile.carpool && /opt/carpool/backend/db/create_fresh_carpool_db.sh carpool_test'
+	su carpool_app -c 'cd /opt/carpool/backend/db && . bash_profile.carpool_app && /opt/carpool/backend/db/create_fresh_carpool_db.sh carpool_test'
 	
 	#npm install pm2 -g
 	#su carpool_web -c 'cd /opt/carpool/backend/nodeAppPostPg && npm install && pm2 start index.js --name carpool_dev'

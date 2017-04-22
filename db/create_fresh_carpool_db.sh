@@ -8,7 +8,7 @@ then
 fi
 
 psql -U postgres -d postgres -h /tmp < carpool_roles.sql \
-&& createdb -h /tmp --owner carpool_admin $1 \
+&& createdb -U postgres -h /tmp --owner carpool_admin $1 \
 && psql -h /tmp $1 < carpool_schema_bootstrap.sql \
 && psql -h /tmp $1 < carpool_schema.sql \
 && psql -h /tmp $1 < carpool_static_data.sql \

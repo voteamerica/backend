@@ -3,7 +3,7 @@
 -- DROP ROLE carpool_admins;
 
 CREATE ROLE carpool_admins
-  NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+  INHERIT NOREPLICATION;
 
 
 -- Role: carpool_web_role
