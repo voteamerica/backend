@@ -95,7 +95,7 @@ Vagrant.configure("2") do |config|
 	
 	# start postgres
 	su postgres -c 'initdb -D /opt/pgsql_data'
-	su postgres -c 'echo $USER && pg_ctl -D /opt/pgsql_data -l /opt/pgsql_data/serverlog start'
+	su postgres -c 'pg_ctl -D /opt/pgsql_data -l /opt/pgsql_data/serverlog start'
 	
 	# this seems to return some error so lets place it last
 	npm install pm2 -g
