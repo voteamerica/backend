@@ -8,7 +8,7 @@ then
 fi
 
 createdb $1 \
-&& psql -h /tmp $1 < carpool_roles.sql \
+&& psql -U postgres -h /tmp $1 < carpool_roles.sql \
 && psql -h /tmp $1 < carpool_schema_bootstrap.sql \
 && psql -h /tmp $1 < carpool_schema.sql \
 && psql -h /tmp $1 < carpool_static_data.sql \
