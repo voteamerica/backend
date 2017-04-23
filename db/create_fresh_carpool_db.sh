@@ -7,10 +7,11 @@ then
 	exit 1
 fi
 
-createdb --owner carpool_admin $1 \ 
-&& psql $1 < carpool_schema_bootstrap.sql \
-&& psql $1 < carpool_schema.sql \
-&& psql $1 < carpool_static_data.sql \
-&& psql $1 < carpool_params_data.sql \
-&& ./load_functions.sh $1
+su postgres -c "cd /opt/carpool/backend/db && psql < carpool_roles.sql" \ 
+&& su postgres -c "createdb --owner carpool_admin $1" \
+&& su carpool_app -c "cd /opt/carpool/backend/db && psql $1 < carpool_schema_bootstrap.sql" \
+&& su carpool_app -c "cd /opt/carpool/backend/db && psql $1 < carpool_schema.sql" \
+&& su carpool_app -c "cd /opt/carpool/backend/db && psql $1 < carpool_static_data.sql" \
+&& su carpool_app -c "cd /opt/carpool/backend/db && psql $1 < carpool_params_data.sql" \
+&& su carpool_app -c "cd /opt/carpool/backend/db && ./load_functions.sh $1"
 
