@@ -54,6 +54,7 @@ Vagrant.configure("2") do |config|
   
   #   # Customize the amount of memory on the VM:
      vb.memory = "1024"
+	 vb.cpus = 2
   end
   #
   # View the documentation for the provider you are using for more
@@ -116,18 +117,20 @@ Vagrant.configure("2") do |config|
 	pip install pytest
 	
 	# directory creation for postgres database
-	mkdir -p /opt/pgsql_data
-	chown -R postgres:postgres /opt/pgsql_data
+	#mkdir -p /opt/pgsql_data
+	#chown -R postgres:postgres /opt/pgsql_data
+	#echo "export PGDATA=/opt/pgsql_data" >> ~postgres/.bash_profile
+	#export PGSETUP_INITDB_OPTIONS="-D /opt/pgsql_data"
+	/usr/pgsql-9.6/bin/postgresql96-setup initdb
 	
 	# initialize and start postgres
-	PGDATA=/opt/pgsql_data && /usr/pgsql-9.6/bin/postgresql96-setup initdb
 	systemctl enable postgresql-9.6.service
 	systemctl start postgresql-9.6.service
 	
 	# make sure server has time to start
-	sleep 10
+	#sleep 10
 	
-	su carpool_app -c 'cd /opt/carpool/backend/db && . bash_profile.carpool_app && /opt/carpool/backend/db/create_fresh_carpool_db.sh carpool_test'
+	#su carpool_app -c 'cd /opt/carpool/backend/db && . bash_profile.carpool_app && /opt/carpool/backend/db/create_fresh_carpool_db.sh carpool_test'
 	
 	
 	########################
@@ -161,7 +164,7 @@ Vagrant.configure("2") do |config|
 	export EXTERNAL_IP=$(ifconfig -a | grep inet | grep -v inet6 | grep -v 10.0 | grep -v 127.0  | head -n 1 | tr -s " " | cut -f 3 -d " ")
 	echo "api: \"http://$EXTERNAL_IP:8080/demo\"" > /opt/carpool/voteamerica.github.io/_config-demo.yml
 	chown -R carpool_web:carpoolg /opt/carpool/voteamerica.github.io
-	su carpool_web -c 'cd /opt/carpool/voteamerica.github.io && jekyll serve --config _config.yml,_config-demo.yml --detach --host $EXTERNAL_IP --port 80'
+	su carpool_web -c 'cd /opt/carpool/voteamerica.github.io &&  /usr/local/bin/jekyll serve --config _config.yml,_config-demo.yml --detach --host $EXTERNAL_IP --port 4000'
 	
   SHELL
 end
