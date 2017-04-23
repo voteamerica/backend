@@ -16,7 +16,7 @@ fi
 
 echo $PGDATABASE 
 
-psql -h /tmp $PGDATABASE <<RPT
+psql $PGDATABASE <<RPT
 select * from carpoolvote.match where uuid_rider='$1' order by score desc;
 RPT
 

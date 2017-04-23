@@ -16,7 +16,7 @@ auth_token  = os.environ['TWILIO_AUTH_TOKEN']  # Your Auth Token from www.twilio
 twilio_number = os.environ['TWILIO_NUMBER']
 
 try:
-	conn = psycopg2.connect("dbname={0} user='carpool_match_engine' host='/tmp'".format(sys.argv[1]))
+	conn = psycopg2.connect("dbname={0} user='carpool_match_engine'".format(sys.argv[1]))
 except:
 	print ("I am unable to connect to the database")
 	exit

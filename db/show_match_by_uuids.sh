@@ -22,7 +22,7 @@ fi
 
 echo $PGDATABASE 
 
-psql -h /tmp $PGDATABASE <<RPT
+psql $PGDATABASE <<RPT
 select * from carpoolvote.match where uuid_rider='$2' and uuid_driver='$1';
 RPT
 
