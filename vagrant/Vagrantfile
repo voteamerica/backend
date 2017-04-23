@@ -130,7 +130,8 @@ Vagrant.configure("2") do |config|
 	# make sure server has time to start
 	#sleep 10
 	
-	#su carpool_app -c 'cd /opt/carpool/backend/db && . bash_profile.carpool_app && /opt/carpool/backend/db/create_fresh_carpool_db.sh carpool_test'
+	#su postgres -c "/opt/carpoop/backend/db/create_db_roles.sh"
+	#su carpool_app -c 'cd /opt/carpool/backend/db && /opt/carpool/backend/db/create_fresh_carpool_db.sh carpool_test'
 	
 	
 	########################

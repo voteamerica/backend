@@ -15,22 +15,20 @@ SET client_min_messages = warning;
 
 
 --
--- Name: carpoolvote; Type: SCHEMA; Schema: -; Owner: postgres
+-- Name: carpoolvote; Type: SCHEMA; Schema: -; Owner: carpool_admin
 --
 
 CREATE SCHEMA carpoolvote;
 
 
-ALTER SCHEMA carpoolvote OWNER TO postgres;
+ALTER SCHEMA carpoolvote OWNER TO carpool_admin;
 
 
 --
--- Name: carpoolvote; Type: ACL; Schema: -; Owner: postgres
+-- Name: carpoolvote; Type: ACL; Schema: -; Owner: carpool_admin
 --
 
 REVOKE ALL ON SCHEMA carpoolvote FROM PUBLIC;
-REVOKE ALL ON SCHEMA carpoolvote FROM postgres;
-GRANT ALL ON SCHEMA carpoolvote TO postgres;
 GRANT USAGE ON SCHEMA carpoolvote TO carpool_role;
 GRANT ALL ON SCHEMA carpoolvote TO carpool_admins;
 GRANT USAGE ON SCHEMA carpoolvote TO carpool_web_role;

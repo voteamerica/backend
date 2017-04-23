@@ -30,8 +30,9 @@ GRANT carpool_web_role TO carpool_role;
 
 CREATE ROLE carpool_app LOGIN
   ENCRYPTED PASSWORD 'md515dfbe205495e280d4859e3a43fad938'
-  NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+  NOSUPERUSER INHERIT NOCREATEROLE NOREPLICATION;
 GRANT carpool_role TO carpool_app;
+GRANT carpool_admins TO carpool_app;
 COMMENT ON ROLE carpool_app IS 'Login for the Carpool Vote Match Engine to use to connect to the DB.';
 
 
