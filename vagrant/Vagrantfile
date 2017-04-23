@@ -50,6 +50,8 @@ Vagrant.configure("2") do |config|
     # Display the VirtualBox GUI when booting the machine
     vb.gui = true
 	config.vm.synced_folder ".", "/vagrant", disabled: true
+	config.vm.network "forwarded_port", guest: 80, host: 8080
+	config.vm.network "private_network", ip: "192.168.50.2"
   
   #   # Customize the amount of memory on the VM:
      vb.memory = "1024"
@@ -73,31 +75,38 @@ Vagrant.configure("2") do |config|
   #   apt-get install -y apache2
   # SHELL
   config.vm.provision "shell", inline: <<-SHELL
-	groupadd carpoolg
-	useradd -g carpoolg --no-user-group carpool_web
-	useradd -g carpoolg --no-user-group carpool_app
-	
-    # package installation 
+  
+	########################
+	# GENERAL STUFF
+	########################  
 	yum -y install epel-release
 	yum -y install wget.x86_64
 	yum -y install net-tools.x86_64
 	yum -y install gcc.x86_64
 	yum -y install git
 	
-	
+  
+	########################
+	# BACK END  DATABASE
+	########################
+	groupadd carpoolg
+	useradd -g carpoolg --no-user-group carpool_app	
+    
 	mkdir /opt/carpool
 	cd /opt/carpool
 	#git clone https://github.com/voteamerica/backend.
 	git clone https://github.com/dmilet/backend.git
 	chown -R carpool_app:carpoolg /opt/carpool
-	chmod g+w /opt/carpool/backend/nodeAppPostPg
 	
 	echo ". /opt/carpool/backend/db/bash_profile.carpool_app" >> /home/carpool_app/.bash_profile
-	echo ". /opt/carpool/backend/nodeAppPostPg/bash_profile.carpool_web" >> /home/carpool_web/.bash_profile
 	
+	chmod a+rx /opt/carpool/backend/vagrant/add_postgres_repo_for_CentOS7.sh
 	/opt/carpool/backend/vagrant/add_postgres_repo_for_CentOS7.sh
-	yum -y install postgresql-server.x86_64
-	yum -y install postgresql-contrib.x86_64
+	yum -y install postgresql96.x86_64
+	yum -y install postgresql96-server.x86_64
+	yum -y install postgresql96-contrib.x86_64
+	yum -y install postgresql96-devel.x86_64
+	ln -s /usr/pgsql-9.6/bin/pg_config /usr/bin/pg_config
 	yum -y install libpqxx.x86_64
 	yum -y install libpqxx-devel.x86_64
 	yum -y install python-devel.x86_64
@@ -106,26 +115,53 @@ Vagrant.configure("2") do |config|
 	pip install --upgrade pip
 	pip install PyGreSQL
 	pip install pytest
-	yum -y install npm
-	yum -y install nginx
-
-	
 	
 	# directory creation for postgres database
 	mkdir -p /opt/pgsql_data
 	chown -R postgres:postgres /opt/pgsql_data
 	
-	# start postgres
-	su postgres -c 'initdb -D /opt/pgsql_data'
-	su postgres -c 'pg_ctl -D /opt/pgsql_data -l /opt/pgsql_data/serverlog start'
+	# initialize and start postgres
+	PGDATA=/opt/pgsql_data && /usr/pgsql-9.6/bin/postgresql96-setup initdb
+	systemctl enable postgresql-9.6.service
+	systemctl start postgresql-9.6.service
+	
+	# make sure server has time to start
 	sleep 10
 	
 	su carpool_app -c 'cd /opt/carpool/backend/db && . bash_profile.carpool_app && /opt/carpool/backend/db/create_fresh_carpool_db.sh carpool_test'
 	
-	#npm install pm2 -g
-	#su carpool_web -c 'cd /opt/carpool/backend/nodeAppPostPg && npm install && pm2 start index.js --name carpool_dev'
 	
-	# this seems to return some error so lets place it last
+	########################
+	# BACK END  WEB APP
+	########################
+	useradd -g carpoolg --no-user-group carpool_web
+	echo ". /opt/carpool/backend/nodeAppPostPg/bash_profile.carpool_web" >> /home/carpool_web/.bash_profile
+	chmod g+w /opt/carpool/backend/nodeAppPostPg
+	
+	yum -y install npm
+	yum -y install nginx
 
+	npm install pm2 -g
+	su carpool_web -c 'cd /opt/carpool/backend/nodeAppPostPg && . bash_profile.carpool_web && npm install && pm2 start index.js --name carpool_dev'
+	
+	cp -p /etc/nginx/nginx.conf /etc/nginx/nginx.conf.orig
+	cp -f /opt/carpool/backend/nginx/conf/nginx.conf.demo /etc/nginx/nginx.conf
+	
+	service stop nginx 
+	service start nginx
+	
+	########################
+	# FRONT END
+	########################
+	yum -y install ruby.x86_64
+	yum -y install ruby-devel.x86_64
+	gem install jekyll bundler
+	cd /opt/carpool
+	git clone https://github.com/voteamerica/voteamerica.github.io.git
+	cd /opt/carpool/voteamerica.github.io
+	echo "api: \"http://demo.carpoolvote.com:8080/demo\"" > /opt/carpool/voteamerica.github.io/_config-demo.yml
+	chown -R carpool_web:carpoolg /opt/carpool/voteamerica.github.io
+	#su carpool_web -c 'cd /opt/carpool/voteamerica.github.io && jekyll serve --config _config.yml,_config-demo.yml --detach --host 192.168.50.2 --port 4000'
+	
   SHELL
 end

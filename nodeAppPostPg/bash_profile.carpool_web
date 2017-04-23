@@ -1,5 +1,8 @@
 export PGHOST='/tmp'
 export PGHOME=/opt/pgsql
 export PGDATA=/opt/pgsql_data
-PATH=$PGHOME/bin:$PATH:$HOME/.local/bin:$HOME/bin
-export PATH
+export PGDATABASE=carpool_test
+export PATH=$PGHOME/bin:$PATH:$HOME/.local/bin:$HOME/bin
+
+export PORT=3000
+
