@@ -16,7 +16,7 @@ fi
 
 echo $PGDATABASE $LIMIT
 
-psql -h /tmp $PGDATABASE <<RPT
+psql $PGDATABASE <<RPT
 select * from carpoolvote.match order by created_ts desc, score desc $LIMIT
 RPT
 
