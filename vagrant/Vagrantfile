@@ -132,6 +132,9 @@ Vagrant.configure("2") do |config|
 	# Create a carpool database for unit test purposes
 	./create_fresh_carpool_db.sh carpool_unittest
 	
+	# start the matching engine
+	su carpool_app -c 'nohup ./start_matching_engine.sh carpool_test &'
+
 	########################
 	# BACK END  WEB APP
 	########################
