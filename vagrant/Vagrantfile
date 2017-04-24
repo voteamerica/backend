@@ -115,6 +115,8 @@ Vagrant.configure("2") do |config|
 	pip install --upgrade pip
 	pip install PyGreSQL
 	pip install pytest
+	pip install requests
+	pip install psycopg2
 		
 	# initialize and start postgres
 	#  DB location : /var/lib/pgsql/9.6/data/
