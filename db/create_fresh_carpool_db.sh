@@ -9,9 +9,9 @@ then
 	exit 1
 fi
 
-su postgres -c "psql < carpool_roles.sql" \ 
+su postgres -c "psql < carpool_roles.sql" \
 && su postgres -c "createdb --owner carpool_admin $1" \
-&& su carpool_app -c "psql $1 < carpool_schema_bootstrap.sql" \
+&& su postgres -c "psql $1 < carpool_schema_bootstrap.sql" \
 && su carpool_app -c "psql $1 < carpool_schema.sql" \
 && su carpool_app -c "psql $1 < carpool_static_data.sql" \
 && su carpool_app -c "psql $1 < carpool_params_data.sql" \
