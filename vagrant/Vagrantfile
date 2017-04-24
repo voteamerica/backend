@@ -95,13 +95,12 @@ Vagrant.configure("2") do |config|
     
 	mkdir /opt/carpool
 	cd /opt/carpool
-	#git clone https://github.com/voteamerica/backend.
+	#git clone https://github.com/voteamerica/backend.git
 	git clone https://github.com/dmilet/backend.git
 	chown -R carpool_app:carpoolg /opt/carpool
 	
 	echo ". /opt/carpool/backend/db/bash_profile.carpool_app" >> /home/carpool_app/.bash_profile
 	
-	#chmod a+rx /opt/carpool/backend/vagrant/add_postgres_repo_for_CentOS7.sh
 	/opt/carpool/backend/vagrant/add_postgres_repo_for_CentOS7.sh
 	yum -y install postgresql96.x86_64
 	yum -y install postgresql96-server.x86_64
@@ -116,24 +115,20 @@ Vagrant.configure("2") do |config|
 	pip install --upgrade pip
 	pip install PyGreSQL
 	pip install pytest
-	
-	# directory creation for postgres database
-	#mkdir -p /opt/pgsql_data
-	#chown -R postgres:postgres /opt/pgsql_data
-	#echo "export PGDATA=/opt/pgsql_data" >> ~postgres/.bash_profile
-	#export PGSETUP_INITDB_OPTIONS="-D /opt/pgsql_data"
-	/usr/pgsql-9.6/bin/postgresql96-setup initdb
-	
+		
 	# initialize and start postgres
+	#  DB location : /var/lib/pgsql/9.6/data/
+	/usr/pgsql-9.6/bin/postgresql96-setup initdb
+	/opt/carpool/backend/vagrant/update_pg_hba_conf.sh
 	systemctl enable postgresql-9.6.service
 	systemctl start postgresql-9.6.service
 	
-	# make sure server has time to start
-	#sleep 10
-	
 	cd /opt/carpool/backend/db 
+	# Create a carpool database for test purposes, through web page and node app
 	./create_fresh_carpool_db.sh carpool_test
 	
+	# Create a carpool database for unit test purposes
+	./create_fresh_carpool_db.sh carpool_unittest
 	
 	########################
 	# BACK END  WEB APP
