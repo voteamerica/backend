@@ -1,5 +1,7 @@
 #!/usr/bin/sh
 
+# should be executed from the directory where the sql files are located
+
 if [[ "X$1" = "X" ]]
 then
 	echo missing DB name
@@ -7,11 +9,11 @@ then
 	exit 1
 fi
 
-createdb $1 \
-&& psql -h /tmp $1 < carpool_roles.sql \
-&& psql -h /tmp $1 < carpool_schema_bootstrap.sql \
-&& psql -h /tmp $1 < carpool_schema.sql \
-&& psql -h /tmp $1 < carpool_static_data.sql \
-&& psql -h /tmp $1 < carpool_params_data.sql \
-&& ./load_functions.sh $1
+su postgres -c "psql < carpool_roles.sql" \
+&& su postgres -c "createdb --owner carpool_admin $1" \
+&& su postgres -c "psql $1 < carpool_schema_bootstrap.sql" \
+&& su carpool_app -c "psql $1 < carpool_schema.sql" \
+&& su carpool_app -c "psql $1 < carpool_static_data.sql" \
+&& su carpool_app -c "psql $1 < carpool_params_data.sql" \
+&& su carpool_app -c "./load_functions.sh $1"
 

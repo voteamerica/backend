@@ -286,14 +286,11 @@ function getFourRiderCancelConfirmPayloadAsArray(req, payload) {
     if (payload.UUID_rider === undefined) {
         console.log("getCancelConfirmPayloadAsArray: no payload rider UUID");
     }
-    if (payload.Score === undefined) {
-        console.log("getCancelConfirmPayloadAsArray: no payload Score");
-    }
     if (payload.RiderPhone === undefined) {
         console.log("getCancelConfirmPayloadAsArray: no payload RiderPhone");
     }
     return [
-        payload.UUID_driver, payload.UUID_rider, payload.Score, payload.RiderPhone
+        payload.UUID_driver, payload.UUID_rider, payload.RiderPhone
     ];
 }
 // for all three param Driver fns
@@ -331,14 +328,11 @@ function getFourDriverCancelConfirmPayloadAsArray(req, payload) {
     if (payload.UUID_rider === undefined) {
         console.log("getCancelConfirmPayloadAsArray: no payload rider UUID");
     }
-    if (payload.Score === undefined) {
-        console.log("getCancelConfirmPayloadAsArray: no payload Score");
-    }
     if (payload.DriverPhone === undefined) {
         console.log("getCancelConfirmPayloadAsArray: no payload DriverPhone");
     }
     return [
-        payload.UUID_driver, payload.UUID_rider, payload.Score, payload.DriverPhone
+        payload.UUID_driver, payload.UUID_rider, payload.DriverPhone
     ];
 }
 function getRejectRidePayloadAsArray(req, payload) {

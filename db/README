@@ -1,22 +1,29 @@
 --- FRESH CARPOOL DB CREATION ---
+as root user
+cd backend/db
 ./create_fresh_carpool_db.sh <DB name>
 
 
 --- CLEAN UP ---
 psql -d <DB name> <  clean_up.sql
 
-
 --- SCHEMA NAME ---
-carpoolvote
+carpoolvote   (owner : carpool_admin)
+
 
 
 --- DATABASE ROLES -----
 carpool_admins    : all privileges 
                     contains individual personal users whose role is to maintain the schema
 capool_role       : privileges to run the matching engine
-                    contains carpool_match_engine database user which should be used to execute the matching engine.
+                    contains carpool_app database user which should be used to execute the matching engine.
 carpool_web_role  : privileges to perform action supported by front end
                     contains the carpool_web database user which should be used by the front end to connect to the database
+
+--- USERS ---
+carpool_admin : schema owner
+carpool_app   : used to run the matching engine and other support functions related to it
+carpool_web   : used to run the nodeApp that services the WebAPI
 
 					
 --- TABLES, VIEWS, SEQUENCES, INDEXES ----

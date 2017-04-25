@@ -1,0 +1,176 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure("2") do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  # Every Vagrant development environment requires a box. You can search for
+  # boxes at https://atlas.hashicorp.com/search.
+  #config.vm.box = "base"
+  config.vm.box = "centos/7"
+
+  # Disable automatic box update checking. If you disable this, then
+  # boxes will only be checked for updates when the user runs
+  # `vagrant box outdated`. This is not recommended.
+  # config.vm.box_check_update = false
+
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest machine.
+  #config.vm.network "forwarded_port", guest: 443, host: 10443
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  # config.vm.network "private_network", ip: "192.168.33.10"
+
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network "public_network"
+
+  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder "../data", "/vagrant_data"
+
+   #config.vm.synced_folder "../", "/vagrant", type: "rsync", rsync__exclude: ".git/"
+  
+  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  #
+  config.vm.provider "virtualbox" do |vb|
+    # Display the VirtualBox GUI when booting the machine
+    vb.gui = true
+	config.vm.synced_folder ".", "/vagrant", disabled: true
+	config.vm.network "private_network", type: "dhcp"
+  
+  #   # Customize the amount of memory on the VM:
+     vb.memory = "1024"
+	 vb.cpus = 2
+  end
+  #
+  # View the documentation for the provider you are using for more
+  # information on available options.
+
+  # Define a Vagrant Push strategy for pushing to Atlas. Other push strategies
+  # such as FTP and Heroku are also available. See the documentation at
+  # https://docs.vagrantup.com/v2/push/atlas.html for more information.
+  # config.push.define "atlas" do |push|
+  #   push.app = "YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME"
+  # end
+
+  # Enable provisioning with a shell script. Additional provisioners such as
+  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+  # config.vm.provision "shell", inline: <<-SHELL
+  #   apt-get update
+  #   apt-get install -y apache2
+  # SHELL
+  config.vm.provision "shell", inline: <<-SHELL
+  
+	########################
+	# GENERAL STUFF
+	########################  
+	yum -y install epel-release
+	yum -y install wget.x86_64
+	yum -y install net-tools.x86_64
+	yum -y install gcc.x86_64
+	yum -y install git
+	
+  
+	########################
+	# BACK END  DATABASE
+	########################
+	groupadd carpoolg
+	useradd -g carpoolg --no-user-group carpool_app	
+	useradd -g carpoolg --no-user-group carpool_admin
+    
+	mkdir /opt/carpool
+	cd /opt/carpool
+	#git clone https://github.com/voteamerica/backend.git
+	git clone https://github.com/dmilet/backend.git
+	chown -R carpool_app:carpoolg /opt/carpool
+	
+	echo ". /opt/carpool/backend/db/bash_profile.carpool_app" >> /home/carpool_app/.bash_profile
+	
+	/opt/carpool/backend/vagrant/add_postgres_repo_for_CentOS7.sh
+	yum -y install postgresql96.x86_64
+	yum -y install postgresql96-server.x86_64
+	yum -y install postgresql96-contrib.x86_64
+	yum -y install postgresql96-devel.x86_64
+	ln -s /usr/pgsql-9.6/bin/pg_config /usr/bin/pg_config
+	yum -y install libpqxx.x86_64
+	yum -y install libpqxx-devel.x86_64
+	yum -y install python-devel.x86_64
+	yum -y install python-pip
+	yum -y install python-wheel
+	pip install --upgrade pip
+	pip install PyGreSQL
+	pip install pytest
+	pip install requests
+	pip install psycopg2
+		
+	# initialize and start postgres
+	#  DB location : /var/lib/pgsql/9.6/data/
+	/usr/pgsql-9.6/bin/postgresql96-setup initdb
+	/opt/carpool/backend/vagrant/update_pg_hba_conf.sh
+	systemctl enable postgresql-9.6.service
+	systemctl start postgresql-9.6.service
+	
+	cd /opt/carpool/backend/db 
+	# Create a carpool database for test purposes, through web page and node app
+	./create_fresh_carpool_db.sh carpool_test
+	
+	# Create a carpool database for unit test purposes
+	./create_fresh_carpool_db.sh carpool_unittest
+	
+	# start the matching engine
+	# note that no e-mail or sms notifications will be generated without the correct API IDs
+	su carpool_app -c 'nohup ./start_matching_engine.sh carpool_test &'
+
+	
+	########################
+	# BACK END  WEB APP
+	########################
+	useradd -g carpoolg --no-user-group carpool_web
+	echo ". /opt/carpool/backend/nodeAppPostPg/bash_profile.carpool_web" >> /home/carpool_web/.bash_profile
+	chmod g+w /opt/carpool/backend/nodeAppPostPg
+	
+	yum -y install npm
+	yum -y install nginx
+
+	npm install pm2 -g
+	su carpool_web -c 'cd /opt/carpool/backend/nodeAppPostPg && . bash_profile.carpool_web && npm install && pm2 start index.js --name carpool_dev'
+	
+	cp -p /etc/nginx/nginx.conf /etc/nginx/nginx.conf.orig
+	cp -f /opt/carpool/backend/nginx/conf/nginx.conf.demo /etc/nginx/nginx.conf
+	# allows nginx to create network connections --- used as a proxy
+	setsebool -P httpd_can_network_connect 1
+	
+	systemctl stop nginx 
+	systemctl start nginx
+	
+	########################
+	# FRONT END
+	########################
+	yum -y install ruby.x86_64
+	yum -y install ruby-devel.x86_64
+	gem install jekyll bundler
+	cd /opt/carpool
+	git clone https://github.com/voteamerica/voteamerica.github.io.git
+	cd /opt/carpool/voteamerica.github.io
+	export EXTERNAL_IP=$(ifconfig -a | grep inet | grep -v inet6 | grep -v 10.0 | grep -v 127.0  | head -n 1 | tr -s " " | cut -f 3 -d " ")
+	echo "api: \"http://$EXTERNAL_IP:8080/demo\"" > /opt/carpool/voteamerica.github.io/_config-demo.yml
+	chown -R carpool_web:carpoolg /opt/carpool/voteamerica.github.io
+	su carpool_web -c 'cd /opt/carpool/voteamerica.github.io &&  /usr/local/bin/jekyll serve --config _config.yml,_config-demo.yml --detach --host $EXTERNAL_IP --port 4000'
+	
+  SHELL
+end

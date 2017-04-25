@@ -14,7 +14,7 @@ key =  os.environ['MAILGUNKEY']
 request_url = 'https://api.mailgun.net/v3/www.carpoolvote.com/messages'
 
 try:
-	conn = psycopg2.connect("dbname={0} user='carpool_match_engine' host='/tmp'".format(sys.argv[1]))
+	conn = psycopg2.connect("dbname={0} user='carpool_app'".format(sys.argv[1]))
 except:
 	print ("I am unable to connect to the database")
 	exit

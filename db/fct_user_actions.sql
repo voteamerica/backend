@@ -1,11 +1,11 @@
 -- actions by rider
 --carpoolvote.rider_cancel_ride_request(UUID, phone number or lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
---carpoolvote.rider_cancel_confirmed_match(UUID_driver, UUID_rider, score, rider’s phone number or rider’s lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
+--carpoolvote.rider_cancel_confirmed_match(UUID_driver, UUID_rider, rider’s phone number or rider’s lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
 
 -- actions by driver
 --carpoolvote.driver_cancel_drive_offer(UUID, phone number or lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
---carpoolvote.driver_cancel_confirmed_match(UUID_driver, UUID_rider, score, driverr’s phone number or driver’s lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
---carpoolvote.driver_confirm_match(UUID_driver, UUID_rider, score, driver’s phone number or driver’s lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
+--carpoolvote.driver_cancel_confirmed_match(UUID_driver, UUID_rider, driverr’s phone number or driver’s lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
+--carpoolvote.driver_confirm_match(UUID_driver, UUID_rider, driver’s phone number or driver’s lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
 --carpoolvote.driver_pause_match(UUID, phone number or lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
 
 -- functions return out_error_code=0 in case of success. If <>0, out_error_text contains error description
@@ -706,7 +706,6 @@ GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_ride_request(
 CREATE OR REPLACE FUNCTION carpoolvote.rider_cancel_confirmed_match(
     a_UUID_driver character varying(50),
 	a_UUID_rider character varying(50),
-	a_score smallint,
     confirmation_parameter character varying(255),
 	OUT out_error_code INTEGER,
 	OUT out_error_text TEXT)
@@ -730,7 +729,6 @@ BEGIN
 	FROM carpoolvote.match m, carpoolvote.rider r
 	WHERE m.uuid_driver = a_UUID_driver
 	AND m.uuid_rider = a_UUID_rider
-	AND m.score = a_score
 	AND m.status = 'MatchConfirmed'   -- We can cancel only a Confirmed match
 	AND m.uuid_rider = r."UUID"
 	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."RiderLastName", r."RiderPhone")
@@ -746,8 +744,7 @@ BEGIN
 		UPDATE carpoolvote.match
 		SET status='Canceled'
 		WHERE uuid_rider = a_UUID_rider
-		AND uuid_driver = a_UUID_driver
-		AND score = a_score;
+		AND uuid_driver = a_UUID_driver;
 	
 		v_step := 'S1';
 		SELECT * INTO drive_offer_row
@@ -799,11 +796,11 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying,
+ALTER FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, character varying,
 	out integer, out text) OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying,
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, character varying,
 	out integer, out text) TO carpool_web_role;
-GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, smallint, character varying,
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_cancel_confirmed_match(character varying, character varying, character varying,
 	out integer, out text) TO carpool_role;
 
 --------------------------------------------------------
@@ -929,7 +926,6 @@ GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_drive_offer(character varyin
 CREATE OR REPLACE FUNCTION carpoolvote.driver_cancel_confirmed_match(
     a_UUID_driver character varying(50),
 	a_UUID_rider character varying(50),
-	a_score smallint,
     confirmation_parameter character varying(255),
 	OUT out_error_code INTEGER,
 	OUT out_error_text TEXT)
@@ -969,8 +965,7 @@ BEGIN
 		UPDATE carpoolvote.match
 		SET status='Canceled'
 		WHERE uuid_rider = a_UUID_rider
-		AND uuid_driver = a_UUID_driver
-		AND score = a_score;
+		AND uuid_driver = a_UUID_driver;
 	
 		v_step := 'S1';
 		SELECT * INTO ride_request_row
@@ -1021,11 +1016,11 @@ END
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying,
+ALTER FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, character varying,
 	out integer, out text) OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying,
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, character varying,
 	out integer, out text) TO carpool_web_role;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, smallint, character varying,
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_confirmed_match(character varying, character varying, character varying,
 	out integer, out text) TO carpool_role;
 
 --------------------------------------------------------
@@ -1038,7 +1033,6 @@ GRANT EXECUTE ON FUNCTION carpoolvote.driver_cancel_confirmed_match(character va
 CREATE OR REPLACE FUNCTION carpoolvote.driver_confirm_match(
     a_UUID_driver character varying(50),
 	a_UUID_rider character varying(50),
-	a_score smallint,
     confirmation_parameter character varying(255),
 	OUT out_error_code INTEGER,
 	OUT out_error_text TEXT)
@@ -1066,7 +1060,6 @@ BEGIN
 	FROM carpoolvote.match m, carpoolvote.driver r
 	WHERE m.uuid_driver = a_UUID_driver
 	AND m.uuid_rider = a_UUID_rider
-	AND m.score = a_score
 	AND m.status = 'MatchProposed'   -- We can confirmed only a 
 	AND m.uuid_driver = r."UUID"
 	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."DriverLastName", r."DriverPhone")
@@ -1096,8 +1089,7 @@ BEGIN
 		UPDATE carpoolvote.match
 		SET status='MatchConfirmed'
 		WHERE uuid_rider = a_UUID_rider
-		AND uuid_driver = a_UUID_driver
-		AND score = a_score;
+		AND uuid_driver = a_UUID_driver;
 	
 		v_step := 'S2, ' || a_UUID_driver;
 		v_return_text := carpoolvote.update_drive_offer_status(a_UUID_driver);
@@ -1130,11 +1122,11 @@ BEGIN
 		WHERE "UUID" = a_UUID_driver;	
 		
 		v_step := 'S5';
-		SELECT * FROM carpoolvote.notify_driver_match_confirmed_by_driver(a_UUID_driver, a_UUID_rider, a_score) INTO out_error_code, out_error_text;
+		SELECT * FROM carpoolvote.notify_driver_match_confirmed_by_driver(a_UUID_driver, a_UUID_rider) INTO out_error_code, out_error_text;
 
 
 		v_step := 'S6';
-		SELECT * FROM carpoolvote.notify_rider_match_confirmed_by_driver(a_UUID_driver, a_UUID_rider, a_score) INTO out_error_code, out_error_text;
+		SELECT * FROM carpoolvote.notify_rider_match_confirmed_by_driver(a_UUID_driver, a_UUID_rider) INTO out_error_code, out_error_text;
 	
 		RETURN;
 	
@@ -1151,11 +1143,11 @@ BEGIN
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, smallint, character varying,
+ALTER FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, character varying,
 	out integer, out text) OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, smallint, character varying,
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, character varying,
 	out integer, out text) TO carpool_web_role;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, smallint, character varying,
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_confirm_match(character varying, character varying, character varying,
 	out integer, out text) TO carpool_role;
 
 
@@ -1498,12 +1490,12 @@ ALTER FUNCTION carpoolvote.rider_info(a_uuid character varying, confirmation_par
 -- Name: driver_cancel_confirmed_match(character varying, character varying, smallint, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
 --
 
-REVOKE ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
-REVOKE ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
-GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web_role;
-GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
-GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
+REVOKE ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) TO carpool_web_role;
+GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) TO carpool_role;
+GRANT ALL ON FUNCTION driver_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) TO PUBLIC;
 
 
 --
@@ -1522,12 +1514,12 @@ GRANT ALL ON FUNCTION driver_cancel_drive_offer(a_uuid character varying, confir
 -- Name: driver_confirm_match(character varying, character varying, smallint, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
 --
 
-REVOKE ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
-REVOKE ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
-GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web_role;
-GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
-GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO PUBLIC;
+REVOKE ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) TO carpool_web_role;
+GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) TO carpool_role;
+GRANT ALL ON FUNCTION driver_confirm_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) TO PUBLIC;
 
 
 --
@@ -1594,11 +1586,11 @@ GRANT ALL ON FUNCTION driver_proposed_matches(a_uuid character varying, confirma
 -- Name: rider_cancel_confirmed_match(character varying, character varying, smallint, character varying); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
 --
 
-REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM PUBLIC;
-REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) FROM carpool_admins;
-GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_admins;
-GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_web_role;
-GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, a_score smallint, confirmation_parameter character varying) TO carpool_role;
+REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) FROM PUBLIC;
+REVOKE ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) FROM carpool_admins;
+GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) TO carpool_admins;
+GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) TO carpool_web_role;
+GRANT ALL ON FUNCTION rider_cancel_confirmed_match(a_uuid_driver character varying, a_uuid_rider character varying, confirmation_parameter character varying) TO carpool_role;
 
 
 --

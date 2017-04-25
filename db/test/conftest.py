@@ -7,8 +7,8 @@ def pytest_addoption(parser):
                      help=("Carpool Admin Username, default=carpool_admin"))
     parser.addoption("--frontend", action="store", default="carpool_web",
                      help=("Carpool Front End Username, default=carpool_web"))
-    parser.addoption("--matchengine", action="store", default="carpool_match_engine",
-                     help=("Carpool Front End Username, default=carpool_match_engine"))
+    parser.addoption("--matchengine", action="store", default="carpool_app",
+                     help=("Carpool Front End Username, default=carpool_app"))
     parser.addoption("--dbhost", action="store", default="/tmp",
                      help=("Database Host, default=/tmp"))
 @pytest.fixture
