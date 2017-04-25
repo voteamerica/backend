@@ -134,6 +134,64 @@ var PostgresQueries = (function () {
         });
     };
 	
+	PostgresQueries.prototype.dbExecuteCarpoolAPIFunction_Insert = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
+        var queryString = fnExecuteFunctionString();
+        console.log("executeFunctionString Insert: " + queryString);
+        pool.query(queryString, fnPayloadArray(req, payload))
+            .then(function (result) {
+            var firstRow = "";
+
+            var displayResult = result || '';
+            var uuid = "";
+            var code = "";
+            var info = "";
+            try {
+                displayResult = JSON.stringify(result);
+                uuid = result.rows[0].out_uuid;
+                code = result.rows[0].out_error_code;
+                info = result.rows[0].out_error_text;
+                console.error('row: ' + JSON.stringify(result.rows[0]));
+            }
+            catch (err) {
+                console.error('no uuid returned');
+            }
+
+            if (result !== undefined && result.rows !== undefined) {
+                // result.rows.forEach( val => console.log(val));
+                result.rows.forEach(function (val) {
+                    return console.log("exec fn: " + val);
+                });
+                firstRow = result.rows[0];
+            }
+            console.error("executed fn: " + firstRow);
+            
+            if (payload._redirect && uuid) {
+                var reply_url = payload._redirect + '&uuid=' + uuid.toString();
+                if (code != undefined) {
+                    reply_url += '&code=' + code.toString();
+                }
+                if (info != undefined) {
+                    reply_url += '&info=' + info.toString();
+                }
+                reply.redirect(reply_url);
+            }
+            else {
+                // reply(results.success + ': ' + uuid);
+                reply(//results.success + 
+                firstRow);
+            }
+
+        })
+            .catch(function (e) {
+            var message = e.message || '';
+            var stack = e.stack || '';
+            console.error(
+            // results.failure, 
+            message, stack);
+            reply(results.failure + message).code(500);
+        });
+    };
+	
 	PostgresQueries.prototype.dbExecuteCarpoolAPIFunction = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
         console.log("executeFunctionString: " + queryString);

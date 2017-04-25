@@ -3,10 +3,10 @@
 #
 
 ## FOLDER 
-# cd VM_share/Jon/Documents/GitHub/voteUSbackend/docker/pg-auto
+# cd VM_share/Jon/Documents/GitHub/voteUSbackend/docker/nodeApp
 
 ## build IMAGE
-## docker build -t carpool --build-arg CACHEBUST=$(date +%s) --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-1 .
+## docker build -t carpool --build-arg CACHEBUST=$(date +%s) --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=master .
 
 ## FOLDER 
 # cd VM_share/Jon/Documents/GitHub/voteUSbackend
