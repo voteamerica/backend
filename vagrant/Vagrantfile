@@ -133,8 +133,10 @@ Vagrant.configure("2") do |config|
 	./create_fresh_carpool_db.sh carpool_unittest
 	
 	# start the matching engine
+	# note that no e-mail or sms notifications will be generated without the correct API IDs
 	su carpool_app -c 'nohup ./start_matching_engine.sh carpool_test &'
 
+	
 	########################
 	# BACK END  WEB APP
 	########################
@@ -150,6 +152,8 @@ Vagrant.configure("2") do |config|
 	
 	cp -p /etc/nginx/nginx.conf /etc/nginx/nginx.conf.orig
 	cp -f /opt/carpool/backend/nginx/conf/nginx.conf.demo /etc/nginx/nginx.conf
+	# allows nginx to create network connections --- used as a proxy
+	setsebool -P httpd_can_network_connect 1
 	
 	systemctl stop nginx 
 	systemctl start nginx
