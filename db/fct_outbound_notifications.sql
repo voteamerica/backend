@@ -918,7 +918,7 @@ BEGIN
 		IF v_rider_record."RiderEmail" IS NOT NULL
 		THEN
 				-- Cancellation notice to rider
-				v_subject := 'Confirmed Ride Cancellation Notice   --- [' || v_driver_record."UUID" || ']';
+				v_subject := 'Confirmed Ride Cancellation Notice   --- [' || v_rider_record."UUID" || ']';
 				v_html_body := '<body>'
 				|| '<p>Dear ' || v_rider_record."RiderFirstName" ||  ' ' || v_rider_record."RiderLastName" || ', <p>' 
 				|| '<p>Your driver ' || v_driver_record."DriverFirstName" || ' ' || v_driver_record."DriverLastName" 
@@ -1016,7 +1016,7 @@ BEGIN
 		IF v_driver_record."DriverEmail" IS NOT NULL
 		THEN
 
-			v_subject := 'Confirmed Ride Cancellation Notice   --- [' || v_rider_record."UUID" || ']';
+			v_subject := 'Confirmed Ride Cancellation Notice   --- [' || v_driver_record."UUID" || ']';
 			v_html_body := '<body>'
 			|| '<p>Dear ' || v_driver_record."DriverFirstName" ||  ' ' || v_driver_record."DriverLastName" ||  ', </p>'
 			|| '<p>We have processed your request to cancel a confirmed ride with ' || v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName" || '</p>'
@@ -1137,7 +1137,7 @@ BEGIN
 			v_body := v_html_header || v_html_body || v_html_footer;
 
 			INSERT INTO carpoolvote.outgoing_email (recipient, uuid, subject, body)
-			VALUES (v_rider_record."RiderEmail", v_subject, v_body);
+			VALUES (v_rider_record."RiderEmail", v_rider_record."UUID", v_subject, v_body);
 
 		END IF;
 		
@@ -1330,7 +1330,7 @@ BEGIN
 			v_body := v_html_header || v_html_body || v_html_footer;
 		
 			INSERT INTO carpoolvote.outgoing_email (recipient, uuid, subject, body)
-			VALUES (v_rider_record."RiderEmail", uuid_rider, v_subject, v_html_body);
+			VALUES (v_rider_record."RiderEmail", uuid_rider, v_subject, v_body);
 		END IF;
 		
 		IF v_rider_record."RiderPhone" IS NOT NULL AND (position('SMS' in v_rider_record."RiderPreferredContact") > 0)
