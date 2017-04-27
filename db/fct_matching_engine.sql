@@ -410,7 +410,7 @@ BEGIN
 										END IF;
 									
                                         IF EXISTS (
-                                            SELECT 1 FROM match_notifications_buffer
+                                            SELECT 1 FROM carpoolvote.match
                                                 WHERE uuid_rider = ride_request_row."UUID"
                                                 AND uuid_driver = drive_offer_row."UUID")
                                         THEN
@@ -437,11 +437,12 @@ BEGIN
 													v_status
 												);
 
-											INSERT INTO match_notifications_buffer (uuid_driver, uuid_rider)
-                                                VALUES (drive_offer_row."UUID", ride_request_row."UUID");
-
 											IF v_status = 'MatchProposed'
 											THEN
+											
+												INSERT INTO match_notifications_buffer (uuid_driver, uuid_rider)
+                                                VALUES (drive_offer_row."UUID", ride_request_row."UUID");
+
 												UPDATE carpoolvote.rider r
 												SET status='MatchProposed'
 												WHERE r."UUID" = ride_request_row."UUID";

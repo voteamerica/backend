@@ -18,21 +18,21 @@ fi
 echo $PGDATABASE 
 
 echo "Rider Details"
-psql -h $PGHOST $PGDATABASE <<RPT
+psql $PGDATABASE <<RPT
 select * from carpoolvote.vw_ride_request where uuid='${id}'
 RPT
 
 echo "Rider Matches"
-psql -h $PGHOST $PGDATABASE <<RPT
+psql $PGDATABASE <<RPT
 select * from carpoolvote.match where uuid_rider='${id}'
 RPT
 
 echo "Rider emails"
-psql -h $PGHOST $PGDATABASE <<RPT
+psql $PGDATABASE <<RPT
 select status, subject, created_ts, last_updated_ts, recipient, emission_info from carpoolvote.outgoing_email where uuid='${id}'
 RPT
 
 echo "Rider sms"
-psql -h $PGHOST $PGDATABASE <<RPT
+psql $PGDATABASE <<RPT
 select status, created_ts, last_updated_ts, recipient, emission_info from carpoolvote.outgoing_sms where uuid='${id}'
 RPT
