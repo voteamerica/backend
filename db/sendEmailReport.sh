@@ -4,9 +4,9 @@
 
 if [[ "X$1" != "X" ]]
 then
-PGDATABASE=carpool_live
-else
 PGDATABASE=$1
+else
+PGDATABASE=carpool_live
 fi
 
 echo "Report run on $(date)" > /tmp/report.txt
