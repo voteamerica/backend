@@ -27,6 +27,8 @@ api_environment	live
 outgoing_sms_whitelist.enabled	true
 radius.max	100
 radius.tolerance	10
+notifications.date.format 'Mon D'
+notifications.time.format	'HH12:MIam'
 \.
 
 
