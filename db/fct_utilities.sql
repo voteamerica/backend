@@ -277,7 +277,7 @@ BEGIN
 	v_output := '';
 
 	SELECT COALESCE(carpoolvote.get_param_value('notifications.time.format'), 'HH12:MIam') INTO v_time_format;
-	SELECT COALESCE(carpoolvote.get_param_value('notifications.date.format'), 'MM/DD/YY') INTO v_date_format;
+	SELECT COALESCE(carpoolvote.get_param_value('notifications.date.format'), 'Mon DD') INTO v_date_format;
 	
 	--RAISE NOTICE 'v_time_format=%', v_time_format;
 	--RAISE NOTICE 'v_date_format=%', v_date_format;

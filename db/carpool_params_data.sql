@@ -28,7 +28,7 @@ radius.max	100
 radius.tolerance	10
 outgoing_sms_whitelist.enabled	true
 notifications.time.format	HH12:MIam
-notifications.date.format	Mon D
+notifications.date.format	Mon DD
 \.
 
 
