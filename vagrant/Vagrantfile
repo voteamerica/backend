@@ -95,11 +95,14 @@ Vagrant.configure("2") do |config|
     
 	mkdir /opt/carpool
 	cd /opt/carpool
+	chown -R carpool_admin:carpoolg /opt/carpool
+	chmod g+w /opt/carpool
 	#git clone https://github.com/voteamerica/backend.git
-	git clone https://github.com/dmilet/backend.git
-	chown -R carpool_app:carpoolg /opt/carpool
+	su carpool_admin -c "git clone https://github.com/dmilet/backend.git"
+	chown -R carpool_admin:carpoolg /opt/carpool/backend
+	chmod -R g+w /opt/carpool/backend
 	
-	echo ". /opt/carpool/backend/db/bash_profile.carpool_app" >> /home/carpool_app/.bash_profile
+	echo ". /opt/carpool/backend/db/bash_profile.carpool_app.test" >> /home/carpool_app/.bash_profile
 	
 	/opt/carpool/backend/vagrant/add_postgres_repo_for_CentOS7.sh
 	yum -y install postgresql96.x86_64
@@ -121,6 +124,7 @@ Vagrant.configure("2") do |config|
 	# initialize and start postgres
 	#  DB location : /var/lib/pgsql/9.6/data/
 	/usr/pgsql-9.6/bin/postgresql96-setup initdb
+	ln -s /var/lib/pgsql/9.6/data /opt/carpool/pgdata
 	/opt/carpool/backend/vagrant/update_pg_hba_conf.sh
 	systemctl enable postgresql-9.6.service
 	systemctl start postgresql-9.6.service
@@ -141,17 +145,17 @@ Vagrant.configure("2") do |config|
 	# BACK END  WEB APP
 	########################
 	useradd -g carpoolg --no-user-group carpool_web
-	echo ". /opt/carpool/backend/nodeAppPostPg/bash_profile.carpool_web" >> /home/carpool_web/.bash_profile
+	echo ". /opt/carpool/backend/nodeAppPostPg/bash_profile.carpool_web.test" >> /home/carpool_web/.bash_profile
 	chmod g+w /opt/carpool/backend/nodeAppPostPg
 	
 	yum -y install npm
 	yum -y install nginx
 
 	npm install pm2 -g
-	su carpool_web -c 'cd /opt/carpool/backend/nodeAppPostPg && . bash_profile.carpool_web && npm install && pm2 start index.js --name carpool_dev'
+	su carpool_web -c 'cd /opt/carpool/backend/nodeAppPostPg && . /home/carpool_web/.bash_profile && npm install && pm2 start index.js --name TEST'
 	
 	cp -p /etc/nginx/nginx.conf /etc/nginx/nginx.conf.orig
-	cp -f /opt/carpool/backend/nginx/conf/nginx.conf.demo /etc/nginx/nginx.conf
+	cp -f /opt/carpool/backend/nginx/conf/nginx.conf.test /etc/nginx/nginx.conf
 	# allows nginx to create network connections --- used as a proxy
 	setsebool -P httpd_can_network_connect 1
 	
@@ -165,12 +169,12 @@ Vagrant.configure("2") do |config|
 	yum -y install ruby-devel.x86_64
 	gem install jekyll bundler
 	cd /opt/carpool
-	git clone https://github.com/voteamerica/voteamerica.github.io.git
+	su carpool_web -c "git clone https://github.com/voteamerica/voteamerica.github.io.git"
 	cd /opt/carpool/voteamerica.github.io
 	export EXTERNAL_IP=$(ifconfig -a | grep inet | grep -v inet6 | grep -v 10.0 | grep -v 127.0  | head -n 1 | tr -s " " | cut -f 3 -d " ")
-	echo "api: \"http://$EXTERNAL_IP:8080/demo\"" > /opt/carpool/voteamerica.github.io/_config-demo.yml
-	chown -R carpool_web:carpoolg /opt/carpool/voteamerica.github.io
-	su carpool_web -c 'cd /opt/carpool/voteamerica.github.io &&  /usr/local/bin/jekyll serve --config _config.yml,_config-demo.yml --detach --host $EXTERNAL_IP --port 4000'
+	echo "api: \"http://$EXTERNAL_IP:8080/test\"" > /opt/carpool/voteamerica.github.io/_config-localtest.yml
+	chown -R carpool_web:carpoolg /opt/carpool/voteamerica.github.io/_config-localtest.yml
+	su carpool_web -c 'cd /opt/carpool/voteamerica.github.io &&  /usr/local/bin/jekyll serve --config _config.yml,_config-localtest.yml --detach --host $EXTERNAL_IP --port 4000'
 	
   SHELL
 end
