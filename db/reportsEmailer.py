@@ -1,7 +1,7 @@
 #!/usr/bin/python3.5
 import os
 import sys
-import requestsnov
+import requests
 import psycopg2
 
 
