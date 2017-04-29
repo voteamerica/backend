@@ -1,1 +1,1 @@
-export PGDATABASE=carpool_v2.0_test
+export PGDATABASE=carpool_test
