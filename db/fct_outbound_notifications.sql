@@ -29,6 +29,9 @@ END IF;
 END
 $BODY$
   LANGUAGE plpgsql VOLATILE;
+ALTER FUNCTION carpoolvote.outgoing_sms_insert_status(character varying) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.outgoing_sms_insert_status(character varying) TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.outgoing_sms_insert_status(character varying) TO carpool_role;
 
 
 ----------------------------------------------------------
@@ -79,6 +82,9 @@ BEGIN
 END
 $BODY$
   LANGUAGE plpgsql IMMUTABLE;
+ALTER FUNCTION carpoolvote.notifications_html_header() OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.notifications_html_header() TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.notifications_html_header() TO carpool_role;
   
 ----------------------------------------------------------
 -- Common function to return HTML footer
@@ -91,6 +97,10 @@ BEGIN
 END
 $BODY$
   LANGUAGE plpgsql IMMUTABLE;
+ALTER FUNCTION carpoolvote.notifications_html_footer() OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.notifications_html_footer() TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.notifications_html_footer() TO carpool_role;
+
   
 ----------------------------------------------------------
 -- Email/SMS notifications to driver after new submission
