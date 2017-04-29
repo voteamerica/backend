@@ -321,9 +321,9 @@ BEGIN
 				|| '<td class="oddRow">Wheelchair accessibility needed</td>'
 				|| '<td class="oddRow">Two-way trip needed</td>'
 				|| '<td class="oddRow">Notes</td>'
-				|| '<td class="oddRow">Name</td>'
-				|| '<td class="oddRow">Email (*=preferred)</td>'
-				|| '<td class="oddRow">Phone Number (*)=preferred</td>'
+				--|| '<td class="oddRow">Name</td>'
+				--|| '<td class="oddRow">Email (*=preferred)</td>'
+				--|| '<td class="oddRow">Phone Number (*)=preferred</td>'
 				|| '</tr>';
 
 			--RAISE NOTICE 'BODY 1 : %', v_html_body;
@@ -359,15 +359,17 @@ BEGIN
 					WHEN v_record.status='MatchConfirmed' THEN 'Confirmed'
 					ELSE v_record.status END || '</td>'
                     || '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td>'
+					--|| '<td class="' || v_row_style || '">' || v_rider_record."RiderCollectionZIP" || '</td>'
                     || '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || '</td>'
+					--|| '<td class="' || v_row_style || '">' || v_rider_record."RiderDropOffZIP" || '</td>'
                     || '<td class="' || v_row_style || '">' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-')  || '</td>'
                     || '<td class="' || v_row_style || '">' || v_rider_record."TotalPartySize" || '</td>'
                     || '<td class="' || v_row_style || '">' || CASE WHEN v_rider_record."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td>'
                     || '<td class="' || v_row_style || '">' || CASE WHEN v_rider_record."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || '</td>'
                     || '<td class="' || v_row_style || '">' || COALESCE (v_rider_record."RiderAccommodationNotes", ' ') || '</td>'
-                    || '<td class="' || v_row_style || '">' || v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName"  || '</td>'
-                    || '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderEmail", ' ') || CASE WHEN coalesce(v_rider_record."RiderPreferredContact" LIKE '%Email%',false) THEN '(*)' else ' ' END || '</td>'
-                    || '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderPhone", ' ') || CASE WHEN coalesce(v_rider_record."RiderPreferredContact" LIKE '%Phone%', false) THEN '(*)' Else ' ' END || '</td>'
+                    --|| '<td class="' || v_row_style || '">' || v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName"  || '</td>'
+                    --|| '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderEmail", ' ') || CASE WHEN coalesce(v_rider_record."RiderPreferredContact" LIKE '%Email%',false) THEN '(*)' else ' ' END || '</td>'
+                    --|| '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderPhone", ' ') || CASE WHEN coalesce(v_rider_record."RiderPreferredContact" LIKE '%Phone%', false) THEN '(*)' Else ' ' END || '</td>'
                     || '</tr>';
                 
 				--RAISE NOTICE 'BODY 2 : % % %', v_html_body, v_row_style, v_rider_record."UUID";

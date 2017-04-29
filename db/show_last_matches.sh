@@ -2,7 +2,7 @@
 
 # USAGE : $0 [dbname] [max-rows]
 
-PGDATABASE=${PGDATABASE:=carpool_v2.0_live}
+PGDATABASE=${PGDATABASE:=carpool_live}
 if [[ "X$1" != "X" ]]
 then
 PGDATABASE=$1
