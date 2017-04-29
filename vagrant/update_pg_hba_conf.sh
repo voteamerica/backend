@@ -13,7 +13,7 @@ do
 if [[ $line =~ ^local.*all.*all.*peer ]]; then
     echo "local   all             carpool_app,carpool_web,carpool_admin   trust" >> /var/lib/pgsql/9.6/data/pg_hba.conf.new
 elif [[ $line =~ ^host.*all.*all.*127.0.0.1.*ident ]]; then
-	echo "host    all             carpool_web             127.0.0.1/32            trust" >> /var/lib/pgsql/9.6/data/pg_hba.conf.new
+	echo "host    all             carpool_web,carpool_app             127.0.0.1/32            trust" >> /var/lib/pgsql/9.6/data/pg_hba.conf.new
 fi
 
 echo "$line" >>  /var/lib/pgsql/9.6/data/pg_hba.conf.new
