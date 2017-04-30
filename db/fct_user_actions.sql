@@ -258,7 +258,7 @@ CREATE OR REPLACE FUNCTION carpoolvote.submit_new_rider(
 $BODY$
 BEGIN	
 
-carpoolvote.submit_new_rider(
+SELECT * FROM carpoolvote.submit_new_rider(
 	a_IPAddress,
     a_RiderFirstName,
     a_RiderLastName,
@@ -279,11 +279,12 @@ carpoolvote.submit_new_rider(
     a_RiderWillBeSafe,
 	NULL,  -- the street number
     a_RiderCollectionAddress,
-    a_RiderDestinationAddress,
+    a_RiderDestinationAddress) INTO 
 	out_uuid,
 	out_error_code,
-	out_error_text
-);
+	out_error_text;
+	
+	RETURN;
 	
 END  
 $BODY$
