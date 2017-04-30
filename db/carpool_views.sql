@@ -170,6 +170,7 @@ CREATE OR REPLACE VIEW carpoolvote.vw_unmatched_drivers_details AS
     driver."DriverCollectionZIP",
     driver."DriverCollectionRadius",
     driver."SeatCount",
+	driver."DriverCanLoadRiderWithWheelchair",
     carpoolvote.convert_datetime_to_local_format(driver."AvailableDriveTimesLocal")
    FROM carpoolvote.driver
   WHERE (driver.status::text = ANY (ARRAY['Pending'::character varying::text, 'MatchProposed'::character varying::text, 'MatchConfirmed'::character varying::text])) AND driver."ReadyToMatch" = true;
