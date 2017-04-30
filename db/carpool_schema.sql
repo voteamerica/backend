@@ -303,6 +303,7 @@ CREATE TABLE rider (
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     status_info text,
     "RiderWillBeSafe" boolean NOT NULL,
+	"RiderCollectionStreetNumber" character varying(10),
     "RiderCollectionAddress" character varying(1000),
     "RiderDestinationAddress" character varying(1000)
 );
