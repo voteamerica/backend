@@ -1,0 +1,28 @@
+version: '2'
+services:
+  web:
+    image: carpool
+    # build: .
+    depends_on:
+    - cp-pg-server
+    # - pg-client
+    # command: bash
+    stdin_open: true
+    tty: true
+    environment:
+      - PGPASSWORD=pwd
+    ports:
+    - "8000:8000"
+    links:
+    - cp-pg-server
+    # volumes:
+    # - /var/vmshare/Jon/Documents/GitHub/backend2:/usr/src/app
+  cp-pg-server:
+    image: pgres-cp
+    ports:
+    - "5432:5432"
+  # pg-client:
+  #   image: postgres:9.5.4
+  #   command: bash
+  #   stdin_open: true
+  #   tty: true
