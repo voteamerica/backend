@@ -43,8 +43,8 @@ RUN npm install
 # can't get these two lines going yet
 # RUN . ./scripts/expo.sh
 
-ENV PORT=8000 PGHOST=$CP_PG_SVR_PORT_5432_TCP_ADDR PGUSER=carpool_web
-ENV PGPASSWORD=$CP_PG_SVR_ENV_POSTGRES_PASSWORD PGDATABASE=carpoolvote
+ENV PORT=8000 PGUSER=carpool_web PGDATABASE=carpoolvote
+# ENV PGHOST=$CP_PG_SVR_PORT_5432_TCP_ADDR PGPASSWORD=$CP_PG_SVR_ENV_POSTGRES_PASSWORD 
 
 COPY ./expo-start.sh /
 
