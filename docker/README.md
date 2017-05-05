@@ -1,8 +1,11 @@
 # carpool Dockerfiles
 
 ## The two folders, nodeApp and pg-auto, contain the Dockerfiles and info to manually setup the docker dev environment.
+## A third folder contains a dockerfile for the jekyll frontend server
 
-## Ideally, these would be revised to have no manual steps and be part of a docker compose setup.
+## Work is under way to revise this process remove manual steps and become a docker compose setup.
+
+# cd .../voteUSbackend/docker
 
 # install compose if necessary
 # https://docs.docker.com/compose/install/
@@ -17,6 +20,8 @@
 # docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up --build
 # docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up --force-recreate
 # docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up -d --force-recreate --remove-orphans
+
+## clearing up for new builds (not a one-step process)
 
 # clear
 # docker-compose rm -f
