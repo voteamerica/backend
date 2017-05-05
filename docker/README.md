@@ -1,8 +1,44 @@
 # carpool Dockerfiles
 
 ## The two folders, nodeApp and pg-auto, contain the Dockerfiles and info to manually setup the docker dev environment.
+## A third folder contains a dockerfile for the jekyll frontend server
 
-## Ideally, these would be revised to have no manual steps and be part of a docker compose setup.
+## Work is under way to revise this process remove manual steps and become a docker compose setup.
+
+# cd .../voteUSbackend/docker
+
+# install compose if necessary
+# https://docs.docker.com/compose/install/
+# sudo -i 
+# curl -L https://github.com/docker/compose/releases/download/1.12.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose 
+# sudo chmod +x /usr/local/bin/docker-compose
+
+# http://stackoverflow.com/questions/32612650/how-to-get-docker-compose-to-always-re-create-containers-from-fresh-images
+# https://github.com/docker/compose/issues/1049
+# docker-compose -f ./compose/docker-compose-static-ip.yml up
+# docker-compose -f ./compose/docker-compose-static-ip-dev.yml up
+# docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up --build
+# docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up --force-recreate
+# docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up -d --force-recreate --remove-orphans
+
+## clearing up for new builds (not a one-step process)
+
+# clear
+# docker-compose rm -f
+# docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml down
+
+# misc tidy
+# http://stackoverflow.com/questions/36663809/how-to-remove-all-docker-volumes
+# https://github.com/chadoe/docker-cleanup-volumes
+
+# effective but slowest
+# docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --no-cache
+
+# cache bust works, but needs a separate call for each service
+# docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) cp-pg-server
+# docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) cp-nodejs
+# docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) cp-front-end
+
 
 # 1) pg-auto
 # cd .../voteUSbackend/docker/pg-auto

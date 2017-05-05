@@ -97,12 +97,20 @@ RUN cd /usr/src/app/backend/db
 # RUN . ./scripts/init_cp_web_role.sh carpool
 
 
-# COPY init-user-db.sh /docker-entrypoint-initdb.d/
-
-# works
-# COPY init-user-db-cp.sh /docker-entrypoint-initdb.d/
-
 COPY create_fresh_carpool_db2.sh /docker-entrypoint-initdb.d/
+
+
+# COPY a-create_fresh_carpool_db.sh /docker-entrypoint-initdb.d/
+# COPY create_fresh_carpool_db2a.sh /docker-entrypoint-initdb.d/
+
+
+# COPY create_fresh_carpool_db3.sh /docker-entrypoint-initdb.d/
+
+# RUN mkdir /docker-entrypoint-initdb.d/scripts
+# COPY load_functions.sh /docker-entrypoint-initdb.d/scripts/
+
+# COPY load_functions.sh /docker-entrypoint-initdb.d/
+
 
 # without this, may get problems with docker run -v ...
 # with it, init script is in wrong folder and fails ...
