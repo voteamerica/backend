@@ -165,7 +165,7 @@ var PostgresQueries = (function () {
             }
             console.error("executed fn: " + firstRow);
             
-            if (payload._redirect && uuid) {
+            if (payload._redirect && uuid != undefined) {
                 var reply_url = payload._redirect + '&uuid=' + uuid.toString();
                 if (code != undefined) {
                     reply_url += '&code=' + code.toString();
