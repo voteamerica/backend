@@ -23,10 +23,12 @@ COPY params (name, value) FROM stdin;
 input.driver.enabled	true
 input.rider.enabled	true
 input.helper.enabled	true
-api_environment	live
-outgoing_sms_whitelist.enabled	true
+api_environment	test
 radius.max	100
 radius.tolerance	10
+outgoing_sms_whitelist.enabled	true
+notifications.time.format	HH12:MIam
+notifications.date.format	Mon DD
 \.
 
 

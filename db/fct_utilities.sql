@@ -245,4 +245,62 @@ GRANT EXECUTE ON FUNCTION carpoolvote.validate_availabletimeslocal(
     character varying, out integer, out text) TO carpool_web_role;
 GRANT EXECUTE ON FUNCTION carpoolvote.validate_availabletimeslocal(
 	character varying, out integer, out text) TO carpool_role;
+
+----------------------------------------------------------
+-- Converts available ride/drive times 
+-- from internal representation
+-- to localized format, read from carpoolvote.params table 
+-- (notifications.datetime.format)
+-- input : 
+-- 2016-10-01T02:00/2016-10-01T03:00|2018-12-01T18:00/2018-12-01T19:00
+-- output :
+-- Oct 7 02:00am-03:00am, Dec 7 06:00pm-07:00pm
+----------------------------------------------------------
+CREATE OR REPLACE FUNCTION carpoolvote.convert_datetime_to_local_format(
+	in_date_string TEXT ) 
+RETURNS TEXT AS
+$BODY$
+DECLARE
+
+ride_times text[];
+start_time timestamp without time zone;
+end_time timestamp without time zone;
+time_elem text;
+
+start_time_txt text;
+end_time_txt text;
+v_time_format text;
+v_date_format text;
+v_output text;
+
+BEGIN
+	v_output := '';
+
+	SELECT COALESCE(carpoolvote.get_param_value('notifications.time.format'), 'HH12:MIam') INTO v_time_format;
+	SELECT COALESCE(carpoolvote.get_param_value('notifications.date.format'), 'Mon DD') INTO v_date_format;
 	
+	--RAISE NOTICE 'v_time_format=%', v_time_format;
+	--RAISE NOTICE 'v_date_format=%', v_date_format;
+
+	ride_times := string_to_array(in_date_string, '|');
+	FOREACH time_elem IN ARRAY ride_times
+	LOOP
+		-- each time interval is in ISO8601 format					
+		-- new format without timezone : 2016-10-01T02:00/2016-10-01T03:00
+		start_time :=  (substring(time_elem from 1 for (position ('/' in time_elem)-1)))::timestamp without time zone;
+		end_time :=    (substring(time_elem from position ('/' in time_elem)))::timestamp without time zone;
+
+		v_output := v_output || ', ' 
+		|| to_char(start_time, v_date_format || ' ' || v_time_format ) || '-' 
+		|| to_char(end_time, v_time_format);
+		--RAISE NOTICE 'start=%', to_char(start_time, v_time_format );
+		--RAISE NOTICE 'end=%', to_char(end_time, v_time_format);
+	END LOOP;
+
+	return substr(v_output,3);
+END
+$BODY$
+  LANGUAGE plpgsql VOLATILE;
+ALTER FUNCTION carpoolvote.convert_datetime_to_local_format(text) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.convert_datetime_to_local_format(text) TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.convert_datetime_to_local_format(text) TO carpool_role;
