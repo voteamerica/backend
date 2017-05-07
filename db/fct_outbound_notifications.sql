@@ -1336,7 +1336,7 @@ BEGIN
 			|| CASE WHEN v_driver_record."DriverPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_driver_record."DriverPreferredContact" LIKE '%Phone%',false) THEN '(*)' else ' ' END || 'Phone: ' || v_driver_record."DriverPhone"  ELSE ' ' END || '<br/>'
 			|| CASE WHEN v_driver_record."DriverPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_driver_record."DriverPreferredContact" LIKE '%SMS%',false) THEN '(*)' else ' ' END || 'SMS/Text: ' || v_driver_record."DriverPhone"  ELSE ' ' END || '<br/>'
 			|| '(*) = Preferred Method</p>'
-			|| '<p>Driver License Plate : ' || COALESCE(v_driver_record."DriverLicenseNumber", 'N/A') || '</p>'
+			|| '<p>Driver License Plate : ' || COALESCE(v_driver_record."DriverLicenseNumber", 'N/A') || ' (Please check before getting in)</p>'
 			|| '<p>If you would prefer to have a different driver, please let us know, and '
 			|| '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-rider-match?UUID_driver=' || uuid_driver 
 			|| '&UUID_rider=' || uuid_rider 
@@ -1360,7 +1360,7 @@ BEGIN
 					|| ' Driver : ' ||  v_driver_record."DriverFirstName" || ' ' || v_driver_record."DriverLastName" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Driver Phone : ' || COALESCE(v_driver_record."DriverPhone", 'N/A') || carpoolvote.urlencode(chr(10))
 					|| ' Driver Email : ' || COALESCE(v_driver_record."DriverEmail", 'N/A') || carpoolvote.urlencode(chr(10))
-					|| ' Driver License Plate : ' || COALESCE(v_driver_record."DriverLicenseNumber", 'N/A') || carpoolvote.urlencode(chr(10))
+					|| ' Driver License Plate : ' || COALESCE(v_driver_record."DriverLicenseNumber", 'N/A') || ' (Please check before getting in)' ||carpoolvote.urlencode(chr(10))
 					|| ' Pick-up location : ' 
 					|| COALESCE(v_rider_record."RiderCollectionStreetNumber", '' ) || ' ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Destination : ' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
