@@ -103,6 +103,13 @@ Vagrant.configure("2") do |config|
 	yum -y install git
 	yum -y install certbot.noarch
 	
+	
+	#################################################
+	# EXTERNAL IP AND PORT FOR LOCAL CARPOOL SITE
+	#################################################
+	export EXTERNAL_PORT=4000
+	export EXTERNAL_IP=$(ifconfig -a | grep inet | grep -v inet6 | grep -v 10.0 | grep -v 127.0  | head -n 1 | tr -s " " | cut -f 3 -d " ")
+	
   
 	########################
 	# BACK END  DATABASE
@@ -148,8 +155,15 @@ Vagrant.configure("2") do |config|
 	systemctl start postgresql-9.6.service
 	
 	cd /opt/carpool/backend/db 
+	# Create a carpool database for live environment
+	# We create it here so that the same Vagrant file can be used to deploy a test environment or a live environment
+	./create_fresh_carpool_db.sh carpool_live
+	
 	# Create a carpool database for test purposes, through web page and node app
 	./create_fresh_carpool_db.sh carpool_test
+	
+	#                                                           DB name   apienv         carpool site URL   (use http://richardwestenra.com/voteamerica.github.io for regular test env on DO)
+	su carpool_admin -c "./configure_carpool_db_for_test.sh carpool_test   test     http://$EXTERNAL_IP:$EXTERNAL_PORT"
 	
 	# Create a carpool database for unit test purposes
 	./create_fresh_carpool_db.sh carpool_unittest
@@ -158,25 +172,19 @@ Vagrant.configure("2") do |config|
 	# note that no e-mail or sms notifications will be generated without the correct API IDs
 	su carpool_app -c 'nohup ./start_matching_engine.sh carpool_test &'
 
-	########################
-	# BACK END  SMS HANDLER
-	########################
-	chmod g+w /opt/carpool/backend/smsHandler
-	su carpool_app -c "cd /opt/carpool/backend/smsHandler && npm install"
-	
 	
 	
 	########################
 	# BACK END  WEB APP
 	########################
+	yum -y install npm
+	yum -y install nginx
+	npm install pm2 -g
+	
 	useradd -g carpoolg --no-user-group carpool_web
 	echo ". /opt/carpool/backend/nodeAppPostPg/bash_profile.carpool_web.test" >> /home/carpool_web/.bash_profile
 	chmod g+w /opt/carpool/backend/nodeAppPostPg
 	
-	yum -y install npm
-	yum -y install nginx
-
-	npm install pm2 -g
 	su carpool_web -c 'cd /opt/carpool/backend/nodeAppPostPg && . /home/carpool_web/.bash_profile && npm install && pm2 start index.js --name TEST'
 	
 	cp -p /etc/nginx/nginx.conf /etc/nginx/nginx.conf.orig
@@ -187,6 +195,14 @@ Vagrant.configure("2") do |config|
 	systemctl stop nginx 
 	systemctl start nginx
 	
+	
+	########################
+	# BACK END  SMS HANDLER
+	########################
+	chmod g+w /opt/carpool/backend/smsHandler
+	su carpool_app -c "cd /opt/carpool/backend/smsHandler && npm install"
+	
+	
 	########################
 	# FRONT END
 	########################
@@ -196,10 +212,11 @@ Vagrant.configure("2") do |config|
 	cd /opt/carpool
 	su carpool_web -c "git clone https://github.com/voteamerica/voteamerica.github.io.git"
 	cd /opt/carpool/voteamerica.github.io
-	export EXTERNAL_IP=$(ifconfig -a | grep inet | grep -v inet6 | grep -v 10.0 | grep -v 127.0  | head -n 1 | tr -s " " | cut -f 3 -d " ")
+	
 	echo "api: \"http://$EXTERNAL_IP:8080/test\"" > /opt/carpool/voteamerica.github.io/_config-localtest.yml
+	echo "cp_site: \"http://$EXTERNAL_IP:$EXTERNAL_PORT\"" >> /opt/carpool/voteamerica.github.io/_config-localtest.yml
 	chown -R carpool_web:carpoolg /opt/carpool/voteamerica.github.io/_config-localtest.yml
-	su carpool_web -c 'cd /opt/carpool/voteamerica.github.io &&  /usr/local/bin/jekyll serve --config _config.yml,_config-localtest.yml --detach --host $EXTERNAL_IP --port 4000'
+	su carpool_web -c 'cd /opt/carpool/voteamerica.github.io &&  /usr/local/bin/jekyll serve --config _config.yml,_config-localtest.yml --detach --host $EXTERNAL_IP --port $EXTERNAL_PORT'
 	
   SHELL
 end

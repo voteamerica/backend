@@ -23,12 +23,13 @@ COPY params (name, value) FROM stdin;
 input.driver.enabled	true
 input.rider.enabled	true
 input.helper.enabled	true
-api_environment	test
+api_environment	live
 radius.max	100
 radius.tolerance	10
-outgoing_sms_whitelist.enabled	true
+outgoing_sms_whitelist.enabled	false
 notifications.time.format	HH12:MIam
 notifications.date.format	Mon DD
+site.base.url	http://carpoolvote.com
 \.
 
 
