@@ -148,8 +148,13 @@ Vagrant.configure("2") do |config|
 	systemctl start postgresql-9.6.service
 	
 	cd /opt/carpool/backend/db 
+	# Create a carpool database for live environment
+	# We create it here so that the same Vagrant file can be used to deploy a test environment or a live environment
+	./create_fresh_carpool_db.sh carpool_live
+	
 	# Create a carpool database for test purposes, through web page and node app
 	./create_fresh_carpool_db.sh carpool_test
+	su carpool_admin -c "./configure_carpool_db_for_test.sh"
 	
 	# Create a carpool database for unit test purposes
 	./create_fresh_carpool_db.sh carpool_unittest
