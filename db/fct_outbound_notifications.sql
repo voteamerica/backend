@@ -417,13 +417,25 @@ BEGIN
 				
 			IF v_driver_record."DriverPhone" IS NOT NULL AND (position('SMS' in v_driver_record."DriverPreferredContact") > 0)
 			THEN
-			
+
+				v_loop_cnt := 0;
 				v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10)) 
 						|| ' New matches are available.' || ' ' || carpoolvote.urlencode(chr(10))
-				        || ' Visit the self-service page for details ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID";			
+				        || ' Please visit the self-service page for details ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || carpoolvote.urlencode(chr(10));			
+			
+				FOR v_record IN SELECT * FROM carpoolvote.match m 
+									WHERE m.uuid_driver = v_driver_record."UUID" AND status <> 'ExtendedMatch' order by score asc
+				LOOP
+					v_body := v_body
+					|| '__________' || carpoolvote.urlencode(chr(10))
+	                || 'From ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || carpoolvote.urlencode(chr(10))
+                    || 'To ' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || carpoolvote.urlencode(chr(10))
+                    || 'When ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal")  || carpoolvote.urlencode(chr(10))
+                    || 'Party of '|| v_rider_record."TotalPartySize" || carpoolvote.urlencode(chr(10));
+				END LOOP;
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
-				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
+				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."DriverPhone"));
 			
 			END IF;
 		
@@ -519,7 +531,7 @@ BEGIN
 					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
-				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
+				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."DriverPhone"));
 			END IF;
 
 		RETURN;
