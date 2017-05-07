@@ -580,8 +580,7 @@ BEGIN
 		v_step := 'S4';
 		UPDATE carpoolvote.rider
 		SET status='Pending'
-		WHERE "UUID" = a_UUID;
-		
+		WHERE "UUID" = a_UUID AND status NOT IN ('Canceled','Expired');
 	END IF;
 		
 	RETURN '';

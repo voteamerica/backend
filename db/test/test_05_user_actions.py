@@ -1052,7 +1052,7 @@ def test_user_actions_009_rider_cancels_confirmed_match(pgdbConnAdmin, pgdbConnM
     assert match_record['status'] == 'MatchConfirmed'   
     pgdbConnMatchEngine.commit()
     
-    # Cannot match an already matched record
+    # Cannot confirm an already confirmed match
     cursor.execute("SELECT * FROM carpoolvote.driver_confirm_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
     {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'confirm' : driver_args['DriverLastName']})
     results = cursor.fetchone()
@@ -1062,7 +1062,7 @@ def test_user_actions_009_rider_cancels_confirmed_match(pgdbConnAdmin, pgdbConnM
     
     # Match is confirmed.
     
-    # Now driver cancels the match
+    # Now rider cancels the match
     cursor.execute("SELECT * FROM carpoolvote.rider_cancel_confirmed_match(%(uuid_driver)s, %(uuid_rider)s, %(confirm)s)", 
     {'uuid_driver' : uuid_driver, 'uuid_rider' : uuid_rider, 'confirm' : rider_args['RiderLastName']})
     results = cursor.fetchone()
@@ -1082,7 +1082,7 @@ def test_user_actions_009_rider_cancels_confirmed_match(pgdbConnAdmin, pgdbConnM
     results = cursor.fetchone()
     assert results[0] == 'Pending'
 
-    # 3. The ride request
+    # The rider cancels ride request
     cursor = pgdbConnWeb.cursor()
     cursor.execute("SELECT * FROM carpoolvote.rider_cancel_ride_request(%(uuid)s, %(confparam)s)",
     {'uuid' : uuid_rider, 'confparam' : rider_args['RiderLastName']})
@@ -1095,4 +1095,20 @@ def test_user_actions_009_rider_cancels_confirmed_match(pgdbConnAdmin, pgdbConnM
     results = cursor.fetchone()
     assert results[0] == 'Canceled'
     
-    
+    # The driver cancels drive offer
+    cursor = pgdbConnWeb.cursor()
+    cursor.execute("SELECT * FROM carpoolvote.driver_cancel_drive_offer(%(uuid)s, %(confparam)s)",
+    {'uuid' : uuid_driver, 'confparam' : driver_args['DriverLastName']})
+    results = cursor.fetchone()
+    assert len(results[1]) == 0
+    assert results[0] == 0
+    pgdbConnWeb.commit()
+
+    # check for issue #123
+    cursor.execute("""SELECT status FROM carpoolvote.rider WHERE "UUID"=%(uuid)s """, {'uuid' : uuid_rider})
+    results = cursor.fetchone()
+    assert results[0] == 'Canceled'
+
+    cursor.execute("""SELECT status FROM carpoolvote.driver WHERE "UUID"=%(uuid)s """, {'uuid' : uuid_driver})
+    results = cursor.fetchone()
+    assert results[0] == 'Canceled'    
