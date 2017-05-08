@@ -421,11 +421,15 @@ BEGIN
 				v_loop_cnt := 0;
 				v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10)) 
 						|| ' New matches are available.' || ' ' || carpoolvote.urlencode(chr(10))
-				        || ' Please visit the self-service page for details ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || carpoolvote.urlencode(chr(10));			
+				        || ' Please visit the self-service page for details ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || ' ' || carpoolvote.urlencode(chr(10));			
 			
 				FOR v_record IN SELECT * FROM carpoolvote.match m 
 									WHERE m.uuid_driver = v_driver_record."UUID" AND status <> 'ExtendedMatch' order by score asc
 				LOOP
+				
+					SELECT * INTO v_rider_record FROM carpoolvote.rider r
+						WHERE r."UUID" = v_record.uuid_rider;
+
 					v_body := v_body
 					|| '__________' || carpoolvote.urlencode(chr(10))
 	                || 'From ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || carpoolvote.urlencode(chr(10))
