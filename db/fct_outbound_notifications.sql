@@ -435,7 +435,7 @@ BEGIN
 				END LOOP;
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
-				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."DriverPhone"));
+				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));
 			
 			END IF;
 		
@@ -531,7 +531,7 @@ BEGIN
 					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
-				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."DriverPhone"));
+				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));
 			END IF;
 
 		RETURN;

@@ -488,9 +488,9 @@ BEGIN
 			SELECT * FROM carpoolvote.notify_driver_new_available_matches(v_record.uuid_driver) INTO v_temp_error_code, v_temp_error_text;
 			IF v_temp_error_code <> carpoolvote.f_SUCCESS()
 			THEN
-				out_error_code := carpool.f_EXECUTION_ERROR();
+				out_error_code := carpoolvote.f_EXECUTION_ERROR();
 				out_error_text := out_error_text || ' | ' || v_temp_error_text;
-				RAISE NOTICE 'Error while generating notifications for uuid=% : %', uuid, v_temp_error_text; 
+				RAISE NOTICE 'Error while generating notifications for uuid=% : %', v_record.uuid_driver, v_temp_error_text; 
 			END IF;
 		END LOOP;
 		
