@@ -170,8 +170,8 @@ BEGIN
 					|| ' Seats : ' || v_driver_record."SeatCount" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Wheelchair accessible : ' || CASE WHEN v_driver_record."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Phone Number : ' || v_driver_record."DriverPhone" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Self-Service portal : ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || v_driver_record."UUID" || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName");
+					|| ' Self-Service portal : ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || ' ' || carpoolvote.urlencode(chr(10));
+					-- ISSUE #124|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || v_driver_record."UUID" || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName");
 					
             INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)                                             
             VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));                                                                 
@@ -267,8 +267,8 @@ BEGIN
 					|| ' Two-way trip needed : ' ||  CASE WHEN v_rider_record."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Notes : ' ||  v_rider_record."RiderAccommodationNotes" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Phone Number : ' ||  v_rider_record."RiderPhone" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Self-Service portal : ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=rider&uuid=' || v_rider_record."UUID" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || v_rider_record."UUID" || '&RiderPhone=' || carpoolvote.urlencode(v_rider_record."RiderLastName");
+					|| ' Self-Service portal : ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=rider&uuid=' || v_rider_record."UUID" || ' ' || carpoolvote.urlencode(chr(10));
+					-- ISSUE #124 || ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || v_rider_record."UUID" || '&RiderPhone=' || carpoolvote.urlencode(v_rider_record."RiderLastName");
 				
             INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)                                             
             VALUES (v_rider_record."RiderPhone",v_rider_record."UUID",  v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));                                                                 
