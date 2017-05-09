@@ -21,6 +21,7 @@ psql < carpool_roles.sql \
 && psql $DB < carpool_static_data.sql \
 && psql $DB < carpool_params_data.sql \
 && psql $DB < fct_utilities.sql \
+&& psql $DB < carpool_views.sql \
 && psql $DB < fct_outbound_notifications.sql \
 && psql $DB < fct_user_actions.sql \
 && psql $DB < fct_matching_engine.sql \

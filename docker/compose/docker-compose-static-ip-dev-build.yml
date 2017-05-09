@@ -6,7 +6,7 @@ services:
       context: ../jekyll/
       args:
         REPO: https://github.com/jkbits1/voteamerica.github.io
-        BRANCH_NAME: jekyll-dev        
+        BRANCH_NAME: master        
     image: gc-jekyll
 
     ports: 
@@ -15,10 +15,11 @@ services:
       - cp-nodejs
       - cp-pg-server
 
-    command: jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml
+    # command: jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml
+    command: jekyll serve -H 0.0.0.0 --watch --config _config-local.yml
 
     volumes:
-      - /var/vms/Jon/Documents/GitHub/voteUSfrontend:/usr/src/app/frontend
+      - ../../../voteUSfrontend:/usr/src/app/frontend
 
     networks:
       vpcbr:

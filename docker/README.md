@@ -15,6 +15,8 @@
 
 # http://stackoverflow.com/questions/32612650/how-to-get-docker-compose-to-always-re-create-containers-from-fresh-images
 # https://github.com/docker/compose/issues/1049
+# docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up
+
 # docker-compose -f ./compose/docker-compose-static-ip.yml up
 # docker-compose -f ./compose/docker-compose-static-ip-dev.yml up
 # docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up --build
@@ -38,6 +40,20 @@
 # docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) cp-pg-server
 # docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) cp-nodejs
 # docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) cp-front-end
+# docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) --build-arg BRANCH_NAME=thanks-redirect cp-front-end
+
+
+## Test fe PR
+#
+# 1) on your local fork, create a branch pr... for the PR (https://help.github.com/articles/checking-out-pull-requests-locally/)
+# push this to origin (not upstream)
+#
+# 2) create specific build of front machine using --build-arg BRANCH_NAME=pr...
+# docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) --build-arg BRANCH_NAME=pr270 cp-front-end
+#
+# 3) use docker-compose to create local system
+# docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up
+
 
 
 # 1) pg-auto
