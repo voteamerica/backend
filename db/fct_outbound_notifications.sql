@@ -29,6 +29,9 @@ END IF;
 END
 $BODY$
   LANGUAGE plpgsql VOLATILE;
+ALTER FUNCTION carpoolvote.outgoing_sms_insert_status(character varying) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.outgoing_sms_insert_status(character varying) TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.outgoing_sms_insert_status(character varying) TO carpool_role;
 
 
 ----------------------------------------------------------
@@ -79,6 +82,9 @@ BEGIN
 END
 $BODY$
   LANGUAGE plpgsql IMMUTABLE;
+ALTER FUNCTION carpoolvote.notifications_html_header() OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.notifications_html_header() TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.notifications_html_header() TO carpool_role;
   
 ----------------------------------------------------------
 -- Common function to return HTML footer
@@ -91,6 +97,10 @@ BEGIN
 END
 $BODY$
   LANGUAGE plpgsql IMMUTABLE;
+ALTER FUNCTION carpoolvote.notifications_html_footer() OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.notifications_html_footer() TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.notifications_html_footer() TO carpool_role;
+
   
 ----------------------------------------------------------
 -- Email/SMS notifications to driver after new submission
@@ -130,14 +140,14 @@ BEGIN
 			|| '<table>'
 			|| '<tr><td class="evenRow">Pick-up ZIP</td><td class="evenRow">' || v_driver_record."DriverCollectionZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Radius</td><td class="oddRow">' || v_driver_record."DriverCollectionRadius" || ' miles</td></tr>'
-			|| '<tr><td class="evenRow">Drive Times</td><td class="evenRow">' || replace(replace(replace(replace(replace(v_driver_record."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+			|| '<tr><td class="evenRow">Drive Times</td><td class="evenRow">' || carpoolvote.convert_datetime_to_local_format(v_driver_record."AvailableDriveTimesLocal") || '</td></tr>'
 			|| '<tr><td class="oddRow">Seats</td><td class="oddRow">' || v_driver_record."SeatCount" || '</td></tr>'
 			|| '<tr><td class="evenRow">Wheelchair accessible</td><td class="evenRow">' || CASE WHEN v_driver_record."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
 			|| '<tr><td class="oddRow">Phone Number</td><td class="oddRow">' || v_driver_record."DriverPhone" || '</td></tr>'
 			|| '<tr><td class="evenRow">Email</td><td class="evenRow">' || v_driver_record."DriverEmail" || '</td></tr>'
 			|| '</table>'
 			|| '</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || v_driver_record."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p><a href="'|| 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || v_driver_record."UUID" || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName") ||  '">Cancel this offer</a></p>'  -- yes, this is correct, the API uses DriverPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -156,12 +166,12 @@ BEGIN
 					|| ' Driver offer received! Ref: ' || v_driver_record."UUID" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Pick-up ZIP : ' || v_driver_record."DriverCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Radius : ' || v_driver_record."DriverCollectionRadius" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Drive Times  : ' || replace(replace(replace(replace(replace(v_driver_record."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Drive Times  : ' || carpoolvote.convert_datetime_to_local_format(v_driver_record."AvailableDriveTimesLocal") || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Seats : ' || v_driver_record."SeatCount" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Wheelchair accessible : ' || CASE WHEN v_driver_record."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Phone Number : ' || v_driver_record."DriverPhone" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Self-Service portal : http://carpoolvote.com/self-service/?type=driver&uuid=' || v_driver_record."UUID" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || v_driver_record."UUID" || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName");
+					|| ' Self-Service portal : ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || ' ' || carpoolvote.urlencode(chr(10));
+					-- ISSUE #124|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || v_driver_record."UUID" || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName");
 					
             INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)                                             
             VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));                                                                 
@@ -218,8 +228,9 @@ BEGIN
 			|| 'Please keep this reference in case you need to manage your ride request.</p>'
 			|| 'We will get in touch as soon as a driver has offered to give you a ride. Please check that the below details are correct:<br/>'
 			|| '<table>'
-			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
-			|| '<tr><td class="oddRow">Pick-up Address</td><td class="oddRow">' || COALESCE(v_rider_record."RiderCollectionAddress", ' ') || '</td></tr>'
+			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || '</td></tr>'
+			|| '<tr><td class="oddRow">Pick-up Address</td><td class="oddRow">' 
+			|| COALESCE(v_rider_record."RiderCollectionStreetNumber", '') || ' ' || COALESCE(v_rider_record."RiderCollectionAddress", ' ') || '</td></tr>'
 			|| '<tr><td class="evenRow">Pick-up ZIP</td><td class="evenRow">' || v_rider_record."RiderCollectionZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Destination Address</td><td class="oddRow">' || COALESCE(v_rider_record."RiderDestinationAddress", ' ') || '</td></tr>'
 			|| '<tr><td class="evenRow">Destination ZIP</td><td class="evenRow">' || v_rider_record."RiderDropOffZIP" || '</td></tr>'
@@ -231,7 +242,7 @@ BEGIN
 			|| '<tr><td class="evenRow">Email</td><td class="evenRow">' || v_rider_record."RiderEmail" || '</td></tr>'
 			|| '</table>'
 			|| '</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || v_rider_record."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=rider&uuid=' || v_rider_record."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || v_rider_record."UUID" || '&RiderPhone=' || carpoolvote.urlencode(v_rider_record."RiderLastName") ||  '">Cancel this request</a></p>' -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -246,16 +257,18 @@ BEGIN
         THEN                                                                                                               
             v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10)) 
 					|| ' Ride Request received! Ref: ' || v_rider_record."UUID" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Pick-up : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up : ' 
+					|| COALESCE(v_rider_record."RiderCollectionStreetNumber", '') || ' ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') 
+					|| v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Destination : ' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Wheelchair accessibility needed : ' ||  CASE WHEN v_rider_record."NeedWheelchair" THEN 'Yes' ELSE 'No' END || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Two-way trip needed : ' ||  CASE WHEN v_rider_record."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Notes : ' ||  v_rider_record."RiderAccommodationNotes" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Phone Number : ' ||  v_rider_record."RiderPhone" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Self-Service portal : http://carpoolvote.com/self-service/?type=rider&uuid=' || v_rider_record."UUID" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || v_rider_record."UUID" || '&RiderPhone=' || carpoolvote.urlencode(v_rider_record."RiderLastName");
+					|| ' Self-Service portal : ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=rider&uuid=' || v_rider_record."UUID" || ' ' || carpoolvote.urlencode(chr(10));
+					-- ISSUE #124 || ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || v_rider_record."UUID" || '&RiderPhone=' || carpoolvote.urlencode(v_rider_record."RiderLastName");
 				
             INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)                                             
             VALUES (v_rider_record."RiderPhone",v_rider_record."UUID",  v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));                                                                 
@@ -359,10 +372,8 @@ BEGIN
 					WHEN v_record.status='MatchConfirmed' THEN 'Confirmed'
 					ELSE v_record.status END || '</td>'
                     || '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td>'
-					--|| '<td class="' || v_row_style || '">' || v_rider_record."RiderCollectionZIP" || '</td>'
                     || '<td class="' || v_row_style || '">' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || '</td>'
-					--|| '<td class="' || v_row_style || '">' || v_rider_record."RiderDropOffZIP" || '</td>'
-                    || '<td class="' || v_row_style || '">' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-')  || '</td>'
+                    || '<td class="' || v_row_style || '">' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal")  || '</td>'
                     || '<td class="' || v_row_style || '">' || v_rider_record."TotalPartySize" || '</td>'
                     || '<td class="' || v_row_style || '">' || CASE WHEN v_rider_record."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td>'
                     || '<td class="' || v_row_style || '">' || CASE WHEN v_rider_record."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || '</td>'
@@ -385,7 +396,7 @@ BEGIN
                 || '<p>If you do not wish to accept the proposed rides, you do not need to do anything. A match is only confirmed once you have accepted it.</p>'
 				|| '<p>If you do not with to receive future notifications about new proposed matches for this Driver Offer, please <a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/pause-match-driver?UUID=' || v_driver_record."UUID" || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName") ||  '">click here</a></p>'            
                 || '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || v_driver_record."UUID" || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName") ||  '">Cancel your Drive Offer</a></p>'
-                || '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || v_driver_record."UUID" || '">self-service portal</a>.</p>'
+                || '<p>To view or manage your matches, visit our <a href="' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || '">self-service portal</a>.</p>'
 				|| '<p>Warm wishes</p>'
                 || '<p>The CarpoolVote.com team.</p>'
                 || '</body>';
@@ -406,13 +417,29 @@ BEGIN
 				
 			IF v_driver_record."DriverPhone" IS NOT NULL AND (position('SMS' in v_driver_record."DriverPreferredContact") > 0)
 			THEN
-			
+
+				v_loop_cnt := 0;
 				v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10)) 
 						|| ' New matches are available.' || ' ' || carpoolvote.urlencode(chr(10))
-				        || ' Visit the self-service page for details http://carpoolvote.com/self-service/?type=driver&uuid=' || v_driver_record."UUID";			
+				        || ' Please visit the self-service page for details ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || ' ' || carpoolvote.urlencode(chr(10));			
+			
+				FOR v_record IN SELECT * FROM carpoolvote.match m 
+									WHERE m.uuid_driver = v_driver_record."UUID" AND status <> 'ExtendedMatch' order by score asc
+				LOOP
+				
+					SELECT * INTO v_rider_record FROM carpoolvote.rider r
+						WHERE r."UUID" = v_record.uuid_rider;
+
+					v_body := v_body
+					|| '__________' || carpoolvote.urlencode(chr(10))
+	                || 'From ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || carpoolvote.urlencode(chr(10))
+                    || 'To ' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || carpoolvote.urlencode(chr(10))
+                    || 'When ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal")  || carpoolvote.urlencode(chr(10))
+                    || 'Party of '|| v_rider_record."TotalPartySize" || carpoolvote.urlencode(chr(10));
+				END LOOP;
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
-				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
+				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));
 			
 			END IF;
 		
@@ -475,7 +502,7 @@ BEGIN
 				|| '<p>These were the ride details: </p>'
 				|| '<p><table>'
 				|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
-					replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+					carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || '</td></tr>'
 				|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">'  || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td></tr>'
 				|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') ||  v_rider_record."RiderDropOffZIP" || '</td></tr>'
 				|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || v_rider_record."TotalPartySize" || '</td></tr>'
@@ -486,7 +513,7 @@ BEGIN
 				|| '</p>'
 				|| '<p>Concerning this ride, no further action is needed from you.</p>'
 				|| '<p>Hopefully you can help another rider in your area.</p>'
-				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || v_driver_record."UUID" || '">Self-Service Portal</a></p>'
+				|| '<p>To view or manage your matches, visit our <a href="' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || '">Self-Service Portal</a></p>'
 				|| '<p>Warm wishes</p>'
 				|| '<p>The CarpoolVote.com team.</p>'
 				|| '</body>';
@@ -505,10 +532,10 @@ BEGIN
 					|| ' Rider : ' || v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Pick-up location : '  ||  COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
-				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
+				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));
 			END IF;
 
 		RETURN;
@@ -562,7 +589,7 @@ BEGIN
 			|| '<p>These were the ride details: </p>'
 			|| '<p><table>'
 			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
-				replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+				carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || '</td></tr>'
 			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td></tr>'
 			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || v_rider_record."TotalPartySize" || '</td></tr>'
@@ -589,7 +616,7 @@ BEGIN
 					|| ' Ride Request ' || v_rider_record."UUID"  || ' was canceled. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 		
 			INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 			VALUES (v_rider_record."RiderPhone", uuid_rider, v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
@@ -652,7 +679,7 @@ BEGIN
 				|| '<p>These were the ride details: </p>'
 				|| '<p><table>'
 				|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
-					replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+					carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || '</td></tr>'
 				|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td></tr>'
 				|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || '</td></tr>'
 				|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || v_rider_record."TotalPartySize" || '</td></tr>'
@@ -663,7 +690,7 @@ BEGIN
 				|| '</p>'
 				|| '<p>Concerning this ride, no further action is needed from you.</p>'
 				|| '<p>Hopefully you can help another rider in your area.</p>'
-				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || v_driver_record."UUID" || '">Self-Service Portal</a></p>'
+				|| '<p>To view or manage your matches, visit our <a href="' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || '">Self-Service Portal</a></p>'
 				|| '<p>Warm wishes</p>'
 				|| '<p>The CarpoolVote.com team.</p>'
 				|| '</body>';
@@ -682,7 +709,7 @@ BEGIN
 					|| ' Rider : ' || v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 				VALUES (v_driver_record."DriverPhone", v_driver_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));
@@ -745,7 +772,7 @@ BEGIN
 			|| '<p>These were the ride details: </p>'
 			|| '<p><table>'
 			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
-				replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+				carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || '</td></tr>'
 			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td></tr>'
 			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || v_rider_record."TotalPartySize" || '</td></tr>'
@@ -756,7 +783,7 @@ BEGIN
 			|| '</p>'
 			|| '<p>No further action is needed from you.</p>'
 			|| '<p>We will try to find another suitable driver.</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || v_rider_record."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=rider&uuid=' || v_rider_record."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || v_rider_record."UUID" || '&RiderPhone=' || carpoolvote.urlencode(v_rider_record."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -776,7 +803,7 @@ BEGIN
 					|| ' Confirmed Ride was canceled. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 				VALUES (v_rider_record."RiderPhone", v_rider_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
@@ -838,7 +865,7 @@ BEGIN
 			|| '<table>'
 			|| '<tr><td class="evenRow">Pick-up ZIP</td><td class="evenRow">' || v_driver_record."DriverCollectionZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Radius</td><td class="oddRow">' || v_driver_record."DriverCollectionRadius" || ' miles</td></tr>'
-			|| '<tr><td class="evenRow">Drive Times</td><td class="evenRow">' || replace(replace(replace(replace(replace(v_driver_record."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+			|| '<tr><td class="evenRow">Drive Times</td><td class="evenRow">' || carpoolvote.convert_datetime_to_local_format(v_driver_record."AvailableDriveTimesLocal") || '</td></tr>'
 			|| '<tr><td class="oddRow">Seats</td><td class="oddRow">' || v_driver_record."SeatCount" || '</td></tr>'
 			|| '<tr><td class="evenRow">Wheelchair accessible</td><td class="evenRow">' || CASE WHEN v_driver_record."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
 			|| '<tr><td class="oddRow">Phone Number</td><td class="oddRow">' || v_driver_record."DriverPhone" || '</td></tr>'
@@ -865,7 +892,7 @@ BEGIN
 					|| ' Drive Offer ' || v_driver_record."UUID" ||  ' was canceled. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Pick-up ZIP : ' || v_driver_record."DriverCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Radius : ' || v_driver_record."DriverCollectionRadius" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Drive Times : ' || replace(replace(replace(replace(replace(v_driver_record."AvailableDriveTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-'); 
+					|| ' Drive Times : ' || carpoolvote.convert_datetime_to_local_format(v_driver_record."AvailableDriveTimesLocal"); 
 			
 			INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 			VALUES (v_driver_record."DriverPhone", uuid_driver, v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));
@@ -928,7 +955,7 @@ BEGIN
 				|| '<p>These were the ride details: </p>'
 				|| '<p><table>'
 				|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
-					replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+					carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || '</td></tr>'
 				|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td></tr>'
 				|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || '</td></tr>'
 				|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || v_rider_record."TotalPartySize" || '</td></tr>'
@@ -939,7 +966,7 @@ BEGIN
 				|| '</p>'
 				|| '<p>Concerning this ride, no further action is needed from you.</p>'
 				|| '<p>We will try to find another suitable driver.</p>'
-				|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || v_rider_record."UUID" || '">Self-Service Portal</a></p>'
+				|| '<p>To view or manage your matches, visit our <a href="' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=rider&uuid=' || v_rider_record."UUID" || '">Self-Service Portal</a></p>'
 				|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || v_rider_record."UUID" || '&RiderPhone=' || carpoolvote.urlencode(v_rider_record."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 				|| '<p>Warm wishes</p>'
 				|| '<p>The CarpoolVote.com team.</p>'
@@ -961,7 +988,7 @@ BEGIN
 					|| ' Driver : ' || v_driver_record."DriverFirstName" || ' ' || v_driver_record."DriverLastName" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 				VALUES (v_rider_record."RiderPhone", uuid_rider, v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
@@ -1025,7 +1052,7 @@ BEGIN
 			|| '<p>These were the ride details: </p>'
 			|| '<p><table>'
 			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
-				replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+				carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || '</td></tr>'
 			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td></tr>'
 			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || v_rider_record."TotalPartySize" || '</td></tr>'
@@ -1036,7 +1063,7 @@ BEGIN
 			|| '</p>'
 			|| '<p>No further action is needed from you.</p>'
 			|| '<p>We hope you can still are still able to help another rider.</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || v_driver_record."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p>If are no longer able to offer a ride, please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || v_driver_record."UUID" || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName") ||  '">cancel this Drive Offer</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -1057,7 +1084,7 @@ BEGIN
 					|| ' Rider : ' ||  v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName"  || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 				VALUES (v_driver_record."DriverPhone", uuid_driver, v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));
@@ -1119,7 +1146,7 @@ BEGIN
 			|| '<p>These were the ride details: </p>'
 			|| '<p><table>'
 			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
-				replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
+				carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || '</td></tr>'
 			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td></tr>'
 			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || v_rider_record."TotalPartySize" || '</td></tr>'
@@ -1130,7 +1157,7 @@ BEGIN
 			|| '</p>'
 			|| '<p>Concerning this ride, no further action is needed from you.</p>'
 			|| '<p>We will try to find another suitable driver.</p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || v_rider_record."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=rider&uuid=' || v_rider_record."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || v_rider_record."UUID" || '&RiderPhone=' || carpoolvote.urlencode(v_rider_record."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -1151,7 +1178,7 @@ BEGIN
 					|| ' Driver : ' ||  v_driver_record."DriverFirstName" || ' ' || v_driver_record."DriverLastName"  || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 				VALUES (v_rider_record."RiderPhone", uuid_rider, v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
@@ -1220,8 +1247,9 @@ BEGIN
 			|| '(*) = Preferred Method</p>'
 			|| '<p><table>'
 			|| '<tr><td class="evenRow">Preferred Ride Times</td><td class="evenRow">' || 
-				replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-') || '</td></tr>'
-			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td></tr>'
+				carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || '</td></tr>'
+			|| '<tr><td class="oddRow">Pick-up location</td><td class="oddRow">' 
+			|| COALESCE(v_rider_record."RiderCollectionStreetNumber", '' ) || ' ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || '</td></tr>'
 			|| '<tr><td class="evenRow">Destination</td><td class="evenRow">' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || '</td></tr>'
 			|| '<tr><td class="oddRow">Party Size</td><td class="oddRow">' || v_rider_record."TotalPartySize" || '</td></tr>'
 			|| '<tr><td class="evenRow">Wheelchair accessibility needed</td><td class="evenRow">' || CASE WHEN v_rider_record."NeedWheelchair" THEN 'Yes' ELSE 'No' END || '</td></tr>'
@@ -1233,7 +1261,7 @@ BEGIN
 			|| '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-driver-match?UUID_driver=' || uuid_driver 
 			|| '&UUID_rider=' || uuid_rider 
 			|| '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName" ) || '">cancel this ride match only</a></p>'
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=driver&uuid=' || v_driver_record."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p><a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || v_driver_record."UUID" || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName") ||  '">Cancel this Drive Offer</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -1249,11 +1277,16 @@ BEGIN
 		THEN
 		
 			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Match is confirmed. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Rider : ' ||  v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName"  || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Match is confirmed.' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Rider ' ||  v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName"
+					|| ' is now waiting for you to get in touch to arrange the details of the ride.'
+					|| ' Please contact the rider as soon as possible.' || carpoolvote.urlencode(chr(10))
+					|| ' Rider Phone : ' || COALESCE(v_rider_record."RiderPhone", 'N/A') || carpoolvote.urlencode(chr(10))
+					|| ' Rider Email : ' || COALESCE(v_rider_record."RiderEmail", 'N/A') || carpoolvote.urlencode(chr(10))
+					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionStreetNumber", '' ) || ' ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') 
+					|| v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 				VALUES (v_driver_record."DriverPhone", uuid_driver, v_body, carpoolvote.outgoing_sms_insert_status(v_driver_record."DriverPhone"));
@@ -1319,11 +1352,12 @@ BEGIN
 			|| CASE WHEN v_driver_record."DriverPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_driver_record."DriverPreferredContact" LIKE '%Phone%',false) THEN '(*)' else ' ' END || 'Phone: ' || v_driver_record."DriverPhone"  ELSE ' ' END || '<br/>'
 			|| CASE WHEN v_driver_record."DriverPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_driver_record."DriverPreferredContact" LIKE '%SMS%',false) THEN '(*)' else ' ' END || 'SMS/Text: ' || v_driver_record."DriverPhone"  ELSE ' ' END || '<br/>'
 			|| '(*) = Preferred Method</p>'
+			|| '<p>Driver License Plate : ' || COALESCE(v_driver_record."DriverLicenseNumber", 'N/A') || ' (Please check before getting in)</p>'
 			|| '<p>If you would prefer to have a different driver, please let us know, and '
 			|| '<a href="' || 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-rider-match?UUID_driver=' || uuid_driver 
 			|| '&UUID_rider=' || uuid_rider 
 			|| '&RiderPhone=' || carpoolvote.urlencode( v_rider_record."RiderLastName") || '">cancel this ride match only</a></p>'   -- yes, this is correct, the API uses RiderPhone as parameter, and one can pass a phone number or a last name
-			|| '<p>To view or manage your matches, visit our <a href="http://carpoolvote.com/self-service/?type=rider&uuid=' || v_rider_record."UUID" || '">Self-Service Portal</a></p>'
+			|| '<p>To view or manage your matches, visit our <a href="' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=rider&uuid=' || v_rider_record."UUID" || '">Self-Service Portal</a></p>'
 			|| '<p>If you no longer need a ride, you please <a href="'|| 'https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || v_rider_record."UUID" || '&RiderPhone=' || carpoolvote.urlencode(v_rider_record."RiderLastName") ||  '">cancel this Ride Request</a></p>'
 			|| '<p>Warm wishes</p>'
 			|| '<p>The CarpoolVote.com team.</p>'
@@ -1340,10 +1374,14 @@ BEGIN
 			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Match is confirmed by driver. No further action needed.'|| ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Driver : ' ||  v_driver_record."DriverFirstName" || ' ' || v_driver_record."DriverLastName" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
+					|| ' Driver Phone : ' || COALESCE(v_driver_record."DriverPhone", 'N/A') || carpoolvote.urlencode(chr(10))
+					|| ' Driver Email : ' || COALESCE(v_driver_record."DriverEmail", 'N/A') || carpoolvote.urlencode(chr(10))
+					|| ' Driver License Plate : ' || COALESCE(v_driver_record."DriverLicenseNumber", 'N/A') || ' (Please check before getting in)' ||carpoolvote.urlencode(chr(10))
+					|| ' Pick-up location : ' 
+					|| COALESCE(v_rider_record."RiderCollectionStreetNumber", '' ) || ' ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Destination : ' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || replace(replace(replace(replace(replace(v_rider_record."AvailableRideTimesLocal", '|', ','), 'T', ' '), '/', '>'), '-','/'), '>', '-');
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 				VALUES (v_rider_record."RiderPhone", uuid_rider, v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));

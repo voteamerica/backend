@@ -92,6 +92,7 @@ CREATE OR REPLACE FUNCTION carpoolvote.submit_new_rider(
     a_RiderAccommodationNotes character varying,
     a_RiderLegalConsent boolean,
     a_RiderWillBeSafe boolean,
+	a_RiderCollectionStreetNumber character varying,
     a_RiderCollectionAddress character varying,
     a_RiderDestinationAddress character varying,
 	OUT out_uuid character varying,
@@ -176,12 +177,12 @@ BEGIN
 		"UUID", "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail", "RiderPhone", "RiderCollectionZIP",
 		"RiderDropOffZIP", "AvailableRideTimesLocal", "TotalPartySize", "TwoWayTripNeeded", "RiderIsVulnerable",
 		"RiderWillNotTalkPolitics", "PleaseStayInTouch", "NeedWheelchair", "RiderPreferredContact",
-		"RiderAccommodationNotes", "RiderLegalConsent", "RiderWillBeSafe", "RiderCollectionAddress", "RiderDestinationAddress")
+		"RiderAccommodationNotes", "RiderLegalConsent", "RiderWillBeSafe", "RiderCollectionStreetNumber", "RiderCollectionAddress", "RiderDestinationAddress")
 		VALUES (
 		out_uuid, a_IPAddress, a_RiderFirstName, a_RiderLastName, a_RiderEmail, a_RiderPhone, a_RiderCollectionZIP,
 		a_RiderDropOffZIP, a_AvailableRideTimesLocal, a_TotalPartySize, a_TwoWayTripNeeded, a_RiderIsVulnerable,
 		a_RiderWillNotTalkPolitics, a_PleaseStayInTouch, a_NeedWheelchair, a_RiderPreferredContact,
-		a_RiderAccommodationNotes, a_RiderLegalConsent, a_RiderWillBeSafe, a_RiderCollectionAddress, a_RiderDestinationAddress);
+		a_RiderAccommodationNotes, a_RiderLegalConsent, a_RiderWillBeSafe, a_RiderCollectionStreetNumber, a_RiderCollectionAddress, a_RiderDestinationAddress);
 
 		v_step := 'S9';
 		SELECT * FROM carpoolvote.notify_new_rider(out_uuid) INTO out_error_code, out_error_text;
@@ -196,6 +197,94 @@ BEGIN
 	END;
 	
 
+	
+END  
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION carpoolvote.submit_new_rider(character varying,
+    character varying, character varying,
+    character varying, character varying, character varying, character varying,
+    character varying, integer, boolean, boolean, boolean, boolean, boolean,
+    character varying, character varying, boolean, boolean, character varying, character varying,
+    character varying,out character varying, out integer, out text)
+  OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider(	character varying,
+    character varying, character varying,
+    character varying, character varying, character varying, character varying,
+    character varying, integer, boolean, boolean, boolean, boolean, boolean,
+    character varying, character varying, boolean, boolean, character varying, character varying,
+    character varying,out character varying, out integer, out text) TO carpool_web_role;
+	
+GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider( character varying,
+    character varying, character varying,
+    character varying, character varying, character varying, character varying,
+    character varying, integer, boolean, boolean, boolean, boolean, boolean,
+    character varying, character varying, boolean, boolean, character varying, character varying,
+    character varying,out character varying, out integer, out text) TO carpool_role;
+
+
+-- 
+-- submit_new_rider
+-- return codes : 
+-- -1 : ERROR - Generic Error
+-- 0  : SUCCESS
+-- 1  : ERROR - Input is disabled
+-- 2  : ERROR - Input validation
+CREATE OR REPLACE FUNCTION carpoolvote.submit_new_rider(
+	a_IPAddress character varying,
+    a_RiderFirstName character varying,
+    a_RiderLastName character varying,
+    a_RiderEmail character varying,
+    a_RiderPhone character varying,
+    a_RiderCollectionZIP character varying,
+    a_RiderDropOffZIP character varying,
+    a_AvailableRideTimesLocal character varying,
+    a_TotalPartySize integer,
+    a_TwoWayTripNeeded boolean,
+    a_RiderIsVulnerable boolean,
+    a_RiderWillNotTalkPolitics boolean,
+    a_PleaseStayInTouch boolean,
+    a_NeedWheelchair boolean,
+    a_RiderPreferredContact character varying,
+    a_RiderAccommodationNotes character varying,
+    a_RiderLegalConsent boolean,
+    a_RiderWillBeSafe boolean,
+    a_RiderCollectionAddress character varying,
+    a_RiderDestinationAddress character varying,
+	OUT out_uuid character varying,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT) AS
+$BODY$
+BEGIN	
+
+SELECT * FROM carpoolvote.submit_new_rider(
+	a_IPAddress,
+    a_RiderFirstName,
+    a_RiderLastName,
+    a_RiderEmail,
+    a_RiderPhone,
+    a_RiderCollectionZIP,
+    a_RiderDropOffZIP,
+    a_AvailableRideTimesLocal,
+    a_TotalPartySize,
+    a_TwoWayTripNeeded,
+    a_RiderIsVulnerable,
+    a_RiderWillNotTalkPolitics,
+    a_PleaseStayInTouch,
+    a_NeedWheelchair,
+    a_RiderPreferredContact,
+    a_RiderAccommodationNotes,
+    a_RiderLegalConsent,
+    a_RiderWillBeSafe,
+	NULL,  -- the street number
+    a_RiderCollectionAddress,
+    a_RiderDestinationAddress) INTO 
+	out_uuid,
+	out_error_code,
+	out_error_text;
+	
+	RETURN;
 	
 END  
 $BODY$
@@ -491,8 +580,7 @@ BEGIN
 		v_step := 'S4';
 		UPDATE carpoolvote.rider
 		SET status='Pending'
-		WHERE "UUID" = a_UUID;
-		
+		WHERE "UUID" = a_UUID AND status NOT IN ('Canceled','Expired');
 	END IF;
 		
 	RETURN '';
