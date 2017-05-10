@@ -16,6 +16,7 @@
 # http://stackoverflow.com/questions/32612650/how-to-get-docker-compose-to-always-re-create-containers-from-fresh-images
 # https://github.com/docker/compose/issues/1049
 # docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up
+# docker-compose -f ./compose/docker-compose-dev-build-test.yml up
 
 # docker-compose -f ./compose/docker-compose-static-ip.yml up
 # docker-compose -f ./compose/docker-compose-static-ip-dev.yml up
