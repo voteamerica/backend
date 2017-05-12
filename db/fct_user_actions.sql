@@ -1,12 +1,14 @@
 -- actions by rider
 --carpoolvote.rider_cancel_ride_request(UUID, phone number or lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
 --carpoolvote.rider_cancel_confirmed_match(UUID_driver, UUID_rider, rider’s phone number or rider’s lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
+--carpoolvote.rider_update_match_details(UUID_driver, UUID_rider, rider’s phone number or rider’s lastname ?, rider_notes TEXT, OUT out_error_code INTEGER, OUT out_error_text TEXT))
 
 -- actions by driver
 --carpoolvote.driver_cancel_drive_offer(UUID, phone number or lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
 --carpoolvote.driver_cancel_confirmed_match(UUID_driver, UUID_rider, driverr’s phone number or driver’s lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
 --carpoolvote.driver_confirm_match(UUID_driver, UUID_rider, driver’s phone number or driver’s lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
 --carpoolvote.driver_pause_match(UUID, phone number or lastname ?, OUT out_error_code INTEGER, OUT out_error_text TEXT)
+--carpoolvote.driver_update_match_details(UUID_driver, UUID_rider, driver’s phone number or rider’s lastname ?, driver_notes TEXT, OUT out_error_code INTEGER, OUT out_error_text TEXT))
 
 -- functions return out_error_code=0 in case of success. If <>0, out_error_text contains error description
 
@@ -1744,4 +1746,138 @@ REVOKE ALL ON FUNCTION update_ride_request_status(a_uuid character varying) FROM
 GRANT ALL ON FUNCTION update_ride_request_status(a_uuid character varying) TO carpool_admins;
 GRANT ALL ON FUNCTION update_ride_request_status(a_uuid character varying) TO carpool_web_role;
 GRANT ALL ON FUNCTION update_ride_request_status(a_uuid character varying) TO carpool_role;
+
+
+--carpoolvote.rider_update_match_details(UUID_driver, UUID_rider, rider’s phone number or rider’s lastname ?, rider_notes TEXT, OUT out_error_code INTEGER, OUT out_error_text TEXT))
+CREATE OR REPLACE FUNCTION carpoolvote.rider_update_match_details(
+    a_UUID_driver character varying(50),
+	a_UUID_rider character varying(50),
+    confirmation_parameter character varying(255),
+	a_rider_notes text,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT)
+	AS
+$BODY$
+
+DECLARE                                                   
+	v_step character varying(200); 
+	v_return_text character varying(200);	
+	
+BEGIN 
+
+
+	out_error_code := carpoolvote.f_SUCCESS();
+	out_error_text := '';
+
+		
+	-- input validation
+	IF NOT EXISTS (
+	SELECT 1 
+	FROM carpoolvote.match m, carpoolvote.rider r
+	WHERE m.uuid_driver = a_UUID_driver
+	AND m.uuid_rider = a_UUID_rider
+	AND m.uuid_rider = r."UUID"
+	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."RiderLastName", r."RiderPhone")
+	)
+	THEN
+		out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
+		out_error_text := 'No Match can be confirmed with those parameters';
+		RETURN;
+	END IF;
+	
+	BEGIN
+		UPDATE carpoolvote.match
+		SET rider_notes = a_rider_notes
+		WHERE
+		uuid_driver = a_UUID_driver
+		AND uuid_rider = a_UUID_rider;
+	
+		RETURN;
+	
+	EXCEPTION WHEN OTHERS 
+	THEN
+		out_error_code := carpoolvote.f_EXECUTION_ERROR();
+		out_error_text := 'Exception occurred during processing: driver_confirm_match,' || v_step || '(' || SQLSTATE || ')' || SQLERRM;
+		RETURN;
+	END;
+
+
+    END  
+
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION carpoolvote.rider_update_match_details(character varying, character varying, character varying, text
+	out integer, out text) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_update_match_details(character varying, character varying, character varying, text
+	out integer, out text) TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_update_match_details(character varying, character varying, character varying, text
+	out integer, out text) TO carpool_role;
+
+
+--carpoolvote.driver_update_match_details(UUID_driver, UUID_rider, driver’s phone number or rider’s lastname ?, driver_notes TEXT, OUT out_error_code INTEGER, OUT out_error_text TEXT))
+CREATE OR REPLACE FUNCTION carpoolvote.driver_update_match_details(
+    a_UUID_driver character varying(50),
+	a_UUID_rider character varying(50),
+    confirmation_parameter character varying(255),
+	a_driver_notes text,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT)
+	AS
+$BODY$
+
+DECLARE                                                   
+	v_step character varying(200); 
+	v_return_text character varying(200);	
+	
+BEGIN 
+
+
+	out_error_code := carpoolvote.f_SUCCESS();
+	out_error_text := '';
+
+		
+	-- input validation
+	IF NOT EXISTS (
+	SELECT 1 
+	FROM carpoolvote.match m, carpoolvote.driver r
+	WHERE m.uuid_driver = a_UUID_driver
+	AND m.uuid_rider = a_UUID_rider
+	AND m.uuid_driver = r."UUID"
+	AND carpoolvote.validate_name_or_phone(confirmation_parameter, r."DriverLastName", r."DriverPhone")
+	)
+	THEN
+		out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
+		out_error_text := 'No Match can be confirmed with those parameters';
+		RETURN;
+	END IF;
+	
+	BEGIN
+		UPDATE carpoolvote.match
+		SET driver_notes = a_driver_notes
+		WHERE
+		uuid_driver = a_UUID_driver
+		AND uuid_rider = a_UUID_rider;
+	
+		RETURN;
+	
+	EXCEPTION WHEN OTHERS 
+	THEN
+		out_error_code := carpoolvote.f_EXECUTION_ERROR();
+		out_error_text := 'Exception occurred during processing: driver_confirm_match,' || v_step || '(' || SQLSTATE || ')' || SQLERRM;
+		RETURN;
+	END;
+
+
+    END  
+
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION carpoolvote.driver_update_match_details(character varying, character varying, character varying, text
+	out integer, out text) OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_update_match_details(character varying, character varying, character varying, text
+	out integer, out text) TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_update_match_details(character varying, character varying, character varying, text
+	out integer, out text) TO carpool_role;
 
