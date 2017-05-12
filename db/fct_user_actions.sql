@@ -1807,11 +1807,11 @@ BEGIN
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION carpoolvote.rider_update_match_details(character varying, character varying, character varying, text
+ALTER FUNCTION carpoolvote.rider_update_match_details(character varying, character varying, character varying, text,
 	out integer, out text) OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.rider_update_match_details(character varying, character varying, character varying, text
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_update_match_details(character varying, character varying, character varying, text,
 	out integer, out text) TO carpool_web_role;
-GRANT EXECUTE ON FUNCTION carpoolvote.rider_update_match_details(character varying, character varying, character varying, text
+GRANT EXECUTE ON FUNCTION carpoolvote.rider_update_match_details(character varying, character varying, character varying, text,
 	out integer, out text) TO carpool_role;
 
 
@@ -1874,10 +1874,10 @@ BEGIN
 $BODY$
   LANGUAGE plpgsql VOLATILE
   COST 100;
-ALTER FUNCTION carpoolvote.driver_update_match_details(character varying, character varying, character varying, text
+ALTER FUNCTION carpoolvote.driver_update_match_details(character varying, character varying, character varying, text,
 	out integer, out text) OWNER TO carpool_admins;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_update_match_details(character varying, character varying, character varying, text
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_update_match_details(character varying, character varying, character varying, text,
 	out integer, out text) TO carpool_web_role;
-GRANT EXECUTE ON FUNCTION carpoolvote.driver_update_match_details(character varying, character varying, character varying, text
+GRANT EXECUTE ON FUNCTION carpoolvote.driver_update_match_details(character varying, character varying, character varying, text,
 	out integer, out text) TO carpool_role;
 
