@@ -56,6 +56,21 @@
 # docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up
 
 
+## Testing
+#
+# create specific machines if appropriate
+#
+# 1) use docker-compose to create local system
+# docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up
+#
+# 2) docker ps, exec into carpool machine
+#
+# 3) goto nightwatch folder
+#
+# 4) run nightwatch
+#
+
+
 
 # 1) pg-auto
 # cd .../voteUSbackend/docker/pg-auto
