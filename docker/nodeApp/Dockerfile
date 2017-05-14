@@ -48,6 +48,8 @@ ENV PORT=8000 PGUSER=carpool_web PGDATABASE=carpoolvote
 
 COPY ./expo-start.sh /
 
+RUN npm install -g nightwatch
+
 ENTRYPOINT ["/expo-start.sh"]
 
 # CMD ["npm start"]

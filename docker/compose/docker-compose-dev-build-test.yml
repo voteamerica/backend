@@ -1,0 +1,105 @@
+version: '2'
+
+services:
+  cp-test:
+    image: selenium/standalone-chrome
+    # image: selenium/standalone-firefox
+
+    depends_on:
+      - cp-nodejs
+      - cp-pg-server
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.3 # may not needed 
+    
+  cp-front-end:
+    build:
+      context: ../jekyll/
+      args:
+        REPO: https://github.com/jkbits1/voteamerica.github.io
+        BRANCH_NAME: master        
+    image: gc-jekyll
+
+    ports: 
+      - "4000:4000"
+    depends_on:
+      - cp-nodejs
+      - cp-pg-server
+
+    # command: jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml
+    command: jekyll serve -H 0.0.0.0 --watch --config _config-local.yml
+
+    volumes:
+      - ../../../voteUSfrontend:/usr/src/app/frontend
+
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.4 # probably not needed, but keeps things in sync 
+
+  cp-nodejs:
+    build:
+      context: ../nodeApp/
+      args:
+        REPO: https://github.com/jkbits1/backend
+        BRANCH_NAME: patch-redirect
+    image: carpool
+
+    depends_on:
+    - cp-pg-server
+    # command: bash
+    stdin_open: true
+    tty: true
+    environment:
+      # - PGHOST=docker_cp-pg-server_1
+      #  it may be that this is overridden by entrypoint script 
+      # (or is it a dockerfile issue?)
+      #  remove this and pwd from entrypoint script, 
+      # also patch run commands to pass PGHOST/pwd as env var command line params
+
+      - PGPASSWORD=pwd
+      - PGHOST=10.5.0.6
+    ports:
+      - "8000:8000"
+    links:
+      - cp-pg-server
+    volumes:
+      # - /var/vms/Jon/Documents/GitHub/voteUSbackend:/usr/src/app/backend
+      - ../..:/usr/src/app/backend
+      - node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/
+
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.5
+
+  cp-pg-server:
+    build:
+      context: ../pg-auto
+      args:
+        REPO: https://github.com/jkbits1/backend
+        BRANCH_NAME: patch-redirect
+    image: pgres-cp
+    ports:
+      - "5432:5432"
+
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.6
+
+  # pg-client:
+  #   image: postgres:9.5.4
+  #   command: bash
+  #   stdin_open: true
+  #   tty: true
+
+# this supports networks with static ip addresses
+# http://stackoverflow.com/questions/39493490/provide-static-ip-to-docker-containers-via-docker-compose
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
+         gateway: 10.5.0.1
+
+volumes:
+  node_app_node_modules:
