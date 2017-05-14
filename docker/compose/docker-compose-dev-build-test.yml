@@ -2,8 +2,8 @@ version: '2'
 
 services:
   cp-test:
-    # image: selenium/standalone-chrome
-    image: selenium/standalone-firefox
+    image: selenium/standalone-chrome
+    # image: selenium/standalone-firefox
 
     depends_on:
       - cp-nodejs
