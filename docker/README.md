@@ -16,22 +16,6 @@ sudo chmod +x /usr/local/bin/docker-compose
 ## Go to the docker folder of your forked repo (here known as voteUSbackend)
 `cd .../voteUSbackend/docker`
 
-## There are several docker compose files to support various setups
-#### http://stackoverflow.com/questions/32612650/how-to-get-docker-compose-to-always-re-create-containers-from-fresh-images
-#### https://github.com/docker/compose/issues/1049
-DEV `docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up`
-
-TEST `docker-compose -f ./compose/docker-compose-dev-build-test.yml up`
-
-MISC
-```
-#### docker-compose -f ./compose/docker-compose-static-ip.yml up
-#### docker-compose -f ./compose/docker-compose-static-ip-dev.yml up
-#### docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up --build
-#### docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up --force-recreate
-#### docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up -d --force-recreate --remove-orphans
-```
-
 ## Test Front-end PR
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 Push this new PR to origin (not upstream)
@@ -45,11 +29,40 @@ Push this new PR to origin (not upstream)
 
 ## Automated Testing
 #### Create specific machines if appropriate
-#### 1) use docker-compose to create local system
+#### 1) edit ...\voteUSfrontend\_config-local.yml
+NOTE: app will not execute correctly in browser
+      with these setting (but nightwatch tests need them) 
+```
+api: "http://10.5.0.5:8000"
+cp_site: "http://10.5.0.4:4000"
+```
+#### 2) use docker-compose to create local system
 `docker-compose -f ./compose/docker-compose-dev-build-test.yml up`
-#### 2) `docker ps`, then `exec` into carpool machine
-#### 3) go to nightwatch folder
-#### 4) run nightwatch
+#### 3) `docker ps`, then `exec` into carpool machine
+#### 4) go to nightwatch folder
+#### 5) run nightwatch
+#### 6) optional - use a vnc viewer (e.g. [RealVNC](https://www.realvnc.com/download/viewer/)) to watch the test being executed on vnc://localhost:5900 (don't type vnc:// for RealVNC viewer)
+
+
+## There are several docker compose files to support various setups
+#### http://stackoverflow.com/questions/32612650/how-to-get-docker-compose-to-always-re-create-containers-from-fresh-images
+#### https://github.com/docker/compose/issues/1049
+
+As above
+
+DEV `docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up`
+
+TEST `docker-compose -f ./compose/docker-compose-dev-build-test.yml up`
+
+
+MISC OTHERS
+```
+#### docker-compose -f ./compose/docker-compose-static-ip.yml up
+#### docker-compose -f ./compose/docker-compose-static-ip-dev.yml up
+#### docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up --build
+#### docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up --force-recreate
+#### docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up -d --force-recreate --remove-orphans
+```
 
 ## Clearing up for new builds (not a one-step process)
 

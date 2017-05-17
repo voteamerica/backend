@@ -2,8 +2,14 @@ version: '2'
 
 services:
   cp-test:
-    image: selenium/standalone-chrome
+    # image: selenium/standalone-chrome
+
+    # this images supports viewing test browser using a vnc viewer
+    image: selenium/standalone-chrome-debug
     # image: selenium/standalone-firefox
+
+    ports: 
+      - "5900:5900"
 
     depends_on:
       - cp-nodejs
@@ -27,7 +33,8 @@ services:
       - cp-pg-server
 
     # command: jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml
-    command: jekyll serve -H 0.0.0.0 --watch --config _config-local.yml
+    # NOTE: .yml file needs to contain IP addresses for this network (not the usual localhost)
+    command: jekyll serve -H 0.0.0.0 --watch --config _config-local.yml 
 
     volumes:
       - ../../../voteUSfrontend:/usr/src/app/frontend
