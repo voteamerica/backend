@@ -13,7 +13,8 @@ curl -L https://github.com/docker/compose/releases/download/1.12.0/docker-compos
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-## Go to the docker folder of your forked repo (here known as voteUSbackend)
+## Go to the docker folder ... 
+#### ... of your forked repo (here named voteUSbackend)
 `cd .../voteUSbackend/docker`
 
 ## Test Front-end PR
@@ -28,10 +29,10 @@ Push this new PR to origin (not upstream)
 
 
 ## Automated Testing
-#### Create specific machines if appropriate
+#### Create specific machines if appropriate (see below)
 #### 1) edit ...\voteUSfrontend\_config-local.yml
 NOTE: app will not execute correctly in browser
-      with these setting (but nightwatch tests need them) 
+      with these settings (but nightwatch tests need them) 
 ```
 api: "http://10.5.0.5:8000"
 cp_site: "http://10.5.0.4:4000"
@@ -41,6 +42,13 @@ cp_site: "http://10.5.0.4:4000"
 #### 3) `docker ps`, then `exec` into carpool machine
 #### 4) go to nightwatch folder
 #### 5) run nightwatch
+All tests
+
+`nightwatch`
+
+Specific group of tests
+
+`nightwatch --group quick`
 #### 6) optional - use a vnc viewer (e.g. [RealVNC](https://www.realvnc.com/download/viewer/)) to watch the test being executed on vnc://localhost:5900 (don't type vnc:// for RealVNC viewer)
 
 

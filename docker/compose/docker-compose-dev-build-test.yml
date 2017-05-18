@@ -2,10 +2,10 @@ version: '2'
 
 services:
   cp-test:
-    # image: selenium/standalone-chrome
+    image: selenium/standalone-chrome
 
     # this images supports viewing test browser using a vnc viewer
-    image: selenium/standalone-chrome-debug
+    # image: selenium/standalone-chrome-debug
     # image: selenium/standalone-firefox
 
     ports: 
@@ -16,7 +16,7 @@ services:
       - cp-pg-server
     networks:
       vpcbr:
-        ipv4_address: 10.5.0.3 # may not needed 
+        ipv4_address: 10.5.0.3 # may not be needed 
     
   cp-front-end:
     build:
