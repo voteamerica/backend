@@ -27,6 +27,15 @@ Push this new PR to origin (not upstream)
 #### 3) use docker-compose to create the full local system
 `docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up`
 
+## Test Backend-end PR
+#### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
+Push this new PR to origin (not upstream)
+
+#### 2) create specific build of front-end docker machine using --build-arg BRANCH_NAME=pr...
+`docker-compose -f ./compose/docker-compose-dev-build-test.yml build --build-arg CACHEBUST=$(date +%s) --build-arg BRANCH_NAME=pr135 cp-pg-server`
+
+#### 3) use docker-compose to create the full local system
+`docker-compose -f ./compose/docker-compose-dev-build-test.yml up`
 
 ## Automated Testing
 #### Create specific machines if appropriate (see below)
