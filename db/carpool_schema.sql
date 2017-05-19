@@ -127,10 +127,13 @@ CREATE TABLE match (
     status character varying(30) DEFAULT 'Proposed'::character varying NOT NULL,
     uuid_driver character varying(50) NOT NULL,
     uuid_rider character varying(50) NOT NULL,
-    score smallint DEFAULT 0 NOT NULL,
+    score smallint DEFAULT 0 NOT NULL, -- score column is now used internaly to store the distance between the driver zip code and the rider zip code
+	driver_notes text,
+	rider_notes text,
     created_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+COMMENT ON COLUMN carpoolvote.match.score IS 'score column is now used internaly to store the distance between the driver zip code and the rider zip code';
 
 
 ALTER TABLE match OWNER TO carpool_admins;
