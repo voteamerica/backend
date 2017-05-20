@@ -30,7 +30,11 @@ RUN git merge origin/$BRANCH_NAME
 
 RUN cd /usr/src/app/backend/db
 
-COPY ./start_matching_engine.sh /usr/src/app/backend/docker/pg-client/start_matching_engine_dkr.sh
+# COPY ./start_matching_engine.sh /usr/src/app/backend/docker/pg-client/start_matching_engine_dkr.sh
+# COPY ./start_matching_engine.sh /usr/src/app/backend/docker/pg-client/
+COPY ./start_matching_engine.sh /
 
 # ENTRYPOINT [ "../docker/pg-client/start_matching_engine_dkr.sh" ]
 # ENTRYPOINT [ "../docker/pg-client/start_matching_engine.sh" ]
+# ENTRYPOINT [ "/usr/src/app/backend/docker/pg-client/start_matching_engine_dkr.sh" ]
+ENTRYPOINT [ "/start_matching_engine.sh" ]

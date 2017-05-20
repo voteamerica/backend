@@ -60,6 +60,10 @@ Specific group of tests
 `nightwatch --group quick`
 #### 6) optional - use a vnc viewer (e.g. [RealVNC](https://www.realvnc.com/download/viewer/)) to watch the test being executed on vnc://localhost:5900 (don't type vnc:// for RealVNC viewer)
 
+#### 7) optional - create specific pg client
+`docker-compose -f ./compose/docker-compose-dev-build-test.yml build --build-arg BRANCH_NAME=docker-test cp-pg-client`
+
+
 
 ## There are several docker compose files to support various setups
 #### http://stackoverflow.com/questions/32612650/how-to-get-docker-compose-to-always-re-create-containers-from-fresh-images
