@@ -70,7 +70,6 @@ services:
     links:
       - cp-pg-server
     volumes:
-      # - /var/vms/Jon/Documents/GitHub/voteUSbackend:/usr/src/app/backend
       - ../..:/usr/src/app/backend
       - node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/
 
@@ -87,16 +86,38 @@ services:
     image: pgres-cp
     ports:
       - "5432:5432"
+    volumes:
+      - ../..:/usr/src/app/backend
 
     networks:
       vpcbr:
         ipv4_address: 10.5.0.6
 
-  # pg-client:
-  #   image: postgres:9.5.4
-  #   command: bash
-  #   stdin_open: true
-  #   tty: true
+  cp-pg-client:
+    build:
+      context: ../pg-client
+      args:
+        REPO: https://github.com/jkbits1/backend
+        BRANCH_NAME: docker-test
+    image: pg-client
+    depends_on:
+    - cp-pg-server
+
+    # command: bash
+    stdin_open: true
+    tty: true
+    environment:
+      - PGUSER=postgres
+      # - PGUSER=carpool_web
+      - PGDATABASE=carpoolvote
+      - PGPASSWORD=pwd
+      - PGHOST=10.5.0.6
+    volumes:
+      - ../..:/usr/src/app/backend
+
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.7
 
 # this supports networks with static ip addresses
 # http://stackoverflow.com/questions/39493490/provide-static-ip-to-docker-containers-via-docker-compose

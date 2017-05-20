@@ -99,6 +99,8 @@ RUN cd /usr/src/app/backend/db
 
 COPY create_fresh_carpool_db2.sh /docker-entrypoint-initdb.d/
 
+# COPY start_matching_engine.sh /docker-entrypoint-initdb.d/
+COPY start_matching_engine_bkg.sh /docker-entrypoint-initdb.d/
 
 # COPY a-create_fresh_carpool_db.sh /docker-entrypoint-initdb.d/
 # COPY create_fresh_carpool_db2a.sh /docker-entrypoint-initdb.d/
