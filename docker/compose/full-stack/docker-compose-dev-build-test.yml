@@ -20,9 +20,9 @@ services:
     
   cp-front-end:
     build:
-      context: ../jekyll/
+      context: ../../jekyll/
       args:
-        REPO: https://github.com/jkbits1/voteamerica.github.io
+        REPO: https://github.com/voteamerica/voteamerica.github.io
         BRANCH_NAME: master        
     image: gc-jekyll
 
@@ -37,7 +37,7 @@ services:
     command: jekyll serve -H 0.0.0.0 --watch --config _config-local.yml 
 
     volumes:
-      - ../../../voteUSfrontend:/usr/src/app/frontend
+      - ../../../../voteUSfrontend:/usr/src/app/frontend
 
     networks:
       vpcbr:
@@ -45,10 +45,10 @@ services:
 
   cp-nodejs:
     build:
-      context: ../nodeApp/
+      context: ../../nodeApp/
       args:
-        REPO: https://github.com/jkbits1/backend
-        BRANCH_NAME: patch-redirect
+        REPO: https://github.com/voteamerica/backend
+        BRANCH_NAME: master
     image: carpool
 
     depends_on:
@@ -70,7 +70,7 @@ services:
     links:
       - cp-pg-server
     volumes:
-      - ../..:/usr/src/app/backend
+      - ../../..:/usr/src/app/backend
       - node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/
 
     networks:
@@ -79,15 +79,15 @@ services:
 
   cp-pg-server:
     build:
-      context: ../pg-auto
+      context: ../../pg-auto
       args:
-        REPO: https://github.com/jkbits1/backend
-        BRANCH_NAME: patch-redirect
+        REPO: https://github.com/voteamerica/backend
+        BRANCH_NAME: master
     image: pgres-cp
     ports:
       - "5432:5432"
     volumes:
-      - ../..:/usr/src/app/backend
+      - ../../..:/usr/src/app/backend
 
     networks:
       vpcbr:
@@ -95,10 +95,10 @@ services:
 
   cp-pg-client:
     build:
-      context: ../pg-client
+      context: ../../pg-client
       args:
-        REPO: https://github.com/jkbits1/backend
-        BRANCH_NAME: docker-test
+        REPO: https://github.com/voteamerica/backend
+        BRANCH_NAME: master
     image: pg-client
     depends_on:
     - cp-pg-server
@@ -113,7 +113,7 @@ services:
       - PGPASSWORD=pwd
       - PGHOST=10.5.0.6
     volumes:
-      - ../..:/usr/src/app/backend
+      - ../../..:/usr/src/app/backend
 
     networks:
       vpcbr:
