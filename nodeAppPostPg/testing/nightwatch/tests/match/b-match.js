@@ -1,8 +1,8 @@
 var common = require('../../common/common.js');
 
 module.exports = {
-  'rider': function (client) {
+  'rider-driver': function (client) {
 
-    (common.addRider(client)).addDriver().finish();
+    common.addRider(client).addDriver().finish();
   }
 };
