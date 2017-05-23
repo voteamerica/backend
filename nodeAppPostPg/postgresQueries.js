@@ -1,5 +1,6 @@
-// // functions that use postgresql pg library to execute db queries etc
 "use strict";
+// // functions that use postgresql pg library to execute db queries etc
+Object.defineProperty(exports, "__esModule", { value: true });
 var PostgresQueries = (function () {
     function PostgresQueries() {
     }
@@ -133,14 +134,12 @@ var PostgresQueries = (function () {
             reply(results.failure + ': ' + message).code(500);
         });
     };
-	
-	PostgresQueries.prototype.dbExecuteCarpoolAPIFunction_Insert = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
+    PostgresQueries.prototype.dbExecuteCarpoolAPIFunction_Insert = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
         console.log("executeFunctionString Insert: " + queryString);
         pool.query(queryString, fnPayloadArray(req, payload))
             .then(function (result) {
             var firstRow = "";
-
             var displayResult = result || '';
             var uuid = "";
             var code = "";
@@ -155,7 +154,6 @@ var PostgresQueries = (function () {
             catch (err) {
                 console.error('no uuid returned');
             }
-
             if (result !== undefined && result.rows !== undefined) {
                 // result.rows.forEach( val => console.log(val));
                 result.rows.forEach(function (val) {
@@ -164,7 +162,6 @@ var PostgresQueries = (function () {
                 firstRow = result.rows[0];
             }
             console.error("executed fn: " + firstRow);
-            
             if (payload._redirect && uuid != undefined) {
                 var reply_url = payload._redirect + '&uuid=' + uuid.toString();
                 if (code != undefined) {
@@ -180,7 +177,6 @@ var PostgresQueries = (function () {
                 reply(//results.success + 
                 firstRow);
             }
-
         })
             .catch(function (e) {
             var message = e.message || '';
@@ -191,8 +187,8 @@ var PostgresQueries = (function () {
             reply(results.failure + message).code(500);
         });
     };
-	
-	PostgresQueries.prototype.dbExecuteCarpoolAPIFunction = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
+    ;
+    PostgresQueries.prototype.dbExecuteCarpoolAPIFunction = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
         console.log("executeFunctionString: " + queryString);
         pool.query(queryString, fnPayloadArray(req, payload))
@@ -218,7 +214,7 @@ var PostgresQueries = (function () {
             reply(results.failure + message).code(500);
         });
     };
-	
+    ;
     PostgresQueries.prototype.dbExecuteFunction = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
         console.log("executeFunctionString: " + queryString);
