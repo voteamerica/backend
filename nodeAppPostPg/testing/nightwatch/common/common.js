@@ -1,10 +1,15 @@
 module.exports = {
+  'dates' : ['2017-08-09'],
+
   'finish' : 
     function finish (client) {
       client.end();
     },
+
   'addDriver' : 
-    function addDriver (client, dates) {
+    function addDriver (client) {
+      var dates = this.dates;
+
       var newState = client
         .url('http://10.5.0.4:4000/#offer-ride')
         .waitForElementVisible('body', 3000)
@@ -64,8 +69,10 @@ module.exports = {
 
       return newState;
     },
+
   'addRider' : 
-    function addRider (client, dates) {
+    function addRider (client) {
+      var dates = this.dates;
       var newState = client
         .url('http://10.5.0.4:4000/#need-ride')
         .waitForElementVisible('body', 3000)
