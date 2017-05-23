@@ -1,13 +1,28 @@
 module.exports = {
+  'currentClient' : undefined,
+
   'dates' : ['2017-08-09'],
 
   'finish' : 
     function finish (client) {
+      if (client !== undefined && client !== null) {
+        this.currentClient = client;
+      }
+
+      var client = this.currentClient;
+      
       client.end();
+
+      return this;
     },
 
   'addDriver' : 
     function addDriver (client) {
+      if (client !== undefined && client !== null) {
+        this.currentClient = client;
+      }
+
+      var client = this.currentClient;
       var dates = this.dates;
 
       var newState = client
@@ -67,11 +82,17 @@ module.exports = {
         .waitForElementVisible('h1#thanks-header', 5000)
         .assert.containsText('h1#thanks-header', 'Thank you');
 
-      return newState;
+      // return newState;
+      return this;
     },
 
   'addRider' : 
     function addRider (client) {
+      if (client !== undefined && client !== null) {
+        this.currentClient = client;
+      }
+
+      var client = this.currentClient;
       var dates = this.dates;
       var newState = client
         .url('http://10.5.0.4:4000/#need-ride')
@@ -126,6 +147,7 @@ module.exports = {
         // .assert.containsText('div.with-errors ul li', 'Please fill in')
         // .assert.valueContains('div.with-errors ul li', 'Please')
 
-      return newState;
+      // return newState;
+      return this;
     }
 };
