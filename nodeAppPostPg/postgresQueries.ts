@@ -251,7 +251,7 @@ class PostgresQueries implements DbQueries {
             message, stack);
             reply(results.failure + message).code(500);
         });
-    };
+    }
 	
 	dbExecuteCarpoolAPIFunction (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
@@ -278,7 +278,7 @@ class PostgresQueries implements DbQueries {
             message, stack);
             reply(results.failure + message).code(500);
         });
-    };
+    }
 	
   dbExecuteFunction (payload, pool, fnExecuteFunctionString, fnPayloadArray,
                         req, reply, results) {

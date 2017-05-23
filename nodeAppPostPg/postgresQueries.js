@@ -187,7 +187,6 @@ var PostgresQueries = (function () {
             reply(results.failure + message).code(500);
         });
     };
-    ;
     PostgresQueries.prototype.dbExecuteCarpoolAPIFunction = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
         console.log("executeFunctionString: " + queryString);
@@ -214,7 +213,6 @@ var PostgresQueries = (function () {
             reply(results.failure + message).code(500);
         });
     };
-    ;
     PostgresQueries.prototype.dbExecuteFunction = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
         console.log("executeFunctionString: " + queryString);
