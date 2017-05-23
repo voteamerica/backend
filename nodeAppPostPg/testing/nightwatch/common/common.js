@@ -204,12 +204,14 @@ module.exports = {
         // cancel match
         .click('#driverConfirmedMatches > ul li.list_button button')
 
-        .waitForElementNotPresent('#driverConfirmedMatches > ul li.list_button button', 3000)
-
-// !!!!!!!!!!!! alert button appears
+        // alert button appears
         // https://stackoverflow.com/questions/35287273/how-to-click-on-alert-box-ok-button-using-nightwatch-js
+        .pause(2000)
+        .acceptAlert()
 
         .saveScreenshot('./reports/match-self-service-cancel-match.png')
+        
+        .waitForElementNotPresent('#driverConfirmedMatches > ul li.list_button button', 3000)
 
       return this;
     }
