@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // lower case class name to avoid git rename issues 
 var logging = (function () {
     function logging() {

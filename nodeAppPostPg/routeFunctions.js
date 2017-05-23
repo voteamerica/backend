@@ -1,5 +1,6 @@
-// route names, handlers and support functions
 "use strict";
+// route names, handlers and support functions
+Object.defineProperty(exports, "__esModule", { value: true });
 // const moment          = require('moment');
 // const postgresQueries = require('./postgresQueries.js');
 var postgresQueries_1 = require("./postgresQueries");
@@ -105,7 +106,9 @@ function getUnmatchedRiders(req, reply) {
     req.log();
     postgresQueries.dbGetUnmatchedRiders(rfPool, dbQueries.dbGetUnmatchedRidersQueryString, reply, results);
 }
-var cancelRideRequest = createConfirmCancelFn('cancel ride request: ', "get payload: ", dbQueries.dbCancelRideRequestFunctionString, getTwoRiderCancelConfirmPayloadAsArray);
+var cancelRideRequest = createConfirmCancelFn('cancel ride request: ', "get payload: ", dbQueries.dbCancelRideRequestFunctionString, getTwoRiderCancelConfirmPayloadAsArray
+// getCancelConfirmQueryAsArray
+);
 var cancelRiderMatch = createConfirmCancelFn('cancel rider match: ', "get payload: ", dbQueries.dbCancelRiderMatchFunctionString, getFourRiderCancelConfirmPayloadAsArray);
 var cancelDriveOffer = createConfirmCancelFn('cancel drive offer: ', "get payload: ", dbQueries.dbCancelDriveOfferFunctionString, getTwoDriverCancelConfirmPayloadAsArray);
 var cancelDriverMatch = createConfirmCancelFn('cancel driver match: ', "get payload: ", dbQueries.dbCancelDriverMatchFunctionString, 
@@ -147,7 +150,7 @@ function createMultipleResultsFn(resultStringText, consoleText, dbQueryFn, paylo
     }
     return execFn;
 }
-//var getInsertResultStrings = createResultStringFn(' row inserted', ' row insert failed');
+//var getInsertResultStrings  = createResultStringFn(' row inserted', ' row insert failed'); 
 var getExecResultStrings = createResultStringFn(' fn called: ', ' fn call failed: ');
 function createResultStringFn(successText, failureText) {
     function getResultStrings(tableName) {
@@ -164,6 +167,7 @@ function createResultStringFn(successText, failureText) {
 function getHelperPayloadAsArray(req, payload) {
     return [
         payload.Name, payload.Email, payload.Capability
+        // 1, moment().toISOString()
     ];
 }
 function getRiderPayloadAsArray(req, payload) {
@@ -180,11 +184,11 @@ function getRiderPayloadAsArray(req, payload) {
         ,
         payload.TotalPartySize,
         (payload.TwoWayTripNeeded ? 'true' : 'false'),
-		(payload.RiderIsVulnrable ? 'true' : 'false'),        
+        (payload.RiderIsVulnrable ? 'true' : 'false'),
         (payload.RiderWillNotTalkPolitics ? 'true' : 'false'),
         (payload.PleaseStayInTouch ? 'true' : 'false'),
         (payload.NeedWheelchair ? 'true' : 'false'),
-	payload.RiderPreferredContact.toString(),
+        payload.RiderPreferredContact.toString(),
         payload.RiderAccommodationNotes,
         (payload.RiderLegalConsent ? 'true' : 'false'),
         (payload.RiderWillBeSafe ? 'true' : 'false'),
@@ -201,7 +205,7 @@ function getDriverPayloadAsArray(req, payload) {
         payload.AvailableDriveTimesJSON,
         (payload.DriverCanLoadRiderWithWheelchair ? 'true' : 'false'),
         payload.SeatCount,
-		payload.DriverLicenceNumber,
+        payload.DriverLicenceNumber,
         payload.DriverFirstName,
         payload.DriverLastName,
         payload.DriverEmail,

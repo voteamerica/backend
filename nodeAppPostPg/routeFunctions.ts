@@ -102,9 +102,8 @@ function createPostFn
       logPost(req);
     }
 
-    postgresQueries.dbExecuteFunction(payload, rfPool, dbQueryFn, 
-                  payloadFn,
-                  req, reply, results);
+    // postgresQueries.dbExecuteCarpoolAPIFunction(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
+    postgresQueries.dbExecuteCarpoolAPIFunction_Insert(payload, rfPool,   dbQueryFn, payloadFn, req, reply, results);
   }
 
   return postFn; 
