@@ -2,7 +2,7 @@
 
 The setup is created using docker compose. Previously this process was done with manual steps to create the individual docker machines.
 
-Folders nodeApp and pg-auto contain the Dockerfiles (and info to manually setup the docker dev environment). A third folder contains a Dockerfile for the jekyll frontend server.
+Folders nodeApp and pg-auto contain the Dockerfiles (and info to manually setup the docker dev environment). A third folder contains a Dockerfile for the jekyll frontend server. Finally, the pg-client folder contains the environment to run the matching engine.
 
 ## Install docker compose (if not already installed)
 #### Details at [the docker compose install page](https://docs.docker.com/compose/install)
@@ -74,6 +74,8 @@ Specific group of tests
 #### 7) optional - create specific pg client
 `docker-compose -f ./compose/full-stack/docker-compose-dev-build-test.yml build --build-arg BRANCH_NAME=docker-test cp-pg-client`
 
+#### useful suggestions for managing tests structure
+https://github.com/nightwatchjs/nightwatch/pull/37
 
 
 ## There are several docker compose files to support various setups
@@ -120,7 +122,8 @@ docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build
 Example of using specific repo branch -`docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) --build-arg BRANCH_NAME=thanks-redirect cp-front-end`
 
 ## network 
-# https://stackoverflow.com/questions/42373954/create-network-failed-to-allocate-gateway-x-x-x-x-address-already-in-use-i
+https://stackoverflow.com/questions/42373954/create-network-failed-to-allocate-gateway-x-x-x-x-address-already-in-use-i
+
 docker network ls, docker network inspect ...
 
 

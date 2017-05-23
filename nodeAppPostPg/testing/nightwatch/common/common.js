@@ -149,5 +149,68 @@ module.exports = {
 
       // return newState;
       return this;
+    },
+
+  // this test is called after first rider, then driver have been added - it's assumed 
+  // app is at thanks driver page
+  'match' : 
+    function match (client) {      
+      if (client !== undefined && client !== null) {
+        this.currentClient = client;
+      }
+
+      var client = this.currentClient;
+      var dates = this.dates;
+
+      var newState = client
+        // .url('http://10.5.0.4:4000/#need-ride')
+        .waitForElementVisible('.self-service-url', 3000)
+        .assert.containsText('.self-service-url', 'self-service portal')
+        .pause(15000) // wait for matching engine to create the proposed match
+        .click('.self-service-url')
+        .pause(3000) // page takes a while to settle and hide id field
+
+        .saveScreenshot('./reports/match-self-service.png')
+
+        .waitForElementVisible('#inputPhoneNumber', 3000)
+        .setValue('input[id="inputPhoneNumber"]', 'test')
+
+        .click('.button')
+
+        .waitForElementVisible('#driverInfo > h3.self-service-heading', 3000)
+
+        .saveScreenshot('./reports/match-self-service-logged-in.png')
+
+        .assert.containsText('#driverInfo > h3.self-service-heading', 'Driver Info')
+        .waitForElementVisible('#driverProposedMatches > h3.self-service-heading', 3000)
+        .assert.containsText('#driverProposedMatches > h3.self-service-heading', 'Driver Proposed Matches')
+
+        // should check for first list item
+        .assert.containsText('#driverProposedMatches > ul li', 'UUID_driver')
+        .assert.containsText('#driverProposedMatches > ul li.list_button button', 'Accept')
+
+        .waitForElementVisible('#driverProposedMatches > ul li.list_button button', 1000)
+        // accept match
+        .click('#driverProposedMatches > ul li.list_button button')
+
+        .waitForElementNotPresent('#driverProposedMatches > ul li.list_button button', 3000)
+        .waitForElementVisible('#driverConfirmedMatches > ul li.list_button button', 3000)
+
+        .saveScreenshot('./reports/match-self-service-accept-match.png')
+
+        .assert.containsText('#driverConfirmedMatches > ul li', 'UUID_driver')
+        .assert.containsText('#driverConfirmedMatches > ul li.list_button button', 'Cancel')
+
+        // cancel match
+        .click('#driverConfirmedMatches > ul li.list_button button')
+
+        .waitForElementNotPresent('#driverConfirmedMatches > ul li.list_button button', 3000)
+
+// !!!!!!!!!!!! alert button appears
+        // https://stackoverflow.com/questions/35287273/how-to-click-on-alert-box-ok-button-using-nightwatch-js
+
+        .saveScreenshot('./reports/match-self-service-cancel-match.png')
+
+      return this;
     }
 };
