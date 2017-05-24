@@ -1,5 +1,11 @@
 // generate string for db query statements etc 
 
+import { DbDefsTables } from "./DbDefsTables";
+import { DbDefsSubmits } from "./DbDefsSubmits";
+
+let dbDefsTables = new DbDefsTables();
+let dbDefsSubmits = new DbDefsSubmits();
+
 module.exports = {
   dbRejectRideFunctionString:   dbRejectRideFunctionString,
 
@@ -44,7 +50,7 @@ function dbSelectFromString(schema: string, tableOrView: string) {
   return 'SELECT * FROM ' + schema + '.' + tableOrView;
 }
 
-function dbGetInsertClause (tableName) {
+function dbGetInsertClause (tableName: string) {
   return 'INSERT INTO ' + dbDefs.SCHEMA_NAME + '.' + tableName;
 }
 
@@ -115,11 +121,11 @@ function dbCancelRideOfferFunctionString() {
 
 // select from table/views
 function dbGetMatchesQueryString () {
-  return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.MATCH_TABLE);
+  return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsTables.MATCH_TABLE);
 }
 
 function dbGetQueryString () {
-  return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_TABLE);
+  return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsTables.DRIVER_TABLE);
 }
 
 function dbGetUnmatchedDriversQueryString () {
@@ -132,7 +138,7 @@ function dbGetUnmatchedRidersQueryString() {
 
 // inserts // , "DriverHasInsurance" , $17
 function dbGetSubmitDriverString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.SUBMIT_DRIVER_FN)
+    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsSubmits.SUBMIT_DRIVER_FN)
         + ' ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '
         + '        $13, $14, $15, $16, $17, $18 )';
 	
@@ -158,7 +164,7 @@ function dbGetSubmitDriverString() {
 	*/
 }
 function dbGetSubmitRiderString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.SUBMIT_RIDER_FN)
+    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsSubmits.SUBMIT_RIDER_FN)
         + ' ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '
         + '        $13, $14, $15, $16, $17, $18, $19, $20 )';  /* TODO add $21 for new a_RiderCollectionStreetNumber when form is ready */
 	/* 
@@ -187,7 +193,7 @@ function dbGetSubmitRiderString() {
 		
 }
 function dbGetSubmitHelperString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.SUBMIT_HELPER_FN)
+    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsSubmits.SUBMIT_HELPER_FN)
         + ' ($1, $2, $3) ';
 	
 	/*
@@ -199,7 +205,7 @@ function dbGetSubmitHelperString() {
 }
 
 // custom items, due to be revised
-function dbGetMatchRiderQueryString (rider_uuid) {
+function dbGetMatchRiderQueryString (rider_uuid: string) {
   return 'SELECT * FROM nov2016.match inner join carpoolvote.rider ' +
     'on (nov2016.match.uuid_rider = carpoolvote.rider."UUID") ' +
     'inner join carpoolvote.driver ' + 
@@ -207,7 +213,7 @@ function dbGetMatchRiderQueryString (rider_uuid) {
     'where nov2016.match.uuid_rider = ' + " '" + rider_uuid + "' ";
 }
 
-function dbGetMatchDriverQueryString (driver_uuid) {
+function dbGetMatchDriverQueryString (driver_uuid: string) {
   return 'SELECT * FROM nov2016.match inner join carpoolvote.rider ' +
     'on (nov2016.match.uuid_rider = carpoolvote.rider."UUID") ' +
     'inner join carpoolvote.driver ' + 

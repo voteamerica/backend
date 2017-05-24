@@ -1,12 +1,12 @@
 // location of db names 
 var SCHEMA_NAME = 'carpoolvote';
-var DRIVER_TABLE = 'driver';
-var RIDER_TABLE = 'rider';
-var HELPER_TABLE = 'helper';
-var SUBMIT_DRIVER_FN = 'submit_new_driver';
-var SUBMIT_RIDER_FN = 'submit_new_rider';
-var SUBMIT_HELPER_FN = 'submit_new_helper';
-var MATCH_TABLE = 'match';
+// const DRIVER_TABLE: string  = 'driver';
+// const RIDER_TABLE: string   = 'rider';
+// const HELPER_TABLE: string  = 'helper';
+// const SUBMIT_DRIVER_FN: string = 'submit_new_driver';
+// const SUBMIT_RIDER_FN: string = 'submit_new_rider';
+// const SUBMIT_HELPER_FN: string = 'submit_new_helper';
+// const MATCH_TABLE: string   = 'match';
 var UNMATCHED_DRIVERS_VIEW = 'vw_unmatched_drivers';
 var UNMATCHED_RIDERS_VIEW = 'vw_unmatched_riders';
 var CANCEL_RIDE_REQUEST_FUNCTION = 'rider_cancel_ride_request($1, $2)';
@@ -32,13 +32,13 @@ module.exports = {
     SCHEMA_NAME: SCHEMA_NAME,
     UNMATCHED_DRIVERS_VIEW: UNMATCHED_DRIVERS_VIEW,
     UNMATCHED_RIDERS_VIEW: UNMATCHED_RIDERS_VIEW,
-    DRIVER_TABLE: DRIVER_TABLE,
-    RIDER_TABLE: RIDER_TABLE,
-    HELPER_TABLE: HELPER_TABLE,
-    SUBMIT_DRIVER_FN: SUBMIT_DRIVER_FN,
-    SUBMIT_RIDER_FN: SUBMIT_RIDER_FN,
-    SUBMIT_HELPER_FN: SUBMIT_HELPER_FN,
-    MATCH_TABLE: MATCH_TABLE,
+    // DRIVER_TABLE: DRIVER_TABLE,
+    // RIDER_TABLE:  RIDER_TABLE,
+    // HELPER_TABLE: HELPER_TABLE,
+    // SUBMIT_DRIVER_FN: SUBMIT_DRIVER_FN,
+    // SUBMIT_RIDER_FN: SUBMIT_RIDER_FN,
+    // SUBMIT_HELPER_FN: SUBMIT_HELPER_FN,
+    // MATCH_TABLE:  MATCH_TABLE,
     CANCEL_RIDE_REQUEST_FUNCTION: CANCEL_RIDE_REQUEST_FUNCTION,
     CANCEL_RIDER_MATCH_FUNCTION: CANCEL_RIDER_MATCH_FUNCTION,
     CANCEL_DRIVE_OFFER_FUNCTION: CANCEL_DRIVE_OFFER_FUNCTION,

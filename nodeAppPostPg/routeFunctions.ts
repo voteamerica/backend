@@ -38,15 +38,15 @@ const DELETE_DRIVER_ROUTE           = 'driver';
 const PUT_RIDER_ROUTE               = 'rider';
 const PUT_DRIVER_ROUTE              = 'driver';
 
-var rfPool = undefined;
+var rfPool: any = undefined;
 
 // NOTE: module.exports at bottom of file
 
-function setPool(pool) {
+function setPool(pool: any) {
   rfPool = pool;
 }
 
-function getAnon (req, reply) {
+function getAnon (req: any, reply: any) {
   var results = {
     success: 'GET carpool: ',
     failure: 'GET error: ' 
@@ -57,14 +57,14 @@ function getAnon (req, reply) {
   postgresQueries.dbGetData(rfPool, dbQueries.dbGetQueryString, reply, results);
 }
 
-var getClientAddress = function (req) {
+var getClientAddress = function (req: any) {
 		// See http://stackoverflow.com/questions/10849687/express-js-how-to-get-remote-client-address
 		// and http://stackoverflow.com/questions/19266329/node-js-get-clients-ip/19267284
         return (req.headers['x-forwarded-for'] || '').split(',')[0] 
         || req.connection.remoteAddress;
 };
 
-function logPostDriver (req) {
+function logPostDriver (req: any) {
   var payload = req.payload;
 
     console.log("driver radius1 : " + payload.DriverCollectionRadius);
@@ -83,7 +83,7 @@ var postDriver =
     dbQueries.dbGetSubmitDriverString, 
     getDriverPayloadAsArray, logPostDriver);
 
-function logPost (req) {
+function logPost (req: any) {
   req.log();
 }
 
@@ -91,7 +91,7 @@ function createPostFn
   (resultStringText: string, 
     dbQueryFn: any, payloadFn: any, logFn: any) {
   
-  function postFn (req, reply) {
+  function postFn (req: any, reply: any) {
     var payload = req.payload;
     var results = getExecResultStrings(resultStringText);
 
@@ -103,13 +103,13 @@ function createPostFn
     }
 
     // postgresQueries.dbExecuteCarpoolAPIFunction(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
-    postgresQueries.dbExecuteCarpoolAPIFunction_Insert(payload, rfPool,   dbQueryFn, payloadFn, req, reply, results);
+    postgresQueries.dbExecuteCarpoolAPIFunction_Insert(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
   }
 
   return postFn; 
 }
 
-function logPostRider (req) {
+function logPostRider (req: any) {
     var payload = req.payload;
 
     //console.log("rider state1 : " + payload.RiderVotingState);
@@ -128,7 +128,7 @@ var postRider =
     dbQueries.dbGetSubmitRiderString, 
     getRiderPayloadAsArray, logPostRider);
 
-function logPostHelper (req) {
+function logPostHelper (req: any) {
   var payload = req.payload;
 
   req.log();
@@ -142,7 +142,7 @@ var postHelper =
     dbQueries.dbGetSubmitHelperString, 
     getHelperPayloadAsArray, logPostHelper);
 
-function getUnmatchedDrivers (req, reply) {
+function getUnmatchedDrivers (req: any, reply: any) {
   var results = {
     success: 'GET unmatched drivers: ',
     failure: 'GET unmatched drivers error: ' 
@@ -153,7 +153,7 @@ function getUnmatchedDrivers (req, reply) {
   postgresQueries.dbGetUnmatchedDrivers(rfPool, dbQueries.dbGetUnmatchedDriversQueryString, reply, results);
 }
 
-function getUnmatchedRiders(req, reply) {
+function getUnmatchedRiders(req: any, reply: any) {
     var results = {
         success: 'GET unmatched riders: ',
         failure: 'GET unmatched riders error: '
@@ -254,7 +254,7 @@ var confirmRide = createConfirmCancelFn
 function createConfirmCancelFn 
   (resultStringText: string, consoleText: string, dbQueryFn: any, payloadFn: any) {
   
-  function execFn (req, reply) {
+  function execFn (req: any, reply: any) {
       // var payload = req.payload;
       var payload = req.query;
       
@@ -276,7 +276,7 @@ function createConfirmCancelFn
 function createMultipleResultsFn 
   (resultStringText: string, consoleText: string, dbQueryFn: any, payloadFn: any) {
   
-  function execFn (req, reply) {
+  function execFn (req: any, reply: any) {
       // var payload = req.payload;
       var payload = req.query;
       
@@ -298,9 +298,9 @@ function createMultipleResultsFn
 //var getInsertResultStrings  = createResultStringFn(' row inserted', ' row insert failed'); 
 var getExecResultStrings    = createResultStringFn(' fn called: ', ' fn call failed: '); 
 
-function createResultStringFn (successText, failureText) {
+function createResultStringFn (successText: string, failureText: string) {
 
-  function getResultStrings (tableName) {
+  function getResultStrings (tableName: string) {
       var resultStrings = {
         success: ' xxx ' + successText,
         failure: ' ' + failureText 
@@ -315,14 +315,14 @@ function createResultStringFn (successText, failureText) {
   return getResultStrings;
 }
 
-function getHelperPayloadAsArray (req, payload) {
+function getHelperPayloadAsArray (req: any, payload: any) {
   return [      
         payload.Name, payload.Email, payload.Capability
         // 1, moment().toISOString()
     ]
 }
 
-function getRiderPayloadAsArray(req, payload) {
+function getRiderPayloadAsArray(req: any, payload: any) {
     var ip = getClientAddress(req);
     return [
         ip,
@@ -348,7 +348,7 @@ function getRiderPayloadAsArray(req, payload) {
         payload.RiderDestinationAddress
     ];
 }
-function getDriverPayloadAsArray(req, payload) {
+function getDriverPayloadAsArray(req: any, payload: any) {
     var ip = getClientAddress(req);
     return [
         ip,
@@ -373,7 +373,7 @@ function getDriverPayloadAsArray(req, payload) {
 }
 
 // for all two param Rider fns
-function getTwoRiderCancelConfirmPayloadAsArray (req, payload) {
+function getTwoRiderCancelConfirmPayloadAsArray (req: any, payload: any) {
 
   if (req === undefined) {
     console.log("getCancelConfirmPayloadAsArray: no req");
@@ -397,7 +397,7 @@ function getTwoRiderCancelConfirmPayloadAsArray (req, payload) {
 }
 
 // for all two param Driver fns
-function getTwoDriverCancelConfirmPayloadAsArray (req, payload) {
+function getTwoDriverCancelConfirmPayloadAsArray (req: any, payload: any) {
 
   if (req === undefined) {
     console.log("getCancelConfirmPayloadAsArray: no req");
@@ -421,7 +421,7 @@ function getTwoDriverCancelConfirmPayloadAsArray (req, payload) {
 }
 
 // for all three param Rider fns
-function getThreeRiderCancelConfirmPayloadAsArray (req, payload) {
+function getThreeRiderCancelConfirmPayloadAsArray (req: any, payload: any) {
 
   if (req === undefined) {
     console.log("getCancelConfirmPayloadAsArray: no req");
@@ -449,7 +449,7 @@ function getThreeRiderCancelConfirmPayloadAsArray (req, payload) {
 }
 
 // for all four param Rider fns
-function getFourRiderCancelConfirmPayloadAsArray (req, payload) {
+function getFourRiderCancelConfirmPayloadAsArray (req: any, payload: any) {
 
   if (req === undefined) {
     console.log("getCancelConfirmPayloadAsArray: no req");
@@ -477,7 +477,7 @@ function getFourRiderCancelConfirmPayloadAsArray (req, payload) {
 }
 
 // for all three param Driver fns
-function getThreeDriverCancelConfirmPayloadAsArray (req, payload) {
+function getThreeDriverCancelConfirmPayloadAsArray (req: any, payload: any) {
 
   if (req === undefined) {
     console.log("getCancelConfirmPayloadAsArray: no req");
@@ -505,7 +505,7 @@ function getThreeDriverCancelConfirmPayloadAsArray (req, payload) {
 }
 
 // for all four param Driver fns
-function getFourDriverCancelConfirmPayloadAsArray (req, payload) {
+function getFourDriverCancelConfirmPayloadAsArray (req: any, payload: any) {
 
   if (req === undefined) {
     console.log("getCancelConfirmPayloadAsArray: no req");
@@ -533,31 +533,31 @@ function getFourDriverCancelConfirmPayloadAsArray (req, payload) {
     ]
 }
 
-function getRejectRidePayloadAsArray (req, payload) {
+function getRejectRidePayloadAsArray (req: any, payload: any) {
   return [
         payload.UUID, payload.RiderPhone
     ]
 }
 
-function getConfirmRidePayloadAsArray (req, payload) {
+function getConfirmRidePayloadAsArray (req: any, payload: any) {
   return [
         payload.UUID, payload.RiderPhone
     ]
 }
 
-function getCancelRidePayloadAsArray (req, payload) {
+function getCancelRidePayloadAsArray (req: any, payload: any) {
   return [      
         payload.UUID, payload.RiderPhone
     ]
 }
 
-function getCancelRideOfferPayloadAsArray (req, payload) {
+function getCancelRideOfferPayloadAsArray (req: any, payload: any) {
   return [
         payload.UUID, payload.DriverPhone
     ]
 }
 
-function sanitiseDriver (payload) {
+function sanitiseDriver (payload: any) {
   if (payload.DriverCollectionRadius === undefined ||
       payload.DriverCollectionRadius === "") {
     // console.log("santising...");
@@ -565,7 +565,7 @@ function sanitiseDriver (payload) {
   }    
 }
 
-function sanitiseRider (payload) {
+function sanitiseRider (payload: any) {
 
   // if (payload.RiderVotingState === undefined) {
   //   payload.RiderVotingState = "MO";

@@ -154,7 +154,7 @@ class PostgresQueries implements DbQueries {
     });
   }
 
-  dbInsertData (payload, pool, fnInsertString, fnPayloadArray,
+  dbInsertData (payload, pool, fnInsertString, fnPayloadArray: any,
                         req, reply, results) {
     var insertString = fnInsertString();
 
@@ -195,7 +195,7 @@ class PostgresQueries implements DbQueries {
     });
   }
 
-	dbExecuteCarpoolAPIFunction_Insert (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
+	dbExecuteCarpoolAPIFunction_Insert (payload, pool, fnExecuteFunctionString, fnPayloadArray: any, req, reply, results) {
         var queryString = fnExecuteFunctionString();
         console.log("executeFunctionString Insert: " + queryString);
         pool.query(queryString, fnPayloadArray(req, payload))
@@ -253,7 +253,7 @@ class PostgresQueries implements DbQueries {
         });
     }
 	
-	dbExecuteCarpoolAPIFunction (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
+	dbExecuteCarpoolAPIFunction (payload, pool, fnExecuteFunctionString, fnPayloadArray: any, req, reply, results) {
         var queryString = fnExecuteFunctionString();
         console.log("executeFunctionString: " + queryString);
         pool.query(queryString, fnPayloadArray(req, payload))
@@ -280,7 +280,7 @@ class PostgresQueries implements DbQueries {
         });
     }
 	
-  dbExecuteFunction (payload, pool, fnExecuteFunctionString, fnPayloadArray,
+  dbExecuteFunction (payload, pool, fnExecuteFunctionString, fnPayloadArray: any,
                         req, reply, results) {
     var queryString = fnExecuteFunctionString();
 
@@ -305,7 +305,7 @@ class PostgresQueries implements DbQueries {
       reply(//results.success + 
               firstRowAsString);
     })
-    .catch(function (e) {
+    .catch(function (e: any) {
       var message = e.message || '';
       var stack = e.stack || '';
 
@@ -317,8 +317,8 @@ class PostgresQueries implements DbQueries {
     });
   }
 
-  dbExecuteFunctionMultipleResults (payload, pool, fnExecuteFunctionString, fnPayloadArray,
-                        req, reply, results) {
+  dbExecuteFunctionMultipleResults (payload: any, pool: any, fnExecuteFunctionString: any, fnPayloadArray: any,
+                        req: any, reply: any, results: any) {
     var queryString = fnExecuteFunctionString();
 
     console.log("executeFunctionMultipleResultsString: " + queryString);
@@ -326,13 +326,13 @@ class PostgresQueries implements DbQueries {
       queryString, 
       fnPayloadArray(req, payload)
       )
-    .then(function (result) {
+    .then(function (result: any) {
       var firstRowAsString = "";
-      var rowsToSend = [];
+      var rowsToSend: any = [];
 
       if (result !== undefined && result.rows !== undefined) {
           // result.rows.forEach( val => console.log(val));
-          result.rows.forEach(function (val) { 
+          result.rows.forEach(function (val: any) { 
             rowsToSend.push(val);
           });
 
@@ -342,7 +342,7 @@ class PostgresQueries implements DbQueries {
 
       reply(rowsToSend);
     })
-    .catch(function (e) {
+    .catch(function (e: any) {
       var message = e.message || '';
       var stack = e.stack || '';
 

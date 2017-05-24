@@ -1,4 +1,10 @@
+"use strict";
 // generate string for db query statements etc 
+Object.defineProperty(exports, "__esModule", { value: true });
+var DbDefsTables_1 = require("./DbDefsTables");
+var DbDefsSubmits_1 = require("./DbDefsSubmits");
+var dbDefsTables = new DbDefsTables_1.DbDefsTables();
+var dbDefsSubmits = new DbDefsSubmits_1.DbDefsSubmits();
 module.exports = {
     dbRejectRideFunctionString: dbRejectRideFunctionString,
     dbCancelRideRequestFunctionString: dbCancelRideRequestFunctionString,
@@ -86,10 +92,10 @@ function dbCancelRideOfferFunctionString() {
 }
 // select from table/views
 function dbGetMatchesQueryString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.MATCH_TABLE);
+    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsTables.MATCH_TABLE);
 }
 function dbGetQueryString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_TABLE);
+    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsTables.DRIVER_TABLE);
 }
 function dbGetUnmatchedDriversQueryString() {
     return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.UNMATCHED_DRIVERS_VIEW);
@@ -99,7 +105,7 @@ function dbGetUnmatchedRidersQueryString() {
 }
 // inserts // , "DriverHasInsurance" , $17
 function dbGetSubmitDriverString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.SUBMIT_DRIVER_FN)
+    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsSubmits.SUBMIT_DRIVER_FN)
         + ' ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '
         + '        $13, $14, $15, $16, $17, $18 )';
     /*
@@ -124,7 +130,7 @@ function dbGetSubmitDriverString() {
     */
 }
 function dbGetSubmitRiderString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.SUBMIT_RIDER_FN)
+    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsSubmits.SUBMIT_RIDER_FN)
         + ' ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '
         + '        $13, $14, $15, $16, $17, $18, $19, $20 )'; /* TODO add $21 for new a_RiderCollectionStreetNumber when form is ready */
     /*
@@ -152,7 +158,7 @@ function dbGetSubmitRiderString() {
     */
 }
 function dbGetSubmitHelperString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.SUBMIT_HELPER_FN)
+    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsSubmits.SUBMIT_HELPER_FN)
         + ' ($1, $2, $3) ';
     /*
     a_helpername character varying,

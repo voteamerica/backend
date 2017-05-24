@@ -132,7 +132,7 @@ server.route({
       failure: 'GET matches: ' 
     };
 
-    req.log();
+    req.log(['request']);
 
     postgresQueries.dbGetMatchesData(pool, dbQueries.dbGetMatchesQueryString, reply, results);
   }
@@ -147,7 +147,7 @@ server.route({
       failure: 'GET match-rider: ' 
     };
 
-    req.log();
+    req.log(['request']);
 
     postgresQueries.dbGetMatchSpecificData(pool, dbQueries.dbGetMatchRiderQueryString, 
                             req.params.uuid, reply, results);
@@ -163,7 +163,7 @@ server.route({
       failure: 'GET match-driver: ' 
     };
 
-    req.log();
+    req.log(['request']);
 
     postgresQueries.dbGetMatchSpecificData(pool, dbQueries.dbGetMatchDriverQueryString, 
                             req.params.uuid, reply, results);
