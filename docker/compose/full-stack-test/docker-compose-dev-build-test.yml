@@ -2,10 +2,10 @@ version: '2'
 
 services:
   cp-test:
-    image: selenium/standalone-chrome
+    # image: selenium/standalone-chrome
 
     # this images supports viewing test browser using a vnc viewer
-    # image: selenium/standalone-chrome-debug
+    image: selenium/standalone-chrome-debug
     # image: selenium/standalone-firefox
 
     ports: 
@@ -23,7 +23,7 @@ services:
       context: ../../jekyll/
       args:
         REPO: https://github.com/voteamerica/voteamerica.github.io
-        BRANCH_NAME: master        
+        BRANCH_NAME: master
     image: gc-jekyll
 
     ports: 
@@ -32,9 +32,15 @@ services:
       - cp-nodejs
       - cp-pg-server
 
+    # https://jekyllrb.com/docs/usage/
     # command: jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml
     # NOTE: .yml file needs to contain IP addresses for this network (not the usual localhost)
-    command: jekyll serve -H 0.0.0.0 --watch --config _config-local.yml 
+    # command: jekyll serve -H 0.0.0.0 --watch --config _config-local.yml 
+    command: jekyll serve -H 0.0.0.0 --watch --config /_config-local-ip.yml
+    # auto test
+    # command: jekyll serve -H 0.0.0.0 --config _config-local.yml --watch site.api="http://10.5.0.5:8000" site.cp_site="http://10.5.0.4:4000"
+    # local dev
+    #command: jekyll serve -H 0.0.0.0 --watch --config --api "http://localhost:8000" --cp_site "http://localhost:4000"
 
     volumes:
       - ../../../../voteUSfrontend:/usr/src/app/frontend
@@ -118,6 +124,27 @@ services:
     networks:
       vpcbr:
         ipv4_address: 10.5.0.7
+
+  cp-test-runner:
+    build:
+      context: ../../nightwatch/
+      args:
+        REPO: https://github.com/voteamerica/backend
+        BRANCH_NAME: master
+    image: nightwatch
+
+    depends_on:
+    - cp-test
+    # command: /bin/bash
+    stdin_open: true
+    tty: true
+    volumes:
+      - ../../..:/usr/src/app/backend
+      - node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/
+
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.8
 
 # this supports networks with static ip addresses
 # http://stackoverflow.com/questions/39493490/provide-static-ip-to-docker-containers-via-docker-compose

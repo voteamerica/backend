@@ -3,8 +3,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var DbDefsTables_1 = require("./DbDefsTables");
 var DbDefsSubmits_1 = require("./DbDefsSubmits");
+var DbDefsMatches_1 = require("./DbDefsMatches");
+var DbDefsExistsInfo_1 = require("./DbDefsExistsInfo");
 var dbDefsTables = new DbDefsTables_1.DbDefsTables();
 var dbDefsSubmits = new DbDefsSubmits_1.DbDefsSubmits();
+var dbDefsMatches = new DbDefsMatches_1.DbDefsMatches();
+var dbDefsExistsInfo = new DbDefsExistsInfo_1.DbDefsExistsInfo();
 module.exports = {
     dbRejectRideFunctionString: dbRejectRideFunctionString,
     dbCancelRideRequestFunctionString: dbCancelRideRequestFunctionString,
@@ -61,22 +65,22 @@ function dbPauseDriverMatchFunctionString() {
     return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.PAUSE_DRIVER_MATCH_FUNCTION);
 }
 function dbDriverExistsFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_EXISTS_FUNCTION);
+    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsExistsInfo.DRIVER_EXISTS_FUNCTION);
 }
 function dbDriverInfoFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_INFO_FUNCTION);
+    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsExistsInfo.DRIVER_INFO_FUNCTION);
 }
 function dbDriverProposedMatchesFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_PROPOSED_MATCHES_FUNCTION);
+    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsMatches.DRIVER_PROPOSED_MATCHES_FUNCTION);
 }
 function dbDriverConfirmedMatchesFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_CONFIRMED_MATCHES_FUNCTION);
+    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsMatches.DRIVER_CONFIRMED_MATCHES_FUNCTION);
 }
 function dbRiderExistsFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.RIDER_EXISTS_FUNCTION);
+    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsExistsInfo.RIDER_EXISTS_FUNCTION);
 }
 function dbRiderInfoFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.RIDER_INFO_FUNCTION);
+    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsExistsInfo.RIDER_INFO_FUNCTION);
 }
 function dbRiderConfirmedMatchFunctionString() {
     return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.RIDER_CONFIRMED_MATCH_FUNCTION);

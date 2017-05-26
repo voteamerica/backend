@@ -2,9 +2,13 @@
 
 import { DbDefsTables } from "./DbDefsTables";
 import { DbDefsSubmits } from "./DbDefsSubmits";
+import { DbDefsMatches} from "./DbDefsMatches";
+import { DbDefsExistsInfo} from "./DbDefsExistsInfo";
 
 let dbDefsTables = new DbDefsTables();
 let dbDefsSubmits = new DbDefsSubmits();
+let dbDefsMatches = new DbDefsMatches();
+let dbDefsExistsInfo = new DbDefsExistsInfo();
 
 module.exports = {
   dbRejectRideFunctionString:   dbRejectRideFunctionString,
@@ -80,27 +84,27 @@ function dbPauseDriverMatchFunctionString() {
 }
 
 function dbDriverExistsFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_EXISTS_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsExistsInfo.DRIVER_EXISTS_FUNCTION);
 }
 
 function dbDriverInfoFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_INFO_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsExistsInfo.DRIVER_INFO_FUNCTION);
 }
 
 function dbDriverProposedMatchesFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_PROPOSED_MATCHES_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsMatches.DRIVER_PROPOSED_MATCHES_FUNCTION);
 }
 
 function dbDriverConfirmedMatchesFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.DRIVER_CONFIRMED_MATCHES_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsMatches.DRIVER_CONFIRMED_MATCHES_FUNCTION);
 }
 
 function dbRiderExistsFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.RIDER_EXISTS_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsExistsInfo.RIDER_EXISTS_FUNCTION);
 }
 
 function dbRiderInfoFunctionString() {
-  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.RIDER_INFO_FUNCTION);
+  return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsExistsInfo.RIDER_INFO_FUNCTION);
 }
 
 function dbRiderConfirmedMatchFunctionString() {

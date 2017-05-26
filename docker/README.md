@@ -42,23 +42,15 @@ Push this new PR to origin (not upstream)
 `docker-compose -f ./compose/full-stack/docker-compose-dev-build-test.yml build --build-arg CACHEBUST=$(date +%s) --build-arg BRANCH_NAME=pr135 cp-pg-server`
 
 #### 3) use docker-compose to create the full local system
-`docker-compose -f ./compose/full-stack/docker-compose-dev-build-test.yml up`
+`docker-compose -f ./compose/full-stack-local/docker-compose-dev-build-test.yml up`
 
 ## Automated Testing
-#### Create specific machines if appropriate (see below)
-#### 1) edit ...\voteUSfrontend\_config-local.yml
-NOTES: 
-1) the settings below can be found in ...\voteUSbackend\docker\_config-local-ip.yml
+NOTES: app will not execute correctly in the standard browser, see the vnc steps below
 
-2) app will not execute correctly in the browser
-      with these settings (but nightwatch tests need them) 
+#### Create specific machines if required
 
-```
-api: "http://10.5.0.5:8000"
-cp_site: "http://10.5.0.4:4000"
-```
 #### 2) use docker-compose to create local system
-`docker-compose -f ./compose/full-stack/docker-compose-dev-build-test.yml up`
+`docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up`
 #### 3) `docker ps`, then `exec` into carpool machine
 #### 4) go to nightwatch folder
 #### 5) run nightwatch
@@ -72,7 +64,7 @@ Specific group of tests
 #### 6) optional - use a vnc viewer (e.g. [RealVNC](https://www.realvnc.com/download/viewer/)) to watch the test being executed on vnc://localhost:5900 (don't type vnc:// for RealVNC viewer)
 
 #### 7) optional - create specific pg client
-`docker-compose -f ./compose/full-stack/docker-compose-dev-build-test.yml build --build-arg BRANCH_NAME=docker-test cp-pg-client`
+`docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg BRANCH_NAME=docker-test cp-pg-client`
 
 #### useful suggestions for managing tests structure
 https://github.com/nightwatchjs/nightwatch/pull/37
@@ -120,6 +112,8 @@ docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build
 docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) cp-front-end
 ```
 Example of using specific repo branch -`docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) --build-arg BRANCH_NAME=thanks-redirect cp-front-end`
+
+Example of using specific repo branch -`docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg CACHEBUST=$(date +%s) --build-arg BRANCH_NAME=thanks-redirect cp-front-end`
 
 ## network 
 https://stackoverflow.com/questions/42373954/create-network-failed-to-allocate-gateway-x-x-x-x-address-already-in-use-i

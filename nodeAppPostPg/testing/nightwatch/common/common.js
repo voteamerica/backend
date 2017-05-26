@@ -96,8 +96,9 @@ module.exports = {
       var dates = this.dates;
       var newState = client
         .url('http://10.5.0.4:4000/#need-ride')
-        .waitForElementVisible('body', 3000)
-        .assert.containsText('legend', 'Your trip')
+        // .waitForElementVisible('body', 3000)
+        .waitForElementVisible('form#need-ride', 3000)
+        // .assert.containsText('legend', 'Your trip')
         .assert.cssClassPresent('#RiderAvailableTimes', 'available-times')
 
         // set date/time

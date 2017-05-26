@@ -1,5 +1,4 @@
 "use strict";
-// location of db names 
 Object.defineProperty(exports, "__esModule", { value: true });
 var DbDefsTables = (function () {
     function DbDefsTables() {

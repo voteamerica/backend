@@ -1,5 +1,3 @@
-// location of db names 
-
 export { DbDefsSubmits };
 
 class DbDefsSubmits {
