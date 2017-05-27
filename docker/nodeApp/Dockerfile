@@ -47,6 +47,7 @@ ENV PORT=8000 PGUSER=carpool_web PGDATABASE=carpoolvote
 # ENV PGHOST=$CP_PG_SVR_PORT_5432_TCP_ADDR PGPASSWORD=$CP_PG_SVR_ENV_POSTGRES_PASSWORD 
 
 COPY ./expo-start.sh /
+COPY ./expo-bash.sh /
 
 # RUN npm install -g nightwatch
 
