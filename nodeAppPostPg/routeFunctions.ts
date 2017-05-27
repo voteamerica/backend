@@ -3,7 +3,10 @@
 // const moment          = require('moment');
 // const postgresQueries = require('./postgresQueries.js');
 import { PostgresQueries }  from "./postgresQueries";
+import { PostFunctions }  from "./PostFunctions";
+
 let postgresQueries = new PostgresQueries();
+let postFunctions = new PostFunctions();
 
 const dbQueries       = require('./dbQueries.js');
 
@@ -44,6 +47,8 @@ var rfPool: any = undefined;
 
 function setPool(pool: any) {
   rfPool = pool;
+
+  postFunctions.setPool(pool);
 }
 
 function getAnon (req: any, reply: any) {
@@ -78,36 +83,36 @@ function logPostDriver (req: any) {
 }
 
 var postDriver = 
-  createPostFn 
+  postFunctions.createPostFn 
   (DRIVER_ROUTE, 
     dbQueries.dbGetSubmitDriverString, 
     getDriverPayloadAsArray, logPostDriver);
 
-function logPost (req: any) {
-  req.log();
-}
+// function logPost (req: any) {
+//   req.log();
+// }
 
-function createPostFn 
-  (resultStringText: string, 
-    dbQueryFn: any, payloadFn: any, logFn: any) {
+// function createPostFn 
+//   (resultStringText: string, 
+//     dbQueryFn: any, payloadFn: any, logFn: any) {
   
-  function postFn (req: any, reply: any) {
-    var payload = req.payload;
-    var results = getExecResultStrings(resultStringText);
+//   function postFn (req: any, reply: any) {
+//     var payload = req.payload;
+//     var results = getExecResultStrings(resultStringText);
 
-    if (logFn !== undefined) {
-      logFn(req);
-    } 
-    else {
-      logPost(req);
-    }
+//     if (logFn !== undefined) {
+//       logFn(req);
+//     } 
+//     else {
+//       logPost(req);
+//     }
 
-    // postgresQueries.dbExecuteCarpoolAPIFunction(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
-    postgresQueries.dbExecuteCarpoolAPIFunction_Insert(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
-  }
+//     // postgresQueries.dbExecuteCarpoolAPIFunction(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
+//     postgresQueries.dbExecuteCarpoolAPIFunction_Insert(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
+//   }
 
-  return postFn; 
-}
+//   return postFn; 
+// }
 
 function logPostRider (req: any) {
     var payload = req.payload;
@@ -123,7 +128,7 @@ function logPostRider (req: any) {
 }
 
 var postRider = 
-  createPostFn 
+  postFunctions.createPostFn 
   (RIDER_ROUTE, 
     dbQueries.dbGetSubmitRiderString, 
     getRiderPayloadAsArray, logPostRider);
@@ -137,7 +142,7 @@ function logPostHelper (req: any) {
 }
 
 var postHelper = 
-  createPostFn 
+  postFunctions.createPostFn 
   (HELPER_ROUTE, 
     dbQueries.dbGetSubmitHelperString, 
     getHelperPayloadAsArray, logPostHelper);
@@ -258,7 +263,7 @@ function createConfirmCancelFn
       // var payload = req.payload;
       var payload = req.query;
       
-      var results = getExecResultStrings(resultStringText);
+      var results = postFunctions.getExecResultStrings(resultStringText);
 
       console.log("createConfirmCancelFn-payload: ", payload);
 
@@ -280,7 +285,7 @@ function createMultipleResultsFn
       // var payload = req.payload;
       var payload = req.query;
       
-      var results = getExecResultStrings(resultStringText);
+      var results = postFunctions.getExecResultStrings(resultStringText);
 
       console.log("createMultipleResultsFn-payload: ", payload);
 
@@ -295,25 +300,7 @@ function createMultipleResultsFn
   return execFn;
 }
 
-//var getInsertResultStrings  = createResultStringFn(' row inserted', ' row insert failed'); 
-var getExecResultStrings    = createResultStringFn(' fn called: ', ' fn call failed: '); 
-
-function createResultStringFn (successText: string, failureText: string) {
-
-  function getResultStrings (tableName: string) {
-      var resultStrings = {
-        success: ' xxx ' + successText,
-        failure: ' ' + failureText 
-      }
-
-      resultStrings.success = tableName + resultStrings.success; 
-      resultStrings.failure = tableName + resultStrings.failure; 
-
-      return resultStrings;
-  }
-
-  return getResultStrings;
-}
+// var getExecResultStrings = postFunctions.createResultStringFn(' fn called: ', ' fn call failed: '); 
 
 function getHelperPayloadAsArray (req: any, payload: any) {
   return [      

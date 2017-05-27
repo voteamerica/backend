@@ -56,6 +56,8 @@ services:
       - PGHOST=10.4.0.6
     ports:
       - "8000:8000"
+      - "5858:5858"
+      - "8080:8080"
     links:
       - cp-pg-server
     volumes:

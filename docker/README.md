@@ -66,6 +66,8 @@ Specific group of tests
 #### 7) optional - create specific pg client
 `docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg BRANCH_NAME=docker-test cp-pg-client`
 
+`docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=update-ts cp-nodejs`
+
 #### useful suggestions for managing tests structure
 https://github.com/nightwatchjs/nightwatch/pull/37
 
