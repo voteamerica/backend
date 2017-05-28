@@ -92,8 +92,8 @@ services:
     image: pgres-cp
     ports:
       - "5432:5432"
-    volumes:
-      - ../../..:/usr/src/app/backend
+    # volumes:
+    #   - ../../..:/usr/src/app/backend
 
     networks:
       vpcbr:
@@ -118,8 +118,8 @@ services:
       - PGDATABASE=carpoolvote
       - PGPASSWORD=pwd
       - PGHOST=10.5.0.6
-    volumes:
-      - ../../..:/usr/src/app/backend
+    # volumes:
+    #   - ../../..:/usr/src/app/backend
 
     networks:
       vpcbr:

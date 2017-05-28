@@ -19,6 +19,7 @@ fi
 
 if [[ "X$3" = "X" ]]; then
     R=https://github.com/jkbits1/backend
+    echo REPO $R
 else 
     R=$3
 fi
@@ -34,6 +35,6 @@ fi
 echo MACHINE $M
 echo CACHEBUST $C
 echo REPO $R
-echo BRANCH_NAME $3
+echo BRANCH_NAME $B
 
 docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=$R --build-arg BRANCH_NAME=$B --build-arg CACHEBUST=$C $M

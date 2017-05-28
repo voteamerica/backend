@@ -44,7 +44,7 @@ services:
     - cp-pg-server
     # command: bash
     # command: /expo-start.sh
-    command: /expo-bash.sh
+    # command: /expo-bash.sh
     stdin_open: true
     tty: true
     environment:
