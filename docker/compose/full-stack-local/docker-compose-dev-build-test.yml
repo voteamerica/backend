@@ -43,6 +43,8 @@ services:
     depends_on:
     - cp-pg-server
     # command: bash
+    # command: /expo-start.sh
+    command: /expo-bash.sh
     stdin_open: true
     tty: true
     environment:
@@ -56,6 +58,8 @@ services:
       - PGHOST=10.4.0.6
     ports:
       - "8000:8000"
+      - "5858:5858"
+      - "8080:8080"
     links:
       - cp-pg-server
     volumes:

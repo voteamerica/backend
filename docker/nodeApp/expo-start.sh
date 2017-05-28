@@ -10,3 +10,5 @@ cd /usr/src/app/backend/nodeAppPostPg
 
 npm start
 
+# node debug index.js
+

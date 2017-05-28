@@ -51,7 +51,9 @@ COPY ./expo-bash.sh /
 
 # RUN npm install -g nightwatch
 
-ENTRYPOINT ["/expo-start.sh"]
+# ENTRYPOINT ["/expo-start.sh"]
+CMD ["/expo-start.sh"]
+
 
 # CMD ["npm start"]
 
