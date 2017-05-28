@@ -4,7 +4,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // const moment          = require('moment');
 // const postgresQueries = require('./postgresQueries.js');
 var postgresQueries_1 = require("./postgresQueries");
+var PostFunctions_1 = require("./PostFunctions");
 var postgresQueries = new postgresQueries_1.PostgresQueries();
+var postFunctions = new PostFunctions_1.PostFunctions();
 var dbQueries = require('./dbQueries.js');
 var UNMATCHED_DRIVERS_ROUTE = 'unmatched-drivers';
 var UNMATCHED_RIDERS_ROUTE = 'unmatched-riders';
@@ -31,6 +33,7 @@ var rfPool = undefined;
 // NOTE: module.exports at bottom of file
 function setPool(pool) {
     rfPool = pool;
+    postFunctions.setPool(pool);
 }
 function getAnon(req, reply) {
     var results = {
@@ -55,25 +58,27 @@ function logPostDriver(req) {
     console.log("driver zip: " + payload.DriverCollectionZIP);
     req.log();
 }
-var postDriver = createPostFn(DRIVER_ROUTE, dbQueries.dbGetSubmitDriverString, getDriverPayloadAsArray, logPostDriver);
-function logPost(req) {
-    req.log();
-}
-function createPostFn(resultStringText, dbQueryFn, payloadFn, logFn) {
-    function postFn(req, reply) {
-        var payload = req.payload;
-        var results = getExecResultStrings(resultStringText);
-        if (logFn !== undefined) {
-            logFn(req);
-        }
-        else {
-            logPost(req);
-        }
-        // postgresQueries.dbExecuteCarpoolAPIFunction(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
-        postgresQueries.dbExecuteCarpoolAPIFunction_Insert(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
-    }
-    return postFn;
-}
+var postDriver = postFunctions.createPostFn(DRIVER_ROUTE, dbQueries.dbGetSubmitDriverString, getDriverPayloadAsArray, logPostDriver);
+// function logPost (req: any) {
+//   req.log();
+// }
+// function createPostFn 
+//   (resultStringText: string, 
+//     dbQueryFn: any, payloadFn: any, logFn: any) {
+//   function postFn (req: any, reply: any) {
+//     var payload = req.payload;
+//     var results = getExecResultStrings(resultStringText);
+//     if (logFn !== undefined) {
+//       logFn(req);
+//     } 
+//     else {
+//       logPost(req);
+//     }
+//     // postgresQueries.dbExecuteCarpoolAPIFunction(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
+//     postgresQueries.dbExecuteCarpoolAPIFunction_Insert(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
+//   }
+//   return postFn; 
+// }
 function logPostRider(req) {
     var payload = req.payload;
     //console.log("rider state1 : " + payload.RiderVotingState);
@@ -83,13 +88,13 @@ function logPostRider(req) {
     console.log("rider payload: " + JSON.stringify(payload, null, 4));
     console.log("rider zip: " + payload.RiderCollectionZIP);
 }
-var postRider = createPostFn(RIDER_ROUTE, dbQueries.dbGetSubmitRiderString, getRiderPayloadAsArray, logPostRider);
+var postRider = postFunctions.createPostFn(RIDER_ROUTE, dbQueries.dbGetSubmitRiderString, getRiderPayloadAsArray, logPostRider);
 function logPostHelper(req) {
     var payload = req.payload;
     req.log();
     console.log("helper payload: " + JSON.stringify(payload, null, 4));
 }
-var postHelper = createPostFn(HELPER_ROUTE, dbQueries.dbGetSubmitHelperString, getHelperPayloadAsArray, logPostHelper);
+var postHelper = postFunctions.createPostFn(HELPER_ROUTE, dbQueries.dbGetSubmitHelperString, getHelperPayloadAsArray, logPostHelper);
 function getUnmatchedDrivers(req, reply) {
     var results = {
         success: 'GET unmatched drivers: ',
@@ -130,7 +135,7 @@ function createConfirmCancelFn(resultStringText, consoleText, dbQueryFn, payload
     function execFn(req, reply) {
         // var payload = req.payload;
         var payload = req.query;
-        var results = getExecResultStrings(resultStringText);
+        var results = postFunctions.getExecResultStrings(resultStringText);
         console.log("createConfirmCancelFn-payload: ", payload);
         req.log();
         console.log(consoleText + JSON.stringify(payload, null, 4));
@@ -142,7 +147,7 @@ function createMultipleResultsFn(resultStringText, consoleText, dbQueryFn, paylo
     function execFn(req, reply) {
         // var payload = req.payload;
         var payload = req.query;
-        var results = getExecResultStrings(resultStringText);
+        var results = postFunctions.getExecResultStrings(resultStringText);
         console.log("createMultipleResultsFn-payload: ", payload);
         req.log();
         console.log(consoleText + JSON.stringify(payload, null, 4));
@@ -150,20 +155,7 @@ function createMultipleResultsFn(resultStringText, consoleText, dbQueryFn, paylo
     }
     return execFn;
 }
-//var getInsertResultStrings  = createResultStringFn(' row inserted', ' row insert failed'); 
-var getExecResultStrings = createResultStringFn(' fn called: ', ' fn call failed: ');
-function createResultStringFn(successText, failureText) {
-    function getResultStrings(tableName) {
-        var resultStrings = {
-            success: ' xxx ' + successText,
-            failure: ' ' + failureText
-        };
-        resultStrings.success = tableName + resultStrings.success;
-        resultStrings.failure = tableName + resultStrings.failure;
-        return resultStrings;
-    }
-    return getResultStrings;
-}
+// var getExecResultStrings = postFunctions.createResultStringFn(' fn called: ', ' fn call failed: '); 
 function getHelperPayloadAsArray(req, payload) {
     return [
         payload.Name, payload.Email, payload.Capability
