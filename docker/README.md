@@ -64,6 +64,9 @@ Specific group of tests
 #### 6) optional - use a vnc viewer (e.g. [RealVNC](https://www.realvnc.com/download/viewer/)) to watch the test being executed on vnc://localhost:5900 (don't type vnc:// for RealVNC viewer)
 
 #### 7) optional - create specific pg client
+ `. ./specific-machine-local.sh cp-nodejs`
+ `. ./specific-machine-local.sh https://github.com/jkbits1/backend ts-route cp-nodejs`
+
 `docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg BRANCH_NAME=docker-test cp-pg-client`
 
 `docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=update-ts cp-nodejs`
@@ -163,3 +166,10 @@ default run command (no volumes) -
 #### execute relevant run command, with volumes if required
 default run command (no volumes) -
 `docker run --rm -it --name gc-jekyll-svr -p 4000:4000 gc-jekyll jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml`
+
+### debugging node with vs code
+#### very useful
+https://blog.docker.com/2016/07/live-debugging-docker/
+
+https://code.visualstudio.com/docs/nodejs/nodejs-debugging
+https://alexanderzeitler.com/articles/debugging-a-nodejs-es6-application-in-a-docker-container-using-visual-studio-code/
