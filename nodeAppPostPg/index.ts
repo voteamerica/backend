@@ -13,9 +13,11 @@ const dbQueries   = require('./dbQueries.js');
 const routeFns    = require('./routeFunctions.js');
 
 import { PostgresQueries }  from "./postgresQueries";
+import { PostFunctions } from "./PostFunctions";
 import { logging }          from "./logging";
 
 let postgresQueries = new PostgresQueries();
+let postFunctions = new PostFunctions();
 let loggingItem        = new logging();
 
 config.user       = process.env.PGUSER;
@@ -30,6 +32,7 @@ const pool = new Pool();
 const server = new Hapi.Server();
 
 routeFns.setPool(pool);
+postFunctions.setPool(pool);
 
 const OPS_INTERVAL  = 300000; // 5 mins
 const DEFAULT_PORT  = process.env.PORT || 3000;
@@ -53,20 +56,20 @@ server.route({
 
 server.route({
   method: 'POST',
-  path: '/' + routeFns.DRIVER_ROUTE,
-  handler: routeFns.postDriver
+  path: '/' + postFunctions.DRIVER_ROUTE,
+  handler: postFunctions.postDriver
 });
 
 server.route({
   method: 'POST',
-  path: '/' + routeFns.RIDER_ROUTE,
-  handler: routeFns.postRider
+  path: '/' + postFunctions.RIDER_ROUTE,
+  handler: postFunctions.postRider
 });
 
 server.route({
   method: 'POST',
-  path: '/' + routeFns.HELPER_ROUTE,
-  handler: routeFns.postHelper
+  path: '/' + postFunctions.HELPER_ROUTE,
+  handler: postFunctions.postHelper
 });
 
 server.route({

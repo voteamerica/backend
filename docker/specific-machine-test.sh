@@ -9,22 +9,31 @@ else
     M=$1
 fi
 
-if [[ "X$2" = "X" ]]; then
-    R=https://github.com/jkbits1/backend
-else 
-    R=$2
+if [[ "X$2" = "X" ]]
+then
+    C=1
+	echo CACHEBUST $C
+else
+    C=$2
 fi
 
-if [[ "X$3" = "X" ]]
+if [[ "X$3" = "X" ]]; then
+    R=https://github.com/jkbits1/backend
+else 
+    R=$3
+fi
+
+if [[ "X$4" = "X" ]]
 then
     B=ts-route
 	echo BRANCH_NAME $B
 else
-    B=$3
+    B=$4
 fi
 
 echo MACHINE $M
+echo CACHEBUST $C
 echo REPO $R
 echo BRANCH_NAME $3
 
-docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=$R --build-arg BRANCH_NAME=$B $M
+docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=$R --build-arg BRANCH_NAME=$B --build-arg CACHEBUST=$C $M

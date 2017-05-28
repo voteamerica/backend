@@ -12,9 +12,6 @@ const dbQueries       = require('./dbQueries.js');
 
 const UNMATCHED_DRIVERS_ROUTE = 'unmatched-drivers';
 const UNMATCHED_RIDERS_ROUTE  = 'unmatched-riders';
-const DRIVER_ROUTE            = 'driver';
-const RIDER_ROUTE             = 'rider';
-const HELPER_ROUTE                  = 'helper';
 const CANCEL_RIDE_REQUEST_ROUTE = 'cancel-ride-request';
 const CANCEL_RIDER_MATCH_ROUTE  = 'cancel-rider-match';
 const CANCEL_DRIVE_OFFER_ROUTE  = 'cancel-drive-offer';
@@ -47,8 +44,6 @@ var rfPool: any = undefined;
 
 function setPool(pool: any) {
   rfPool = pool;
-
-  postFunctions.setPool(pool);
 }
 
 function getAnon (req: any, reply: any) {
@@ -61,91 +56,6 @@ function getAnon (req: any, reply: any) {
 
   postgresQueries.dbGetData(rfPool, dbQueries.dbGetQueryString, reply, results);
 }
-
-var getClientAddress = function (req: any) {
-		// See http://stackoverflow.com/questions/10849687/express-js-how-to-get-remote-client-address
-		// and http://stackoverflow.com/questions/19266329/node-js-get-clients-ip/19267284
-        return (req.headers['x-forwarded-for'] || '').split(',')[0] 
-        || req.connection.remoteAddress;
-};
-
-function logPostDriver (req: any) {
-  var payload = req.payload;
-
-    console.log("driver radius1 : " + payload.DriverCollectionRadius);
-    sanitiseDriver(payload);
-    console.log("driver radius2 : " + payload.DriverCollectionRadius);
-
-    console.log("driver payload: " + JSON.stringify(payload, null, 4));
-    console.log("driver zip: " + payload.DriverCollectionZIP);
-
-    req.log();
-}
-
-var postDriver = 
-  postFunctions.createPostFn 
-  (DRIVER_ROUTE, 
-    dbQueries.dbGetSubmitDriverString, 
-    getDriverPayloadAsArray, logPostDriver);
-
-// function logPost (req: any) {
-//   req.log();
-// }
-
-// function createPostFn 
-//   (resultStringText: string, 
-//     dbQueryFn: any, payloadFn: any, logFn: any) {
-  
-//   function postFn (req: any, reply: any) {
-//     var payload = req.payload;
-//     var results = getExecResultStrings(resultStringText);
-
-//     if (logFn !== undefined) {
-//       logFn(req);
-//     } 
-//     else {
-//       logPost(req);
-//     }
-
-//     // postgresQueries.dbExecuteCarpoolAPIFunction(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
-//     postgresQueries.dbExecuteCarpoolAPIFunction_Insert(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
-//   }
-
-//   return postFn; 
-// }
-
-function logPostRider (req: any) {
-    var payload = req.payload;
-
-    //console.log("rider state1 : " + payload.RiderVotingState);
-    sanitiseRider(payload);
-    //console.log("rider state2 : " + payload.RiderVotingState);
-
-    req.log();
-
-    console.log("rider payload: " + JSON.stringify(payload, null, 4));
-    console.log("rider zip: " + payload.RiderCollectionZIP);
-}
-
-var postRider = 
-  postFunctions.createPostFn 
-  (RIDER_ROUTE, 
-    dbQueries.dbGetSubmitRiderString, 
-    getRiderPayloadAsArray, logPostRider);
-
-function logPostHelper (req: any) {
-  var payload = req.payload;
-
-  req.log();
-
-  console.log("helper payload: " + JSON.stringify(payload, null, 4));
-}
-
-var postHelper = 
-  postFunctions.createPostFn 
-  (HELPER_ROUTE, 
-    dbQueries.dbGetSubmitHelperString, 
-    getHelperPayloadAsArray, logPostHelper);
 
 function getUnmatchedDrivers (req: any, reply: any) {
   var results = {
@@ -298,65 +208,6 @@ function createMultipleResultsFn
   }
 
   return execFn;
-}
-
-// var getExecResultStrings = postFunctions.createResultStringFn(' fn called: ', ' fn call failed: '); 
-
-function getHelperPayloadAsArray (req: any, payload: any) {
-  return [      
-        payload.Name, payload.Email, payload.Capability
-        // 1, moment().toISOString()
-    ]
-}
-
-function getRiderPayloadAsArray(req: any, payload: any) {
-    var ip = getClientAddress(req);
-    return [
-        ip,
-        payload.RiderFirstName,
-        payload.RiderLastName,
-        payload.RiderEmail,
-        payload.RiderPhone,
-        payload.RiderCollectionZIP,
-        payload.RiderDropOffZIP,
-        payload.AvailableRideTimesJSON // this one should be in local time as passed along by the forms
-        ,
-        payload.TotalPartySize,
-        (payload.TwoWayTripNeeded ? 'true' : 'false'),
-		(payload.RiderIsVulnrable ? 'true' : 'false'),        
-        (payload.RiderWillNotTalkPolitics ? 'true' : 'false'),
-        (payload.PleaseStayInTouch ? 'true' : 'false'),
-        (payload.NeedWheelchair ? 'true' : 'false'),
-		payload.RiderPreferredContact.toString(),
-        payload.RiderAccommodationNotes,
-        (payload.RiderLegalConsent ? 'true' : 'false'),
-        (payload.RiderWillBeSafe ? 'true' : 'false'),
-        payload.RiderCollectionAddress,
-        payload.RiderDestinationAddress
-    ];
-}
-function getDriverPayloadAsArray(req: any, payload: any) {
-    var ip = getClientAddress(req);
-    return [
-        ip,
-        payload.DriverCollectionZIP,
-        payload.DriverCollectionRadius,
-        payload.AvailableDriveTimesJSON,
-        (payload.DriverCanLoadRiderWithWheelchair ? 'true' : 'false'),
-        payload.SeatCount,
-		payload.DriverLicenceNumber,
-        payload.DriverFirstName,
-        payload.DriverLastName,
-        payload.DriverEmail,
-        payload.DriverPhone,
-        (payload.DrivingOnBehalfOfOrganization ? 'true' : 'false'),
-        payload.DrivingOBOOrganizationName,
-        (payload.RidersCanSeeDriverDetails ? 'true' : 'false'),
-        (payload.DriverWillNotTalkPolitics ? 'true' : 'false'),
-        (payload.PleaseStayInTouch ? 'true' : 'false'),
-        payload.DriverPreferredContact.toString(),
-        (payload.DriverWillTakeCare ? 'true' : 'false')
-    ];
 }
 
 // for all two param Rider fns
@@ -544,26 +395,11 @@ function getCancelRideOfferPayloadAsArray (req: any, payload: any) {
     ]
 }
 
-function sanitiseDriver (payload: any) {
-  if (payload.DriverCollectionRadius === undefined ||
-      payload.DriverCollectionRadius === "") {
-    // console.log("santising...");
-    payload.DriverCollectionRadius = 0;
-  }    
-}
-
-function sanitiseRider (payload: any) {
-
-  // if (payload.RiderVotingState === undefined) {
-  //   payload.RiderVotingState = "MO";
-  // }
-}
-
 module.exports = {
   getAnon: getAnon,
-  postDriver: postDriver,
-  postRider: postRider,
-  postHelper: postHelper,
+  // postDriver: postDriver,
+  // postRider: postRider,
+  // postHelper: postHelper,
   getUnmatchedDrivers:  getUnmatchedDrivers,
   getUnmatchedRiders:   getUnmatchedRiders,
   cancelRideRequest:  cancelRideRequest,
@@ -591,9 +427,9 @@ module.exports = {
   
   UNMATCHED_DRIVERS_ROUTE: UNMATCHED_DRIVERS_ROUTE,
   UNMATCHED_RIDERS_ROUTE: UNMATCHED_RIDERS_ROUTE,
-  DRIVER_ROUTE: DRIVER_ROUTE,
-  RIDER_ROUTE: RIDER_ROUTE,
-  HELPER_ROUTE: HELPER_ROUTE,
+  // DRIVER_ROUTE: DRIVER_ROUTE,
+  // RIDER_ROUTE: RIDER_ROUTE,
+  // HELPER_ROUTE: HELPER_ROUTE,
 
   CANCEL_RIDE_REQUEST_ROUTE:  CANCEL_RIDE_REQUEST_ROUTE,
   CANCEL_RIDER_MATCH_ROUTE:   CANCEL_RIDER_MATCH_ROUTE,

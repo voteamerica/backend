@@ -9,8 +9,10 @@ var logOptions = require('./logInfo.js');
 var dbQueries = require('./dbQueries.js');
 var routeFns = require('./routeFunctions.js');
 var postgresQueries_1 = require("./postgresQueries");
+var PostFunctions_1 = require("./PostFunctions");
 var logging_1 = require("./logging");
 var postgresQueries = new postgresQueries_1.PostgresQueries();
+var postFunctions = new PostFunctions_1.PostFunctions();
 var loggingItem = new logging_1.logging();
 config.user = process.env.PGUSER;
 config.database = process.env.PGDATABASE;
@@ -22,6 +24,7 @@ config.port = process.env.PGPORT;
 var pool = new Pool();
 var server = new Hapi.Server();
 routeFns.setPool(pool);
+postFunctions.setPool(pool);
 var OPS_INTERVAL = 300000; // 5 mins
 var DEFAULT_PORT = process.env.PORT || 3000;
 var appPort = DEFAULT_PORT;
@@ -39,18 +42,18 @@ server.route({
 });
 server.route({
     method: 'POST',
-    path: '/' + routeFns.DRIVER_ROUTE,
-    handler: routeFns.postDriver
+    path: '/' + postFunctions.DRIVER_ROUTE,
+    handler: postFunctions.postDriver
 });
 server.route({
     method: 'POST',
-    path: '/' + routeFns.RIDER_ROUTE,
-    handler: routeFns.postRider
+    path: '/' + postFunctions.RIDER_ROUTE,
+    handler: postFunctions.postRider
 });
 server.route({
     method: 'POST',
-    path: '/' + routeFns.HELPER_ROUTE,
-    handler: routeFns.postHelper
+    path: '/' + postFunctions.HELPER_ROUTE,
+    handler: postFunctions.postHelper
 });
 server.route({
     method: 'GET',

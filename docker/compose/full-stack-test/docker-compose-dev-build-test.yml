@@ -75,9 +75,9 @@ services:
       - "8000:8000"
     links:
       - cp-pg-server
-    volumes:
-      - ../../..:/usr/src/app/backend
-      - node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/
+    # volumes:
+    #   - ../../..:/usr/src/app/backend
+    #   - node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/
 
     networks:
       vpcbr:
