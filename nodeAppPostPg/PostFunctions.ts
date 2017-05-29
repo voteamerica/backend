@@ -5,6 +5,14 @@ let postgresQueries = new PostgresQueries();
 
 const dbQueries       = require('./dbQueries.js');
 
+interface PayloadFunc {
+  (self:PostFunctions, req: any, payload: any): any[]
+}
+
+interface PayloadFunc2 {
+  (req: any, payload: any): any[]
+}
+
 class PostFunctions {
 
   readonly DRIVER_ROUTE:string  = 'driver';
@@ -70,7 +78,7 @@ class PostFunctions {
   }
 
   createPostFn (resultStringText: string, 
-    dbQueryFn: any, payloadFn: any, logFn: any) {
+    dbQueryFn: any, payloadFn: PayloadFunc2, logFn: any) {
 
     var self = this;
     
@@ -93,7 +101,7 @@ class PostFunctions {
     return postFn; 
   }
 
-  createPayloadFn (payloadFn: any) {
+  createPayloadFn (payloadFn: PayloadFunc) {
     var self = this;
 
     function callPayloadFn (req: any, payload: any) {
@@ -103,7 +111,7 @@ class PostFunctions {
     return callPayloadFn;
   }
 
-  getDriverPayloadAsArray (self:any, req: any, payload: any) {
+  getDriverPayloadAsArray (self:PostFunctions, req: any, payload: any): any[] {
     var ip = self.getClientAddress(req);
     return [
         ip,
@@ -127,14 +135,14 @@ class PostFunctions {
     ];
   }
 
-  getHelperPayloadAsArray (self:any, req: any, payload: any) {
+  getHelperPayloadAsArray (self:any, req: any, payload: any): any[] {
   return [      
         payload.Name, payload.Email, payload.Capability
         // 1, moment().toISOString()
     ]
   }
 
-  getRiderPayloadAsArray (self:any, req: any, payload: any) {
+  getRiderPayloadAsArray (self:any, req: any, payload: any): any[] {
     var ip = self.getClientAddress(req);
     return [
         ip,
@@ -168,7 +176,7 @@ class PostFunctions {
         || req.connection.remoteAddress;
   }
 
-  logPostDriver (self: any, req: any) {
+  logPostDriver (self: PostFunctions, req: any) {
     var payload = req.payload;
 
     console.log("driver radius1 : " + payload.DriverCollectionRadius);
@@ -181,7 +189,7 @@ class PostFunctions {
     req.log();
   }
 
-  logPostHelper (self: any, req: any) {
+  logPostHelper (self: PostFunctions, req: any) {
     var payload = req.payload;
 
     req.log();
@@ -189,7 +197,7 @@ class PostFunctions {
     console.log("helper payload: " + JSON.stringify(payload, null, 4));
   }
 
-  logPostRider (self: any, req: any) {
+  logPostRider (self: PostFunctions, req: any) {
     var payload = req.payload;
 
     //console.log("rider state1 : " + payload.RiderVotingState);

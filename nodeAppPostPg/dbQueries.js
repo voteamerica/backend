@@ -5,10 +5,14 @@ var DbDefsTables_1 = require("./DbDefsTables");
 var DbDefsSubmits_1 = require("./DbDefsSubmits");
 var DbDefsMatches_1 = require("./DbDefsMatches");
 var DbDefsExistsInfo_1 = require("./DbDefsExistsInfo");
+var DbDefsMatchFunctions_1 = require("./DbDefsMatchFunctions");
+var dbDefsSchema = new DbDefsTables_1.DbDefsSchema();
 var dbDefsTables = new DbDefsTables_1.DbDefsTables();
+var dbDefsViews = new DbDefsTables_1.DbDefsViews();
 var dbDefsSubmits = new DbDefsSubmits_1.DbDefsSubmits();
 var dbDefsMatches = new DbDefsMatches_1.DbDefsMatches();
 var dbDefsExistsInfo = new DbDefsExistsInfo_1.DbDefsExistsInfo();
+var dbDefsMatchFunctions = new DbDefsMatchFunctions_1.DbDefsMatchFunctions();
 module.exports = {
     dbRejectRideFunctionString: dbRejectRideFunctionString,
     dbCancelRideRequestFunctionString: dbCancelRideRequestFunctionString,
@@ -43,73 +47,73 @@ function dbSelectFromString(schema, tableOrView) {
     return 'SELECT * FROM ' + schema + '.' + tableOrView;
 }
 function dbGetInsertClause(tableName) {
-    return 'INSERT INTO ' + dbDefs.SCHEMA_NAME + '.' + tableName;
+    return 'INSERT INTO ' + dbDefsSchema.SCHEMA_NAME + '.' + tableName;
 }
 // exec fns
 function dbCancelRideRequestFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.CANCEL_RIDE_REQUEST_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.CANCEL_RIDE_REQUEST_FUNCTION);
 }
 function dbCancelRiderMatchFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.CANCEL_RIDER_MATCH_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.CANCEL_RIDER_MATCH_FUNCTION);
 }
 function dbCancelDriveOfferFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.CANCEL_DRIVE_OFFER_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.CANCEL_DRIVE_OFFER_FUNCTION);
 }
 function dbCancelDriverMatchFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.CANCEL_DRIVER_MATCH_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsMatchFunctions.CANCEL_DRIVER_MATCH_FUNCTION);
 }
 function dbAcceptDriverMatchFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.ACCEPT_DRIVER_MATCH_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsMatchFunctions.ACCEPT_DRIVER_MATCH_FUNCTION);
 }
 function dbPauseDriverMatchFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.PAUSE_DRIVER_MATCH_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsMatchFunctions.PAUSE_DRIVER_MATCH_FUNCTION);
 }
 function dbDriverExistsFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsExistsInfo.DRIVER_EXISTS_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsExistsInfo.DRIVER_EXISTS_FUNCTION);
 }
 function dbDriverInfoFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsExistsInfo.DRIVER_INFO_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsExistsInfo.DRIVER_INFO_FUNCTION);
 }
 function dbDriverProposedMatchesFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsMatches.DRIVER_PROPOSED_MATCHES_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsMatches.DRIVER_PROPOSED_MATCHES_FUNCTION);
 }
 function dbDriverConfirmedMatchesFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsMatches.DRIVER_CONFIRMED_MATCHES_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsMatches.DRIVER_CONFIRMED_MATCHES_FUNCTION);
 }
 function dbRiderExistsFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsExistsInfo.RIDER_EXISTS_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsExistsInfo.RIDER_EXISTS_FUNCTION);
 }
 function dbRiderInfoFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefsExistsInfo.RIDER_INFO_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsExistsInfo.RIDER_INFO_FUNCTION);
 }
 function dbRiderConfirmedMatchFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.RIDER_CONFIRMED_MATCH_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.RIDER_CONFIRMED_MATCH_FUNCTION);
 }
 function dbRejectRideFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.REJECT_RIDE_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.REJECT_RIDE_FUNCTION);
 }
 function dbConfirmRideFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.CONFIRM_RIDE_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.CONFIRM_RIDE_FUNCTION);
 }
 function dbCancelRideOfferFunctionString() {
-    return dbExecuteFunctionString(dbDefs.SCHEMA_NAME, dbDefs.CANCEL_RIDE_OFFER_FUNCTION);
+    return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.CANCEL_RIDE_OFFER_FUNCTION);
 }
 // select from table/views
 function dbGetMatchesQueryString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsTables.MATCH_TABLE);
+    return dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsTables.MATCH_TABLE);
 }
 function dbGetQueryString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsTables.DRIVER_TABLE);
+    return dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsTables.DRIVER_TABLE);
 }
 function dbGetUnmatchedDriversQueryString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.UNMATCHED_DRIVERS_VIEW);
+    return dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsViews.UNMATCHED_DRIVERS_VIEW);
 }
 function dbGetUnmatchedRidersQueryString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefs.UNMATCHED_RIDERS_VIEW);
+    return dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsViews.UNMATCHED_RIDERS_VIEW);
 }
 // inserts // , "DriverHasInsurance" , $17
 function dbGetSubmitDriverString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsSubmits.SUBMIT_DRIVER_FN)
+    return dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsSubmits.SUBMIT_DRIVER_FN)
         + ' ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '
         + '        $13, $14, $15, $16, $17, $18 )';
     /*
@@ -134,7 +138,7 @@ function dbGetSubmitDriverString() {
     */
 }
 function dbGetSubmitRiderString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsSubmits.SUBMIT_RIDER_FN)
+    return dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsSubmits.SUBMIT_RIDER_FN)
         + ' ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '
         + '        $13, $14, $15, $16, $17, $18, $19, $20 )'; /* TODO add $21 for new a_RiderCollectionStreetNumber when form is ready */
     /*
@@ -162,7 +166,7 @@ function dbGetSubmitRiderString() {
     */
 }
 function dbGetSubmitHelperString() {
-    return dbSelectFromString(dbDefs.SCHEMA_NAME, dbDefsSubmits.SUBMIT_HELPER_FN)
+    return dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsSubmits.SUBMIT_HELPER_FN)
         + ' ($1, $2, $3) ';
     /*
     a_helpername character varying,

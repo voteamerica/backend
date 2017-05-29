@@ -10,9 +10,11 @@ var dbQueries = require('./dbQueries.js');
 var routeFns = require('./routeFunctions.js');
 var postgresQueries_1 = require("./postgresQueries");
 var PostFunctions_1 = require("./PostFunctions");
+var RouteNames_1 = require("./RouteNames");
 var logging_1 = require("./logging");
 var postgresQueries = new postgresQueries_1.PostgresQueries();
 var postFunctions = new PostFunctions_1.PostFunctions();
+var routeNames = new RouteNames_1.RouteNames();
 var loggingItem = new logging_1.logging();
 config.user = process.env.PGUSER;
 config.database = process.env.PGDATABASE;
@@ -77,12 +79,12 @@ server.route({
 });
 server.route({
     method: 'GET',
-    path: '/' + routeFns.DRIVER_PROPOSED_MATCHES_ROUTE,
+    path: '/' + routeNames.DRIVER_PROPOSED_MATCHES_ROUTE,
     handler: routeFns.driverProposedMatches
 });
 server.route({
     method: 'GET',
-    path: '/' + routeFns.DRIVER_CONFIRMED_MATCHES_ROUTE,
+    path: '/' + routeNames.DRIVER_CONFIRMED_MATCHES_ROUTE,
     handler: routeFns.driverConfirmedMatches
 });
 server.route({

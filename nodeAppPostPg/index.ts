@@ -14,10 +14,12 @@ const routeFns    = require('./routeFunctions.js');
 
 import { PostgresQueries }  from "./postgresQueries";
 import { PostFunctions } from "./PostFunctions";
+import { RouteNames} from "./RouteNames";
 import { logging }          from "./logging";
 
 let postgresQueries = new PostgresQueries();
 let postFunctions = new PostFunctions();
+let routeNames = new RouteNames();
 let loggingItem        = new logging();
 
 config.user       = process.env.PGUSER;
@@ -98,13 +100,13 @@ server.route({
 
 server.route({
   method: 'GET',
-  path: '/' + routeFns.DRIVER_PROPOSED_MATCHES_ROUTE,
+  path: '/' + routeNames.DRIVER_PROPOSED_MATCHES_ROUTE,
   handler: routeFns.driverProposedMatches
 });
 
 server.route({
   method: 'GET',
-  path: '/' + routeFns.DRIVER_CONFIRMED_MATCHES_ROUTE,
+  path: '/' + routeNames.DRIVER_CONFIRMED_MATCHES_ROUTE,
   handler: routeFns.driverConfirmedMatches
 });
 
