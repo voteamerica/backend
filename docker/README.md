@@ -52,10 +52,13 @@ NOTES: app will not execute correctly in the standard browser, see the vnc steps
 #### 2) use docker-compose to create local system
 `docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up`
 #### 3) test environment
-in a new terminal 
-`docker ps | grep nigh`, then `docker exec -it ctr-id /bin/bash` into carpool machine
+in a new terminal, run
+`docker ps | grep nigh`. Look for the 12 alphanumeric id then, type `docker exec -it ctr-id /bin/bash`, replacing ctr-id with the first three numbers/letters of the id, into carpool machine
+
 #### 5) run nightwatch with script
+Use this script with no parameter for default tests, or with a parameter for specific test group
 `. ./run-tests.sh`
+`. ./run-tests.sh match2`
 
 #### ) close tidily when done
 ctrl-c twice to exit, then
@@ -77,10 +80,6 @@ Specific group of tests
 
 `. ./specific-machine-test.sh cp-nodejs $(date +%s)`
  
-`docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg BRANCH_NAME=docker-test cp-pg-client`
-
-`docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=update-ts cp-nodejs`
-
 #### useful suggestions for managing tests structure
 https://github.com/nightwatchjs/nightwatch/pull/37
 
