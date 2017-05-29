@@ -51,9 +51,17 @@ NOTES: app will not execute correctly in the standard browser, see the vnc steps
 
 #### 2) use docker-compose to create local system
 `docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up`
-#### 3) `docker ps`, then `exec` into carpool machine
-#### 4) go to nightwatch folder
-#### 5) run nightwatch
+#### 3) test environment
+in a new terminal 
+`docker ps | grep nigh`, then `docker exec -it ctr-id /bin/bash` into carpool machine
+#### 5) run nightwatch with script
+`. ./run-tests.sh`
+
+#### ) close tidily when done
+ctrl-c twice to exit, then
+`docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml down`
+
+
 All tests
 
 `nightwatch`

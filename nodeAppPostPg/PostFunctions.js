@@ -1,13 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var postgresQueries_1 = require("./postgresQueries");
+var RouteNames_1 = require("./RouteNames");
+var routeNamesAddDriverRider = new RouteNames_1.RouteNamesAddDriverRider();
 var postgresQueries = new postgresQueries_1.PostgresQueries();
 var dbQueries = require('./dbQueries.js');
 var PostFunctions = (function () {
     function PostFunctions() {
-        this.DRIVER_ROUTE = 'driver';
-        this.RIDER_ROUTE = 'rider';
-        this.HELPER_ROUTE = 'helper';
         this.rfPool = undefined;
         this.getExecResultStrings = undefined;
         this.postRider = undefined;
@@ -18,11 +17,11 @@ var PostFunctions = (function () {
     PostFunctions.prototype.setPool = function (pool) {
         this.rfPool = pool;
         this.postDriver =
-            this.createPostFn(this.DRIVER_ROUTE, dbQueries.dbGetSubmitDriverString, this.createPayloadFn(this.getDriverPayloadAsArray), this.logPostDriver);
+            this.createPostFn(routeNamesAddDriverRider.DRIVER_ROUTE, dbQueries.dbGetSubmitDriverString, this.createPayloadFn(this.getDriverPayloadAsArray), this.logPostDriver);
         this.postHelper =
-            this.createPostFn(this.HELPER_ROUTE, dbQueries.dbGetSubmitHelperString, this.createPayloadFn(this.getHelperPayloadAsArray), this.logPostHelper);
+            this.createPostFn(routeNamesAddDriverRider.HELPER_ROUTE, dbQueries.dbGetSubmitHelperString, this.createPayloadFn(this.getHelperPayloadAsArray), this.logPostHelper);
         this.postRider =
-            this.createPostFn(this.RIDER_ROUTE, dbQueries.dbGetSubmitRiderString, this.createPayloadFn(this.getRiderPayloadAsArray), this.logPostRider);
+            this.createPostFn(routeNamesAddDriverRider.RIDER_ROUTE, dbQueries.dbGetSubmitRiderString, this.createPayloadFn(this.getRiderPayloadAsArray), this.logPostRider);
     };
     PostFunctions.prototype.logPost = function (req) {
         req.log();

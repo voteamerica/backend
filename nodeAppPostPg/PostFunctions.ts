@@ -1,6 +1,9 @@
 export { PostFunctions };
 
 import { PostgresQueries }  from "./postgresQueries";
+import { RouteNamesAddDriverRider } from "./RouteNames";
+
+let routeNamesAddDriverRider = new RouteNamesAddDriverRider();
 let postgresQueries = new PostgresQueries();
 
 const dbQueries       = require('./dbQueries.js');
@@ -15,10 +18,6 @@ interface PayloadFunc2 {
 
 class PostFunctions {
 
-  readonly DRIVER_ROUTE:string  = 'driver';
-  readonly RIDER_ROUTE:string   = 'rider';
-  readonly HELPER_ROUTE:string  = 'helper';
-
   private rfPool: any = undefined;
 
   getExecResultStrings: any = undefined;  
@@ -32,21 +31,21 @@ class PostFunctions {
 
     this.postDriver = 
       this.createPostFn 
-      (this.DRIVER_ROUTE, 
+      (routeNamesAddDriverRider.DRIVER_ROUTE, 
         dbQueries.dbGetSubmitDriverString, 
         this.createPayloadFn(this.getDriverPayloadAsArray), 
         this.logPostDriver);
 
     this.postHelper = 
       this.createPostFn 
-      (this.HELPER_ROUTE, 
+      (routeNamesAddDriverRider.HELPER_ROUTE, 
         dbQueries.dbGetSubmitHelperString, 
         this.createPayloadFn(this.getHelperPayloadAsArray), 
         this.logPostHelper);
 
     this.postRider = 
       this.createPostFn 
-      (this.RIDER_ROUTE, 
+      (routeNamesAddDriverRider.RIDER_ROUTE, 
         dbQueries.dbGetSubmitRiderString, 
         this.createPayloadFn(this.getRiderPayloadAsArray), 
         this.logPostRider);

@@ -10,34 +10,6 @@ let postFunctions = new PostFunctions();
 
 const dbQueries       = require('./dbQueries.js');
 
-const UNMATCHED_DRIVERS_ROUTE = 'unmatched-drivers';
-const UNMATCHED_RIDERS_ROUTE  = 'unmatched-riders';
-const CANCEL_RIDE_REQUEST_ROUTE = 'cancel-ride-request';
-const CANCEL_RIDER_MATCH_ROUTE  = 'cancel-rider-match';
-const CANCEL_DRIVE_OFFER_ROUTE  = 'cancel-drive-offer';
-const CANCEL_DRIVER_MATCH_ROUTE = 'cancel-driver-match';
-
-const ACCEPT_DRIVER_MATCH_ROUTE = 'accept-driver-match';
-
-const PAUSE_DRIVER_MATCH_ROUTE  = 'pause-driver-match';
-
-
-const DRIVER_EXISTS_ROUTE = 'driver-exists';
-const DRIVER_INFO_ROUTE ='driver-info';
-
-// const DRIVER_PROPOSED_MATCHES_ROUTE = 'driver-proposed-matches';
-// const DRIVER_CONFIRMED_MATCHES_ROUTE = 'driver-confirmed-matches';
-
-const RIDER_EXISTS_ROUTE = 'rider-exists';
-const RIDER_INFO_ROUTE = 'rider-info';
-
-const RIDER_CONFIRMED_MATCH_ROUTE = 'rider-confirmed-match';
-
-
-const DELETE_DRIVER_ROUTE           = 'driver';
-const PUT_RIDER_ROUTE               = 'rider';
-const PUT_DRIVER_ROUTE              = 'driver';
-
 var rfPool: any = undefined;
 
 // NOTE: module.exports at bottom of file
@@ -397,9 +369,7 @@ function getCancelRideOfferPayloadAsArray (req: any, payload: any) {
 
 module.exports = {
   getAnon: getAnon,
-  // postDriver: postDriver,
-  // postRider: postRider,
-  // postHelper: postHelper,
+
   getUnmatchedDrivers:  getUnmatchedDrivers,
   getUnmatchedRiders:   getUnmatchedRiders,
   cancelRideRequest:  cancelRideRequest,
@@ -425,33 +395,5 @@ module.exports = {
   rejectRide: rejectRide,
   confirmRide: confirmRide,
   
-  UNMATCHED_DRIVERS_ROUTE: UNMATCHED_DRIVERS_ROUTE,
-  UNMATCHED_RIDERS_ROUTE: UNMATCHED_RIDERS_ROUTE,
-  // DRIVER_ROUTE: DRIVER_ROUTE,
-  // RIDER_ROUTE: RIDER_ROUTE,
-  // HELPER_ROUTE: HELPER_ROUTE,
-
-  CANCEL_RIDE_REQUEST_ROUTE:  CANCEL_RIDE_REQUEST_ROUTE,
-  CANCEL_RIDER_MATCH_ROUTE:   CANCEL_RIDER_MATCH_ROUTE,
-  CANCEL_DRIVE_OFFER_ROUTE:   CANCEL_DRIVE_OFFER_ROUTE,
-  CANCEL_DRIVER_MATCH_ROUTE:  CANCEL_DRIVER_MATCH_ROUTE,
-
-  ACCEPT_DRIVER_MATCH_ROUTE:  ACCEPT_DRIVER_MATCH_ROUTE,
-  PAUSE_DRIVER_MATCH_ROUTE:   PAUSE_DRIVER_MATCH_ROUTE,
-
-  DRIVER_EXISTS_ROUTE: DRIVER_EXISTS_ROUTE,
-  DRIVER_INFO_ROUTE: DRIVER_INFO_ROUTE,
-
-  // DRIVER_PROPOSED_MATCHES_ROUTE: DRIVER_PROPOSED_MATCHES_ROUTE,
-  // DRIVER_CONFIRMED_MATCHES_ROUTE: DRIVER_CONFIRMED_MATCHES_ROUTE,
-
-  RIDER_EXISTS_ROUTE: RIDER_EXISTS_ROUTE,
-  RIDER_INFO_ROUTE: RIDER_INFO_ROUTE,
-
-  RIDER_CONFIRMED_MATCH_ROUTE: RIDER_CONFIRMED_MATCH_ROUTE,
-
-  DELETE_DRIVER_ROUTE: DELETE_DRIVER_ROUTE,
-  PUT_RIDER_ROUTE: PUT_RIDER_ROUTE,
-  PUT_DRIVER_ROUTE: PUT_DRIVER_ROUTE,
   setPool: setPool
 }
