@@ -38,22 +38,9 @@ RUN git merge origin/$BRANCH_NAME
 
 RUN cd /usr/src/app/backend/nodeAppPostPg
 
-RUN npm install
+RUN npm install -g nightwatch
 
-# can't get these two lines going yet
-# RUN . ./scripts/expo.sh
-
-ENV PORT=8000 PGUSER=carpool_web PGDATABASE=carpoolvote
-# ENV PGHOST=$CP_PG_SVR_PORT_5432_TCP_ADDR PGPASSWORD=$CP_PG_SVR_ENV_POSTGRES_PASSWORD 
-
-COPY ./expo-start.sh /
-COPY ./expo-bash.sh /
-
-# RUN npm install -g nightwatch
-
-# ENTRYPOINT ["/expo-start.sh"]
-CMD ["/expo-start.sh"]
-
+ENTRYPOINT ["/bin/bash"]
 
 # CMD ["npm start"]
 

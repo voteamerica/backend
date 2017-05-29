@@ -9,7 +9,7 @@ class logging implements CustomLog {
 
   logReqResp(server: any, pool: any): any {
 
-    server.on('request', (request, event, tags) => {
+    server.on('request', (request: any, event: any, tags: any) => {
 
       // Include the Requestor's IP Address on every log
       if( !event.remoteAddress ) {
@@ -24,7 +24,7 @@ class logging implements CustomLog {
       console.log('server req: %j', event) ;
     });
 
-    server.on('response', (request) => {  
+    server.on('response', (request: any) => {  
       console.log(
           "server resp: " 
         + request.info.remoteAddress 
@@ -33,7 +33,7 @@ class logging implements CustomLog {
         + ' --> ' + request.response.statusCode);
     });
 
-    pool.on('error', (err, client) => {
+    pool.on('error', (err: any, client: any) => {
       if (err) {
         console.error("db err: " + err);
       } 

@@ -1,29 +1,12 @@
 version: '2'
 
 services:
-  cp-test:
-    image: selenium/standalone-chrome
-
-    # this images supports viewing test browser using a vnc viewer
-    # image: selenium/standalone-chrome-debug
-    # image: selenium/standalone-firefox
-
-    ports: 
-      - "5900:5900"
-
-    depends_on:
-      - cp-nodejs
-      - cp-pg-server
-    networks:
-      vpcbr:
-        ipv4_address: 10.5.0.3 # may not be needed 
-    
   cp-front-end:
     build:
       context: ../../jekyll/
       args:
         REPO: https://github.com/voteamerica/voteamerica.github.io
-        BRANCH_NAME: master        
+        BRANCH_NAME: master
     image: gc-jekyll
 
     ports: 
@@ -32,16 +15,22 @@ services:
       - cp-nodejs
       - cp-pg-server
 
+    # https://jekyllrb.com/docs/usage/
     # command: jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml
     # NOTE: .yml file needs to contain IP addresses for this network (not the usual localhost)
-    command: jekyll serve -H 0.0.0.0 --watch --config _config-local.yml 
+    # command: jekyll serve -H 0.0.0.0 --watch --config _config-local.yml 
+    command: jekyll serve -H 0.0.0.0 --watch --config /_config-local-host.yml
+    # auto test
+    # command: jekyll serve -H 0.0.0.0 --config _config-local.yml --watch site.api="http://10.4.0.5:8000" site.cp_site="http://10.4.0.4:4000"
+    # local dev
+    #command: jekyll serve -H 0.0.0.0 --watch --config --api "http://localhost:8000" --cp_site "http://localhost:4000"
 
     volumes:
       - ../../../../voteUSfrontend:/usr/src/app/frontend
 
     networks:
       vpcbr:
-        ipv4_address: 10.5.0.4 # probably not needed, but keeps things in sync 
+        ipv4_address: 10.4.0.4 # probably not needed, but keeps things in sync 
 
   cp-nodejs:
     build:
@@ -54,6 +43,8 @@ services:
     depends_on:
     - cp-pg-server
     # command: bash
+    # command: /expo-start.sh
+    # command: /expo-bash.sh
     stdin_open: true
     tty: true
     environment:
@@ -64,9 +55,11 @@ services:
       # also patch run commands to pass PGHOST/pwd as env var command line params
 
       - PGPASSWORD=pwd
-      - PGHOST=10.5.0.6
+      - PGHOST=10.4.0.6
     ports:
       - "8000:8000"
+      - "5858:5858"
+      - "8080:8080"
     links:
       - cp-pg-server
     volumes:
@@ -75,7 +68,7 @@ services:
 
     networks:
       vpcbr:
-        ipv4_address: 10.5.0.5
+        ipv4_address: 10.4.0.5
 
   cp-pg-server:
     build:
@@ -91,7 +84,7 @@ services:
 
     networks:
       vpcbr:
-        ipv4_address: 10.5.0.6
+        ipv4_address: 10.4.0.6
 
   cp-pg-client:
     build:
@@ -111,13 +104,13 @@ services:
       # - PGUSER=carpool_web
       - PGDATABASE=carpoolvote
       - PGPASSWORD=pwd
-      - PGHOST=10.5.0.6
+      - PGHOST=10.4.0.6
     volumes:
       - ../../..:/usr/src/app/backend
 
     networks:
       vpcbr:
-        ipv4_address: 10.5.0.7
+        ipv4_address: 10.4.0.7
 
 # this supports networks with static ip addresses
 # http://stackoverflow.com/questions/39493490/provide-static-ip-to-docker-containers-via-docker-compose
@@ -126,8 +119,8 @@ networks:
     driver: bridge
     ipam:
      config:
-       - subnet: 10.5.0.0/16
-         gateway: 10.5.0.1
+       - subnet: 10.4.0.0/16
+         gateway: 10.4.0.1
 
 volumes:
   node_app_node_modules:

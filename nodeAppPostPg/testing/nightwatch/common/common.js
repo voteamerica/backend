@@ -3,6 +3,8 @@ module.exports = {
 
   'dates' : ['2017-08-09'],
 
+  'riderSelfServicePageUrl' : "",
+
   'finish' : 
     function finish (client) {
       if (client !== undefined && client !== null) {
@@ -92,12 +94,17 @@ module.exports = {
         this.currentClient = client;
       }
 
+      console.log("addRider");
+
+      var self = this;
+
       var client = this.currentClient;
       var dates = this.dates;
       var newState = client
         .url('http://10.5.0.4:4000/#need-ride')
-        .waitForElementVisible('body', 3000)
-        .assert.containsText('legend', 'Your trip')
+        // .waitForElementVisible('body', 3000)
+        .waitForElementVisible('form#need-ride', 3000)
+        // .assert.containsText('legend', 'Your trip')
         .assert.cssClassPresent('#RiderAvailableTimes', 'available-times')
 
         // set date/time
@@ -141,20 +148,31 @@ module.exports = {
         .saveScreenshot('./reports/rider-submitted.png')
 
         .waitForElementVisible('h1#thanks-header', 5000)
-        .assert.containsText('h1#thanks-header', 'Congratulations');
+        .assert.containsText('h1#thanks-header', 'Congratulations')
 
+        .waitForElementVisible('.self-service-url', 1000)
+        .assert.containsText('.self-service-url', 'self-service portal')
+
+        .getAttribute(".self-service-url", "href", function(result) {
+          console.log("rider self service url: ", result);
+          // this.assert.equal(typeof result, "object");
+          // this.assert.equal(result.status, 0);
+          // this.assert.equal(result.value, "#home");
+          self.riderSelfServicePageUrl = result.value;
+
+          console.log("rider url: ", self.riderSelfServicePageUrl);
+        });
 
         // .assert.containsText('div.with-errors ul li', 'Please fill in')
         // .assert.valueContains('div.with-errors ul li', 'Please')
 
-      // return newState;
       return this;
     },
 
   // this test is called after first rider, then driver have been added - it's assumed 
   // app is at thanks driver page
-  'match' : 
-    function match (client) {      
+  'viewProposedMatch' : 
+    function viewProposedMatch (client) {      
       if (client !== undefined && client !== null) {
         this.currentClient = client;
       }
@@ -190,29 +208,104 @@ module.exports = {
         .assert.containsText('#driverProposedMatches > ul li.list_button button', 'Accept')
 
         .waitForElementVisible('#driverProposedMatches > ul li.list_button button', 1000)
-        // accept match
-        .click('#driverProposedMatches > ul li.list_button button')
-
-        .waitForElementNotPresent('#driverProposedMatches > ul li.list_button button', 3000)
-        .waitForElementVisible('#driverConfirmedMatches > ul li.list_button button', 3000)
-
-        .saveScreenshot('./reports/match-self-service-accept-match.png')
-
-        .assert.containsText('#driverConfirmedMatches > ul li', 'UUID_driver')
-        .assert.containsText('#driverConfirmedMatches > ul li.list_button button', 'Cancel')
-
-        // cancel match
-        .click('#driverConfirmedMatches > ul li.list_button button')
-
-        // alert button appears
-        // https://stackoverflow.com/questions/35287273/how-to-click-on-alert-box-ok-button-using-nightwatch-js
-        .pause(2000)
-        .acceptAlert()
-
-        .saveScreenshot('./reports/match-self-service-cancel-match.png')
-        
-        .waitForElementNotPresent('#driverConfirmedMatches > ul li.list_button button', 3000)
 
       return this;
-    }
+    },
+
+    // this test is called after first rider, then driver have been added - it's assumed 
+    // app is at driver self service page, with a proposed match visible
+    'acceptMatch' : 
+      function acceptMatch (client) {      
+        if (client !== undefined && client !== null) {
+          this.currentClient = client;
+        }
+
+        var client = this.currentClient;
+        var dates = this.dates;
+
+        var newState = client
+          .click('#driverProposedMatches > ul li.list_button button')
+
+          .waitForElementNotPresent('#driverProposedMatches > ul li.list_button button', 3000)
+          .waitForElementVisible('#driverConfirmedMatches > ul li.list_button button', 3000)
+
+          .saveScreenshot('./reports/match-self-service-accept-match.png')
+
+          .assert.containsText('#driverConfirmedMatches > ul li', 'UUID_driver')
+          .assert.containsText('#driverConfirmedMatches > ul li.list_button button', 'Cancel')
+
+        return this;
+      },
+
+    // this test is called after first rider, then driver have been added - it's assumed 
+    // app is at driver self service page, with an accepted match visible
+    'driverCancelMatch' : 
+      function driverCancelMatch (client) {      
+        if (client !== undefined && client !== null) {
+          this.currentClient = client;
+        }
+
+        var client = this.currentClient;
+        var dates = this.dates;
+
+        var newState = client
+          .click('#driverConfirmedMatches > ul li.list_button button')
+
+          // alert button appears
+          // https://stackoverflow.com/questions/35287273/how-to-click-on-alert-box-ok-button-using-nightwatch-js
+          .pause(2000)
+          .acceptAlert()
+
+          .saveScreenshot('./reports/match-self-service-cancel-match.png')
+          
+          .waitForElementNotPresent('#driverConfirmedMatches > ul li.list_button button', 3000)
+
+        return this;
+      },
+
+    // this test is called after first rider, then driver have been added - it's assumed 
+    // app is at rider self service page
+    'viewRiderSelfService' : 
+      function viewRiderSelfService (client) {
+        if (client !== undefined && client !== null) {
+          this.currentClient = client;
+        }
+
+        var self = this;
+
+        var client = this.currentClient;
+        var dates = this.dates;
+        
+        console.log("rider info url 1: ", this.riderSelfServicePageUrl);
+        // console.log("rider info url: ", riderUrl);
+
+        var newState = client
+          .perform(function (client, done) {
+
+            console.log("rider info url 2: ", self.riderSelfServicePageUrl);
+
+            client
+              .url(self.riderSelfServicePageUrl)
+              // .url(riderUrl)
+
+              .pause(3000) // page takes a while to settle and hide id field
+
+              .saveScreenshot('./reports/rider-self-service.png')
+
+              .waitForElementVisible('#inputPhoneNumber', 3000)
+              .setValue('input[id="inputPhoneNumber"]', 'test')
+
+              .click('.button')
+
+              .waitForElementVisible('#riderInfo > h3.self-service-heading', 3000)
+
+              .saveScreenshot('./reports/rider-self-service-logged-in.png')
+
+              .assert.containsText('#riderInfo > h3.self-service-heading', 'Rider Info');
+
+            done();
+          })
+
+        return this;
+      }
 };

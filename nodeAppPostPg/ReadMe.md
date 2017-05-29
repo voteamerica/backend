@@ -67,3 +67,8 @@ pm2 stop all // only one app, so this is ok - better to use app id, though
 
 monitor app 
 pm2 list
+
+### typescript
+#### https://www.typescriptlang.org/#download-links 
+#### https://stackoverflow.com/questions/31173738/typescript-getting-error-ts2304-cannot-find-name-require
+#### https://blogs.msdn.microsoft.com/typescript/2016/06/15/the-future-of-declaration-files/
