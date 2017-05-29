@@ -3,7 +3,7 @@
 // const moment          = require('moment');
 // const postgresQueries = require('./postgresQueries.js');
 import { PostgresQueries }  from "./postgresQueries";
-import { PostFunctions }  from "./PostFunctions";
+import { PostFunctions, PayloadFunc2 }  from "./PostFunctions";
 
 let postgresQueries = new PostgresQueries();
 let postFunctions = new PostFunctions();
@@ -129,17 +129,17 @@ var riderConfirmedMatch = createConfirmCancelFn
     getTwoRiderCancelConfirmPayloadAsArray
   );
 
-var cancelRideOffer = createConfirmCancelFn 
-  ('cancel ride offer: ', "delete payload: ", dbQueries.dbCancelRideOfferFunctionString, getCancelRideOfferPayloadAsArray);
+// var cancelRideOffer = createConfirmCancelFn 
+//   ('cancel ride offer: ', "delete payload: ", dbQueries.dbCancelRideOfferFunctionString, getCancelRideOfferPayloadAsArray);
 
-var rejectRide = createConfirmCancelFn 
-  ('reject ride: ', "reject payload: ", dbQueries.dbRejectRideFunctionString, getRejectRidePayloadAsArray);
+// var rejectRide = createConfirmCancelFn 
+//   ('reject ride: ', "reject payload: ", dbQueries.dbRejectRideFunctionString, getRejectRidePayloadAsArray);
 
-var confirmRide = createConfirmCancelFn 
-  ('confirm ride: ', "confirm payload: ", dbQueries.dbConfirmRideFunctionString, 'getConfirmRidePayloadAsArray');
+// var confirmRide = createConfirmCancelFn 
+//   ('confirm ride: ', "confirm payload: ", dbQueries.dbConfirmRideFunctionString, getConfirmRidePayloadAsArray);
 
 function createConfirmCancelFn 
-  (resultStringText: string, consoleText: string, dbQueryFn: any, payloadFn: any) {
+  (resultStringText: string, consoleText: string, dbQueryFn: any, payloadFn: PayloadFunc2) {
   
   function execFn (req: any, reply: any) {
       // var payload = req.payload;
@@ -391,9 +391,9 @@ module.exports = {
 
   riderConfirmedMatch: riderConfirmedMatch,
 
-  cancelRideOffer: cancelRideOffer,
-  rejectRide: rejectRide,
-  confirmRide: confirmRide,
+  // cancelRideOffer: cancelRideOffer,
+  // rejectRide: rejectRide,
+  // confirmRide: confirmRide,
   
   setPool: setPool
 }

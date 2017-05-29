@@ -16,6 +16,8 @@ export interface DbQueries {
 
 export { PostgresQueries };
 
+import { PayloadFunc2 } from "./PostFunctions"
+
 class PostgresQueries implements DbQueries {
 
   dbGetData(pool, fnGetString, reply, results) {
@@ -195,7 +197,9 @@ class PostgresQueries implements DbQueries {
     });
   }
 
-	dbExecuteCarpoolAPIFunction_Insert (payload, pool, fnExecuteFunctionString, fnPayloadArray: any, req, reply, results) {
+	dbExecuteCarpoolAPIFunction_Insert (
+    payload, pool, fnExecuteFunctionString, 
+    fnPayloadArray: PayloadFunc2, req, reply, results) {
         var queryString = fnExecuteFunctionString();
         console.log("executeFunctionString Insert: " + queryString);
         pool.query(queryString, fnPayloadArray(req, payload))

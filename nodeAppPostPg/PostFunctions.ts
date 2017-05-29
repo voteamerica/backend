@@ -1,4 +1,4 @@
-export { PostFunctions };
+export { PostFunctions, PayloadFunc2 };
 
 import { PostgresQueries }  from "./postgresQueries";
 import { RouteNamesAddDriverRider } from "./RouteNames";
@@ -14,6 +14,14 @@ interface PayloadFunc {
 
 interface PayloadFunc2 {
   (req: any, payload: any): any[]
+}
+
+interface LogPostFunc {
+  (self: PostFunctions, req: any)
+}
+
+interface GetSubmitStringFunc {
+  (): string
 }
 
 class PostFunctions {
@@ -77,8 +85,10 @@ class PostFunctions {
   }
 
   createPostFn (resultStringText: string, 
-    dbQueryFn: any, payloadFn: PayloadFunc2, logFn: any) {
-
+    dbQueryFn: GetSubmitStringFunc, 
+    payloadFn: PayloadFunc2, 
+    logFn: LogPostFunc) {
+      
     var self = this;
     
     function postFn (req: any, reply: any) {
@@ -110,7 +120,7 @@ class PostFunctions {
     return callPayloadFn;
   }
 
-  getDriverPayloadAsArray (self:PostFunctions, req: any, payload: any): any[] {
+  getDriverPayloadAsArray (self: PostFunctions, req: any, payload: any): any[] {
     var ip = self.getClientAddress(req);
     return [
         ip,
@@ -134,14 +144,14 @@ class PostFunctions {
     ];
   }
 
-  getHelperPayloadAsArray (self:any, req: any, payload: any): any[] {
+  getHelperPayloadAsArray (self: PostFunctions, req: any, payload: any): any[] {
   return [      
         payload.Name, payload.Email, payload.Capability
         // 1, moment().toISOString()
     ]
   }
 
-  getRiderPayloadAsArray (self:any, req: any, payload: any): any[] {
+  getRiderPayloadAsArray (self: PostFunctions, req: any, payload: any): any[] {
     var ip = self.getClientAddress(req);
     return [
         ip,

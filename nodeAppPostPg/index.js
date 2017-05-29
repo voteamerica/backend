@@ -23,7 +23,6 @@ var routeNamesMatch = new RouteNames_2.RouteNamesMatch();
 var routeNamesSelfServiceInfoExists = new RouteNames_3.RouteNamesSelfServiceInfoExists();
 var routeNamesCancel = new RouteNames_4.RouteNamesCancel();
 var routeNamesUnmatched = new RouteNames_4.RouteNamesUnmatched();
-var routeNamesChange = new RouteNames_4.RouteNamesChange();
 var loggingItem = new logging_1.logging();
 config.user = process.env.PGUSER;
 config.database = process.env.PGDATABASE;
@@ -178,21 +177,21 @@ server.route({
     path: '/' + routeNamesMatch.PAUSE_DRIVER_MATCH_ROUTE,
     handler: routeFns.pauseDriverMatch
 });
-server.route({
-    method: 'DELETE',
-    path: '/' + routeNamesChange.DELETE_DRIVER_ROUTE,
-    handler: routeFns.cancelRideOffer
-});
-server.route({
-    method: 'PUT',
-    path: '/' + routeNamesChange.PUT_RIDER_ROUTE,
-    handler: routeFns.rejectRide
-});
-server.route({
-    method: 'PUT',
-    path: '/' + routeNamesChange.PUT_DRIVER_ROUTE,
-    handler: routeFns.confirmRide
-});
+// server.route({
+//   method: 'DELETE',
+//   path: '/' + routeNamesChange.DELETE_DRIVER_ROUTE,
+//   handler: routeFns.cancelRideOffer
+// });
+// server.route({
+//   method: 'PUT',
+//   path: '/' + routeNamesChange.PUT_RIDER_ROUTE,
+//   handler: routeFns.rejectRide
+// });
+// server.route({
+//   method: 'PUT',
+//   path: '/' + routeNamesChange.PUT_DRIVER_ROUTE,
+//   handler: routeFns.confirmRide
+// });
 server.register({
     register: Good,
     options: logOptions

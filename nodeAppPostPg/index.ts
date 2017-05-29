@@ -15,9 +15,11 @@ const routeFns    = require('./routeFunctions.js');
 import { PostgresQueries }  from "./postgresQueries";
 import { PostFunctions } from "./PostFunctions";
 import { RouteNamesAddDriverRider } from "./RouteNames";
-import { RouteNamesSelfService, RouteNamesMatch } from "./RouteNames";
+import { RouteNamesSelfService, RouteNamesMatch
+  // , RouteNamesChange
+  } from "./RouteNames";
 import { RouteNamesSelfServiceInfoExists } from "./RouteNames";
-import { RouteNamesCancel, RouteNamesUnmatched, RouteNamesChange } from "./RouteNames";
+import { RouteNamesCancel, RouteNamesUnmatched } from "./RouteNames";
 import { logging }          from "./logging";
 
 let postgresQueries = new PostgresQueries();
@@ -28,7 +30,6 @@ let routeNamesMatch = new RouteNamesMatch();
 let routeNamesSelfServiceInfoExists = new RouteNamesSelfServiceInfoExists();
 let routeNamesCancel = new RouteNamesCancel();
 let routeNamesUnmatched = new RouteNamesUnmatched();
-let routeNamesChange = new RouteNamesChange();
 let loggingItem        = new logging();
 
 config.user       = process.env.PGUSER;
@@ -221,23 +222,23 @@ server.route({
   handler: routeFns.pauseDriverMatch
 });
 
-server.route({
-  method: 'DELETE',
-  path: '/' + routeNamesChange.DELETE_DRIVER_ROUTE,
-  handler: routeFns.cancelRideOffer
-});
+// server.route({
+//   method: 'DELETE',
+//   path: '/' + routeNamesChange.DELETE_DRIVER_ROUTE,
+//   handler: routeFns.cancelRideOffer
+// });
 
-server.route({
-  method: 'PUT',
-  path: '/' + routeNamesChange.PUT_RIDER_ROUTE,
-  handler: routeFns.rejectRide
-});
+// server.route({
+//   method: 'PUT',
+//   path: '/' + routeNamesChange.PUT_RIDER_ROUTE,
+//   handler: routeFns.rejectRide
+// });
 
-server.route({
-  method: 'PUT',
-  path: '/' + routeNamesChange.PUT_DRIVER_ROUTE,
-  handler: routeFns.confirmRide
-});
+// server.route({
+//   method: 'PUT',
+//   path: '/' + routeNamesChange.PUT_DRIVER_ROUTE,
+//   handler: routeFns.confirmRide
+// });
 
 server.register({
     register: Good,

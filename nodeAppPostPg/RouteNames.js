@@ -54,13 +54,9 @@ var RouteNamesUnmatched = (function () {
     return RouteNamesUnmatched;
 }());
 exports.RouteNamesUnmatched = RouteNamesUnmatched;
-var RouteNamesChange = (function () {
-    function RouteNamesChange() {
-        this.DELETE_DRIVER_ROUTE = 'driver';
-        this.PUT_RIDER_ROUTE = 'rider';
-        this.PUT_DRIVER_ROUTE = 'driver';
-    }
-    return RouteNamesChange;
-}());
-exports.RouteNamesChange = RouteNamesChange;
+// class RouteNamesChange {
+//   readonly DELETE_DRIVER_ROUTE: string           = 'driver';
+//   readonly PUT_RIDER_ROUTE: string               = 'rider';
+//   readonly PUT_DRIVER_ROUTE: string              = 'driver';
+// }
 //# sourceMappingURL=RouteNames.js.map

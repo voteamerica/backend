@@ -138,9 +138,9 @@ services:
     # command: /bin/bash
     stdin_open: true
     tty: true
-    volumes:
-      - ../../..:/usr/src/app/backend
-      - node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/
+    # volumes:
+    #   - ../../..:/usr/src/app/backend
+    #   - node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/
 
     networks:
       vpcbr:

@@ -54,9 +54,12 @@ var driverConfirmedMatches = createMultipleResultsFn('driver confirmed matches: 
 var riderExists = createConfirmCancelFn('rider exists: ', "get payload: ", dbQueries.dbRiderExistsFunctionString, getTwoRiderCancelConfirmPayloadAsArray);
 var riderInfo = createConfirmCancelFn('rider info: ', "get payload: ", dbQueries.dbRiderInfoFunctionString, getTwoRiderCancelConfirmPayloadAsArray);
 var riderConfirmedMatch = createConfirmCancelFn('rider confirmed match: ', "get payload: ", dbQueries.dbRiderConfirmedMatchFunctionString, getTwoRiderCancelConfirmPayloadAsArray);
-var cancelRideOffer = createConfirmCancelFn('cancel ride offer: ', "delete payload: ", dbQueries.dbCancelRideOfferFunctionString, getCancelRideOfferPayloadAsArray);
-var rejectRide = createConfirmCancelFn('reject ride: ', "reject payload: ", dbQueries.dbRejectRideFunctionString, getRejectRidePayloadAsArray);
-var confirmRide = createConfirmCancelFn('confirm ride: ', "confirm payload: ", dbQueries.dbConfirmRideFunctionString, 'getConfirmRidePayloadAsArray');
+// var cancelRideOffer = createConfirmCancelFn 
+//   ('cancel ride offer: ', "delete payload: ", dbQueries.dbCancelRideOfferFunctionString, getCancelRideOfferPayloadAsArray);
+// var rejectRide = createConfirmCancelFn 
+//   ('reject ride: ', "reject payload: ", dbQueries.dbRejectRideFunctionString, getRejectRidePayloadAsArray);
+// var confirmRide = createConfirmCancelFn 
+//   ('confirm ride: ', "confirm payload: ", dbQueries.dbConfirmRideFunctionString, getConfirmRidePayloadAsArray);
 function createConfirmCancelFn(resultStringText, consoleText, dbQueryFn, payloadFn) {
     function execFn(req, reply) {
         // var payload = req.payload;
@@ -238,9 +241,9 @@ module.exports = {
     riderExists: riderExists,
     riderInfo: riderInfo,
     riderConfirmedMatch: riderConfirmedMatch,
-    cancelRideOffer: cancelRideOffer,
-    rejectRide: rejectRide,
-    confirmRide: confirmRide,
+    // cancelRideOffer: cancelRideOffer,
+    // rejectRide: rejectRide,
+    // confirmRide: confirmRide,
     setPool: setPool
 };
 //# sourceMappingURL=routeFunctions.js.map
