@@ -23,3 +23,5 @@ nightwatch --group $TEST_GROUP
 
 echo tests complete
 
+exit 0
+

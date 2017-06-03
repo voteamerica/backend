@@ -52,6 +52,15 @@ Push this new PR to origin (not upstream)
 ## 2) Automated Testing
 NOTES: app will not execute correctly in the standard browser, see the vnc steps below
 
+#### wip
+```
+. ./specific-machine-test.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
+docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up -d
+sleep 60
+docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh match2
+
+```
+
 #### Create specific machines if required
  ```
 . ./specific-machine-local.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-changes
@@ -61,6 +70,10 @@ NOTES: app will not execute correctly in the standard browser, see the vnc steps
 
 #### 2) use docker-compose to create local system
 `docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up`
+
+```
+docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up | grep OK. | docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml down
+```
 
 #### 3) test environment
 In a new terminal, run
