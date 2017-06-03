@@ -38,9 +38,13 @@ RUN git merge origin/$BRANCH_NAME
 
 RUN cd /usr/src/app/backend/nodeAppPostPg
 
+RUN ls ./ru*
+
 RUN npm install -g nightwatch
 
 COPY ./run-tests.sh /
+
+RUN ls /ru*
 
 # ENTRYPOINT ["/bin/bash"]
 

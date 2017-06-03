@@ -13,18 +13,23 @@ curl -L https://github.com/docker/compose/releases/download/1.12.0/docker-compos
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-## Create the necessary local setup
+## Two main setups - Dev and Auto-testing
+Scroll below to the type of setup required.
+
+## 1) Dev
+
+### Create the necessary local setup
 We need two folders at the same level. One contains the frontend git repo, the other the backend git repo.
 
 `git clone https://github.com/voteamerica/voteamerica.github.io voteUSfrontend`
 
 `git clone https://github.com/voteamerica/backend voteUSbackend`
 
-## Go to the docker folder ... 
+### Go to the docker folder ... 
 #### ... of your forked repo (here named voteUSbackend)
 `cd .../voteUSbackend/docker`
 
-## Test Front-end PR
+### Test Front-end PR
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 Push this new PR to origin (not upstream)
 
@@ -34,7 +39,7 @@ Push this new PR to origin (not upstream)
 #### 3) use docker-compose to create the full local system
 `docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up`
 
-## Test Backend-end PR
+### Test Backend-end PR
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 Push this new PR to origin (not upstream)
 
@@ -44,20 +49,29 @@ Push this new PR to origin (not upstream)
 #### 3) use docker-compose to create the full local system
 `docker-compose -f ./compose/full-stack-local/docker-compose-dev-build-test.yml up`
 
-## Automated Testing
+## 2) Automated Testing
 NOTES: app will not execute correctly in the standard browser, see the vnc steps below
 
 #### Create specific machines if required
  ```
 . ./specific-machine-local.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-changes
 . ./specific-machine-test.sh cp-nodejs $(date +%s)
+. ./specific-machine-test.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
  ```
 
 #### 2) use docker-compose to create local system
 `docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up`
+
 #### 3) test environment
-in a new terminal, run
-`docker ps | grep nigh`. Look for the 12 alphanumeric id then, type `docker exec -it ctr-id /bin/bash`, replacing ctr-id with the first three numbers/letters of the id, into carpool machine
+In a new terminal, run
+`docker exec -it $(docker ps | grep nigh | cut -c 1-4) /bin/bash`
+
+Or step by step -
+`docker ps | grep nigh | cut -c 1-4`
+This provides 4 characters of the docker machine's alphanumeric id. Type `docker exec -it ctr-id /bin/bash`, replacing ctr-id with the numbers/letters of the id, to use the testing machine
+
+For full line of info, type `docker ps | grep nigh` 
+
 
 #### 5) run nightwatch with script
 Use this script with no parameter for default tests, or with a parameter for specific test group
