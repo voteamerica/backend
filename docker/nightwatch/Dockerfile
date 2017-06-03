@@ -40,7 +40,9 @@ RUN cd /usr/src/app/backend/nodeAppPostPg
 
 RUN npm install -g nightwatch
 
-ENTRYPOINT ["/bin/bash"]
+COPY ./run-tests.sh /
 
-# CMD ["npm start"]
+# ENTRYPOINT ["/bin/bash"]
+
+CMD ["/run-tests.sh match2"]
 

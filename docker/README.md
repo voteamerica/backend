@@ -48,6 +48,10 @@ Push this new PR to origin (not upstream)
 NOTES: app will not execute correctly in the standard browser, see the vnc steps below
 
 #### Create specific machines if required
+ ```
+. ./specific-machine-local.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-changes
+. ./specific-machine-test.sh cp-nodejs $(date +%s)
+ ```
 
 #### 2) use docker-compose to create local system
 `docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up`
@@ -75,10 +79,12 @@ Specific group of tests
 #### 6) optional - use a vnc viewer (e.g. [RealVNC](https://www.realvnc.com/download/viewer/)) to watch the test being executed on vnc://localhost:5900 (don't type vnc:// for RealVNC viewer)
 
 #### 7) optional - create specific pg client
- `. ./specific-machine-local.sh cp-nodejs`
- `. ./specific-machine-local.sh https://github.com/jkbits1/backend ts-route cp-nodejs`
+```
+. ./specific-machine-local.sh cp-nodejs
+. ./specific-machine-test.sh cp-nodejs $(date +%s)
+. ./specific-machine-local.sh cp-nodejs $(date +%s) https://github.com/jkbits1/backend ts-route 
+```
 
-`. ./specific-machine-test.sh cp-nodejs $(date +%s)`
  
 #### useful suggestions for managing tests structure
 https://github.com/nightwatchjs/nightwatch/pull/37
