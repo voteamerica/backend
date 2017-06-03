@@ -12,6 +12,10 @@ echo TEST_GROUP $TEST_GROUP
 
 cd /usr/src/app/backend/nodeAppPostPg/testing/nightwatch
 
+echo sleep
+sleep 60
+echo start tests
+
 # nightwatch 
 # nightwatch --group basic
 
