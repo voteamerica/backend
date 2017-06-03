@@ -47,6 +47,7 @@ COPY ./run-tests.sh /
 RUN ls /ru*
 
 # ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT [""]
 
-CMD ["/run-tests.sh match2"]
+# CMD ["/run-tests.sh match2"]
 
