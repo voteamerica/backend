@@ -50,12 +50,15 @@ Push this new PR to origin (not upstream)
 `docker-compose -f ./compose/full-stack-local/docker-compose-dev-build-test.yml up`
 
 ## 2) Automated Testing
-NOTES: app will not execute correctly in the standard browser, see the vnc steps below
+NOTE: app will not execute correctly in the standard browser, see the vnc steps below
 
-#### wip
+Run the tests
 ```
 sh ./start-compose-tests.sh
+```
 
+These steps are part of the above script
+```
 . ./specific-machine-test.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
 docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up -d
 sleep 60
