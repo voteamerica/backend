@@ -25,7 +25,7 @@ nightwatch --group $TEST_GROUP
 # https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
 EXIT_CODE=$?
 
-echo tests complete x $EXIT_CODE
+echo tests complete $EXIT_CODE
 
 exit $EXIT_CODE
 

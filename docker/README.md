@@ -54,6 +54,8 @@ NOTES: app will not execute correctly in the standard browser, see the vnc steps
 
 #### wip
 ```
+sh ./start-compose-tests.sh
+
 . ./specific-machine-test.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
 docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up -d
 sleep 60
