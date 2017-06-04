@@ -21,7 +21,11 @@ echo start tests
 
 nightwatch --group $TEST_GROUP
 
-echo tests complete
+# get exit code of last action
+# https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
+EXIT_CODE=$?
 
-exit 0
+echo tests complete x $EXIT_CODE
+
+exit $EXIT_CODE
 
