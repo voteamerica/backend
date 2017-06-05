@@ -29,7 +29,10 @@ before_script:
 
   - docker-compose -f ./docker/compose/full-stack-test/docker-compose-dev-build-test.yml up -d
 
-
+# permissions needed, two suggestions here
+# https://stackoverflow.com/questions/42154912/permission-denied-for-build-sh-file
+# https://stackoverflow.com/questions/10516201/updating-file-permissions-only-in-git
+# https://stackoverflow.com/questions/14267441/automatically-apply-git-update-index-chmodx-to-executable-files
 script:
   - ./docker/compose-tests.sh
 
