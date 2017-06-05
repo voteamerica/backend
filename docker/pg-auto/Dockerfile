@@ -120,6 +120,10 @@ COPY create_fresh_carpool_db2.sh /docker-entrypoint-initdb.d/
 
 # create db end
 
+# this step may be needed, not totally sure why not in std dockerfile
+# https://github.com/moby/moby/issues/27182
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 5432
