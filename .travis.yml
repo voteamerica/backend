@@ -31,7 +31,7 @@ before_script:
 
 
 script:
-  - ./docker/compose/test.sh
+  - ./docker/compose-tests.sh
 
 after_script:
-  - docker-compose down
+  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-dev-build-test.yml down
