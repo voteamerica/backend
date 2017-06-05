@@ -162,15 +162,15 @@ BEGIN
 
 		IF v_driver_record."DriverPhone" IS NOT NULL AND (position('SMS' in v_driver_record."DriverPreferredContact") > 0)
         THEN                                                                                                               
-            v_body :=  'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Driver offer received! Ref: ' || v_driver_record."UUID" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Pick-up ZIP : ' || v_driver_record."DriverCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Radius : ' || v_driver_record."DriverCollectionRadius" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Drive Times  : ' || carpoolvote.convert_datetime_to_local_format(v_driver_record."AvailableDriveTimesLocal") || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Seats : ' || v_driver_record."SeatCount" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Wheelchair accessible : ' || CASE WHEN v_driver_record."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Phone Number : ' || v_driver_record."DriverPhone" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Self-Service portal : ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || ' ' || carpoolvote.urlencode(chr(10));
+            v_body :=  'From CarpoolVote.com' || ' ' || chr(10)
+					|| ' Driver offer received! Ref: ' || v_driver_record."UUID" || ' ' || chr(10)
+					|| ' Pick-up ZIP : ' || v_driver_record."DriverCollectionZIP" || ' ' || chr(10)
+					|| ' Radius : ' || v_driver_record."DriverCollectionRadius" || ' ' || chr(10)
+					|| ' Drive Times  : ' || carpoolvote.convert_datetime_to_local_format(v_driver_record."AvailableDriveTimesLocal") || ' ' || chr(10)
+					|| ' Seats : ' || v_driver_record."SeatCount" || ' ' || chr(10)
+					|| ' Wheelchair accessible : ' || CASE WHEN v_driver_record."DriverCanLoadRiderWithWheelchair" THEN 'Yes' ELSE 'No' END || ' ' || chr(10)
+					|| ' Phone Number : ' || v_driver_record."DriverPhone" || ' ' || chr(10)
+					|| ' Self-Service portal : ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || ' ' || chr(10);
 					-- ISSUE #124|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-drive-offer?UUID=' || v_driver_record."UUID" || '&DriverPhone=' || carpoolvote.urlencode(v_driver_record."DriverLastName");
 					
             INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)                                             
@@ -255,20 +255,20 @@ BEGIN
 
 		IF v_rider_record."RiderPhone" IS NOT NULL AND (position('SMS' in v_rider_record."RiderPreferredContact") > 0)                                                                               
         THEN                                                                                                               
-            v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10)) 
-					|| ' Ride Request received! Ref: ' || v_rider_record."UUID" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || ' ' || carpoolvote.urlencode(chr(10))
+            v_body := 'From CarpoolVote.com' || ' ' || chr(10) 
+					|| ' Ride Request received! Ref: ' || v_rider_record."UUID" || ' ' || chr(10)
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || ' ' || chr(10)
 					|| ' Pick-up : ' 
 					|| COALESCE(v_rider_record."RiderCollectionStreetNumber", '') || ' ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') 
-					|| v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Destination : ' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Wheelchair accessibility needed : ' ||  CASE WHEN v_rider_record."NeedWheelchair" THEN 'Yes' ELSE 'No' END || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Two-way trip needed : ' ||  CASE WHEN v_rider_record."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Notes : ' ||  v_rider_record."RiderAccommodationNotes" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Phone Number : ' ||  v_rider_record."RiderPhone" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Self-Service portal : ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=rider&uuid=' || v_rider_record."UUID" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' User support : 804-239-3389 ' || carpoolvote.urlencode(chr(10))
+					|| v_rider_record."RiderCollectionZIP" || ' ' || chr(10)
+					|| ' Destination : ' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || ' ' || chr(10)
+					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || chr(10)
+					|| ' Wheelchair accessibility needed : ' ||  CASE WHEN v_rider_record."NeedWheelchair" THEN 'Yes' ELSE 'No' END || ' ' || chr(10)
+					|| ' Two-way trip needed : ' ||  CASE WHEN v_rider_record."TwoWayTripNeeded" THEN 'Yes' ELSE 'No' END || ' ' || chr(10)
+					|| ' Notes : ' ||  v_rider_record."RiderAccommodationNotes" || ' ' || chr(10)
+					|| ' Phone Number : ' ||  v_rider_record."RiderPhone" || ' ' || chr(10)
+					|| ' Self-Service portal : ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=rider&uuid=' || v_rider_record."UUID" || ' ' || chr(10)
+					|| ' User support : 540-656-9388 ' || chr(10)
 					|| ' Cancel : https://api.carpoolvote.com/' || COALESCE(carpoolvote.get_param_value('api_environment'), 'live') || '/cancel-ride-request?UUID=' || v_rider_record."UUID" || '&RiderPhone=' || carpoolvote.urlencode(v_rider_record."RiderLastName");
 				
             INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)                                             
@@ -420,9 +420,9 @@ BEGIN
 			THEN
 
 				v_loop_cnt := 0;
-				v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10)) 
-						|| ' New matches are available.' || ' ' || carpoolvote.urlencode(chr(10))
-				        || ' Please visit the self-service page for details ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || ' ' || carpoolvote.urlencode(chr(10));			
+				v_body := 'From CarpoolVote.com' || ' ' || chr(10) 
+						|| ' New matches are available.' || ' ' || chr(10)
+				        || ' Please visit the self-service page for details ' || COALESCE(carpoolvote.get_param_value('site.base.url'), 'http://carpoolvote.com') || '/self-service/?type=driver&uuid=' || v_driver_record."UUID" || ' ' || chr(10);			
 			
 				FOR v_record IN SELECT * FROM carpoolvote.match m 
 									WHERE m.uuid_driver = v_driver_record."UUID" AND status <> 'ExtendedMatch' order by score asc
@@ -432,11 +432,11 @@ BEGIN
 						WHERE r."UUID" = v_record.uuid_rider;
 
 					v_body := v_body
-					|| '__________' || carpoolvote.urlencode(chr(10))
-	                || 'From ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || carpoolvote.urlencode(chr(10))
-                    || 'To ' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || carpoolvote.urlencode(chr(10))
-                    || 'When ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal")  || carpoolvote.urlencode(chr(10))
-                    || 'Party of '|| v_rider_record."TotalPartySize" || carpoolvote.urlencode(chr(10));
+					|| '__________' || chr(10)
+	                || 'From ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || chr(10)
+                    || 'To ' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || chr(10)
+                    || 'When ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal")  || chr(10)
+                    || 'Party of '|| v_rider_record."TotalPartySize" || chr(10);
 				END LOOP;
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
@@ -528,11 +528,11 @@ BEGIN
 			IF v_driver_record."DriverPhone" IS NOT NULL AND (position('SMS' in v_driver_record."DriverPreferredContact") > 0)
 			THEN
 			
-				v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Confirmed Ride was canceled by rider. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Rider : ' || v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Pick-up location : '  ||  COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
+				v_body := 'From CarpoolVote.com' || ' ' || chr(10)
+					|| ' Confirmed Ride was canceled by rider. No further action needed.' || ' ' || chr(10)
+					|| ' Rider : ' || v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName" || ' ' || chr(10)
+					|| ' Pick-up location : '  ||  COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || chr(10)
+					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || chr(10)
 					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
@@ -613,12 +613,12 @@ BEGIN
 		IF v_rider_record."RiderPhone" IS NOT NULL AND (position('SMS' in v_rider_record."RiderPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Ride Request ' || v_rider_record."UUID"  || ' was canceled. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' User support : 804-239-3389 ';
+			v_body := 'From CarpoolVote.com' || ' ' || chr(10)
+					|| ' Ride Request ' || v_rider_record."UUID"  || ' was canceled. No further action needed.' || ' ' || chr(10)
+					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || chr(10)
+					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || chr(10)
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || ' ' || chr(10)
+					|| ' User support : 540-656-9388 ';
 		
 			INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 			VALUES (v_rider_record."RiderPhone", uuid_rider, v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
@@ -706,11 +706,11 @@ BEGIN
 		IF v_driver_record."DriverPhone" IS NOT NULL AND (position('SMS' in v_driver_record."DriverPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Confirmed Ride was canceled by rider. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Rider : ' || v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || chr(10)
+					|| ' Confirmed Ride was canceled by rider. No further action needed.' || ' ' || chr(10)
+					|| ' Rider : ' || v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName" || ' ' || chr(10)
+					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || chr(10)
+					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || chr(10)
 					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
@@ -801,12 +801,12 @@ BEGIN
 		IF v_rider_record."RiderPhone" IS NOT NULL AND (position('SMS' in v_rider_record."RiderPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Confirmed Ride was canceled. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || chr(10)
+					|| ' Confirmed Ride was canceled. No further action needed.' || ' ' || chr(10)
+					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || chr(10)
 					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' 
-					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' User support : 804-239-3389 ';
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || ' ' || chr(10)
+					|| ' User support : 540-656-9388 ';
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 				VALUES (v_rider_record."RiderPhone", v_rider_record."UUID", v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
@@ -891,10 +891,10 @@ BEGIN
 		IF v_driver_record."DriverPhone" IS NOT NULL AND (position('SMS' in v_driver_record."DriverPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Drive Offer ' || v_driver_record."UUID" ||  ' was canceled. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Pick-up ZIP : ' || v_driver_record."DriverCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Radius : ' || v_driver_record."DriverCollectionRadius" || ' ' || carpoolvote.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || chr(10)
+					|| ' Drive Offer ' || v_driver_record."UUID" ||  ' was canceled. No further action needed.' || ' ' || chr(10)
+					|| ' Pick-up ZIP : ' || v_driver_record."DriverCollectionZIP" || ' ' || chr(10)
+					|| ' Radius : ' || v_driver_record."DriverCollectionRadius" || ' ' || chr(10)
 					|| ' Drive Times : ' || carpoolvote.convert_datetime_to_local_format(v_driver_record."AvailableDriveTimesLocal"); 
 			
 			INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
@@ -986,13 +986,13 @@ BEGIN
 			IF v_rider_record."RiderPhone" IS NOT NULL AND (position('SMS' in v_rider_record."RiderPreferredContact") > 0)
 			THEN
 		
-				v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Confirmed Ride was canceled by driver. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Driver : ' || v_driver_record."DriverFirstName" || ' ' || v_driver_record."DriverLastName" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' User support : 804-239-3389 ';
+				v_body := 'From CarpoolVote.com' || ' ' || chr(10)
+					|| ' Confirmed Ride was canceled by driver. No further action needed.' || ' ' || chr(10)
+					|| ' Driver : ' || v_driver_record."DriverFirstName" || ' ' || v_driver_record."DriverLastName" || ' ' || chr(10)
+					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || chr(10)
+					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || chr(10)
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || ' ' || chr(10)
+					|| ' User support : 540-656-9388 ';
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 				VALUES (v_rider_record."RiderPhone", uuid_rider, v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
 			END IF;
@@ -1082,11 +1082,11 @@ BEGIN
 		IF v_driver_record."DriverPhone" IS NOT NULL AND (position('SMS' in v_driver_record."DriverPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Confirmed Ride was canceled. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Rider : ' ||  v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName"  || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || chr(10)
+					|| ' Confirmed Ride was canceled. No further action needed.' || ' ' || chr(10)
+					|| ' Rider : ' ||  v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName"  || ' ' || chr(10)
+					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || chr(10)
+					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || chr(10)
 					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
@@ -1176,13 +1176,13 @@ BEGIN
 		IF v_rider_record."RiderPhone" IS NOT NULL AND (position('SMS' in v_rider_record."RiderPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Confirmed Ride was canceled by driver. No further action needed.' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Driver : ' ||  v_driver_record."DriverFirstName" || ' ' || v_driver_record."DriverLastName"  || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' User support : 804-239-3389 ';
+			v_body := 'From CarpoolVote.com' || ' ' || chr(10)
+					|| ' Confirmed Ride was canceled by driver. No further action needed.' || ' ' || chr(10)
+					|| ' Driver : ' ||  v_driver_record."DriverFirstName" || ' ' || v_driver_record."DriverLastName"  || ' ' || chr(10)
+					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || chr(10)
+					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || chr(10)
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || ' ' || chr(10)
+					|| ' User support : 540-656-9388 ';
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 				VALUES (v_rider_record."RiderPhone", uuid_rider, v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
 		END IF;
@@ -1279,17 +1279,17 @@ BEGIN
 		IF v_driver_record."DriverPhone" IS NOT NULL AND (position('SMS' in v_driver_record."DriverPreferredContact") > 0)
 		THEN
 		
-			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Match is confirmed.' || ' ' || carpoolvote.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || chr(10)
+					|| ' Match is confirmed.' || ' ' || chr(10)
 					|| ' Rider ' ||  v_rider_record."RiderFirstName" || ' ' || v_rider_record."RiderLastName"
 					|| ' is now waiting for you to get in touch to arrange the details of the ride.'
-					|| ' Please contact the rider as soon as possible.' || carpoolvote.urlencode(chr(10))
-					|| CASE WHEN v_rider_record."RiderEmail" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_rider_record."RiderPreferredContact" LIKE '%Email%',false) THEN '(preferred)' else ' ' END || 'Email: ' || v_rider_record."RiderEmail"  ELSE ' ' END || carpoolvote.urlencode(chr(10))
-					|| CASE WHEN v_rider_record."RiderPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_rider_record."RiderPreferredContact" LIKE '%Phone%',false) THEN '(preferred)' else ' ' END || 'Phone: ' || v_rider_record."RiderPhone"  ELSE ' ' END || carpoolvote.urlencode(chr(10))
-					|| CASE WHEN v_rider_record."RiderPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_rider_record."RiderPreferredContact" LIKE '%SMS%',false) THEN '(preferred)' else ' ' END || 'SMS/Text: ' || v_rider_record."RiderPhone"  ELSE ' ' END || carpoolvote.urlencode(chr(10))
+					|| ' Please contact the rider as soon as possible.' || chr(10)
+					|| CASE WHEN v_rider_record."RiderEmail" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_rider_record."RiderPreferredContact" LIKE '%Email%',false) THEN '(preferred)' else ' ' END || 'Email: ' || v_rider_record."RiderEmail"  ELSE ' ' END || chr(10)
+					|| CASE WHEN v_rider_record."RiderPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_rider_record."RiderPreferredContact" LIKE '%Phone%',false) THEN '(preferred)' else ' ' END || 'Phone: ' || v_rider_record."RiderPhone"  ELSE ' ' END || chr(10)
+					|| CASE WHEN v_rider_record."RiderPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_rider_record."RiderPreferredContact" LIKE '%SMS%',false) THEN '(preferred)' else ' ' END || 'SMS/Text: ' || v_rider_record."RiderPhone"  ELSE ' ' END || chr(10)
 					|| ' Pick-up location : ' || COALESCE(v_rider_record."RiderCollectionStreetNumber", '' ) || ' ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') 
-					|| v_rider_record."RiderCollectionZIP" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
+					|| v_rider_record."RiderCollectionZIP" || ' ' || chr(10)
+					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || chr(10)
 					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal");
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
@@ -1375,19 +1375,19 @@ BEGIN
 		
 		IF v_rider_record."RiderPhone" IS NOT NULL AND (position('SMS' in v_rider_record."RiderPreferredContact") > 0)
 		THEN
-			v_body := 'From CarpoolVote.com' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Match is confirmed by driver. No further action needed.'|| ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Driver : ' ||  v_driver_record."DriverFirstName" || ' ' || v_driver_record."DriverLastName" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
-					|| CASE WHEN v_driver_record."DriverEmail" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_driver_record."DriverPreferredContact" LIKE '%Email%',false) THEN '(*)' else ' ' END || 'Email: ' || v_driver_record."DriverEmail"  ELSE ' ' END || carpoolvote.urlencode(chr(10))
-					|| CASE WHEN v_driver_record."DriverPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_driver_record."DriverPreferredContact" LIKE '%Phone%',false) THEN '(*)' else ' ' END || 'Phone: ' || v_driver_record."DriverPhone"  ELSE ' ' END || carpoolvote.urlencode(chr(10))
-					|| CASE WHEN v_driver_record."DriverPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_driver_record."DriverPreferredContact" LIKE '%SMS%',false) THEN '(*)' else ' ' END || 'SMS/Text: ' || v_driver_record."DriverPhone"  ELSE ' ' END || carpoolvote.urlencode(chr(10))
-					|| ' Driver License Plate : ' || COALESCE(v_driver_record."DriverLicenseNumber", 'N/A') || ' (Please check before getting in)' ||carpoolvote.urlencode(chr(10))
+			v_body := 'From CarpoolVote.com' || ' ' || chr(10)
+					|| ' Match is confirmed by driver. No further action needed.'|| ' ' || chr(10)
+					|| ' Driver : ' ||  v_driver_record."DriverFirstName" || ' ' || v_driver_record."DriverLastName" || ' ' || ' ' || chr(10)
+					|| CASE WHEN v_driver_record."DriverEmail" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_driver_record."DriverPreferredContact" LIKE '%Email%',false) THEN '(*)' else ' ' END || 'Email: ' || v_driver_record."DriverEmail"  ELSE ' ' END || chr(10)
+					|| CASE WHEN v_driver_record."DriverPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_driver_record."DriverPreferredContact" LIKE '%Phone%',false) THEN '(*)' else ' ' END || 'Phone: ' || v_driver_record."DriverPhone"  ELSE ' ' END || chr(10)
+					|| CASE WHEN v_driver_record."DriverPhone" IS NOT NULL THEN '- ' || CASE WHEN coalesce(v_driver_record."DriverPreferredContact" LIKE '%SMS%',false) THEN '(*)' else ' ' END || 'SMS/Text: ' || v_driver_record."DriverPhone"  ELSE ' ' END || chr(10)
+					|| ' Driver License Plate : ' || COALESCE(v_driver_record."DriverLicenseNumber", 'N/A') || ' (Please check before getting in)' ||chr(10)
 					|| ' Pick-up location : ' 
-					|| COALESCE(v_rider_record."RiderCollectionStreetNumber", '' ) || ' ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Destination : ' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || ' ' || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || ' ' || carpoolvote.urlencode(chr(10))
-					|| ' User support : 804-239-3389 ';
+					|| COALESCE(v_rider_record."RiderCollectionStreetNumber", '' ) || ' ' || COALESCE(v_rider_record."RiderCollectionAddress" || ', ', '') || v_rider_record."RiderCollectionZIP" || ' ' || ' ' || chr(10)
+					|| ' Destination : ' || COALESCE(v_rider_record."RiderDestinationAddress" || ', ', '') || v_rider_record."RiderDropOffZIP" || ' ' || ' ' || chr(10)
+					|| ' Party Size : ' || v_rider_record."TotalPartySize" || ' ' || chr(10)
+					|| ' Preferred Ride Times : ' || carpoolvote.convert_datetime_to_local_format(v_rider_record."AvailableRideTimesLocal") || ' ' || chr(10)
+					|| ' User support : 540-656-9388 ';
 			
 				INSERT INTO carpoolvote.outgoing_sms (recipient, uuid, body, status)
 				VALUES (v_rider_record."RiderPhone", uuid_rider, v_body, carpoolvote.outgoing_sms_insert_status(v_rider_record."RiderPhone"));
