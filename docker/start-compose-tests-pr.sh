@@ -1,5 +1,13 @@
 #!/bin/bash
 
+if [[ "X$1" = "X" ]]
+then
+    TEST_GROUP=match2
+	echo TEST_GROUP default: $TEST_GROUP
+else
+    TEST_GROUP=$1
+fi
+
 # useful info here
 # https://hharnisc.github.io/2016/06/19/integration-testing-with-docker-compose.html
 # 
@@ -20,7 +28,7 @@ docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up
 
 sleep 60
 
-docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh match2
+docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh TEST_GROUP
 
 # docker logs $ (docker ps | grep nigh | cut -c 1-4)
 

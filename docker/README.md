@@ -49,8 +49,15 @@ Push this new PR to origin (not upstream)
 . ./specific-machine-test.sh cp-pg-server $(date +%s) https://github.com/jkbits1/backend pr162
 ```
 
-#### 3) use docker-compose to create the full local system
-`docker-compose -f ./compose/full-stack-local/docker-compose-dev-build-test.yml up`
+#### 3) Run the tests
+This script uses docker-compose to create the full local system
+
+```
+sh ./start-compose-tests-pr.sh
+```
+
+#### 4) Optional: use VNC viewer to watch the tests execute
+
 
 ## 2) Automated Testing
 NOTE: app will not execute correctly in the standard browser, see the vnc steps below
