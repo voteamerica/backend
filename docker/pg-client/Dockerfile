@@ -34,7 +34,7 @@ RUN cd /usr/src/app/backend/db
 # COPY ./start_matching_engine.sh /usr/src/app/backend/docker/pg-client/
 COPY ./start_matching_engine.sh /
 
-# this step may be needed, not totally sure why not in std dockerfile
+# this step may be needed
 # https://github.com/moby/moby/issues/27182
 RUN chmod +x /start_matching_engine.sh
 
