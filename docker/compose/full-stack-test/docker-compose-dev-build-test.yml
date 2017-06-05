@@ -135,8 +135,8 @@ services:
 
     depends_on:
     - cp-test
-    # command: /bin/bash
-    command: /run-tests.sh match2
+    command: /bin/bash
+    # command: /run-tests.sh match2
 
     stdin_open: true
     tty: true
