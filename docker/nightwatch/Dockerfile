@@ -44,6 +44,10 @@ RUN npm install -g nightwatch
 
 COPY ./run-tests.sh /
 
+# this step may be needed
+# https://github.com/moby/moby/issues/27182
+RUN chmod +x /run-tests.sh
+
 RUN ls /ru*
 
 # ENTRYPOINT ["/bin/bash"]
