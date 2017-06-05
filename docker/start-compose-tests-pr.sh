@@ -28,7 +28,7 @@ docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up
 
 sleep 60
 
-docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh TEST_GROUP
+docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
 
 # docker logs $ (docker ps | grep nigh | cut -c 1-4)
 

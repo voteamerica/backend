@@ -35,7 +35,7 @@ echo start compose tests
 
 sleep 60
 
-docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh TEST_GROUP
+docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
 
 # docker logs $ (docker ps | grep nigh | cut -c 1-4)
 

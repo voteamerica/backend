@@ -50,10 +50,11 @@ Push this new PR to origin (not upstream)
 ```
 
 #### 3) Run the tests
-This script uses docker-compose to create the full local system
+This script uses docker-compose to create the full local system. The parameter specifies a nightwatch test group.
 
 ```
 sh ./start-compose-tests-pr.sh
+sh ./start-compose-tests-pr.sh match
 ```
 
 #### 4) Optional: use VNC viewer to watch the tests execute
