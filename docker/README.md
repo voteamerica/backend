@@ -44,7 +44,10 @@ Push this new PR to origin (not upstream)
 Push this new PR to origin (not upstream)
 
 #### 2) create specific build of front-end docker machine using --build-arg BRANCH_NAME=pr...
-`docker-compose -f ./compose/full-stack/docker-compose-dev-build-test.yml build --build-arg CACHEBUST=$(date +%s) --build-arg BRANCH_NAME=pr135 cp-pg-server`
+```
+. ./specific-machine-test.sh cp-nodejs $(date +%s) https://github.com/jkbits1/backend pr162
+. ./specific-machine-test.sh cp-pg-server $(date +%s) https://github.com/jkbits1/backend pr162
+```
 
 #### 3) use docker-compose to create the full local system
 `docker-compose -f ./compose/full-stack-local/docker-compose-dev-build-test.yml up`
