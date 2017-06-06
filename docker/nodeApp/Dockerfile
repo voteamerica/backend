@@ -49,6 +49,11 @@ ENV PORT=8000 PGUSER=carpool_web PGDATABASE=carpoolvote
 COPY ./expo-start.sh /
 COPY ./expo-bash.sh /
 
+# these steps may be needed
+# https://github.com/moby/moby/issues/27182
+RUN chmod +x /expo-start.sh
+RUN chmod +x /expo-bash.sh
+
 # RUN npm install -g nightwatch
 
 # ENTRYPOINT ["/expo-start.sh"]

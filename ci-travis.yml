@@ -1,0 +1,42 @@
+---
+# Use Ubuntu 'trusty' distribution
+sudo: required
+dist: trusty
+
+# services:
+#   - docker
+
+install:
+  # Update docker-engine using Ubuntu 'trusty' apt repo
+  - >
+    curl -sSL "https://get.docker.com/gpg" |
+     sudo -E apt-key add -
+  - >
+    echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" |
+     sudo tee -a /etc/apt/sources.list
+  - sudo apt-get update
+  - >
+    sudo apt-get -o Dpkg::Options::="--force-confdef" \
+     -o Dpkg::Options::="--force-confold" --assume-yes install docker-engine
+  - docker version
+  # Update docker-compose via pip
+  - sudo pip install docker-compose
+  - docker-compose version
+
+before_script:
+  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=$TRAVIS_BRANCH --build-arg CACHEBUST=$(date +%s) cp-test-runner
+  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=$TRAVIS_BRANCH --build-arg CACHEBUST=$(date +%s) cp-nodejs
+  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=$TRAVIS_BRANCH --build-arg CACHEBUST=$(date +%s) cp-pg-server
+
+  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-dev-build-test.yml up -d
+
+# permissions needed, two suggestions here
+# https://stackoverflow.com/questions/42154912/permission-denied-for-build-sh-file
+# https://stackoverflow.com/questions/10516201/updating-file-permissions-only-in-git
+# https://stackoverflow.com/questions/14267441/automatically-apply-git-update-index-chmodx-to-executable-files
+script:
+  # - ./docker/compose-tests.sh
+  - ./docker/compose-tests.sh match
+
+after_script:
+  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-dev-build-test.yml down

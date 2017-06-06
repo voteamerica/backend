@@ -34,6 +34,11 @@ RUN cd /usr/src/app/backend/db
 # COPY ./start_matching_engine.sh /usr/src/app/backend/docker/pg-client/
 COPY ./start_matching_engine.sh /
 
+# this step may be needed
+# https://github.com/moby/moby/issues/27182
+RUN chmod +x /start_matching_engine.sh
+
+
 # ENTRYPOINT [ "../docker/pg-client/start_matching_engine_dkr.sh" ]
 # ENTRYPOINT [ "../docker/pg-client/start_matching_engine.sh" ]
 # ENTRYPOINT [ "/usr/src/app/backend/docker/pg-client/start_matching_engine_dkr.sh" ]

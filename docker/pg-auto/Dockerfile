@@ -37,7 +37,7 @@ RUN set -ex; \
 	apt-key list
 
 ENV PG_MAJOR 9.6
-ENV PG_VERSION 9.6.2-1.pgdg80+1
+ENV PG_VERSION 9.6.3-1.pgdg80+1
 
 RUN echo 'deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main' $PG_MAJOR > /etc/apt/sources.list.d/pgdg.list
 
@@ -119,6 +119,10 @@ COPY create_fresh_carpool_db2.sh /docker-entrypoint-initdb.d/
 # WORKDIR /usr/src/app/
 
 # create db end
+
+# this step may be needed, not totally sure why not in std dockerfile
+# https://github.com/moby/moby/issues/27182
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 

@@ -38,9 +38,20 @@ RUN git merge origin/$BRANCH_NAME
 
 RUN cd /usr/src/app/backend/nodeAppPostPg
 
+RUN ls ./ru*
+
 RUN npm install -g nightwatch
 
-ENTRYPOINT ["/bin/bash"]
+COPY ./run-tests.sh /
 
-# CMD ["npm start"]
+# this step may be needed
+# https://github.com/moby/moby/issues/27182
+RUN chmod +x /run-tests.sh
+
+RUN ls /ru*
+
+# ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT [""]
+
+# CMD ["/run-tests.sh match2"]
 
