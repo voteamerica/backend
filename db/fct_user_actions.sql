@@ -566,7 +566,8 @@ BEGIN
 		v_step := 'S2';
 		UPDATE carpoolvote.rider
 		SET status='MatchConfirmed'
-		WHERE "UUID" = a_UUID;
+		WHERE "UUID" = a_UUID
+		AND status NOT IN ('Canceled', 'Expired');
 	ELSIF EXISTS (   -- If there is at least one match in MatchProposed or MatchConfirmed -> MatchProposed
 		SELECT 1
 		FROM carpoolvote.match
@@ -577,12 +578,14 @@ BEGIN
 		v_step := 'S3';
 		UPDATE carpoolvote.rider
 		SET status='MatchProposed'
-		WHERE "UUID" = a_UUID;	
+		WHERE "UUID" = a_UUID
+		AND status NOT IN ('Canceled', 'Expired');	
 	ELSE               -- default, is Pending
 		v_step := 'S4';
 		UPDATE carpoolvote.rider
 		SET status='Pending'
-		WHERE "UUID" = a_UUID AND status NOT IN ('Canceled','Expired');
+		WHERE "UUID" = a_UUID 
+		AND status NOT IN ('Canceled', 'Expired');
 	END IF;
 		
 	RETURN '';
@@ -627,7 +630,8 @@ BEGIN
 		v_step := 'S2';
 		UPDATE carpoolvote.driver
 		SET status='MatchConfirmed'
-		WHERE "UUID" = a_UUID;
+		WHERE "UUID" = a_UUID
+		AND status NOT IN ('Canceled', 'Expired');
 	ELSIF EXISTS (   -- If there is at least one match in MatchProposed or MatchConfirmed -> MatchProposed
 		SELECT 1
 		FROM carpoolvote.match
@@ -638,13 +642,15 @@ BEGIN
 		v_step := 'S3';
 		UPDATE carpoolvote.driver
 		SET status='MatchProposed'
-		WHERE "UUID" = a_UUID;
+		WHERE "UUID" = a_UUID
+		AND status NOT IN ('Canceled', 'Expired');
 	
 	ELSE               -- default, is Pending
 		v_step := 'S4';
 		UPDATE carpoolvote.driver
 		SET status='Pending'
-		WHERE "UUID" = a_UUID;
+		WHERE "UUID" = a_UUID
+		AND status NOT IN ('Canceled', 'Expired');
 		
 	END IF;
 		
