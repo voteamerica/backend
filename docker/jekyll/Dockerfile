@@ -2,6 +2,9 @@ FROM grahamc/jekyll
 
 RUN apt-get update
 
+# for editing 
+RUN apt-get install -y vim-tiny
+
 RUN apt-get install -y git
 
 ARG CACHEBUST=1

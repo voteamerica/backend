@@ -24,8 +24,9 @@ install:
   - docker-compose version
 
 before_script:
-  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-test --build-arg CACHEBUST=$(date +%s) cp-test-runner
-  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-test --build-arg CACHEBUST=$(date +%s) cp-nodejs
+  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=$TRAVIS_BRANCH --build-arg CACHEBUST=$(date +%s) cp-test-runner
+  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=$TRAVIS_BRANCH --build-arg CACHEBUST=$(date +%s) cp-nodejs
+  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=$TRAVIS_BRANCH --build-arg CACHEBUST=$(date +%s) cp-pg-server
 
   - docker-compose -f ./docker/compose/full-stack-test/docker-compose-dev-build-test.yml up -d
 

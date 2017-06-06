@@ -22,29 +22,16 @@ fi
 # http://www.tldp.org/LDP/abs/html/exit-status.html
 # http://bencane.com/2014/09/02/understanding-exit-codes-and-how-to-use-them-in-bash-scripts/
 
-# https://docs.travis-ci.com/user/environment-variables/
-# https://blog.travis-ci.com/2014-08-22-environment-variables/
-# https://docs.travis-ci.com/user/ci-environment/
-# https://docs.travis-ci.com/user/encryption-keys/
-
-# https://docs.travis-ci.com/user/customizing-the-build#The-Build-Lifecycle
-
-# https://docs.travis-ci.com/user/pull-requests/
-
-# https://docs.travis-ci.com/user/status-images/
-
-# https://docs.travis-ci.com/user/notifications/
-
-echo start compose tests
+echo start compose tests - volumes
 
 # pwd
 
 # ls ./s*.sh
 
 # build specific machines
-# docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-test --build-arg CACHEBUST=$(date +%s) cp-test-runner
+# docker-compose -f ./compose/full-stack-test/docker-compose-test-volumes.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-test --build-arg CACHEBUST=$(date +%s) cp-test-runner
 
-# docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up -d
+docker-compose -f ./compose/full-stack-test/docker-compose-test-volumes.yml up -d
 
 sleep 60
 
@@ -55,7 +42,7 @@ EXIT_CODE=$?
 
 docker logs fullstacktest_cp-test-runner_1
 
-# docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml down
+docker-compose -f ./compose/full-stack-test/docker-compose-test-volumes.yml down
 
 echo exit code: $EXIT_CODE
 

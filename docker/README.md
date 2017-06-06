@@ -18,8 +18,39 @@ Scroll below to the type of setup required.
 
 ## 1) Dev
 
+### a) Front-end Dev
+
+#### Create the necessary local setup
+NOTE: it is better to fork the carpoolvote repo's rather than clone them directly. Use the commands below with your own repo in place of the carpoolvote repo's.
+
+It is assumed that you already have a a local clone of the frontend repo, but if not, create one:
+
+`git clone https://github.com/voteamerica/voteamerica.github.io voteUSfrontend`
+
+If it does not already exist, clone the backend git repo. The tests and the system that supports them exist in this repo.
+
+`git clone https://github.com/voteamerica/backend voteUSbackend`
+
+#### Go to the docker folder ... 
+... of your backend repo (here named voteUSbackend)
+`cd .../voteUSbackend/docker`
+
+#### Create specific machines (if required)
+ ```
+sh ./specific-machine-local-front.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-refactor
+sh ./specific-machine-local-front.sh cp-nodejs $(date +%s) https://github.com/voteamerica/backend master
+sh ./specific-machine-local-front.sh cp-pg-server $(date +%s) https://github.com/voteamerica/backend master
+ ```
+
+#### use docker-compose to create local system
+```
+docker-compose -f ./compose/full-stack-local/docker-compose-dev-frontend.yml up
+```
+
+### b) General Dev
+
 ### Create the necessary local setup
-We need two folders at the same level. One contains the frontend git repo, the other the backend git repo.
+We need folders for the frontend and backend repo's to exist at the same level, e.g. both directly beneath the GitHub folder
 
 `git clone https://github.com/voteamerica/voteamerica.github.io voteUSfrontend`
 
@@ -29,7 +60,56 @@ We need two folders at the same level. One contains the frontend git repo, the o
 #### ... of your forked repo (here named voteUSbackend)
 `cd .../voteUSbackend/docker`
 
-### Test Front-end PR
+#### Create specific machines (if required)
+ ```
+sh ./specific-machine-local.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-refactor
+sh ./specific-machine-local.sh cp-nodejs $(date +%s) https://github.com/jkbits1/backend docker-test
+sh ./specific-machine-local.sh cp-pg-server $(date +%s) https://github.com/jkbits1/backend docker-test
+sh ./specific-machine-local.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
+ ```
+
+#### 2) use docker-compose to create local system
+```
+docker-compose -f ./compose/full-stack-local/docker-compose-dev-build-test.yml up
+```
+
+## 2) Automated Testing 
+NOTE: app will not execute correctly in the standard browser, see the vnc steps below
+
+### a) use gh repos
+
+#### Create specific machines (if required)
+ ```
+sh ./specific-machine-test.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-changes
+sh ./specific-machine-test.sh cp-nodejs $(date +%s)
+sh ./specific-machine-test.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
+ ```
+
+#### Run the tests
+Parameter is nightwatch test group. If not specified, a default is used.
+```
+sh ./start-compose-tests.sh
+sh ./start-compose-tests.sh match
+```
+
+### b) use local dev env
+NOTE: app will not execute correctly in the standard browser, see the vnc steps below
+
+#### Create specific machines (if required)
+ ```
+sh ./specific-machine-test-volumes.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-changes
+sh ./specific-machine-test-volumes.sh cp-nodejs $(date +%s)
+sh ./specific-machine-test-volumes.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
+ ```
+
+#### Run the tests
+Parameter is nightwatch test group. If not specified, a default is used.
+```
+sh ./start-compose-tests-volumes.sh
+sh ./start-compose-tests-volumes.sh match
+```
+
+### c) Test Front-end PR
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 Push this new PR to origin (not upstream)
 
@@ -39,7 +119,7 @@ Push this new PR to origin (not upstream)
 #### 3) use docker-compose to create the full local system
 `docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up`
 
-### Test Backend-end PR
+### d) Test Backend-end PR
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 Push this new PR to origin (not upstream)
 
@@ -60,39 +140,10 @@ sh ./start-compose-tests-pr.sh match
 #### 4) Optional: use VNC viewer to watch the tests execute
 
 
-## 2) Automated Testing
-NOTE: app will not execute correctly in the standard browser, see the vnc steps below
 
-Run the tests
-```
-sh ./start-compose-tests.sh
-```
 
-These steps are part of the above script
-```
-. ./specific-machine-test.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
-docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up -d
-sleep 60
-docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh match2
 
-docker logs $ (docker ps | grep nigh | cut -c 1-4)
-docker wait fullstacktest_cp-test-runner_1
-
-```
-
-#### Create specific machines if required
- ```
-. ./specific-machine-local.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-changes
-. ./specific-machine-test.sh cp-nodejs $(date +%s)
-. ./specific-machine-test.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
- ```
-
-#### 2) use docker-compose to create local system
-`docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up`
-
-```
-docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml up | grep OK. | docker-compose -f ./compose/full-stack-test/docker-compose-dev-build-test.yml down
-```
+### Manual test steps 
 
 #### 3) test environment
 In a new terminal, run

@@ -1,0 +1,101 @@
+version: '2'
+
+services:
+  cp-front-end:
+    build:
+      context: ../../jekyll/
+      args:
+        REPO: https://github.com/voteamerica/voteamerica.github.io
+        BRANCH_NAME: master
+    image: gc-jekyll
+
+    ports: 
+      - "4000:4000"
+    depends_on:
+      - cp-nodejs
+      - cp-pg-server
+
+    command: jekyll serve -H 0.0.0.0 --watch --config /_config-local-host.yml
+
+    volumes:
+      - ../../../../voteUSfrontend:/usr/src/app/frontend
+
+    networks:
+      vpcbr:
+        ipv4_address: 10.4.0.4 # probably not needed, but keeps things in sync 
+
+  cp-nodejs:
+    build:
+      context: ../../nodeApp/
+      args:
+        REPO: https://github.com/voteamerica/backend
+        BRANCH_NAME: master
+    image: carpool
+
+    depends_on:
+    - cp-pg-server
+    # command: bash
+    # command: /expo-start.sh
+    # command: /expo-bash.sh
+    stdin_open: true
+    tty: true
+    environment:
+      - PGPASSWORD=pwd
+      - PGHOST=10.4.0.6
+    ports:
+      - "8000:8000"
+      - "5858:5858"
+      - "8080:8080"
+    links:
+      - cp-pg-server
+
+    networks:
+      vpcbr:
+        ipv4_address: 10.4.0.5
+
+  cp-pg-server:
+    build:
+      context: ../../pg-auto
+      args:
+        REPO: https://github.com/voteamerica/backend
+        BRANCH_NAME: master
+    image: pgres-cp
+    ports:
+      - "5432:5432"
+
+    networks:
+      vpcbr:
+        ipv4_address: 10.4.0.6
+
+  cp-pg-client:
+    build:
+      context: ../../pg-client
+      args:
+        REPO: https://github.com/voteamerica/backend
+        BRANCH_NAME: master
+    image: pg-client
+    depends_on:
+    - cp-pg-server
+
+    stdin_open: true
+    tty: true
+    environment:
+      - PGUSER=postgres
+      # - PGUSER=carpool_web
+      - PGDATABASE=carpoolvote
+      - PGPASSWORD=pwd
+      - PGHOST=10.4.0.6
+
+    networks:
+      vpcbr:
+        ipv4_address: 10.4.0.7
+
+# this supports networks with static ip addresses
+# http://stackoverflow.com/questions/39493490/provide-static-ip-to-docker-containers-via-docker-compose
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.4.0.0/16
+         gateway: 10.4.0.1
