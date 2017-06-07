@@ -3,6 +3,9 @@
 sudo: required
 dist: trusty
 
+# may be a useful refactor at some point
+# https://docs.travis-ci.com/user/docker/
+
 # services:
 #   - docker
 
