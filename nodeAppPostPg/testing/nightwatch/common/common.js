@@ -169,10 +169,10 @@ module.exports = {
       return this;
     },
 
-  // this test is called after first rider, then driver have been added - it's assumed 
+  // this test is called after a driver has been added - it's assumed 
   // app is at thanks driver page
-  'viewProposedMatch' : 
-    function viewProposedMatch (client) {      
+  'viewDriverSelfService' : 
+    function viewDriverSelfService (client) {      
       if (client !== undefined && client !== null) {
         this.currentClient = client;
       }
@@ -203,6 +203,21 @@ module.exports = {
         .waitForElementVisible('#driverProposedMatches > h3.self-service-heading', 3000)
         .assert.containsText('#driverProposedMatches > h3.self-service-heading', 'Driver Proposed Matches')
 
+      return this;
+    },
+
+  // this test is called after first rider, then driver have been added - it's assumed 
+  // app is at driver self service page, with a proposed match visible
+  'viewProposedMatch' : 
+    function viewProposedMatch (client) {      
+      if (client !== undefined && client !== null) {
+        this.currentClient = client;
+      }
+
+      var client = this.currentClient;
+      var dates = this.dates;
+
+      var newState = client
         // should check for first list item
         .assert.containsText('#driverProposedMatches > ul li', 'UUID_driver')
         .assert.containsText('#driverProposedMatches > ul li.list_button button', 'Accept')
@@ -305,6 +320,68 @@ module.exports = {
 
             done();
           })
+
+        return this;
+      },
+
+    // this test is called a driver has been added - it's assumed 
+    // app is at driver self service page
+    'pauseDriverSelfService' : 
+      function pauseDriverSelfService (client) {
+        if (client !== undefined && client !== null) {
+          this.currentClient = client;
+        }
+
+        var self = this;
+
+        var client = this.currentClient;
+        var dates = this.dates;
+        
+        var client = this.currentClient;
+        var dates = this.dates;
+
+        var newState = client
+          .waitForElementVisible('#btnPauseDriverMatch', 3000)
+
+          .click('#btnPauseDriverMatch')
+
+          .pause(3000)
+
+          .waitForElementNotPresent('', 3000)
+          .assert.containsText('#driverInfo > ul', 'PAUSED')
+
+          .saveScreenshot('./reports/driver-pause-notifications.png')
+
+        return this;
+      },
+
+    // this test is called a driver has been added - it's assumed 
+    // app is at driver self service page
+    'cancelDriverSelfService' : 
+      function cancelDriverSelfService (client) {
+        if (client !== undefined && client !== null) {
+          this.currentClient = client;
+        }
+
+        var self = this;
+
+        var client = this.currentClient;
+        var dates = this.dates;
+        
+        var client = this.currentClient;
+        var dates = this.dates;
+
+        var newState = client
+          .waitForElementVisible('#btnCancelDriveOffer', 3000)
+
+          .click('#btnCancelDriveOffer')
+
+          .pause(3000)
+
+          .waitForElementNotPresent('', 3000)
+          .assert.containsText('#driverInfo > ul', 'CANCEL')
+
+          .saveScreenshot('./reports/driver-cancel-notifications.png')
 
         return this;
       }

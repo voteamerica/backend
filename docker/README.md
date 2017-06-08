@@ -121,7 +121,19 @@ Push this new PR to origin (not upstream)
 
 ### d) Test Backend-end PR
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
-Push this new PR to origin (not upstream)
+
+Checkout this new pr branch.
+
+Now, if your repo is set up for travis, simply:
+
+i) merge with master if PR is behind master. If not merged automatically, stop at this step and mention this on the PR issue page. Otherwise, continue.
+
+ii) add .travis.yml if necessary (e.g. https://github.com/jkbits1/backend/blob/docker-test/.travis.yml)
+
+iii) push this new PR to origin (not upstream)
+
+iv) watch travis test the PR (e.g. https://travis-ci.org/jkbits1/backend/builds/240592981)
+
 
 #### 2) create specific build of front-end docker machine using --build-arg BRANCH_NAME=pr...
 ```
