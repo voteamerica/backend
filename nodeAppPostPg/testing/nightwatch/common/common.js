@@ -376,9 +376,10 @@ module.exports = {
 
           .click('#btnCancelDriveOffer')
 
+          .pause(2000)
+          .acceptAlert()
           .pause(3000)
 
-          .waitForElementNotPresent('', 3000)
           .assert.containsText('#driverInfo > ul', 'CANCEL')
 
           .saveScreenshot('./reports/driver-cancel-notifications.png')
