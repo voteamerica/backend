@@ -8,12 +8,14 @@ else
     TEST_GROUP=$1
 fi
 
-echo TEST_GROUP $TEST_GROUP
+echo run-tests TEST_GROUP $TEST_GROUP
 
 cd /usr/src/app/backend/nodeAppPostPg/testing/nightwatch
 
-echo sleep
+echo sleep 60
+
 sleep 60
+
 echo start tests
 
 # nightwatch 

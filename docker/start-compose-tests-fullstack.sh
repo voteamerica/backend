@@ -26,6 +26,8 @@ echo start compose tests - fullstack
 
 docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml up -d
 
+echo sleep 60
+
 sleep 60
 
 docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
