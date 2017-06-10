@@ -22,7 +22,7 @@ fi
 # http://www.tldp.org/LDP/abs/html/exit-status.html
 # http://bencane.com/2014/09/02/understanding-exit-codes-and-how-to-use-them-in-bash-scripts/
 
-echo start compose tests - volumes
+echo start compose tests - fullstack
 
 docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml up -d
 
