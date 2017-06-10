@@ -29,9 +29,9 @@ echo start compose local
 # ls ./s*.sh
 
 # build specific machines
-docker-compose -f ./compose/full-stack-local/docker-compose-dev-build-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-test --build-arg CACHEBUST=$(date +%s) cp-test-runner
+docker-compose -f ./compose/full-stack-local/docker-compose-local-fullstack.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-test --build-arg CACHEBUST=$(date +%s) cp-test-runner
 
-docker-compose -f ./compose/full-stack-local/docker-compose-dev-build-test.yml up -d
+docker-compose -f ./compose/full-stack-local/docker-compose-local-fullstack.yml up -d
 
 # sleep 60
 
@@ -42,7 +42,7 @@ docker-compose -f ./compose/full-stack-local/docker-compose-dev-build-test.yml u
 
 # docker logs fullstacktest_cp-test-runner_1
 
-# docker-compose -f ./compose/full-stack-local/docker-compose-dev-build-test.yml down
+# docker-compose -f ./compose/full-stack-local/docker-compose-local-fullstack.yml down
 
 # echo exit code: $EXIT_CODE
 
