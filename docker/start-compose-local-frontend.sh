@@ -14,14 +14,6 @@
 # http://www.tldp.org/LDP/abs/html/exit-status.html
 # http://bencane.com/2014/09/02/understanding-exit-codes-and-how-to-use-them-in-bash-scripts/
 
-echo start compose local
+echo start compose local frontend
 
-# pwd
-
-# ls ./s*.sh
-
-# build specific machines
-docker-compose -f ./compose/full-stack-local/docker-compose-local-fullstack.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-test --build-arg CACHEBUST=$(date +%s) cp-test-runner
-
-docker-compose -f ./compose/full-stack-local/docker-compose-local-fullstack.yml up
-
+docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml up
