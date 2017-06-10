@@ -21,7 +21,14 @@ Scroll below to the type of setup required.
 ### a) Front-end Dev
 
 #### Create the necessary local setup
-NOTE: it is better to fork the carpoolvote repo's rather than clone them directly. Use the commands below with your own repo in place of the carpoolvote repo's.
+**NOTE:**   it is best to clone from a fork of the carpoolvote repo's rather than directly. Use the commands below with your own forked repo in place of the carpoolvote repo's.
+
+**Front-end code folder name**
+
+The default value for the front-end folder is `voteUSfrontend`. This can be changed by either editing the `COMPOSE_DEV_FE_DIR` variable in the `.env` file (in the docker folder) or by setting the environment variable 
+
+```export COMPOSE_DEV_FE_DIR=...``` See the [docker documentation](https://docs.docker.com/compose/compose-file/compose-file-v2/#variable-substitution) for details.
+
 
 It is assumed that you already have a a local clone of the frontend repo, but if not, create one:
 

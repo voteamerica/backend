@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 
 services:
   cp-front-end:
@@ -15,22 +15,15 @@ services:
       - cp-nodejs
       - cp-pg-server
 
-    # https://jekyllrb.com/docs/usage/
-    # command: jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml
-    # NOTE: .yml file needs to contain IP addresses for this network (not the usual localhost)
-    # command: jekyll serve -H 0.0.0.0 --watch --config _config-local.yml 
+    # NOTE: .yml file contains IP addresses for this network (not the usual localhost)
     command: jekyll serve -H 0.0.0.0 --watch --config /_config-local-host.yml
-    # auto test
-    # command: jekyll serve -H 0.0.0.0 --config _config-local.yml --watch site.api="http://10.4.0.5:8000" site.cp_site="http://10.4.0.4:4000"
-    # local dev
-    #command: jekyll serve -H 0.0.0.0 --watch --config --api "http://localhost:8000" --cp_site "http://localhost:4000"
 
     volumes:
-      - ../../../../voteUSfrontend:/usr/src/app/frontend
+      - ../../../../${COMPOSE_DEV_FE_DIR:-voteUSfrontend}:/usr/src/app/frontend
 
     networks:
       vpcbr:
-        ipv4_address: 10.4.0.4 # probably not needed, but keeps things in sync 
+        ipv4_address: 10.4.0.4
 
   cp-nodejs:
     build:
@@ -48,12 +41,6 @@ services:
     stdin_open: true
     tty: true
     environment:
-      # - PGHOST=docker_cp-pg-server_1
-      #  it may be that this is overridden by entrypoint script 
-      # (or is it a dockerfile issue?)
-      #  remove this and pwd from entrypoint script, 
-      # also patch run commands to pass PGHOST/pwd as env var command line params
-
       - PGPASSWORD=pwd
       - PGHOST=10.4.0.6
     ports:

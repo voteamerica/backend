@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 
 services:
   cp-front-end:
@@ -18,7 +18,7 @@ services:
     command: jekyll serve -H 0.0.0.0 --watch --config /_config-local-host.yml
 
     volumes:
-      - ../../../../voteUSfrontend:/usr/src/app/frontend
+      - ../../../../${COMPOSE_DEV_FE_DIR:-voteUSfrontend}:/usr/src/app/frontend
 
     networks:
       vpcbr:
