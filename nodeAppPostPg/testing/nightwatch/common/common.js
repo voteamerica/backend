@@ -355,7 +355,7 @@ module.exports = {
         return this;
       },
 
-    // this test is called a driver has been added - it's assumed 
+    // this test is called after a driver has been added - it's assumed 
     // app is at driver self service page
     'cancelDriverSelfService' : 
       function cancelDriverSelfService (client) {
@@ -382,8 +382,40 @@ module.exports = {
 
           .assert.containsText('#driverInfo > ul', 'CANCEL')
 
-          .saveScreenshot('./reports/driver-cancel-notifications.png')
+          .saveScreenshot('./reports/driver-cancel-offer.png')
 
         return this;
-      }
+      },
+
+    // this test is called after a rider has been added - it's assumed 
+    // app is at rider self service page
+    'cancelRiderSelfService' : 
+      function cancelRiderSelfService (client) {
+        if (client !== undefined && client !== null) {
+          this.currentClient = client;
+        }
+
+        var self = this;
+
+        var client = this.currentClient;
+        var dates = this.dates;
+        
+        var client = this.currentClient;
+        var dates = this.dates;
+
+        var newState = client
+          .waitForElementVisible('#btnCancelRideRequest', 3000)
+
+          .click('#btnCancelRideRequest')
+
+          .pause(2000)
+          .acceptAlert()
+          .pause(3000)
+
+          .assert.containsText('#riderInfo > ul', 'CANCEL')
+
+          .saveScreenshot('./reports/rider-cancel-request.png')
+
+        return this;
+      }      
 };

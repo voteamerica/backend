@@ -14,78 +14,70 @@ sudo chmod +x /usr/local/bin/docker-compose
 ```
 
 ## Two main setups - Dev and Auto-testing
-Scroll below to the type of setup required.
+Scroll below to the type of setup required, front-end or full-stack.
 
 ## 1) Dev
 
-### a) Front-end Dev
-
 #### Create the necessary local setup
-**NOTE:**   it is best to clone from a fork of the carpoolvote repo's rather than directly. Use the commands below with your own forked repo in place of the carpoolvote repo's.
+**IMPORTANT:**
+1) It is best to clone from a fork of the carpoolvote repo's rather than directly. Use the commands below with your own forked repo in place of the carpoolvote repo's.
 
-**Front-end code folder name**
+2) Folders for the frontend and backend repo's must be at the same level, e.g. both directly beneath the GitHub folder
 
-The default value for the front-end folder is `voteUSfrontend`. This can be changed by either editing the `COMPOSE_DEV_FE_DIR` variable in the `.env` file (in the docker folder) or by setting the environment variable 
+**Front-end code folder**
+
+The default value for the front-end folder is `voteUSfrontend`. This can be changed by either editing the `COMPOSE_DEV_FE_DIR` variable in the `.env` file (in the docker folder) or by setting this as an environment variable.
 
 ```export COMPOSE_DEV_FE_DIR=...``` See the [docker documentation](https://docs.docker.com/compose/compose-file/compose-file-v2/#variable-substitution) for details.
-
 
 It is assumed that you already have a a local clone of the frontend repo, but if not, create one:
 
 `git clone https://github.com/voteamerica/voteamerica.github.io voteUSfrontend`
 
-If it does not already exist, clone the backend git repo. The tests and the system that supports them exist in this repo.
+**Back-end code folder**
+
+If it does not already exist, clone the backend git repo. It can be named however you wish. Here it is called `voteUSbackend`.
 
 `git clone https://github.com/voteamerica/backend voteUSbackend`
+
+### a) Front-end Dev
 
 #### Go to the docker folder ... 
 ... of your backend repo (here named voteUSbackend)
 `cd .../voteUSbackend/docker`
 
 #### Create specific machines (if required)
- ```
-sh ./specific-machine-local-front.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-refactor
+This might be necessary if you are testing against a version of either the node app or db that is under development. 
+
+```
 sh ./specific-machine-local-front.sh cp-nodejs $(date +%s) https://github.com/voteamerica/backend master
 sh ./specific-machine-local-front.sh cp-pg-server $(date +%s) https://github.com/voteamerica/backend master
  ```
 
 #### use docker-compose to create local system
 ```
-docker-compose -f ./compose/full-stack-local/docker-compose-dev-frontend.yml up
+docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml up
 ```
 
-### b) General Dev
+### b) Fullstack Dev
+This works directly from the files in the folders for your front and back-end repos.
 
-### Create the necessary local setup
-We need folders for the frontend and backend repo's to exist at the same level, e.g. both directly beneath the GitHub folder
-
-`git clone https://github.com/voteamerica/voteamerica.github.io voteUSfrontend`
-
-`git clone https://github.com/voteamerica/backend voteUSbackend`
-
-### Go to the docker folder ... 
-#### ... of your forked repo (here named voteUSbackend)
+#### Go to the docker folder ... 
+##### ... of your forked repo (here named voteUSbackend)
 `cd .../voteUSbackend/docker`
-
-#### Create specific machines (if required)
- ```
-sh ./specific-machine-local.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-refactor
-sh ./specific-machine-local.sh cp-nodejs $(date +%s) https://github.com/jkbits1/backend docker-test
-sh ./specific-machine-local.sh cp-pg-server $(date +%s) https://github.com/jkbits1/backend docker-test
-sh ./specific-machine-local.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
- ```
 
 #### 2) use docker-compose to create local system
 ```
-docker-compose -f ./compose/full-stack-local/docker-compose-dev-build-test.yml up
+docker-compose -f ./compose/full-stack-local/docker-compose-local-fullstack.yml up
 ```
 
 ## 2) Automated Testing 
 NOTE: app will not execute correctly in the standard browser, see the vnc steps below
 
-### a) use gh repos
+### a) Use github repos (ignores any local code)
 
 #### Create specific machines (if required)
+E.g. for specific front-end, node app, db or test-runner repo branches.
  ```
 sh ./specific-machine-test.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-changes
 sh ./specific-machine-test.sh cp-nodejs $(date +%s)
@@ -99,22 +91,32 @@ sh ./start-compose-tests.sh
 sh ./start-compose-tests.sh match
 ```
 
-### b) use local dev env
-NOTE: app will not execute correctly in the standard browser, see the vnc steps below
+### b) Use local dev env - frontend (local code is used for frontend)
 
 #### Create specific machines (if required)
  ```
-sh ./specific-machine-test-volumes.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-changes
-sh ./specific-machine-test-volumes.sh cp-nodejs $(date +%s)
-sh ./specific-machine-test-volumes.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
+sh ./specific-machine-test-frontend.sh cp-nodejs $(date +%s)
+sh ./specific-machine-test-frontend.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
  ```
 
 #### Run the tests
 Parameter is nightwatch test group. If not specified, a default is used.
 ```
-sh ./start-compose-tests-volumes.sh
-sh ./start-compose-tests-volumes.sh match
+sh ./start-compose-tests-frontend.sh
+sh ./start-compose-tests-frontend.sh match
 ```
+
+### b) Use local dev env - fullstack (local code is used for frontend, backend & test runner)
+
+#### Run the tests
+Parameter is nightwatch test group. If not specified, a default is used.
+```
+sh ./start-compose-tests-fullstack.sh
+sh ./start-compose-tests-fullstack.sh match
+```
+
+
+### review c) d)
 
 ### c) Test Front-end PR
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)

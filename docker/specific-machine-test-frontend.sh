@@ -37,4 +37,4 @@ echo CACHEBUST $C
 echo REPO $R
 echo BRANCH_NAME $B
 
-docker-compose -f ./compose/full-stack-test/docker-compose-test-volumes.yml build --build-arg REPO=$R --build-arg BRANCH_NAME=$B --build-arg CACHEBUST=$C $M
+docker-compose -f ./compose/full-stack-test/docker-compose-test-frontend.yml build --build-arg REPO=$R --build-arg BRANCH_NAME=$B --build-arg CACHEBUST=$C $M

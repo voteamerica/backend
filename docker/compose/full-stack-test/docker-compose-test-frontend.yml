@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 
 services:
   cp-test:
@@ -75,9 +75,6 @@ services:
       - "8000:8000"
     links:
       - cp-pg-server
-    # volumes:
-    #   - ../../..:/usr/src/app/backend
-    #   - node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/
 
     networks:
       vpcbr:
@@ -92,8 +89,6 @@ services:
     image: pgres-cp
     ports:
       - "5433:5432"
-    # volumes:
-    #   - ../../..:/usr/src/app/backend
 
     networks:
       vpcbr:
@@ -118,8 +113,6 @@ services:
       - PGDATABASE=carpoolvote
       - PGPASSWORD=pwd
       - PGHOST=10.5.0.6
-    # volumes:
-    #   - ../../..:/usr/src/app/backend
 
     networks:
       vpcbr:
@@ -140,9 +133,6 @@ services:
 
     stdin_open: true
     tty: true
-    # volumes:
-    #   - ../../..:/usr/src/app/backend
-    #   - node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/
 
     networks:
       vpcbr:
