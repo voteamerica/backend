@@ -35,7 +35,7 @@ fi
 
 # https://docs.travis-ci.com/user/notifications/
 
-echo start compose tests
+echo start compose tests - travis ci
 
 # pwd
 
