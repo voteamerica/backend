@@ -37,4 +37,4 @@ echo CACHEBUST $C
 echo REPO $R
 echo BRANCH_NAME $B
 
-docker-compose -f ./compose/full-stack-local/docker-compose-dev-frontend.yml build --build-arg REPO=$R --build-arg BRANCH_NAME=$B --build-arg CACHEBUST=$C $M
+docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml build --build-arg REPO=$R --build-arg BRANCH_NAME=$B --build-arg CACHEBUST=$C $M
