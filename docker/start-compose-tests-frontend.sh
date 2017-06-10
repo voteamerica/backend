@@ -22,16 +22,16 @@ fi
 # http://www.tldp.org/LDP/abs/html/exit-status.html
 # http://bencane.com/2014/09/02/understanding-exit-codes-and-how-to-use-them-in-bash-scripts/
 
-echo start compose tests - volumes
+echo start compose tests - frontend
 
 # pwd
 
 # ls ./s*.sh
 
 # build specific machines
-# docker-compose -f ./compose/full-stack-test/docker-compose-test-volumes.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-test --build-arg CACHEBUST=$(date +%s) cp-test-runner
+# docker-compose -f ./compose/full-stack-test/docker-compose-test-frontend.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-test --build-arg CACHEBUST=$(date +%s) cp-test-runner
 
-docker-compose -f ./compose/full-stack-test/docker-compose-test-volumes.yml up -d
+docker-compose -f ./compose/full-stack-test/docker-compose-test-frontend.yml up -d
 
 sleep 60
 
@@ -42,7 +42,7 @@ EXIT_CODE=$?
 
 docker logs fullstacktest_cp-test-runner_1
 
-docker-compose -f ./compose/full-stack-test/docker-compose-test-volumes.yml down
+docker-compose -f ./compose/full-stack-test/docker-compose-test-frontend.yml down
 
 echo exit code: $EXIT_CODE
 

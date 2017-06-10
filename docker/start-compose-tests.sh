@@ -29,7 +29,7 @@ echo start compose tests
 # ls ./s*.sh
 
 # build specific machines
-docker-compose -f ./compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-test --build-arg CACHEBUST=$(date +%s) cp-test-runner
+# docker-compose -f ./compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-test --build-arg CACHEBUST=$(date +%s) cp-test-runner
 
 docker-compose -f ./compose/full-stack-test/docker-compose-test.yml up -d
 

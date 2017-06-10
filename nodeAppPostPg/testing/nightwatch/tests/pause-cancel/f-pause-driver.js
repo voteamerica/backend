@@ -1,13 +1,16 @@
 var common = require('../../common/common.js');
 
 module.exports = {
-  'rider-self_svc': function (client) {
+  'driver-pause-cancel': function (client) {
 
     common
       .addDriver(client)
       .viewDriverSelfService()
       .pauseDriverSelfService()
       .cancelDriverSelfService()
+      .addRider()
+      .viewRiderSelfService()
+      .cancelRiderSelfService()      
       .finish();
   }
 };

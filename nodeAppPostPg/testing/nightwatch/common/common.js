@@ -6,7 +6,7 @@ module.exports = {
   'riderSelfServicePageUrl' : "",
 
   'finish' : 
-    function finish (client) {
+    function (client) {
       if (client !== undefined && client !== null) {
         this.currentClient = client;
       }
@@ -19,7 +19,7 @@ module.exports = {
     },
 
   'addDriver' : 
-    function addDriver (client) {
+    function (client) {
       if (client !== undefined && client !== null) {
         this.currentClient = client;
       }
@@ -27,7 +27,7 @@ module.exports = {
       var client = this.currentClient;
       var dates = this.dates;
 
-      var newState = client
+      client
         .url('http://10.5.0.4:4000/#offer-ride')
         .waitForElementVisible('body', 3000)
         .assert.containsText('form#offer-ride legend', 'What can you offer?')
@@ -89,18 +89,19 @@ module.exports = {
     },
 
   'addRider' : 
-    function addRider (client) {
+    function (client) {
       if (client !== undefined && client !== null) {
         this.currentClient = client;
       }
 
-      console.log("addRider");
-
-      var self = this;
-
       var client = this.currentClient;
       var dates = this.dates;
-      var newState = client
+      
+      var self = this;
+
+      console.log("addRider");
+
+      client
         .url('http://10.5.0.4:4000/#need-ride')
         // .waitForElementVisible('body', 3000)
         .waitForElementVisible('form#need-ride', 3000)
@@ -172,7 +173,7 @@ module.exports = {
   // this test is called after a driver has been added - it's assumed 
   // app is at thanks driver page
   'viewDriverSelfService' : 
-    function viewDriverSelfService (client) {      
+    function (client) {      
       if (client !== undefined && client !== null) {
         this.currentClient = client;
       }
@@ -180,7 +181,7 @@ module.exports = {
       var client = this.currentClient;
       var dates = this.dates;
 
-      var newState = client
+      client
         // .url('http://10.5.0.4:4000/#need-ride')
         .waitForElementVisible('.self-service-url', 3000)
         .assert.containsText('.self-service-url', 'self-service portal')
@@ -209,7 +210,7 @@ module.exports = {
   // this test is called after first rider, then driver have been added - it's assumed 
   // app is at driver self service page, with a proposed match visible
   'viewProposedMatch' : 
-    function viewProposedMatch (client) {      
+    function (client) {      
       if (client !== undefined && client !== null) {
         this.currentClient = client;
       }
@@ -217,7 +218,7 @@ module.exports = {
       var client = this.currentClient;
       var dates = this.dates;
 
-      var newState = client
+      client
         // should check for first list item
         .assert.containsText('#driverProposedMatches > ul li', 'UUID_driver')
         .assert.containsText('#driverProposedMatches > ul li.list_button button', 'Accept')
@@ -230,7 +231,7 @@ module.exports = {
     // this test is called after first rider, then driver have been added - it's assumed 
     // app is at driver self service page, with a proposed match visible
     'acceptMatch' : 
-      function acceptMatch (client) {      
+      function (client) {      
         if (client !== undefined && client !== null) {
           this.currentClient = client;
         }
@@ -238,7 +239,7 @@ module.exports = {
         var client = this.currentClient;
         var dates = this.dates;
 
-        var newState = client
+        client
           .click('#driverProposedMatches > ul li.list_button button')
 
           .waitForElementNotPresent('#driverProposedMatches > ul li.list_button button', 3000)
@@ -255,7 +256,7 @@ module.exports = {
     // this test is called after first rider, then driver have been added - it's assumed 
     // app is at driver self service page, with an accepted match visible
     'driverCancelMatch' : 
-      function driverCancelMatch (client) {      
+      function (client) {      
         if (client !== undefined && client !== null) {
           this.currentClient = client;
         }
@@ -263,7 +264,7 @@ module.exports = {
         var client = this.currentClient;
         var dates = this.dates;
 
-        var newState = client
+        client
           .click('#driverConfirmedMatches > ul li.list_button button')
 
           // alert button appears
@@ -281,20 +282,20 @@ module.exports = {
     // this test is called after first rider, then driver have been added - it's assumed 
     // app is at rider self service page
     'viewRiderSelfService' : 
-      function viewRiderSelfService (client) {
+      function (client) {
         if (client !== undefined && client !== null) {
           this.currentClient = client;
         }
 
-        var self = this;
-
         var client = this.currentClient;
         var dates = this.dates;
         
+        var self = this;
+
         console.log("rider info url 1: ", this.riderSelfServicePageUrl);
         // console.log("rider info url: ", riderUrl);
 
-        var newState = client
+        client
           .perform(function (client, done) {
 
             console.log("rider info url 2: ", self.riderSelfServicePageUrl);
@@ -327,20 +328,17 @@ module.exports = {
     // this test is called a driver has been added - it's assumed 
     // app is at driver self service page
     'pauseDriverSelfService' : 
-      function pauseDriverSelfService (client) {
+      function (client) {
         if (client !== undefined && client !== null) {
           this.currentClient = client;
         }
 
-        var self = this;
-
         var client = this.currentClient;
         var dates = this.dates;
         
-        var client = this.currentClient;
-        var dates = this.dates;
+        var self = this;
 
-        var newState = client
+        client
           .waitForElementVisible('#btnPauseDriverMatch', 3000)
 
           .click('#btnPauseDriverMatch')
@@ -355,23 +353,20 @@ module.exports = {
         return this;
       },
 
-    // this test is called a driver has been added - it's assumed 
+    // this test is called after a driver has been added - it's assumed 
     // app is at driver self service page
     'cancelDriverSelfService' : 
-      function cancelDriverSelfService (client) {
+      function (client) {
         if (client !== undefined && client !== null) {
           this.currentClient = client;
         }
 
-        var self = this;
-
         var client = this.currentClient;
         var dates = this.dates;
         
-        var client = this.currentClient;
-        var dates = this.dates;
+        var self = this;
 
-        var newState = client
+        client
           .waitForElementVisible('#btnCancelDriveOffer', 3000)
 
           .click('#btnCancelDriveOffer')
@@ -382,8 +377,59 @@ module.exports = {
 
           .assert.containsText('#driverInfo > ul', 'CANCEL')
 
-          .saveScreenshot('./reports/driver-cancel-notifications.png')
+          .saveScreenshot('./reports/driver-cancel-offer.png')
 
         return this;
-      }
+      },
+
+    // this test is called after a rider has been added - it's assumed 
+    // app is at rider self service page
+    'cancelRiderSelfService' : 
+      function (client) {
+        if (client !== undefined && client !== null) {
+          this.currentClient = client;
+        }
+
+        var client = this.currentClient;
+        var dates = this.dates;
+        
+        var self = this;
+
+        client
+          .waitForElementVisible('#btnCancelRideRequest', 3000)
+
+          .click('#btnCancelRideRequest')
+
+          .pause(2000)
+          .acceptAlert()
+          .pause(3000)
+
+          .assert.containsText('#riderInfo > ul', 'CANCEL')
+
+          .saveScreenshot('./reports/rider-cancel-request.png')
+
+        return this;
+      },
+
+    // this test is run at the start
+    'matchRiderDriver': 
+      function (client) {
+
+        if (client !== undefined && client !== null) {
+          this.currentClient = client;
+        }
+
+        var client = this.currentClient;
+        var dates = this.dates;
+        
+        var self = this;
+
+        this
+          .addRider(client)
+          .addDriver()
+          .viewDriverSelfService()
+          .viewProposedMatch().acceptMatch().driverCancelMatch();
+
+        return this;
+    }
 };

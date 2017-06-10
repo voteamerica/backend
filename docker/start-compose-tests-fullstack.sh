@@ -22,24 +22,11 @@ fi
 # http://www.tldp.org/LDP/abs/html/exit-status.html
 # http://bencane.com/2014/09/02/understanding-exit-codes-and-how-to-use-them-in-bash-scripts/
 
-# https://docs.travis-ci.com/user/environment-variables/
-# https://blog.travis-ci.com/2014-08-22-environment-variables/
-# https://docs.travis-ci.com/user/ci-environment/
-# https://docs.travis-ci.com/user/encryption-keys/
+echo start compose tests - fullstack
 
-# https://docs.travis-ci.com/user/customizing-the-build#The-Build-Lifecycle
+docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml up -d
 
-# https://docs.travis-ci.com/user/pull-requests/
-
-# https://docs.travis-ci.com/user/status-images/
-
-# https://docs.travis-ci.com/user/notifications/
-
-echo start compose tests - travis ci
-
-# pwd
-
-# ls ./s*.sh
+echo sleep 60
 
 sleep 60
 
@@ -47,6 +34,8 @@ docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
 EXIT_CODE=$?
 
 docker logs fullstacktest_cp-test-runner_1
+
+docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml down
 
 echo exit code: $EXIT_CODE
 
