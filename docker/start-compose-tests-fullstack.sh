@@ -26,9 +26,32 @@ echo start compose tests - fullstack
 
 docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml up -d
 
-echo sleep 60
+# echo sct-full sleep 60
+# sleep 60
 
-sleep 60
+echo sct-full sleep 45
+sleep 45
+
+
+# docker logs fullstacktest_cp-test_1 | grep Selenium
+# --line-buffered not supported everywhere
+# docker logs fullstacktest_cp-test_1 | grep --line-buffered Selenium
+# docker logs fullstacktest_cp-test_1 | sed -n '/Selenium/p'
+
+
+echo sct-full test runner status
+# https://stackoverflow.com/questions/34724980/finding-a-string-in-docker-logs-of-container
+docker logs fullstacktest_cp-test_1 > stdout.log 2>stderr.log
+cat stdout.log | grep Selenium
+
+echo sct-full db status
+docker logs fullstacktest_cp-pg-server_1 > cp-pg-server-stdout.log 2>cp-pg-server-stderr.log
+cat cp-pg-server-stdout.log | grep 'autovacuum launcher started'
+
+echo sct-full node app status
+docker logs fullstacktest_cp-nodejs_1 > cp-nodejs-stdout.log 2>cp-nodejs-stderr.log
+cat cp-nodejs-stdout.log | grep 'Server running'
+
 
 docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
 EXIT_CODE=$?

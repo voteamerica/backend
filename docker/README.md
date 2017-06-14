@@ -108,6 +108,12 @@ sh ./start-compose-tests-frontend.sh match
 
 ### b) Use local dev env - fullstack (local code is used for frontend, backend & test runner)
 
+#### Create specific machines (if required)
+Possibly needed if change change the run-tests.sh script in the nightwatch docker folder. The same applies to changes to scripts in the other docker folders.
+```
+sh ./specific-machine-test-fullstack.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
+```
+
 #### Run the tests
 Parameter is nightwatch test group. If not specified, a default is used.
 ```
@@ -306,3 +312,9 @@ https://blog.docker.com/2016/07/live-debugging-docker/
 
 https://code.visualstudio.com/docs/nodejs/nodejs-debugging
 https://alexanderzeitler.com/articles/debugging-a-nodejs-es6-application-in-a-docker-container-using-visual-studio-code/
+
+### virtualbox portforward list, update
+```
+./vboxmanage showvminfo default | grep 'host port'
+VBoxManage modifyvm "VM name" --natpf1 "guestssh,tcp,127.0.0.1,2222,,22"
+```

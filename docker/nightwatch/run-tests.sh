@@ -8,18 +8,17 @@ else
     TEST_GROUP=$1
 fi
 
-echo run-tests TEST_GROUP $TEST_GROUP
+echo run-tests - TEST_GROUP $TEST_GROUP
 
 cd /usr/src/app/backend/nodeAppPostPg/testing/nightwatch
 
-echo sleep 60
+# echo run-tests - sleep 60
+# sleep 60
 
-sleep 60
+echo run-tests - sleep 20
+sleep 20
 
-echo start tests
-
-# nightwatch 
-# nightwatch --group basic
+echo run-tests - start tests
 
 nightwatch --group $TEST_GROUP
 
@@ -27,7 +26,7 @@ nightwatch --group $TEST_GROUP
 # https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
 EXIT_CODE=$?
 
-echo tests complete $EXIT_CODE
+echo run-tests - tests complete $EXIT_CODE
 
 exit $EXIT_CODE
 

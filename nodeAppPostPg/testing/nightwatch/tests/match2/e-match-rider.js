@@ -4,8 +4,9 @@ module.exports = {
   'rider-self_svc': function (client) {
 
     common
-      .addRider(client)
+      .testAddRider(client)
       .viewRiderSelfService()
-      .finish();
+      // .finish();
+      .testFinish();
   }
 };

@@ -41,7 +41,23 @@ echo start compose tests - travis ci
 
 # ls ./s*.sh
 
+echo sct-travis sleep 60
+
 sleep 60
+
+echo sct-travis test runner status
+# https://stackoverflow.com/questions/34724980/finding-a-string-in-docker-logs-of-container
+docker logs fullstacktest_cp-test_1 > stdout.log 2>stderr.log
+cat stdout.log | grep Selenium
+
+echo sct-travis db status
+docker logs fullstacktest_cp-pg-server_1 > cp-pg-server-stdout.log 2>cp-pg-server-stderr.log
+cat cp-pg-server-stdout.log | grep 'autovacuum launcher started'
+
+echo sct-travis node app status
+docker logs fullstacktest_cp-nodejs_1 > cp-nodejs-stdout.log 2>cp-nodejs-stderr.log
+cat cp-nodejs-stdout.log | grep 'Server running'
+
 
 docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
 EXIT_CODE=$?
