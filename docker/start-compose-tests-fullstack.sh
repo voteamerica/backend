@@ -53,6 +53,10 @@ cat cp-pg-server-stdout.log | grep 'autovacuum launcher started'
 echo sct-full node app status
 docker logs fullstacktest_cp-nodejs_1 > cp-nodejs-stdout.log 2>cp-nodejs-stderr.log
 cat cp-nodejs-stdout.log | grep 'Server running'
+
+echo sct fe status
+docker logs fullstacktest_cp-front-end_1 > cp-front-end-stdout.log 2>cp-pg-front-end-stderr.log
+cat cp-front-end-stdout.log | grep 'Server running'
 cat cp-front-end-stdout.log | grep 'Configuration file'
 cat cp-front-end-stdout.log | grep 'Source'
 cat cp-front-end-stdout.log | grep 'Destination'
@@ -61,10 +65,10 @@ echo sct-full pg-client status
 docker logs fullstacktest_cp-client_1 > cp-client-stdout.log 2>cp-pg-client-stderr.log
 cat cp-client-stdout.log | grep 'DO'
 
-curl 10.5.0.6:5432
+# curl 10.5.0.6:5432
 curl 10.5.0.5:8000
-# curl 10.5.0.4:4000
-curl 10.5.0.3:4444
+curl 10.5.0.4:4000 | grep "Every American"
+curl 10.5.0.3:4444 | grep "Selenium"
 
 docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
 EXIT_CODE=$?
