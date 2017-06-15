@@ -35,7 +35,8 @@ services:
     # https://jekyllrb.com/docs/usage/
     # NOTE: .yml file needs to contain IP addresses for this network (not the usual localhost)
     # command: jekyll serve -H 0.0.0.0 --watch --config /_config-local-ip.yml
-    command: jekyll serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-ip.yml
+    # command: jekyll serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-ip.yml
+    command: jekyll serve -H 10.5.0.4 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-ip.yml
 
     volumes:
       - ../../../../voteUSfrontend:/usr/src/app/frontend
