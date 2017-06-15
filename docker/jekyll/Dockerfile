@@ -1,11 +1,14 @@
-FROM grahamc/jekyll
+FROM jekyll/jekyll:pages
+# FROM grahamc/jekyll
 
-RUN apt-get update
+# RUN apt-get update
 
 # for editing 
-RUN apt-get install -y vim-tiny
+# RUN apt-get install -y vim-tiny
 
-RUN apt-get install -y git
+# RUN apt-get install -y git
+
+RUN apk --update add git vim
 
 ARG CACHEBUST=1
 ARG FE_PATH=/usr/src/app/frontend/
@@ -30,4 +33,4 @@ COPY ./_config-local-ip.yml /
 
 # ENTRYPOINT ["jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml"]
 
-ENTRYPOINT [""]
+# ENTRYPOINT [""]

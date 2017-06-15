@@ -24,7 +24,7 @@ services:
       args:
         REPO: https://github.com/voteamerica/voteamerica.github.io
         BRANCH_NAME: master
-    image: gc-jekyll
+    # image: gc-jekyll
 
     ports: 
       - "4000:4000"

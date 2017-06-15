@@ -73,7 +73,7 @@ cat cp-client-stdout.log | grep 'DO'
 
 curl 10.5.0.6:5432
 curl 10.5.0.5:8000
-curl 10.5.0.4:4000
+# curl 10.5.0.4:4000
 curl 10.5.0.3:4444
 
 
