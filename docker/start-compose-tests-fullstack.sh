@@ -70,6 +70,11 @@ curl 10.5.0.5:8000
 curl 10.5.0.4:4000 | grep "Every American"
 curl 10.5.0.3:4444 | grep "Selenium"
 
+curl localhost:8000
+curl localhost:4000 | grep "Every American"
+curl localhost:4444 | grep "Selenium"
+
+
 docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
 EXIT_CODE=$?
 

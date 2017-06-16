@@ -34,7 +34,8 @@ services:
 
     # command: jekyll serve -H 0.0.0.0 --watch --config /_config-local-ip.yml
     # command: jekyll serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-ip.yml
-    command: jekyll serve -H 10.5.0.4 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-ip.yml
+    # command: jekyll serve -H 10.5.0.4 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-ip.yml
+    command: jekyll serve --watch --source /usr/src/app/frontend --config /_config-local-ip.yml
 
     networks:
       vpcbr:
@@ -113,7 +114,7 @@ services:
 
     depends_on:
     - cp-test
-    command: /bin/bash
+    # command: /bin/bash
     # command: /run-tests.sh match2
 
     stdin_open: true
