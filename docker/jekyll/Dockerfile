@@ -23,10 +23,15 @@ RUN git clone --single-branch --branch $BRANCH_NAME $REPO frontend \
 
 WORKDIR $FE_PATH
 
+RUN pwd
+RUN ls
+
 RUN git fetch origin
 RUN git merge origin/$BRANCH_NAME
 
-RUN cd $FE_PATH
+# RUN cd $FE_PATH
+
+# RUN mkdir $FE_PATH/_site
 
 COPY ./_config-local-host.yml /
 COPY ./_config-local-ip.yml /
@@ -34,3 +39,5 @@ COPY ./_config-local-ip.yml /
 # ENTRYPOINT ["jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml"]
 
 # ENTRYPOINT [""]
+# ENTRYPOINT ["/bin/bash"]
+
