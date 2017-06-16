@@ -1,10 +1,29 @@
 // NOTE: module.exports at end of file
 
-function createTest (testFunction) {
+// IMPORTANT: test functions created here are used in a chain. See any files under the tests folder
+//            or just think of jQuery functions.
+
+//            There are two ways to write chainable test functions, both are pretty easy. Choice
+//            is a matter of personal taste.
+
+//            NOTE: either type of test function is created as part of the testObject below 
+//            (in other words, NOT as a global module function).
+
+//            1) create a function in the same pattern as templateTest() below. The initial "var client..."
+//               and "return this" must be in place. Your code replaces "client.end()".
+
+//               This pattern has a little boiler-plate but it's short and the pattern is readable.
+
+//            2) create a function using createChainableTest(), e.g. addRider(). This removes boiler-plate
+//               except for passing your function to createChainableTest(). Instead of "this", use "testObject".
+//               Remember to pass client as a param to your function (as with all nightwatch functions).
+
+function createChainableTest (testFunction) {
   var testFn = function (client) {
       var client = this.setClient(client);
       
-      testFunction(this, client);
+      // testFunction(this, client);
+      testFunction(client);
 
       return this;
     };
@@ -36,13 +55,13 @@ var testObject = {
       return this;
     },
 
-  'testFinish' : 
-    createTest (
-      function (thisx, client) {
+  'finish' : 
+    createChainableTest (
+      function (client) {
         client.end();
       }),
 
-  'finish' : 
+  'finishOrig' : 
     function (client) {
       var client = this.setClient(client);
             
@@ -52,9 +71,10 @@ var testObject = {
     },
 
   'addDriver' : 
+    createChainableTest (
     function (client) {
-      var client = this.setClient(client);
-      var dates = this.dates;
+      // var client = this.setClient(client);
+      var dates = testObject.dates;
 
       client
         .url('http://10.5.0.4:4000/#offer-ride')
@@ -113,14 +133,14 @@ var testObject = {
         .waitForElementVisible('h1#thanks-header', 5000)
         .assert.containsText('h1#thanks-header', 'Thank you');
 
-      // return newState;
-      return this;
-    },
+      // return this;
+    }),
 
-  'testAddRider' : 
-    createTest (
-      function (self, client) {
-      var dates = self.dates;
+  'addRider' : 
+    createChainableTest (
+      // function (self, client) {
+      function (client) {
+      var dates = testObject.dates;
       
       // var self = thisx;
 
@@ -185,9 +205,12 @@ var testObject = {
           // this.assert.equal(typeof result, "object");
           // this.assert.equal(result.status, 0);
           // this.assert.equal(result.value, "#home");
-          self.riderSelfServicePageUrl = result.value;
 
-          console.log("rider url: ", self.riderSelfServicePageUrl);
+          // self.riderSelfServicePageUrl = result.value;
+          testObject.riderSelfServicePageUrl = result.value;
+
+          // console.log("rider url: ", self.riderSelfServicePageUrl);
+          console.log("rider url: ", testObject.riderSelfServicePageUrl);
         });
 
         // .assert.containsText('div.with-errors ul li', 'Please fill in')
@@ -195,14 +218,14 @@ var testObject = {
 
       }),
 
-  'addRider' : 
+  'addRiderOrig' : 
     function (client) {
       var client = this.setClient(client);
       var dates = this.dates;
       
       var self = this;
 
-      console.log("addRider");
+      console.log("addRiderOrig");
 
       client
         .url('http://10.5.0.4:4000/#need-ride')
@@ -366,7 +389,7 @@ var testObject = {
       return this;
     },
 
-  // this test is called after first rider, then driver have been added - it's assumed 
+  // this test is called after a rider has been added - it's assumed 
   // app is at rider self service page
   'viewRiderSelfService' : 
     function (client) {
