@@ -60,14 +60,17 @@ echo sct-travis node app status
 docker logs fullstacktest_cp-nodejs_1 > cp-nodejs-stdout.log 2>cp-nodejs-stderr.log
 cat cp-nodejs-stdout.log | grep 'Server running'
 
-echo sct-full fe status
+echo sct-travis fe status
 docker logs fullstacktest_cp-front-end_1 > cp-front-end-stdout.log 2>cp-pg-front-end-stderr.log
 cat cp-front-end-stdout.log | grep 'Server running'
 cat cp-front-end-stdout.log | grep 'Configuration file'
 cat cp-front-end-stdout.log | grep 'Source'
 cat cp-front-end-stdout.log | grep 'Destination'
 
-echo sct-full pg-client status
+echo sct-travis sleep 10
+sleep 10
+
+echo sct-travis pg-client status
 docker logs fullstacktest_cp-client_1 > cp-client-stdout.log 2>cp-pg-client-stderr.log
 cat cp-client-stdout.log | grep 'DO'
 
@@ -92,6 +95,13 @@ then
     exit 0
 else 
     echo "tests failed"
+
+    docker logs fullstacktest_cp-nodejs_1
+    docker logs fullstacktest_cp-pg-server_1
+    docker logs fullstacktest_cp-pg-client_1
+    docker logs fullstacktest_cp-front-end_1
+    docker logs fullstacktest_cp-test_1
+
     exit $EXIT_CODE
 fi
 
