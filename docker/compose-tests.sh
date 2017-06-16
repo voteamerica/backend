@@ -76,7 +76,7 @@ curl 10.5.0.5:8000
 curl 10.5.0.4:4000 | grep "Every American"
 curl 10.5.0.3:4444 | grep "Selenium"
 
-curl http://localhost:4444/selenium-server/driver?cmd=getLogMessages
+curl http://10.5.0.3:4444/selenium-server/driver?cmd=getLogMessages
 
 
 docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
