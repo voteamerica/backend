@@ -5,6 +5,8 @@ import { DbDefsSubmits } from "./DbDefsSubmits";
 import { DbDefsMatches} from "./DbDefsMatches";
 import { DbDefsExistsInfo} from "./DbDefsExistsInfo";
 import { DbDefsMatchFunctions} from "./DbDefsMatchFunctions";
+import { DbDefsCancels } from "./DbDefsCancels";
+import { DbDefsLegacy } from "./DbDefsLegacy";
 
 let dbDefsSchema = new DbDefsSchema();
 let dbDefsTables = new DbDefsTables();
@@ -13,6 +15,8 @@ let dbDefsSubmits = new DbDefsSubmits();
 let dbDefsMatches = new DbDefsMatches();
 let dbDefsExistsInfo = new DbDefsExistsInfo();
 let dbDefsMatchFunctions = new DbDefsMatchFunctions();
+let dbDefsCancels = new DbDefsCancels();
+let dbDefsLegacy = new DbDefsLegacy();
 
 module.exports = {
   dbRejectRideFunctionString:   dbRejectRideFunctionString,
@@ -48,7 +52,7 @@ module.exports = {
   dbGetSubmitHelperString:      dbGetSubmitHelperString
 }
 
-const dbDefs = require('./dbDefs.js');
+// const dbDefs = require('./dbDefs.js');
 
 function dbExecuteFunctionString(schema: string, functionName: string): string {
   return 'SELECT ' + schema + '.' + functionName;
@@ -64,15 +68,15 @@ function dbGetInsertClause (tableName: string): string {
 
 // exec fns
 function dbCancelRideRequestFunctionString(): string {
-  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.CANCEL_RIDE_REQUEST_FUNCTION);
+  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsCancels.CANCEL_RIDE_REQUEST_FUNCTION);
 }
 
 function dbCancelRiderMatchFunctionString(): string {
-  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.CANCEL_RIDER_MATCH_FUNCTION);
+  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsCancels.CANCEL_RIDER_MATCH_FUNCTION);
 }
 
 function dbCancelDriveOfferFunctionString(): string {
-  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.CANCEL_DRIVE_OFFER_FUNCTION);
+  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsCancels.CANCEL_DRIVE_OFFER_FUNCTION);
 }
 
 function dbCancelDriverMatchFunctionString(): string {
@@ -112,19 +116,19 @@ function dbRiderInfoFunctionString(): string {
 }
 
 function dbRiderConfirmedMatchFunctionString(): string {
-  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.RIDER_CONFIRMED_MATCH_FUNCTION);
+  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsMatchFunctions.RIDER_CONFIRMED_MATCH_FUNCTION);
 }
 
 function dbRejectRideFunctionString(): string {
-  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.REJECT_RIDE_FUNCTION);
+  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsLegacy.REJECT_RIDE_FUNCTION);
 }
 
 function dbConfirmRideFunctionString(): string {
-  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.CONFIRM_RIDE_FUNCTION);
+  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsLegacy.CONFIRM_RIDE_FUNCTION);
 }
 
 function dbCancelRideOfferFunctionString(): string {
-  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefs.CANCEL_RIDE_OFFER_FUNCTION); 
+  return dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsLegacy.CANCEL_RIDE_OFFER_FUNCTION); 
 }
 
 // select from table/views
