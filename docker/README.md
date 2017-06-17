@@ -9,7 +9,7 @@ Folders nodeApp and pg-auto contain the Dockerfiles (and info to manually setup 
 e.g. boot2docker requires these steps
 ``` 
 sudo -i
-curl -L https://github.com/docker/compose/releases/download/1.12.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
@@ -54,8 +54,10 @@ sh ./specific-machine-local-front.sh cp-nodejs $(date +%s) https://github.com/vo
 sh ./specific-machine-local-front.sh cp-pg-server $(date +%s) https://github.com/voteamerica/backend master
  ```
 
-#### use docker-compose to create local system
+#### create local system
 ```
+sh ./start-compose-local-frontend.sh
+
 docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml up
 ```
 
@@ -68,6 +70,8 @@ This works directly from the files in the folders for your front and back-end re
 
 #### 2) use docker-compose to create local system
 ```
+sh ./start-compose-local-fullstack.sh
+
 docker-compose -f ./compose/full-stack-local/docker-compose-local-fullstack.yml up
 ```
 
@@ -107,6 +111,12 @@ sh ./start-compose-tests-frontend.sh match
 ```
 
 ### b) Use local dev env - fullstack (local code is used for frontend, backend & test runner)
+
+#### Create specific machines (if required)
+Possibly needed if change change the run-tests.sh script in the nightwatch docker folder. The same applies to changes to scripts in the other docker folders.
+```
+sh ./specific-machine-test-fullstack.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
+```
 
 #### Run the tests
 Parameter is nightwatch test group. If not specified, a default is used.
@@ -306,3 +316,17 @@ https://blog.docker.com/2016/07/live-debugging-docker/
 
 https://code.visualstudio.com/docs/nodejs/nodejs-debugging
 https://alexanderzeitler.com/articles/debugging-a-nodejs-es6-application-in-a-docker-container-using-visual-studio-code/
+
+### virtualbox portforward list, update
+```
+./vboxmanage showvminfo default | grep 'host port'
+.\VBoxManage modifyvm "default" --natpf1 "NodeApp,tcp,127.0.0.1,8000,,8000"
+.\VBoxManage modifyvm "default" --natpf1 "NodeDebug,tcp,127.0.0.1,5858,,5858"
+.\VBoxManage modifyvm "default" --natpf1 "NodeDebug2,tcp,127.0.0.1,8080,,8080"
+.\VBoxManage modifyvm "default" --natpf1 "Postgres,tcp,127.0.0.1,5432,,5432"
+.\VBoxManage modifyvm "default" --natpf1 "jekyll,tcp,127.0.0.1,4000,,4000"
+.\VBoxManage modifyvm "default" --natpf1 "pulp,tcp,127.0.0.1,1337,,1337"
+
+
+
+```

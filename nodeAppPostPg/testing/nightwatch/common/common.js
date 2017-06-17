@@ -1,31 +1,79 @@
-module.exports = {
+// NOTE: module.exports at end of file
+
+// IMPORTANT: test functions created here are used in a chain. See any files under the tests folder
+//            or just think of jQuery functions.
+
+//            There are two ways to write chainable test functions, both are pretty easy. Choice
+//            is a matter of personal taste.
+
+//            NOTE: either type of test function is created as part of the testObject below 
+//            (in other words, NOT as a global module function).
+
+//            1) create a function in the same pattern as templateTest() below. The initial "var client..."
+//               and "return this" must be in place. Your code replaces "client.end()".
+
+//               This pattern has a little boiler-plate but it's short and the pattern is readable.
+
+//            2) create a function using createChainableTest(), e.g. addRider(). This removes boiler-plate
+//               except for passing your function to createChainableTest(). Instead of "this", use "testObject".
+//               Remember to pass client as a param to your function (as with all nightwatch functions).
+
+function createChainableTest (testFunction) {
+  var testFn = function (client) {
+      var client = this.setClient(client);
+      
+      // testFunction(this, client);
+      testFunction(client);
+
+      return this;
+    };
+
+  return testFn;
+}
+
+var testObject = {
   'currentClient' : undefined,
 
   'dates' : ['2017-08-09'],
 
   'riderSelfServicePageUrl' : "",
 
-  'finish' : 
-    function (client) {
+  'setClient' : function (client) {
       if (client !== undefined && client !== null) {
         this.currentClient = client;
       }
 
-      var client = this.currentClient;
+      return this.currentClient;
+    },
+
+  'templateTest' : 
+    function (client) {
+      var client = this.setClient(client);
       
       client.end();
 
       return this;
     },
 
-  'addDriver' : 
-    function (client) {
-      if (client !== undefined && client !== null) {
-        this.currentClient = client;
-      }
+  'finish' : 
+    createChainableTest (
+      function (client) {
+        client.end();
+      }),
 
-      var client = this.currentClient;
-      var dates = this.dates;
+  'finishOrig' : 
+    function (client) {
+      var client = this.setClient(client);
+            
+      client.end();
+
+      return this;
+    },
+
+  'addDriver' : 
+    createChainableTest (
+    function (client) {
+      var dates = testObject.dates;
 
       client
         .url('http://10.5.0.4:4000/#offer-ride')
@@ -77,35 +125,24 @@ module.exports = {
         
         .saveScreenshot('./reports/driver-submitted.png')
         
-        // .pause(5000)
+        .waitForElementVisible('h1#thanks-header', 5000)
         
         .saveScreenshot('./reports/driver-thanks.png')
-
-        .waitForElementVisible('h1#thanks-header', 5000)
+        
         .assert.containsText('h1#thanks-header', 'Thank you');
-
-      // return newState;
-      return this;
-    },
+    }),
 
   'addRider' : 
-    function (client) {
-      if (client !== undefined && client !== null) {
-        this.currentClient = client;
-      }
-
-      var client = this.currentClient;
-      var dates = this.dates;
+    createChainableTest (
+      function (client) {
+      var dates = testObject.dates;
       
-      var self = this;
-
       console.log("addRider");
+      console.log("dates: ", dates);
 
       client
         .url('http://10.5.0.4:4000/#need-ride')
-        // .waitForElementVisible('body', 3000)
         .waitForElementVisible('form#need-ride', 3000)
-        // .assert.containsText('legend', 'Your trip')
         .assert.cssClassPresent('#RiderAvailableTimes', 'available-times')
 
         // set date/time
@@ -123,10 +160,82 @@ module.exports = {
         // .setValue('input[name="RiderDate"]', '2017-05-12')
 
         .setValue('input[id="riderCollectionAddress"]', '1 high st')
-        // .assert.containsText('input[id="riderCollectionAddress"]', '1 high st')
         .assert.valueContains('input[id="riderCollectionAddress"]', '1')
 
-  // new
+        .setValue('input[name="RiderCollectionZIP"]', '10036')
+        .setValue('input[id="riderDestinationAddress"]', '1 main st')
+        .setValue('input[id="rideDestinationZIP"]', '10036')
+
+        .setValue('input[id="rideSeats"]', '1')
+        .setValue('#RiderAccommodationNotes', 'comfy chair')
+
+        .setValue('input[name="RiderFirstName"]', 'anne')
+        .setValue('input[name="RiderLastName"]', 'test')
+        .setValue('input[name="RiderEmail"]', 'a@test.com')
+        .setValue('input[name="RiderPhone"]', '07755000111')
+
+        .click('input[name="RiderPreferredContact"]')
+        .click('input[name="RiderAgreeTnC"]')
+        
+        .saveScreenshot('./reports/rider-entries2.png')
+
+        .click('button[id="needRideSubmit"]')
+
+        .saveScreenshot('./reports/rider-submitted.png')
+
+        .waitForElementVisible('h1#thanks-header', 5000)
+        .assert.containsText('h1#thanks-header', 'Congratulations')
+
+        .waitForElementVisible('.self-service-url', 1000)
+        .assert.containsText('.self-service-url', 'self-service portal')
+
+        .getAttribute(".self-service-url", "href", function(result) {
+          console.log("rider self service url: ", result);
+          // this.assert.equal(typeof result, "object");
+          // this.assert.equal(result.status, 0);
+          // this.assert.equal(result.value, "#home");
+
+          testObject.riderSelfServicePageUrl = result.value;
+
+          console.log("rider url: ", testObject.riderSelfServicePageUrl);
+        });
+
+        // .assert.containsText('div.with-errors ul li', 'Please fill in')
+        // .assert.valueContains('div.with-errors ul li', 'Please')
+
+      }),
+
+  'addRiderOrig' : 
+    function (client) {
+      var client = this.setClient(client);
+      var dates = this.dates;
+      
+      var self = this;
+
+      console.log("addRiderOrig");
+
+      client
+        .url('http://10.5.0.4:4000/#need-ride')
+        .waitForElementVisible('form#need-ride', 3000)
+        .assert.cssClassPresent('#RiderAvailableTimes', 'available-times')
+
+        // set date/time
+        .execute( function (data) {
+            console.log('passed args: ', arguments);
+            document.getElementById("RiderDate0").value = arguments[0];  
+            return arguments;
+          }
+          , dates 
+          , function (result) {
+              console.log("result", result.value);
+              client.assert.deepEqual(dates, result.value, 'Result matches');
+            }
+        )
+        // .setValue('input[name="RiderDate"]', '2017-05-12')
+
+        .setValue('input[id="riderCollectionAddress"]', '1 high st')
+        .assert.valueContains('input[id="riderCollectionAddress"]', '1')
+
         .setValue('input[name="RiderCollectionZIP"]', '10036')
         .setValue('input[id="riderDestinationAddress"]', '1 main st')
         .setValue('input[id="rideDestinationZIP"]', '10036')
@@ -173,16 +282,10 @@ module.exports = {
   // this test is called after a driver has been added - it's assumed 
   // app is at thanks driver page
   'viewDriverSelfService' : 
+    createChainableTest (
     function (client) {      
-      if (client !== undefined && client !== null) {
-        this.currentClient = client;
-      }
-
-      var client = this.currentClient;
-      var dates = this.dates;
 
       client
-        // .url('http://10.5.0.4:4000/#need-ride')
         .waitForElementVisible('.self-service-url', 3000)
         .assert.containsText('.self-service-url', 'self-service portal')
         .pause(15000) // wait for matching engine to create the proposed match
@@ -202,234 +305,164 @@ module.exports = {
 
         .assert.containsText('#driverInfo > h3.self-service-heading', 'Driver Info')
         .waitForElementVisible('#driverProposedMatches > h3.self-service-heading', 3000)
-        .assert.containsText('#driverProposedMatches > h3.self-service-heading', 'Driver Proposed Matches')
-
-      return this;
-    },
+        .assert.containsText('#driverProposedMatches > h3.self-service-heading', 'Driver Proposed Matches');
+    }),
 
   // this test is called after first rider, then driver have been added - it's assumed 
   // app is at driver self service page, with a proposed match visible
   'viewProposedMatch' : 
+    createChainableTest (
     function (client) {      
-      if (client !== undefined && client !== null) {
-        this.currentClient = client;
-      }
-
-      var client = this.currentClient;
-      var dates = this.dates;
 
       client
-        // should check for first list item
+        // to do - should check for first list item
         .assert.containsText('#driverProposedMatches > ul li', 'UUID_driver')
         .assert.containsText('#driverProposedMatches > ul li.list_button button', 'Accept')
 
-        .waitForElementVisible('#driverProposedMatches > ul li.list_button button', 1000)
+        .waitForElementVisible('#driverProposedMatches > ul li.list_button button', 1000);
+    }),
 
-      return this;
-    },
+  // this test is called after first rider, then driver have been added - it's assumed 
+  // app is at driver self service page, with a proposed match visible
+  'acceptMatch' : 
+    createChainableTest(
+    function (client) {      
 
-    // this test is called after first rider, then driver have been added - it's assumed 
-    // app is at driver self service page, with a proposed match visible
-    'acceptMatch' : 
-      function (client) {      
-        if (client !== undefined && client !== null) {
-          this.currentClient = client;
-        }
+      client
+        .click('#driverProposedMatches > ul li.list_button button')
 
-        var client = this.currentClient;
-        var dates = this.dates;
+        .waitForElementNotPresent('#driverProposedMatches > ul li.list_button button', 3000)
+        .waitForElementVisible('#driverConfirmedMatches > ul li.list_button button', 3000)
 
-        client
-          .click('#driverProposedMatches > ul li.list_button button')
+        .saveScreenshot('./reports/match-self-service-accept-match.png')
 
-          .waitForElementNotPresent('#driverProposedMatches > ul li.list_button button', 3000)
-          .waitForElementVisible('#driverConfirmedMatches > ul li.list_button button', 3000)
+        .assert.containsText('#driverConfirmedMatches > ul li', 'UUID_driver')
+        .assert.containsText('#driverConfirmedMatches > ul li.list_button button', 'Cancel');
+    }),
 
-          .saveScreenshot('./reports/match-self-service-accept-match.png')
+  // this test is called after first rider, then driver have been added - it's assumed 
+  // app is at driver self service page, with an accepted match visible
+  'driverCancelMatch' : 
+    createChainableTest(
+    function (client) {      
 
-          .assert.containsText('#driverConfirmedMatches > ul li', 'UUID_driver')
-          .assert.containsText('#driverConfirmedMatches > ul li.list_button button', 'Cancel')
+      client
+        .click('#driverConfirmedMatches > ul li.list_button button')
 
-        return this;
-      },
+        // alert button appears
+        // https://stackoverflow.com/questions/35287273/how-to-click-on-alert-box-ok-button-using-nightwatch-js
+        .pause(2000)
+        .acceptAlert()
 
-    // this test is called after first rider, then driver have been added - it's assumed 
-    // app is at driver self service page, with an accepted match visible
-    'driverCancelMatch' : 
-      function (client) {      
-        if (client !== undefined && client !== null) {
-          this.currentClient = client;
-        }
-
-        var client = this.currentClient;
-        var dates = this.dates;
-
-        client
-          .click('#driverConfirmedMatches > ul li.list_button button')
-
-          // alert button appears
-          // https://stackoverflow.com/questions/35287273/how-to-click-on-alert-box-ok-button-using-nightwatch-js
-          .pause(2000)
-          .acceptAlert()
-
-          .saveScreenshot('./reports/match-self-service-cancel-match.png')
-          
-          .waitForElementNotPresent('#driverConfirmedMatches > ul li.list_button button', 3000)
-
-        return this;
-      },
-
-    // this test is called after first rider, then driver have been added - it's assumed 
-    // app is at rider self service page
-    'viewRiderSelfService' : 
-      function (client) {
-        if (client !== undefined && client !== null) {
-          this.currentClient = client;
-        }
-
-        var client = this.currentClient;
-        var dates = this.dates;
+        .saveScreenshot('./reports/match-self-service-cancel-match.png')
         
-        var self = this;
+        .waitForElementNotPresent('#driverConfirmedMatches > ul li.list_button button', 3000);
+    }),
 
-        console.log("rider info url 1: ", this.riderSelfServicePageUrl);
-        // console.log("rider info url: ", riderUrl);
+  // this test is called after a rider has been added - it's assumed 
+  // app is at rider self service page
+  'viewRiderSelfService' : 
+    createChainableTest(
+    function (client) {
+      
+      console.log("rider info url 1: ", testObject.riderSelfServicePageUrl);
 
-        client
-          .perform(function (client, done) {
+      client
+        .perform(function (client, done) {
 
-            console.log("rider info url 2: ", self.riderSelfServicePageUrl);
+          console.log("rider info url 2: ", testObject.riderSelfServicePageUrl);
 
-            client
-              .url(self.riderSelfServicePageUrl)
-              // .url(riderUrl)
+          client
+            .url(testObject.riderSelfServicePageUrl)
 
-              .pause(3000) // page takes a while to settle and hide id field
+            .pause(3000) // page takes a while to settle and hide id field
 
-              .saveScreenshot('./reports/rider-self-service.png')
+            .saveScreenshot('./reports/rider-self-service.png')
 
-              .waitForElementVisible('#inputPhoneNumber', 3000)
-              .setValue('input[id="inputPhoneNumber"]', 'test')
+            .waitForElementVisible('#inputPhoneNumber', 3000)
+            .setValue('input[id="inputPhoneNumber"]', 'test')
 
-              .click('.button')
+            .click('.button')
 
-              .waitForElementVisible('#riderInfo > h3.self-service-heading', 3000)
+            .waitForElementVisible('#riderInfo > h3.self-service-heading', 3000)
 
-              .saveScreenshot('./reports/rider-self-service-logged-in.png')
+            .saveScreenshot('./reports/rider-self-service-logged-in.png')
 
-              .assert.containsText('#riderInfo > h3.self-service-heading', 'Rider Info');
+            .assert.containsText('#riderInfo > h3.self-service-heading', 'Rider Info');
 
-            done();
-          })
+          done();
+        });
+    }),
 
-        return this;
-      },
+  // this test is called a driver has been added - it's assumed 
+  // app is at driver self service page
+  'pauseDriverSelfService' : 
+    createChainableTest(
+    function (client) {
+      
+      client
+        .waitForElementVisible('#btnPauseDriverMatch', 3000)
 
-    // this test is called a driver has been added - it's assumed 
-    // app is at driver self service page
-    'pauseDriverSelfService' : 
-      function (client) {
-        if (client !== undefined && client !== null) {
-          this.currentClient = client;
-        }
+        .click('#btnPauseDriverMatch')
 
-        var client = this.currentClient;
-        var dates = this.dates;
+        .pause(3000)
+
+        .saveScreenshot('./reports/driver-pause-notifications.png')
         
-        var self = this;
+        .assert.containsText('#driverInfo > ul', 'PAUSED');
+    }),
 
-        client
-          .waitForElementVisible('#btnPauseDriverMatch', 3000)
+  // this test is called after a driver has been added - it's assumed 
+  // app is at driver self service page
+  'cancelDriverSelfService' : 
+    createChainableTest(
+    function (client) {
 
-          .click('#btnPauseDriverMatch')
+      client
+        .waitForElementVisible('#btnCancelDriveOffer', 3000)
 
-          .pause(3000)
+        .click('#btnCancelDriveOffer')
 
-          .waitForElementNotPresent('', 3000)
-          .assert.containsText('#driverInfo > ul', 'PAUSED')
+        .pause(2000)
+        .acceptAlert()
+        .pause(3000)
 
-          .saveScreenshot('./reports/driver-pause-notifications.png')
+        .saveScreenshot('./reports/driver-cancel-offer.png')
 
-        return this;
-      },
+        .assert.containsText('#driverInfo > ul', 'CANCEL');
+    }),
 
-    // this test is called after a driver has been added - it's assumed 
-    // app is at driver self service page
-    'cancelDriverSelfService' : 
-      function (client) {
-        if (client !== undefined && client !== null) {
-          this.currentClient = client;
-        }
+  // this test is called after a rider has been added - it's assumed 
+  // app is at rider self service page
+  'cancelRiderSelfService' : 
+    createChainableTest(
+    function (client) {
 
-        var client = this.currentClient;
-        var dates = this.dates;
-        
-        var self = this;
+      client
+        .waitForElementVisible('#btnCancelRideRequest', 3000)
 
-        client
-          .waitForElementVisible('#btnCancelDriveOffer', 3000)
+        .click('#btnCancelRideRequest')
 
-          .click('#btnCancelDriveOffer')
+        .pause(2000)
+        .acceptAlert()
+        .pause(3000)
 
-          .pause(2000)
-          .acceptAlert()
-          .pause(3000)
+        .saveScreenshot('./reports/rider-cancel-request.png')
 
-          .assert.containsText('#driverInfo > ul', 'CANCEL')
+        .assert.containsText('#riderInfo > ul', 'CANCEL');
+    }),
 
-          .saveScreenshot('./reports/driver-cancel-offer.png')
+  // this test is run at the start
+  'matchRiderDriver': 
+    createChainableTest(
+    function (client) {
 
-        return this;
-      },
-
-    // this test is called after a rider has been added - it's assumed 
-    // app is at rider self service page
-    'cancelRiderSelfService' : 
-      function (client) {
-        if (client !== undefined && client !== null) {
-          this.currentClient = client;
-        }
-
-        var client = this.currentClient;
-        var dates = this.dates;
-        
-        var self = this;
-
-        client
-          .waitForElementVisible('#btnCancelRideRequest', 3000)
-
-          .click('#btnCancelRideRequest')
-
-          .pause(2000)
-          .acceptAlert()
-          .pause(3000)
-
-          .assert.containsText('#riderInfo > ul', 'CANCEL')
-
-          .saveScreenshot('./reports/rider-cancel-request.png')
-
-        return this;
-      },
-
-    // this test is run at the start
-    'matchRiderDriver': 
-      function (client) {
-
-        if (client !== undefined && client !== null) {
-          this.currentClient = client;
-        }
-
-        var client = this.currentClient;
-        var dates = this.dates;
-        
-        var self = this;
-
-        this
-          .addRider(client)
-          .addDriver()
-          .viewDriverSelfService()
-          .viewProposedMatch().acceptMatch().driverCancelMatch();
-
-        return this;
-    }
+      testObject
+        .addRider(client)
+        .addDriver()
+        .viewDriverSelfService()
+        .viewProposedMatch().acceptMatch().driverCancelMatch();
+  })
 };
+
+module.exports = testObject;

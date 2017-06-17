@@ -35,6 +35,44 @@ docker-compose -f ./compose/full-stack-test/docker-compose-test.yml up -d
 
 sleep 60
 
+echo sct test runner status
+# https://stackoverflow.com/questions/34724980/finding-a-string-in-docker-logs-of-container
+docker logs fullstacktest_cp-test_1 > stdout.log 2>stderr.log
+cat stdout.log | grep Selenium
+cat stdout.log | grep ServerConnector
+
+echo sct db status
+docker logs fullstacktest_cp-pg-server_1 > cp-pg-server-stdout.log 2>cp-pg-server-stderr.log
+cat cp-pg-server-stdout.log | grep 'ALTER ROLE'
+cat cp-pg-server-stdout.log | grep 'autovacuum launcher started'
+
+echo sct node app status
+docker logs fullstacktest_cp-nodejs_1 > cp-nodejs-stdout.log 2>cp-nodejs-stderr.log
+cat cp-nodejs-stdout.log | grep 'Server running'
+
+echo sct fe status
+docker logs fullstacktest_cp-front-end_1 > cp-front-end-stdout.log 2>cp-pg-front-end-stderr.log
+cat cp-front-end-stdout.log | grep 'Server running'
+cat cp-front-end-stdout.log | grep 'Configuration file'
+cat cp-front-end-stdout.log | grep 'Source'
+cat cp-front-end-stdout.log | grep 'Destination'
+
+echo sct pg-client status
+docker logs fullstacktest_cp-client_1 > cp-client-stdout.log 2>cp-pg-client-stderr.log
+cat cp-client-stdout.log | grep 'DO'
+
+# curl 10.5.0.6:5432
+curl 10.5.0.5:8000
+curl 10.5.0.4:4000 | grep "Every American"
+curl 10.5.0.3:4444 | grep "Selenium"
+
+curl http://10.5.0.3:4444/selenium-server/driver?cmd=getLogMessages
+
+curl localhost:8000
+curl localhost:4000 | grep "Every American"
+# curl localhost:4444 | grep "Selenium"
+
+
 docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
 # docker logs $ (docker ps | grep nigh | cut -c 1-4)
 # docker wait fullstacktest_cp-test-runner_1

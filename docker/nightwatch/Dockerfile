@@ -50,8 +50,8 @@ RUN chmod +x /run-tests.sh
 
 RUN ls /ru*
 
-# ENTRYPOINT ["/bin/bash"]
-ENTRYPOINT [""]
+ENTRYPOINT ["/bin/bash"]
+# ENTRYPOINT [""]
 
 # CMD ["/run-tests.sh match2"]
 
