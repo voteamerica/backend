@@ -10,13 +10,13 @@ fi
 
 echo run-tests - TEST_GROUP $TEST_GROUP
 
-cd /usr/src/app/backend/nodeAppPostPg/testing/nightwatch
+cd /usr/src/app/backend/nodeAppPostPg/testing/nightwatch --verbose
 
 # echo run-tests - sleep 60
 # sleep 60
 
-echo run-tests - sleep 20
-sleep 20
+echo run-tests - sleep 30
+sleep 30
 
 echo run-tests - start tests
 

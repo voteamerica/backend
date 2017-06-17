@@ -85,6 +85,17 @@ EXIT_CODE=$?
 
 docker logs fullstacktest_cp-test-runner_1
 
+if [[ $EXIT_CODE -ne 0 ]]
+then
+    echo "tests failed - printing logs"
+
+    # docker logs fullstacktest_cp-nodejs_1
+    # docker logs fullstacktest_cp-pg-server_1
+    # docker logs fullstacktest_cp-pg-client_1
+    # docker logs fullstacktest_cp-front-end_1
+    # docker logs fullstacktest_cp-test_1   
+fi
+
 docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml down
 
 echo exit code: $EXIT_CODE
@@ -96,12 +107,6 @@ then
 else 
     echo "tests failed"
 
-    docker logs fullstacktest_cp-nodejs_1
-    docker logs fullstacktest_cp-pg-server_1
-    docker logs fullstacktest_cp-pg-client_1
-    docker logs fullstacktest_cp-front-end_1
-    docker logs fullstacktest_cp-test_1
-    
     exit $EXIT_CODE
 fi
 

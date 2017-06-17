@@ -299,12 +299,11 @@ var testObject = {
   // this test is called after a driver has been added - it's assumed 
   // app is at thanks driver page
   'viewDriverSelfService' : 
+    createChainableTest (
     function (client) {      
-      var client = this.setClient(client);
-      var dates = this.dates;
+      var dates = testObject.dates;
 
       client
-        // .url('http://10.5.0.4:4000/#need-ride')
         .waitForElementVisible('.self-service-url', 3000)
         .assert.containsText('.self-service-url', 'self-service portal')
         .pause(15000) // wait for matching engine to create the proposed match
@@ -324,27 +323,23 @@ var testObject = {
 
         .assert.containsText('#driverInfo > h3.self-service-heading', 'Driver Info')
         .waitForElementVisible('#driverProposedMatches > h3.self-service-heading', 3000)
-        .assert.containsText('#driverProposedMatches > h3.self-service-heading', 'Driver Proposed Matches')
-
-      return this;
-    },
+        .assert.containsText('#driverProposedMatches > h3.self-service-heading', 'Driver Proposed Matches');
+    }),
 
   // this test is called after first rider, then driver have been added - it's assumed 
   // app is at driver self service page, with a proposed match visible
   'viewProposedMatch' : 
+    createChainableTest (
     function (client) {      
-      var client = this.setClient(client);
-      var dates = this.dates;
+      var dates = testObject.dates;
 
       client
         // should check for first list item
         .assert.containsText('#driverProposedMatches > ul li', 'UUID_driver')
         .assert.containsText('#driverProposedMatches > ul li.list_button button', 'Accept')
 
-        .waitForElementVisible('#driverProposedMatches > ul li.list_button button', 1000)
-
-      return this;
-    },
+        .waitForElementVisible('#driverProposedMatches > ul li.list_button button', 1000);
+    }),
 
   // this test is called after first rider, then driver have been added - it's assumed 
   // app is at driver self service page, with a proposed match visible
