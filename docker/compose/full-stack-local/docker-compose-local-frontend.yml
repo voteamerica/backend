@@ -15,7 +15,7 @@ services:
       - cp-nodejs
       - cp-pg-server
 
-    # command: jekyll serve -H 0.0.0.0 --watch --config /_config-local-host.yml
+    # NOTE: override destination so that generated files are visible on host machine
     command: jekyll serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-host.yml
 
     volumes:

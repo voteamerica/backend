@@ -24,7 +24,6 @@ services:
       args:
         REPO: https://github.com/voteamerica/voteamerica.github.io
         BRANCH_NAME: master
-    # image: gc-jekyll
 
     ports: 
       - "4000:4000"
@@ -35,10 +34,6 @@ services:
     # https://jekyllrb.com/docs/usage/
     # NOTE: .yml file needs to contain IP addresses for this network (not the usual localhost)
     # command: jekyll serve -H 0.0.0.0 --watch --config /_config-local-ip.yml
-    # command: jekyll serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-ip.yml
-    # command: jekyll serve -H 10.5.0.4 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-ip.yml
-    # command:   jekyll serve -H 10.5.0.4 --watch --config /_config-local-ip.yml
-    # command: jekyll serve --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-ip.yml
     command: jekyll serve --watch --source /usr/src/app/frontend --config /_config-local-ip.yml
 
     volumes:

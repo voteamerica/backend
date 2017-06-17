@@ -320,18 +320,12 @@ https://alexanderzeitler.com/articles/debugging-a-nodejs-es6-application-in-a-do
 ### virtualbox portforward list, update
 ```
 ./vboxmanage showvminfo default | grep 'host port'
-.\VBoxManage modifyvm "default" --natpf1 "NodeApp,tcp,127.
-0.0.1,8000,,8000"
-.\VBoxManage modifyvm "default" --natpf1 "NodeDebug,tcp,127.
-0.0.1,5858,,5858"
-.\VBoxManage modifyvm "default" --natpf1 "NodeDebug2,tcp,127.
-0.0.1,8080,,8080"
-.\VBoxManage modifyvm "default" --natpf1 "Postgres,tcp,127.
-0.0.1,5432,,5432"
-.\VBoxManage modifyvm "default" --natpf1 "jekyll,tcp,127.
-0.0.1,4000,,4000"
-.\VBoxManage modifyvm "default" --natpf1 "pulp,tcp,127.
-0.0.1,1337,,1337"
+.\VBoxManage modifyvm "default" --natpf1 "NodeApp,tcp,127.0.0.1,8000,,8000"
+.\VBoxManage modifyvm "default" --natpf1 "NodeDebug,tcp,127.0.0.1,5858,,5858"
+.\VBoxManage modifyvm "default" --natpf1 "NodeDebug2,tcp,127.0.0.1,8080,,8080"
+.\VBoxManage modifyvm "default" --natpf1 "Postgres,tcp,127.0.0.1,5432,,5432"
+.\VBoxManage modifyvm "default" --natpf1 "jekyll,tcp,127.0.0.1,4000,,4000"
+.\VBoxManage modifyvm "default" --natpf1 "pulp,tcp,127.0.0.1,1337,,1337"
 
 
 
