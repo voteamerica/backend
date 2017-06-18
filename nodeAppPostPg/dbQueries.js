@@ -21,10 +21,10 @@ var dbDefsLegacy = new DbDefsLegacy_1.DbDefsLegacy();
 var dbQueriesHelpers = new DbQueriesPosts_1.DbQueriesHelpers();
 module.exports = {
     dbRejectRideFunctionString: dbRejectRideFunctionString,
-    dbCancelRideRequestFunctionString: dbCancelRideRequestFunctionString,
-    dbCancelRiderMatchFunctionString: dbCancelRiderMatchFunctionString,
-    dbCancelDriveOfferFunctionString: dbCancelDriveOfferFunctionString,
-    dbCancelDriverMatchFunctionString: dbCancelDriverMatchFunctionString,
+    // dbCancelRideRequestFunctionString:  dbCancelRideRequestFunctionString,
+    // dbCancelRiderMatchFunctionString:   dbCancelRiderMatchFunctionString,
+    // dbCancelDriveOfferFunctionString:   dbCancelDriveOfferFunctionString,
+    // dbCancelDriverMatchFunctionString:  dbCancelDriverMatchFunctionString,
     dbAcceptDriverMatchFunctionString: dbAcceptDriverMatchFunctionString,
     dbPauseDriverMatchFunctionString: dbPauseDriverMatchFunctionString,
     dbDriverExistsFunctionString: dbDriverExistsFunctionString,
@@ -43,18 +43,6 @@ module.exports = {
 };
 // const dbDefs = require('./dbDefs.js');
 // exec fns
-function dbCancelRideRequestFunctionString() {
-    return dbQueriesHelpers.dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsCancels.CANCEL_RIDE_REQUEST_FUNCTION);
-}
-function dbCancelRiderMatchFunctionString() {
-    return dbQueriesHelpers.dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsCancels.CANCEL_RIDER_MATCH_FUNCTION);
-}
-function dbCancelDriveOfferFunctionString() {
-    return dbQueriesHelpers.dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsCancels.CANCEL_DRIVE_OFFER_FUNCTION);
-}
-function dbCancelDriverMatchFunctionString() {
-    return dbQueriesHelpers.dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsMatchFunctions.CANCEL_DRIVER_MATCH_FUNCTION);
-}
 function dbAcceptDriverMatchFunctionString() {
     return dbQueriesHelpers.dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsMatchFunctions.ACCEPT_DRIVER_MATCH_FUNCTION);
 }

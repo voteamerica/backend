@@ -3,8 +3,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 // const moment          = require('moment');
 // const postgresQueries = require('./postgresQueries.js');
+var DbDefsCancels_1 = require("./DbDefsCancels");
 var postgresQueries_1 = require("./postgresQueries");
 var PostFunctions_1 = require("./PostFunctions");
+var dbQueriesCancels = new DbDefsCancels_1.DbQueriesCancels();
 var postgresQueries = new postgresQueries_1.PostgresQueries();
 var postFunctions = new PostFunctions_1.PostFunctions();
 var dbQueries = require('./dbQueries.js');
@@ -37,7 +39,7 @@ function getUnmatchedRiders(req, reply) {
     req.log();
     postgresQueries.dbGetUnmatchedRiders(rfPool, dbQueries.dbGetUnmatchedRidersQueryString, reply, results);
 }
-var cancelRideRequest = createConfirmCancelFn('cancel ride request: ', "get payload: ", dbQueries.dbCancelRideRequestFunctionString, getTwoRiderCancelConfirmPayloadAsArray
+var cancelRideRequest = createConfirmCancelFn('cancel ride request: ', "get payload: ", dbQueriesCancels.dbCancelRideRequestFunctionString, getTwoRiderCancelConfirmPayloadAsArray
 // getCancelConfirmQueryAsArray
 );
 var cancelRiderMatch = createConfirmCancelFn('cancel rider match: ', "get payload: ", dbQueries.dbCancelRiderMatchFunctionString, getFourRiderCancelConfirmPayloadAsArray);

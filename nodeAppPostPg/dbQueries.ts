@@ -25,10 +25,10 @@ let dbQueriesHelpers = new DbQueriesHelpers();
 module.exports = {
   dbRejectRideFunctionString:   dbRejectRideFunctionString,
 
-  dbCancelRideRequestFunctionString:  dbCancelRideRequestFunctionString,
-  dbCancelRiderMatchFunctionString:   dbCancelRiderMatchFunctionString,
-  dbCancelDriveOfferFunctionString:   dbCancelDriveOfferFunctionString,
-  dbCancelDriverMatchFunctionString:  dbCancelDriverMatchFunctionString,
+  // dbCancelRideRequestFunctionString:  dbCancelRideRequestFunctionString,
+  // dbCancelRiderMatchFunctionString:   dbCancelRiderMatchFunctionString,
+  // dbCancelDriveOfferFunctionString:   dbCancelDriveOfferFunctionString,
+  // dbCancelDriverMatchFunctionString:  dbCancelDriverMatchFunctionString,
 
   dbAcceptDriverMatchFunctionString:  dbAcceptDriverMatchFunctionString,
   dbPauseDriverMatchFunctionString:   dbPauseDriverMatchFunctionString,
@@ -60,22 +60,6 @@ module.exports = {
 // const dbDefs = require('./dbDefs.js');
 
 // exec fns
-function dbCancelRideRequestFunctionString(): string {
-  return dbQueriesHelpers.dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsCancels.CANCEL_RIDE_REQUEST_FUNCTION);
-}
-
-function dbCancelRiderMatchFunctionString(): string {
-  return dbQueriesHelpers.dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsCancels.CANCEL_RIDER_MATCH_FUNCTION);
-}
-
-function dbCancelDriveOfferFunctionString(): string {
-  return dbQueriesHelpers.dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsCancels.CANCEL_DRIVE_OFFER_FUNCTION);
-}
-
-function dbCancelDriverMatchFunctionString(): string {
-  return dbQueriesHelpers.dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsMatchFunctions.CANCEL_DRIVER_MATCH_FUNCTION);
-}
-
 function dbAcceptDriverMatchFunctionString(): string {
   return dbQueriesHelpers.dbExecuteFunctionString(dbDefsSchema.SCHEMA_NAME, dbDefsMatchFunctions.ACCEPT_DRIVER_MATCH_FUNCTION);
 }

@@ -1,8 +1,12 @@
-# Docker setup for carpool-vote 
+# Docker environments for carpool-vote 
 
-The setup is created using docker compose. Previously this process was done with manual steps to create the individual docker machines.
+#### There are two main types of environments - development and automated tests
 
-Folders nodeApp and pg-auto contain the Dockerfiles (and info to manually setup the docker dev environment). A third folder contains a Dockerfile for the jekyll frontend server. Finally, the pg-client folder contains the environment to run the matching engine.
+Each environment is created using docker compose. Previously this process was done with manual steps to create the individual docker machines.
+
+For the development environment, folders nodeApp and pg-auto contain the Dockerfiles (and details to manually setup the docker dev environment). A third folder contains a Dockerfile for the jekyll frontend server. Finally, the pg-client folder contains the environment to run the matching engine.
+
+The testing environment has two further folders, one for a selenium standalone server, and another for the app that runs the tests.
 
 ## Install docker compose (if not already installed)
 #### Details at [the docker compose install page](https://docs.docker.com/compose/install)
@@ -13,10 +17,7 @@ curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compos
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-## Two main setups - Dev and Auto-testing
-Scroll below to the type of setup required, front-end or full-stack.
-
-## 1) Dev
+## Development enviroments
 
 #### Create the necessary local setup
 **IMPORTANT:**
@@ -40,7 +41,7 @@ If it does not already exist, clone the backend git repo. It can be named howeve
 
 `git clone https://github.com/voteamerica/backend voteUSbackend`
 
-### a) Front-end Dev
+### 1) Front-end Development
 
 #### Go to the docker folder ... 
 ... of your backend repo (here named voteUSbackend)
@@ -61,7 +62,7 @@ sh ./start-compose-local-frontend.sh
 docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml up
 ```
 
-### b) Fullstack Dev
+### 2) Full-stack Development
 This works directly from the files in the folders for your front and back-end repos.
 
 #### Go to the docker folder ... 
@@ -75,10 +76,12 @@ sh ./start-compose-local-fullstack.sh
 docker-compose -f ./compose/full-stack-local/docker-compose-local-fullstack.yml up
 ```
 
-## 2) Automated Testing 
-NOTE: app will not execute correctly in the standard browser, see the vnc steps below
+## Automated Testing 
+NOTE: app will not execute correctly in the standard browser, see the VNC steps below
 
-### a) Use github repos (ignores any local code)
+There are three types, depending on whether it is required to override the code in github repos with code on the local machine.
+
+### 1) Github repos only - ignores any local code
 
 #### Create specific machines (if required)
 E.g. for specific front-end, node app, db or test-runner repo branches.
@@ -95,7 +98,9 @@ sh ./start-compose-tests.sh
 sh ./start-compose-tests.sh match
 ```
 
-### b) Use local dev env - frontend (local code is used for frontend)
+### 2) Local development environment - frontend 
+
+#### This overrides the frontend github repo with local code.
 
 #### Create specific machines (if required)
  ```
@@ -110,7 +115,9 @@ sh ./start-compose-tests-frontend.sh
 sh ./start-compose-tests-frontend.sh match
 ```
 
-### b) Use local dev env - fullstack (local code is used for frontend, backend & test runner)
+### 3) Local development environment - fullstack 
+
+#### Local code overrides github repos for frontend, backend & test runner.
 
 #### Create specific machines (if required)
 Possibly needed if change change the run-tests.sh script in the nightwatch docker folder. The same applies to changes to scripts in the other docker folders.

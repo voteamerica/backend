@@ -2,8 +2,13 @@
 
 // const moment          = require('moment');
 // const postgresQueries = require('./postgresQueries.js');
+
+import { DbQueriesCancels } from "./DbDefsCancels"
+
 import { PostgresQueries }  from "./postgresQueries";
 import { PostFunctions, PayloadFunc2 }  from "./PostFunctions";
+
+let dbQueriesCancels = new DbQueriesCancels();
 
 let postgresQueries = new PostgresQueries();
 let postFunctions = new PostFunctions();
@@ -51,7 +56,7 @@ function getUnmatchedRiders(req: any, reply: any) {
 
 var cancelRideRequest = createConfirmCancelFn 
   ('cancel ride request: ', "get payload: ", 
-    dbQueries.dbCancelRideRequestFunctionString, 
+    dbQueriesCancels.dbCancelRideRequestFunctionString, 
     getTwoRiderCancelConfirmPayloadAsArray
     // getCancelConfirmQueryAsArray
     );
