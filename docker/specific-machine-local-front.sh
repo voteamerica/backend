@@ -9,12 +9,14 @@ else
     M=$1
 fi
 
-if [[ "X$2" = "X" ]]
+if [[ "X$2" = "XR" ]]
 then
+    # R is flag for rebuild, so force a cache bust
+    C=$(date +%s)
+else
+    # 1 matches the arg in the dockerfile, this will not bust the cache
     C=1
 	echo CACHEBUST $C
-else
-    C=$2
 fi
 
 if [[ "X$3" = "X" ]]; then
@@ -38,3 +40,4 @@ echo REPO $R
 echo BRANCH_NAME $B
 
 docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml build --build-arg REPO=$R --build-arg BRANCH_NAME=$B --build-arg CACHEBUST=$C $M
+

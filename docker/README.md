@@ -51,8 +51,8 @@ If it does not already exist, clone the backend git repo. It can be named howeve
 This might be necessary if you are testing against a version of either the node app or db that is under development. 
 
 ```
-sh ./specific-machine-local-front.sh cp-nodejs $(date +%s) https://github.com/voteamerica/backend master
-sh ./specific-machine-local-front.sh cp-pg-server $(date +%s) https://github.com/voteamerica/backend master
+sh ./specific-machine-local-front.sh cp-nodejs R https://github.com/voteamerica/backend master
+sh ./specific-machine-local-front.sh cp-pg-server R https://github.com/voteamerica/backend master
  ```
 
 #### create local system
@@ -86,9 +86,9 @@ There are three types, depending on whether it is required to override the code 
 #### Create specific machines (if required)
 E.g. for specific front-end, node app, db or test-runner repo branches.
  ```
-sh ./specific-machine-test.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-changes
-sh ./specific-machine-test.sh cp-nodejs $(date +%s)
-sh ./specific-machine-test.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
+sh ./specific-machine-test.sh cp-front-end R https://github.com/jkbits1/voteamerica.github.io self-service-changes
+sh ./specific-machine-test.sh cp-nodejs R
+sh ./specific-machine-test.sh cp-test-runner R https://github.com/jkbits1/backend docker-test
  ```
 
 #### Run the tests
@@ -103,9 +103,10 @@ sh ./start-compose-tests.sh match
 #### This overrides the frontend github repo with local code.
 
 #### Create specific machines (if required)
+##### e.g. to test a against a specific branch
  ```
-sh ./specific-machine-test-frontend.sh cp-nodejs $(date +%s)
-sh ./specific-machine-test-frontend.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
+sh ./specific-machine-test-frontend.sh cp-nodejs R
+sh ./specific-machine-test-frontend.sh cp-test-runner R https://github.com/jkbits1/backend docker-test
  ```
 
 #### Run the tests
@@ -122,7 +123,7 @@ sh ./start-compose-tests-frontend.sh match
 #### Create specific machines (if required)
 Possibly needed if change change the run-tests.sh script in the nightwatch docker folder. The same applies to changes to scripts in the other docker folders.
 ```
-sh ./specific-machine-test-fullstack.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
+sh ./specific-machine-test-fullstack.sh cp-test-runner R https://github.com/jkbits1/backend docker-test
 ```
 
 #### Run the tests
@@ -133,7 +134,7 @@ sh ./start-compose-tests-fullstack.sh match
 ```
 
 
-### review c) d)
+### The following instructions are being reviewed
 
 ### c) Test Front-end PR
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
@@ -163,8 +164,8 @@ iv) watch travis test the PR (e.g. https://travis-ci.org/jkbits1/backend/builds/
 
 #### 2) create specific build of front-end docker machine using --build-arg BRANCH_NAME=pr...
 ```
-. ./specific-machine-test.sh cp-nodejs $(date +%s) https://github.com/jkbits1/backend pr162
-. ./specific-machine-test.sh cp-pg-server $(date +%s) https://github.com/jkbits1/backend pr162
+. ./specific-machine-test.sh cp-nodejs R https://github.com/jkbits1/backend pr162
+. ./specific-machine-test.sh cp-pg-server R https://github.com/jkbits1/backend pr162
 ```
 
 #### 3) Run the tests
@@ -216,8 +217,8 @@ Specific group of tests
 #### 7) optional - create specific pg client
 ```
 . ./specific-machine-local.sh cp-nodejs
-. ./specific-machine-test.sh cp-nodejs $(date +%s)
-. ./specific-machine-local.sh cp-nodejs $(date +%s) https://github.com/jkbits1/backend ts-route 
+. ./specific-machine-test.sh cp-nodejs R
+. ./specific-machine-local.sh cp-nodejs R https://github.com/jkbits1/backend ts-route 
 ```
 
  
