@@ -12,6 +12,8 @@ const dbQueries   = require('./dbQueries.js');
 
 const routeFns    = require('./routeFunctions.js');
 
+import { DbQueriesPosts } from "./DbQueriesPosts"
+
 import { PostgresQueries }  from "./postgresQueries";
 import { PostFunctions } from "./PostFunctions";
 import { RouteNamesAddDriverRider } from "./RouteNames";
@@ -21,6 +23,8 @@ import { RouteNamesSelfService, RouteNamesMatch
 import { RouteNamesSelfServiceInfoExists } from "./RouteNames";
 import { RouteNamesCancel, RouteNamesUnmatched } from "./RouteNames";
 import { logging }          from "./logging";
+
+let dbQueriesPosts = new DbQueriesPosts();
 
 let postgresQueries = new PostgresQueries();
 let postFunctions = new PostFunctions();
@@ -257,8 +261,8 @@ server.register({
 
       console.log(`Server running at: ${server.info.uri} \n`);
 
-      console.log("driver ins: " + dbQueries.dbGetSubmitDriverString());
-      console.log("rider ins: " + dbQueries.dbGetSubmitRiderString());
+      console.log("driver ins: " + dbQueriesPosts.dbGetSubmitDriverString());
+      console.log("rider ins: " + dbQueriesPosts.dbGetSubmitRiderString());
       console.log("cancel ride fn: " + dbQueries.dbCancelRideRequestFunctionString());
       console.log("reject ride fn: " + dbQueries.dbRejectRideFunctionString());
       console.log("ops interval:" + logOptions.ops.interval);
