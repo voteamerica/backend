@@ -2,8 +2,13 @@
 
 // const moment          = require('moment');
 // const postgresQueries = require('./postgresQueries.js');
+
+import { DbQueriesCancels } from "./DbDefsCancels"
+
 import { PostgresQueries }  from "./postgresQueries";
 import { PostFunctions, PayloadFunc2 }  from "./PostFunctions";
+
+let dbQueriesCancels = new DbQueriesCancels();
 
 let postgresQueries = new PostgresQueries();
 let postFunctions = new PostFunctions();
@@ -51,26 +56,26 @@ function getUnmatchedRiders(req: any, reply: any) {
 
 var cancelRideRequest = createConfirmCancelFn 
   ('cancel ride request: ', "get payload: ", 
-    dbQueries.dbCancelRideRequestFunctionString, 
+    dbQueriesCancels.dbCancelRideRequestFunctionString, 
     getTwoRiderCancelConfirmPayloadAsArray
     // getCancelConfirmQueryAsArray
     );
 
 var cancelRiderMatch = createConfirmCancelFn 
   ('cancel rider match: ', "get payload: ", 
-    dbQueries.dbCancelRiderMatchFunctionString, 
+    dbQueriesCancels.dbCancelRiderMatchFunctionString, 
     getFourRiderCancelConfirmPayloadAsArray
   );
 
 var cancelDriveOffer = createConfirmCancelFn 
   ('cancel drive offer: ', "get payload: ", 
-    dbQueries.dbCancelDriveOfferFunctionString, 
+    dbQueriesCancels.dbCancelDriveOfferFunctionString, 
     getTwoDriverCancelConfirmPayloadAsArray
   );
 
 var cancelDriverMatch = createConfirmCancelFn 
   ('cancel driver match: ', "get payload: ", 
-    dbQueries.dbCancelDriverMatchFunctionString, 
+    dbQueriesCancels.dbCancelDriverMatchFunctionString, 
     // getThreeDriverCancelConfirmPayloadAsArray
     getFourDriverCancelConfirmPayloadAsArray
   );

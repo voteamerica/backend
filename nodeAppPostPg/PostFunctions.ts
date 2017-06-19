@@ -1,12 +1,14 @@
 export { PostFunctions, PayloadFunc2 };
 
+import { DbQueriesPosts } from "./DbQueriesPosts"
 import { PostgresQueries }  from "./postgresQueries";
 import { RouteNamesAddDriverRider } from "./RouteNames";
 
+let dbQueriesPosts = new DbQueriesPosts();
 let routeNamesAddDriverRider = new RouteNamesAddDriverRider();
 let postgresQueries = new PostgresQueries();
 
-const dbQueries       = require('./dbQueries.js');
+// const dbQueries       = require('./dbQueries.js');
 
 interface PayloadFunc {
   (self:PostFunctions, req: any, payload: any): any[]
@@ -40,21 +42,21 @@ class PostFunctions {
     this.postDriver = 
       this.createPostFn 
       (routeNamesAddDriverRider.DRIVER_ROUTE, 
-        dbQueries.dbGetSubmitDriverString, 
+        dbQueriesPosts.dbGetSubmitDriverString, 
         this.createPayloadFn(this.getDriverPayloadAsArray), 
         this.logPostDriver);
 
     this.postHelper = 
       this.createPostFn 
       (routeNamesAddDriverRider.HELPER_ROUTE, 
-        dbQueries.dbGetSubmitHelperString, 
+        dbQueriesPosts.dbGetSubmitHelperString, 
         this.createPayloadFn(this.getHelperPayloadAsArray), 
         this.logPostHelper);
 
     this.postRider = 
       this.createPostFn 
       (routeNamesAddDriverRider.RIDER_ROUTE, 
-        dbQueries.dbGetSubmitRiderString, 
+        dbQueriesPosts.dbGetSubmitRiderString, 
         this.createPayloadFn(this.getRiderPayloadAsArray), 
         this.logPostRider);
   }

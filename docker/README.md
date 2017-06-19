@@ -1,8 +1,12 @@
-# Docker setup for carpool-vote 
+# Docker environments for carpool-vote 
 
-The setup is created using docker compose. Previously this process was done with manual steps to create the individual docker machines.
+#### There are two main types of environments - development and automated tests
 
-Folders nodeApp and pg-auto contain the Dockerfiles (and info to manually setup the docker dev environment). A third folder contains a Dockerfile for the jekyll frontend server. Finally, the pg-client folder contains the environment to run the matching engine.
+Each environment is created using docker compose. Previously this process was done with manual steps to create the individual docker machines.
+
+For the development environment, folders nodeApp and pg-auto contain the Dockerfiles (and details to manually setup the docker dev environment). A third folder contains a Dockerfile for the jekyll frontend server. Finally, the pg-client folder contains the environment to run the matching engine.
+
+The testing environment has two further folders, one for a selenium standalone server, and another for the app that runs the tests.
 
 ## Install docker compose (if not already installed)
 #### Details at [the docker compose install page](https://docs.docker.com/compose/install)
@@ -13,10 +17,9 @@ curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compos
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-## Two main setups - Dev and Auto-testing
-Scroll below to the type of setup required, front-end or full-stack.
+## Development enviroments
 
-## 1) Dev
+Carpool-vote is spread across two repos, one for front-end the other for backend. Although some setups below use only one, mostly it is necessary to have both installed on your development machine.
 
 #### Create the necessary local setup
 **IMPORTANT:**
@@ -40,7 +43,22 @@ If it does not already exist, clone the backend git repo. It can be named howeve
 
 `git clone https://github.com/voteamerica/backend voteUSbackend`
 
-### a) Front-end Dev
+#### Create specific machines (if required)
+This can be necessary for testing against a version of code that is under development or in a non-default branch and/or repo.
+
+Example params to these scripts 
+
+`cp-nodejs` the service name in the relevant docker-compose .yml file
+
+`R` force rebuild
+
+`https://github.com/voteamerica/backend` repo name
+
+`master` branch name
+
+More details below.
+
+### 1) Front-end Development
 
 #### Go to the docker folder ... 
 ... of your backend repo (here named voteUSbackend)
@@ -50,42 +68,56 @@ If it does not already exist, clone the backend git repo. It can be named howeve
 This might be necessary if you are testing against a version of either the node app or db that is under development. 
 
 ```
-sh ./specific-machine-local-front.sh cp-nodejs $(date +%s) https://github.com/voteamerica/backend master
-sh ./specific-machine-local-front.sh cp-pg-server $(date +%s) https://github.com/voteamerica/backend master
+sh ./specific-machine-local-frontend.sh cp-nodejs R https://github.com/voteamerica/backend master
+sh ./specific-machine-local-frontend.sh cp-pg-server R https://github.com/voteamerica/backend master
  ```
 
-#### create local system
+#### Start the environment
+
 ```
 sh ./start-compose-local-frontend.sh
-
-docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml up
 ```
 
-### b) Fullstack Dev
+Ctrl-C to finish, then tidy up with this command
+```
+docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml down
+```
+
+### 2) Full-stack Development
 This works directly from the files in the folders for your front and back-end repos.
+
+If you don't have a local clone of the front-end repo, create one as described above.
 
 #### Go to the docker folder ... 
 ##### ... of your forked repo (here named voteUSbackend)
 `cd .../voteUSbackend/docker`
 
-#### 2) use docker-compose to create local system
+#### Start the environment
+
 ```
-sh ./start-compose-local-fullstack.sh
-
-docker-compose -f ./compose/full-stack-local/docker-compose-local-fullstack.yml up
+sh ./start-compose-local.sh
 ```
 
-## 2) Automated Testing 
-NOTE: app will not execute correctly in the standard browser, see the vnc steps below
+Ctrl-C to finish, then tidy up with this command
+```
+docker-compose -f ./compose/full-stack-local/docker-compose-local-fullstack.yml down
+```
 
-### a) Use github repos (ignores any local code)
+## Automated Testing 
+
+There are three types of tests, depending on whether it is required to override the code in github repos with code on the local machine.
+
+#### Optional - use VNC viewer to watch tests excecute
+The app, under the test setups, does not execute correctly in the standard browser. Instead, use a VNC viewer (e.g. [RealVNC](https://www.realvnc.com/download/viewer/)) to watch the test being executed on vnc://localhost:5900 (don't type vnc:// for RealVNC viewer)
+
+### 1) Github repos only - ignores any local code
 
 #### Create specific machines (if required)
 E.g. for specific front-end, node app, db or test-runner repo branches.
  ```
-sh ./specific-machine-test.sh cp-front-end $(date +%s) https://github.com/jkbits1/voteamerica.github.io self-service-changes
-sh ./specific-machine-test.sh cp-nodejs $(date +%s)
-sh ./specific-machine-test.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
+sh ./specific-machine-test.sh cp-front-end R https://github.com/jkbits1/voteamerica.github.io self-service-changes
+sh ./specific-machine-test.sh cp-nodejs R
+sh ./specific-machine-test.sh cp-test-runner R https://github.com/jkbits1/backend docker-test
  ```
 
 #### Run the tests
@@ -95,12 +127,15 @@ sh ./start-compose-tests.sh
 sh ./start-compose-tests.sh match
 ```
 
-### b) Use local dev env - frontend (local code is used for frontend)
+### 2) Local development environment - frontend 
+
+#### This overrides the frontend github repo with local code.
 
 #### Create specific machines (if required)
+##### e.g. to test a against a specific branch
  ```
-sh ./specific-machine-test-frontend.sh cp-nodejs $(date +%s)
-sh ./specific-machine-test-frontend.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
+sh ./specific-machine-test-frontend.sh cp-nodejs R
+sh ./specific-machine-test-frontend.sh cp-test-runner R https://github.com/jkbits1/backend docker-test
  ```
 
 #### Run the tests
@@ -110,12 +145,14 @@ sh ./start-compose-tests-frontend.sh
 sh ./start-compose-tests-frontend.sh match
 ```
 
-### b) Use local dev env - fullstack (local code is used for frontend, backend & test runner)
+### 3) Local development environment - fullstack 
+
+#### Local code overrides github repos for frontend, backend & test runner.
 
 #### Create specific machines (if required)
 Possibly needed if change change the run-tests.sh script in the nightwatch docker folder. The same applies to changes to scripts in the other docker folders.
 ```
-sh ./specific-machine-test-fullstack.sh cp-test-runner $(date +%s) https://github.com/jkbits1/backend docker-test
+sh ./specific-machine-test-fullstack.sh cp-test-runner R https://github.com/jkbits1/backend docker-test
 ```
 
 #### Run the tests
@@ -125,8 +162,9 @@ sh ./start-compose-tests-fullstack.sh
 sh ./start-compose-tests-fullstack.sh match
 ```
 
+docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml
 
-### review c) d)
+### The following instructions are being reviewed
 
 ### c) Test Front-end PR
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
@@ -156,8 +194,8 @@ iv) watch travis test the PR (e.g. https://travis-ci.org/jkbits1/backend/builds/
 
 #### 2) create specific build of front-end docker machine using --build-arg BRANCH_NAME=pr...
 ```
-. ./specific-machine-test.sh cp-nodejs $(date +%s) https://github.com/jkbits1/backend pr162
-. ./specific-machine-test.sh cp-pg-server $(date +%s) https://github.com/jkbits1/backend pr162
+. ./specific-machine-test.sh cp-nodejs R https://github.com/jkbits1/backend pr162
+. ./specific-machine-test.sh cp-pg-server R https://github.com/jkbits1/backend pr162
 ```
 
 #### 3) Run the tests
@@ -204,13 +242,12 @@ All tests
 Specific group of tests
 
 `nightwatch --group quick`
-#### 6) optional - use a vnc viewer (e.g. [RealVNC](https://www.realvnc.com/download/viewer/)) to watch the test being executed on vnc://localhost:5900 (don't type vnc:// for RealVNC viewer)
 
 #### 7) optional - create specific pg client
 ```
 . ./specific-machine-local.sh cp-nodejs
-. ./specific-machine-test.sh cp-nodejs $(date +%s)
-. ./specific-machine-local.sh cp-nodejs $(date +%s) https://github.com/jkbits1/backend ts-route 
+. ./specific-machine-test.sh cp-nodejs R
+. ./specific-machine-local.sh cp-nodejs R https://github.com/jkbits1/backend ts-route 
 ```
 
  
@@ -325,6 +362,7 @@ https://alexanderzeitler.com/articles/debugging-a-nodejs-es6-application-in-a-do
 .\VBoxManage modifyvm "default" --natpf1 "NodeDebug2,tcp,127.0.0.1,8080,,8080"
 .\VBoxManage modifyvm "default" --natpf1 "Postgres,tcp,127.0.0.1,5432,,5432"
 .\VBoxManage modifyvm "default" --natpf1 "jekyll,tcp,127.0.0.1,4000,,4000"
+.\VBoxManage modifyvm "default" --natpf1 "vnc,tcp,127.0.0.1,5900,,5900"
 .\VBoxManage modifyvm "default" --natpf1 "pulp,tcp,127.0.0.1,1337,,1337"
 
 
