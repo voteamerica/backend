@@ -49,7 +49,8 @@ before_script:
 # https://stackoverflow.com/questions/14267441/automatically-apply-git-update-index-chmodx-to-executable-files
 script:
   # - ./docker/compose-tests.sh
-  - travis_retry ./docker/compose-tests.sh match
+  # - travis_retry ./docker/compose-tests.sh match
+  - travis_retry ./docker/compose-tests.sh pause-cancel
 
 after_script:
   - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml down
