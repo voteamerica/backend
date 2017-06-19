@@ -6,6 +6,8 @@ module.exports = {
     common.nextDate(client)
       .matchRiderDriver()
       .viewRiderSelfService()
+      .viewRiderMatch()
+      .riderCancelMatch()
       .finish();
   }
 };

@@ -486,6 +486,33 @@ var testObject = {
         .assert.containsText('#riderInfo > ul', 'CANCEL');
     }),
 
+  'viewRiderMatch': 
+    createChainableTest(
+      function (client) {
+        client
+          // to do - should check for first list item
+          .assert.containsText('#riderConfirmedMatch > ul li', 'UUID_driver')
+          .assert.containsText('#riderConfirmedMatch > ul li.list_button button', 'Cancel')
+      }),
+
+  'riderCancelMatch':
+    createChainableTest(
+      function (client) {
+
+      client
+        .waitForElementVisible('#riderConfirmedMatch > ul li.list_button button', 1000)
+
+        .click('#riderConfirmedMatch > ul li.list_button button')
+
+        .pause(2000)
+        .acceptAlert()
+        .pause(3000)
+
+        .saveScreenshot('./reports/rider-self-service-cancel-match.png')
+
+        .waitForElementNotPresent('#riderConfirmedMatch > ul li.list_button button', 3000)
+      }),
+
   // this test is run at the start
   'matchRiderDriver': 
     createChainableTest(
@@ -495,7 +522,8 @@ var testObject = {
         .addRider(client)
         .addDriver()
         .viewDriverSelfService()
-        .viewProposedMatch().acceptMatch();
+        .viewProposedMatch()
+        .acceptMatch();
   })
 };
 
