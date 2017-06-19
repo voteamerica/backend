@@ -50,7 +50,7 @@ before_script:
 script:
   # - ./docker/compose-tests.sh
   # - travis_retry ./docker/compose-tests.sh match
-  - travis_retry ./docker/compose-tests.sh pause-cancel
+  - travis_retry ./docker/compose-tests.sh pause-cancel2
 
 after_script:
   - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml down
