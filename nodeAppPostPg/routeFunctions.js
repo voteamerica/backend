@@ -42,9 +42,9 @@ function getUnmatchedRiders(req, reply) {
 var cancelRideRequest = createConfirmCancelFn('cancel ride request: ', "get payload: ", dbQueriesCancels.dbCancelRideRequestFunctionString, getTwoRiderCancelConfirmPayloadAsArray
 // getCancelConfirmQueryAsArray
 );
-var cancelRiderMatch = createConfirmCancelFn('cancel rider match: ', "get payload: ", dbQueries.dbCancelRiderMatchFunctionString, getFourRiderCancelConfirmPayloadAsArray);
-var cancelDriveOffer = createConfirmCancelFn('cancel drive offer: ', "get payload: ", dbQueries.dbCancelDriveOfferFunctionString, getTwoDriverCancelConfirmPayloadAsArray);
-var cancelDriverMatch = createConfirmCancelFn('cancel driver match: ', "get payload: ", dbQueries.dbCancelDriverMatchFunctionString, 
+var cancelRiderMatch = createConfirmCancelFn('cancel rider match: ', "get payload: ", dbQueriesCancels.dbCancelRiderMatchFunctionString, getFourRiderCancelConfirmPayloadAsArray);
+var cancelDriveOffer = createConfirmCancelFn('cancel drive offer: ', "get payload: ", dbQueriesCancels.dbCancelDriveOfferFunctionString, getTwoDriverCancelConfirmPayloadAsArray);
+var cancelDriverMatch = createConfirmCancelFn('cancel driver match: ', "get payload: ", dbQueriesCancels.dbCancelDriverMatchFunctionString, 
 // getThreeDriverCancelConfirmPayloadAsArray
 getFourDriverCancelConfirmPayloadAsArray);
 var acceptDriverMatch = createConfirmCancelFn('accept driver match: ', "get payload: ", dbQueries.dbAcceptDriverMatchFunctionString, getFourDriverCancelConfirmPayloadAsArray);

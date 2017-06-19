@@ -19,6 +19,8 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 ## Development enviroments
 
+Carpool-vote is spread across two repos, one for front-end the other for backend. Although some setups below use only one, mostly it is necessary to have both installed on your development machine.
+
 #### Create the necessary local setup
 **IMPORTANT:**
 1) It is best to clone from a fork of the carpoolvote repo's rather than directly. Use the commands below with your own forked repo in place of the carpoolvote repo's.
@@ -41,6 +43,21 @@ If it does not already exist, clone the backend git repo. It can be named howeve
 
 `git clone https://github.com/voteamerica/backend voteUSbackend`
 
+#### Create specific machines (if required)
+This can be necessary for testing against a version of code that is under development or in a non-default branch and/or repo.
+
+Example params to these scripts 
+
+`cp-nodejs` the service name in the relevant docker-compose .yml file
+
+`R` force rebuild
+
+`https://github.com/voteamerica/backend` repo name
+
+`master` branch name
+
+More details below.
+
 ### 1) Front-end Development
 
 #### Go to the docker folder ... 
@@ -51,35 +68,47 @@ If it does not already exist, clone the backend git repo. It can be named howeve
 This might be necessary if you are testing against a version of either the node app or db that is under development. 
 
 ```
-sh ./specific-machine-local-front.sh cp-nodejs R https://github.com/voteamerica/backend master
-sh ./specific-machine-local-front.sh cp-pg-server R https://github.com/voteamerica/backend master
+sh ./specific-machine-local-frontend.sh cp-nodejs R https://github.com/voteamerica/backend master
+sh ./specific-machine-local-frontend.sh cp-pg-server R https://github.com/voteamerica/backend master
  ```
 
-#### create local system
+#### Start the environment
+
 ```
 sh ./start-compose-local-frontend.sh
+```
 
-docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml up
+Ctrl-C to finish, then tidy up with this command
+```
+docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml down
 ```
 
 ### 2) Full-stack Development
 This works directly from the files in the folders for your front and back-end repos.
 
+If you don't have a local clone of the front-end repo, create one as described above.
+
 #### Go to the docker folder ... 
 ##### ... of your forked repo (here named voteUSbackend)
 `cd .../voteUSbackend/docker`
 
-#### 2) use docker-compose to create local system
-```
-sh ./start-compose-local-fullstack.sh
+#### Start the environment
 
-docker-compose -f ./compose/full-stack-local/docker-compose-local-fullstack.yml up
+```
+sh ./start-compose-local.sh
+```
+
+Ctrl-C to finish, then tidy up with this command
+```
+docker-compose -f ./compose/full-stack-local/docker-compose-local-fullstack.yml down
 ```
 
 ## Automated Testing 
-NOTE: app will not execute correctly in the standard browser, see the VNC steps below
 
-There are three types, depending on whether it is required to override the code in github repos with code on the local machine.
+There are three types of tests, depending on whether it is required to override the code in github repos with code on the local machine.
+
+#### Optional - use VNC viewer to watch tests excecute
+The app, under the test setups, does not execute correctly in the standard browser. Instead, use a VNC viewer (e.g. [RealVNC](https://www.realvnc.com/download/viewer/)) to watch the test being executed on vnc://localhost:5900 (don't type vnc:// for RealVNC viewer)
 
 ### 1) Github repos only - ignores any local code
 
@@ -133,6 +162,7 @@ sh ./start-compose-tests-fullstack.sh
 sh ./start-compose-tests-fullstack.sh match
 ```
 
+docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml
 
 ### The following instructions are being reviewed
 
@@ -212,7 +242,6 @@ All tests
 Specific group of tests
 
 `nightwatch --group quick`
-#### 6) optional - use a vnc viewer (e.g. [RealVNC](https://www.realvnc.com/download/viewer/)) to watch the test being executed on vnc://localhost:5900 (don't type vnc:// for RealVNC viewer)
 
 #### 7) optional - create specific pg client
 ```
@@ -333,6 +362,7 @@ https://alexanderzeitler.com/articles/debugging-a-nodejs-es6-application-in-a-do
 .\VBoxManage modifyvm "default" --natpf1 "NodeDebug2,tcp,127.0.0.1,8080,,8080"
 .\VBoxManage modifyvm "default" --natpf1 "Postgres,tcp,127.0.0.1,5432,,5432"
 .\VBoxManage modifyvm "default" --natpf1 "jekyll,tcp,127.0.0.1,4000,,4000"
+.\VBoxManage modifyvm "default" --natpf1 "vnc,tcp,127.0.0.1,5900,,5900"
 .\VBoxManage modifyvm "default" --natpf1 "pulp,tcp,127.0.0.1,1337,,1337"
 
 

@@ -63,19 +63,19 @@ var cancelRideRequest = createConfirmCancelFn
 
 var cancelRiderMatch = createConfirmCancelFn 
   ('cancel rider match: ', "get payload: ", 
-    dbQueries.dbCancelRiderMatchFunctionString, 
+    dbQueriesCancels.dbCancelRiderMatchFunctionString, 
     getFourRiderCancelConfirmPayloadAsArray
   );
 
 var cancelDriveOffer = createConfirmCancelFn 
   ('cancel drive offer: ', "get payload: ", 
-    dbQueries.dbCancelDriveOfferFunctionString, 
+    dbQueriesCancels.dbCancelDriveOfferFunctionString, 
     getTwoDriverCancelConfirmPayloadAsArray
   );
 
 var cancelDriverMatch = createConfirmCancelFn 
   ('cancel driver match: ', "get payload: ", 
-    dbQueries.dbCancelDriverMatchFunctionString, 
+    dbQueriesCancels.dbCancelDriverMatchFunctionString, 
     // getThreeDriverCancelConfirmPayloadAsArray
     getFourDriverCancelConfirmPayloadAsArray
   );

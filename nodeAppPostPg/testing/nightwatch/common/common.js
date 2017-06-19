@@ -34,7 +34,10 @@ function createChainableTest (testFunction) {
 var testObject = {
   'currentClient' : undefined,
 
-  'dates' : ['2017-08-09'],
+  'dates' : ['2017-08-09', '2017-09-09'],
+  // 'dates' : ['2017-08-09'],
+
+  'currentDateIndex' : 0,
 
   'riderSelfServicePageUrl' : "",
 
@@ -61,6 +64,12 @@ var testObject = {
         client.end();
       }),
 
+  'nextDate' : 
+    createChainableTest (
+      function (client) {
+        testObject.currentDateIndex += 1;
+      }),
+
   'finishOrig' : 
     function (client) {
       var client = this.setClient(client);
@@ -74,6 +83,7 @@ var testObject = {
     createChainableTest (
     function (client) {
       var dates = testObject.dates;
+      var dateIndex = testObject.currentDateIndex;
 
       client
         .url('http://10.5.0.4:4000/#offer-ride')
@@ -89,14 +99,28 @@ var testObject = {
 
         // set date/time
         .execute( function (data) {
-            console.log('passed args: ', arguments);
-            document.getElementById("DriverDate0").value = arguments[0];  
-            return arguments;
+            var driverDateElement = document.getElementById("DriverDate0");
+
+            console.log('addDriver - passed args: ', arguments);
+            console.log('addDriver - data: ', data);
+            
+            // driverDateElement.value = arguments[testObject.currentDateIndex];  
+            driverDateElement.value = arguments[0][arguments[1]];  
+            
+            return driverDateElement.value;
           }
-          , dates 
+          , [dates, dateIndex] 
           , function (result) {
-              console.log("result", result.value);
-              client.assert.deepEqual(dates, result.value, 'Result matches');
+              console.log("addDriver - result", result.value);
+              console.log("addDriver - dates to check", dates);
+              // console.log("addDriver - date index", testObject.currentDateIndex);
+              // console.log("addDriver - current dates", dates[testObject.currentDateIndex]);
+
+              console.log("addDriver - date index", dateIndex);
+              console.log("addDriver - current date", dates[dateIndex]);
+
+              // client.assert.deepEqual(dates[testObject.currentDateIndex], result.value, 'Date matches');
+              client.assert.deepEqual(dates[dateIndex], result.value, 'Date matches');
             }
         )
 
@@ -135,7 +159,8 @@ var testObject = {
   'addRider' : 
     createChainableTest (
       function (client) {
-      var dates = testObject.dates;
+      var dates     = testObject.dates;
+      var dateIndex = testObject.currentDateIndex;
       
       console.log("addRider");
       console.log("dates: ", dates);
@@ -147,14 +172,23 @@ var testObject = {
 
         // set date/time
         .execute( function (data) {
-            console.log('passed args: ', arguments);
-            document.getElementById("RiderDate0").value = arguments[0];  
-            return arguments;
+            var riderDateElement = document.getElementById("RiderDate0");
+
+            console.log('addRider - passed args: ', arguments);
+            console.log('addRider - data: ', data);
+            
+            riderDateElement.value = arguments[0][arguments[1]];  
+            
+            return riderDateElement.value;
           }
-          , dates 
+          , [dates, dateIndex] 
           , function (result) {
-              console.log("result", result.value);
-              client.assert.deepEqual(dates, result.value, 'Result matches');
+              console.log("addRider - result", result.value);
+              console.log("addRider - dates to check", dates);
+              console.log("addRider - date index", dateIndex);
+              console.log("addRider - current date", dates[dateIndex]);
+
+              client.assert.deepEqual(dates[dateIndex], result.value, 'Date matches');
             }
         )
         // .setValue('input[name="RiderDate"]', '2017-05-12')
@@ -190,14 +224,14 @@ var testObject = {
         .assert.containsText('.self-service-url', 'self-service portal')
 
         .getAttribute(".self-service-url", "href", function(result) {
-          console.log("rider self service url: ", result);
+          console.log("addRider - self service url: ", result);
           // this.assert.equal(typeof result, "object");
           // this.assert.equal(result.status, 0);
           // this.assert.equal(result.value, "#home");
 
           testObject.riderSelfServicePageUrl = result.value;
 
-          console.log("rider url: ", testObject.riderSelfServicePageUrl);
+          console.log("addRider - rider url: ", testObject.riderSelfServicePageUrl);
         });
 
         // .assert.containsText('div.with-errors ul li', 'Please fill in')
@@ -205,79 +239,79 @@ var testObject = {
 
       }),
 
-  'addRiderOrig' : 
-    function (client) {
-      var client = this.setClient(client);
-      var dates = this.dates;
+  // 'addRiderOrig' : 
+  //   function (client) {
+  //     var client = this.setClient(client);
+  //     var dates = this.dates;
       
-      var self = this;
+  //     var self = this;
 
-      console.log("addRiderOrig");
+  //     console.log("addRiderOrig");
 
-      client
-        .url('http://10.5.0.4:4000/#need-ride')
-        .waitForElementVisible('form#need-ride', 3000)
-        .assert.cssClassPresent('#RiderAvailableTimes', 'available-times')
+  //     client
+  //       .url('http://10.5.0.4:4000/#need-ride')
+  //       .waitForElementVisible('form#need-ride', 3000)
+  //       .assert.cssClassPresent('#RiderAvailableTimes', 'available-times')
 
-        // set date/time
-        .execute( function (data) {
-            console.log('passed args: ', arguments);
-            document.getElementById("RiderDate0").value = arguments[0];  
-            return arguments;
-          }
-          , dates 
-          , function (result) {
-              console.log("result", result.value);
-              client.assert.deepEqual(dates, result.value, 'Result matches');
-            }
-        )
-        // .setValue('input[name="RiderDate"]', '2017-05-12')
+  //       // set date/time
+  //       .execute( function (data) {
+  //           console.log('passed args: ', arguments);
+  //           document.getElementById("RiderDate0").value = arguments[0];  
+  //           return arguments;
+  //         }
+  //         , dates 
+  //         , function (result) {
+  //             console.log("result", result.value);
+  //             client.assert.deepEqual(dates, result.value, 'Result matches');
+  //           }
+  //       )
+  //       // .setValue('input[name="RiderDate"]', '2017-05-12')
 
-        .setValue('input[id="riderCollectionAddress"]', '1 high st')
-        .assert.valueContains('input[id="riderCollectionAddress"]', '1')
+  //       .setValue('input[id="riderCollectionAddress"]', '1 high st')
+  //       .assert.valueContains('input[id="riderCollectionAddress"]', '1')
 
-        .setValue('input[name="RiderCollectionZIP"]', '10036')
-        .setValue('input[id="riderDestinationAddress"]', '1 main st')
-        .setValue('input[id="rideDestinationZIP"]', '10036')
+  //       .setValue('input[name="RiderCollectionZIP"]', '10036')
+  //       .setValue('input[id="riderDestinationAddress"]', '1 main st')
+  //       .setValue('input[id="rideDestinationZIP"]', '10036')
 
-        .setValue('input[id="rideSeats"]', '1')
-        .setValue('#RiderAccommodationNotes', 'comfy chair')
+  //       .setValue('input[id="rideSeats"]', '1')
+  //       .setValue('#RiderAccommodationNotes', 'comfy chair')
 
-        .setValue('input[name="RiderFirstName"]', 'anne')
-        .setValue('input[name="RiderLastName"]', 'test')
-        .setValue('input[name="RiderEmail"]', 'a@test.com')
-        .setValue('input[name="RiderPhone"]', '07755000111')
+  //       .setValue('input[name="RiderFirstName"]', 'anne')
+  //       .setValue('input[name="RiderLastName"]', 'test')
+  //       .setValue('input[name="RiderEmail"]', 'a@test.com')
+  //       .setValue('input[name="RiderPhone"]', '07755000111')
 
-        .click('input[name="RiderPreferredContact"]')
-        .click('input[name="RiderAgreeTnC"]')
+  //       .click('input[name="RiderPreferredContact"]')
+  //       .click('input[name="RiderAgreeTnC"]')
         
-        .saveScreenshot('./reports/rider-entries2.png')
+  //       .saveScreenshot('./reports/rider-entries2.png')
 
-        .click('button[id="needRideSubmit"]')
+  //       .click('button[id="needRideSubmit"]')
 
-        .saveScreenshot('./reports/rider-submitted.png')
+  //       .saveScreenshot('./reports/rider-submitted.png')
 
-        .waitForElementVisible('h1#thanks-header', 5000)
-        .assert.containsText('h1#thanks-header', 'Congratulations')
+  //       .waitForElementVisible('h1#thanks-header', 5000)
+  //       .assert.containsText('h1#thanks-header', 'Congratulations')
 
-        .waitForElementVisible('.self-service-url', 1000)
-        .assert.containsText('.self-service-url', 'self-service portal')
+  //       .waitForElementVisible('.self-service-url', 1000)
+  //       .assert.containsText('.self-service-url', 'self-service portal')
 
-        .getAttribute(".self-service-url", "href", function(result) {
-          console.log("rider self service url: ", result);
-          // this.assert.equal(typeof result, "object");
-          // this.assert.equal(result.status, 0);
-          // this.assert.equal(result.value, "#home");
-          self.riderSelfServicePageUrl = result.value;
+  //       .getAttribute(".self-service-url", "href", function(result) {
+  //         console.log("rider self service url: ", result);
+  //         // this.assert.equal(typeof result, "object");
+  //         // this.assert.equal(result.status, 0);
+  //         // this.assert.equal(result.value, "#home");
+  //         self.riderSelfServicePageUrl = result.value;
 
-          console.log("rider url: ", self.riderSelfServicePageUrl);
-        });
+  //         console.log("rider url: ", self.riderSelfServicePageUrl);
+  //       });
 
-        // .assert.containsText('div.with-errors ul li', 'Please fill in')
-        // .assert.valueContains('div.with-errors ul li', 'Please')
+  //       // .assert.containsText('div.with-errors ul li', 'Please fill in')
+  //       // .assert.valueContains('div.with-errors ul li', 'Please')
 
-      return this;
-    },
+  //     return this;
+  //   },
 
   // this test is called after a driver has been added - it's assumed 
   // app is at thanks driver page
@@ -461,7 +495,7 @@ var testObject = {
         .addRider(client)
         .addDriver()
         .viewDriverSelfService()
-        .viewProposedMatch().acceptMatch().driverCancelMatch();
+        .viewProposedMatch().acceptMatch();
   })
 };
 
