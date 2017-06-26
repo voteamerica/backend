@@ -22,23 +22,14 @@ Details can be found [here](https://github.com/voteamerica/backend/tree/master/d
 
 ### Nodejs App
 
-This is [here](https://github.com/voteamerica/backend/tree/master/nodeAppPostPg). The app is built with [TypeScript](https://www.typescriptlang.org/index.html). Install Typescript on your development machine. The mainstream editors support Typescript, and it is also possible to compile the files manually as below.
-
-```
-cd NodeAppPostPg
-```
-
-Work on the .ts files, and compile them, as show below, to create the .js files
-
-```
-tsc -p .
-```
+This is [here](https://github.com/voteamerica/backend/tree/master/nodeAppPostPg).
 
 ### Database
 
 The database is Postgres. 
+This is [here](https://github.com/voteamerica/backend/tree/master/db)
 
-### Repos overview
+### Working on the front-end
 The front-end repo is [here](https://github.com/voteamerica/voteamerica.github.io). The main site is available at http://carpoolvote.com/
 
 ## Contributing
