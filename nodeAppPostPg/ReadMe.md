@@ -1,22 +1,23 @@
-Node app - 
+# Nodejs App 
 
-  accepts POSTs to ip-address/driver and ip-address/rider
-  Form data is inserted into relevant postGres STAGE table
-    (WEBSUBMISSION_DRIVER/RIDER) 
+This app handles all requests and submissions from the front-end. Together with the Postgres database, this app provides the bulk of the services of the Carpool Vote system.
 
-  a GET to ip-address returns test data. This allows for a quick check that 
-  service is running and connected to db.
+## Development
 
-Use testPage.html (and linked testPageScript.js) to test app
-  testPageScript.js contains a line that refers to app location and route
-      http://ip-address/driver
-      http://ip-address/rider
+ The app is built with [TypeScript](https://www.typescriptlang.org/index.html). Install Typescript on your development machine from [here](https://www.typescriptlang.org/#download-links). The mainstream editors support Typescript, and it is also possible to compile the files manually as below.
 
-      (change ip-address depending on app location)
+```
+cd NodeAppPostPg
+```
 
-#########################
-STEPS TO INSTALL ON LINUX
-#########################  
+Work on the .ts files, and compile them, as show below, to create the .js files
+
+```
+tsc -p .
+```
+
+
+## Installation on linux - notes for deployment
 
 DATABASE 
 Run matches.sql
@@ -68,7 +69,25 @@ pm2 stop all // only one app, so this is ok - better to use app id, though
 monitor app 
 pm2 list
 
-### typescript
-#### https://www.typescriptlang.org/#download-links 
-#### https://stackoverflow.com/questions/31173738/typescript-getting-error-ts2304-cannot-find-name-require
-#### https://blogs.msdn.microsoft.com/typescript/2016/06/15/the-future-of-declaration-files/
+### typescript notes
+
+https://stackoverflow.com/questions/31173738/typescript-getting-error-ts2304-cannot-find-name-require
+
+https://blogs.msdn.microsoft.com/typescript/2016/06/15/the-future-of-declaration-files/
+
+### Legacy notes
+Node app - 
+
+  accepts POSTs to ip-address/driver and ip-address/rider
+  Form data is inserted into relevant postGres STAGE table
+    (WEBSUBMISSION_DRIVER/RIDER) 
+
+  a GET to ip-address returns test data. This allows for a quick check that 
+  service is running and connected to db.
+
+Use testPage.html (and linked testPageScript.js) to test app
+  testPageScript.js contains a line that refers to app location and route
+      http://ip-address/driver
+      http://ip-address/rider
+
+      (change ip-address depending on app location)
