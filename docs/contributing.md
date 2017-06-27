@@ -7,7 +7,7 @@ Different areas of this repo use different technologies. See the README.md for i
 
 ## Getting started
 
-- Join our [Slack team](https://carpool-vote.slack.com/)! It's the best way to keep up to date with the project. Please [email us](mailto:slack@carpoolvote.com) if you would like to join.
+- Join our [Slack team](https://carpool-vote.slack.com/). It's the best way to keep up to date with the project. Please [email us](mailto:slack@carpoolvote.com) if you would like to join.
 - If you're new to GitHub and open-source, please familiarise yourself 
 with the [official guidelines](https://guides.github.com/activities/contributing-to-open-source/).
 - Check our GitHub issues to see what needs doing.

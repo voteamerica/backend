@@ -10,7 +10,7 @@ We have a [Slack team](https://carpool-vote.slack.com/)! Please [email us](mailt
 
 ## Overview
 
-Everything related to the back-end of Carpool Vote exists in this repo. The main components are a Nodejs app that provides services to the front-end and a Postgres database. Other components, written in both Python and Nodejs, that send emails, sms messages, and provide other functionality to support the Nodejs app and the database.
+Everything related to the back-end of Carpool Vote exists in this repo. The main components are a Nodejs app that provides services to the front-end and a Postgres database. Other components, written in both Python and Nodejs, send emails, sms messages, and provide other functions to support the Nodejs app and the database.
 
 ### Travis CI
 A setup exists to run Travis CI tests against PRs. This is in the process of being connected to this repo so that PRs are automatically tested.
