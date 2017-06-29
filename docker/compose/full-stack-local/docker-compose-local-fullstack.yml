@@ -3,7 +3,7 @@ version: '2.1'
 services:
   cp-front-end:
     build:
-      context: ../../jekyll/
+      context: ../../jekyllDev/
       args:
         REPO: https://github.com/voteamerica/voteamerica.github.io
         BRANCH_NAME: master
