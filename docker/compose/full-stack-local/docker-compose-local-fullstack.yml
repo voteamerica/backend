@@ -3,11 +3,12 @@ version: '2.1'
 services:
   cp-front-end:
     build:
-      context: ../../jekyll/
+      context: ../../jekyllDev/
       args:
         REPO: https://github.com/voteamerica/voteamerica.github.io
         BRANCH_NAME: master
-    image: gc-jekyll
+        # JEKYLL_VERSION: jekyll@3.4.4
+    # image: gc-jekyll
 
     ports: 
       - "4000:4000"
@@ -15,8 +16,19 @@ services:
       - cp-nodejs
       - cp-pg-server
 
+    # override entrypoint of standard jekyll dockerfile
+    # entrypoint: /bin/bash
     # NOTE: override destination so that generated files are visible on host machine
-    command: jekyll serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-host.yml
+    # command: jekyll serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-host.yml
+    # command: jekyll serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --config /_config-local-host.yml
+    # command: jekyll serve -H 0.0.0.0 --force_polling --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-host.yml
+    # command: jekyll serve --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-host.yml
+
+    # command: serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --config /_config-local-host.yml
+    command: serve -H 0.0.0.0 --force_polling --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-host.yml
+
+    
+    # command: /bin/bash
 
     volumes:
       - ../../../../${COMPOSE_DEV_FE_DIR:-voteUSfrontend}:/usr/src/app/frontend
