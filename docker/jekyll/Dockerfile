@@ -37,7 +37,6 @@ COPY ./_config-local-host.yml /
 COPY ./_config-local-ip.yml /
 
 # ENTRYPOINT ["jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml"]
-
 # ENTRYPOINT [""]
 # ENTRYPOINT ["/bin/bash"]
 
