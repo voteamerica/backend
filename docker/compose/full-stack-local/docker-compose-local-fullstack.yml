@@ -20,9 +20,13 @@ services:
     # entrypoint: /bin/bash
     # NOTE: override destination so that generated files are visible on host machine
     # command: jekyll serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-host.yml
-    command: jekyll serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --config /_config-local-host.yml
+    # command: jekyll serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --config /_config-local-host.yml
     # command: jekyll serve -H 0.0.0.0 --force_polling --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-host.yml
     # command: jekyll serve --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-host.yml
+
+    # command: serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --config /_config-local-host.yml
+    command: serve -H 0.0.0.0 --force_polling --source /usr/src/app/frontend --config /_config-local-host.yml
+
     
     # command: /bin/bash
 
