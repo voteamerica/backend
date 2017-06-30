@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/voteamerica/backend.svg?branch=master)](https://travis-ci.org/voteamerica/backend)
+
 # Carpool Vote - Backend repo
 
 Carpool Vote connects volunteer drivers with anybody who needs a ride to claim their vote. We are a nonpartisan organisation: Our goal is to increase voter turnout and improve representation.
@@ -6,17 +8,17 @@ We successfully deployed the site for the US 2016 election and now we are workin
 
 ## Slack
 
-We have a [Slack team](https://carpool-vote.slack.com/)! Please [email us](mailto:slack@carpoolvote.com) if you would like to join.
+We have a [Slack team](https://carpool-vote.slack.com/). Please [email us](mailto:slack@carpoolvote.com) if you would like to join.
 
 ## Overview
 
-Everything related to the back-end of Carpool Vote exists in this repo. The main components are a Nodejs app that provides services to the front-end and a Postgres database. Other components, written in both Python and Nodejs, send emails, sms messages, and provide other functions to support the Nodejs app and the database.
+Everything related to the back-end of Carpool Vote exists in this repo. The main components are a Nodejs app that provides services to the front-end and a Postgres database. Other components, written in both Python and Nodejs, send emails, SMS messages, and provide other functions to support the Nodejs app and the database.
 
 ### Travis CI
-A setup exists to run Travis CI tests against PRs. This is in the process of being connected to this repo so that PRs are automatically tested.
+[Travis CI](https://travis-ci.org/voteamerica/backend) tests are run automatically against all PRs. 
 
 ### Development environment and automated tests
-Docker and docker-compose are used to create a variety of development environments and automated tests.
+Docker and docker-compose are used to provide contributors with a variety of development environments and automated tests.
 
 Details can be found [here](https://github.com/voteamerica/backend/tree/master/docker)
 
