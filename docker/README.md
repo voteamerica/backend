@@ -95,7 +95,7 @@ If you don't have a local clone of the front-end repo, create one as described a
 #### Start the environment
 
 ```
-sh ./start-compose-local.sh
+sh ./start-compose-local-fullstack.sh
 ```
 
 Ctrl-C to finish, then tidy up with this command
@@ -364,7 +364,8 @@ https://alexanderzeitler.com/articles/debugging-a-nodejs-es6-application-in-a-do
 .\VBoxManage modifyvm "default" --natpf1 "jekyll,tcp,127.0.0.1,4000,,4000"
 .\VBoxManage modifyvm "default" --natpf1 "vnc,tcp,127.0.0.1,5900,,5900"
 .\VBoxManage modifyvm "default" --natpf1 "pulp,tcp,127.0.0.1,1337,,1337"
-
-
-
 ```
+
+### create fr pr with revised tests
+
+
