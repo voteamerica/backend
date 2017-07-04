@@ -72,6 +72,7 @@ echo EVENT $EVENT
 if [[ "X$PR_SLUG" = "X"]]
 then
     # push event
+    NOP=0
     echo PUSH $REPO
 else
     # pr event
@@ -83,6 +84,7 @@ fi
 if [[ "X$PR_BRANCH" = "X"]]
 then
     # push event
+    NOP=0
     echo PUSH $BRANCH
 else
     # pr event
