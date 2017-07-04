@@ -70,9 +70,10 @@ echo PR_SLUG $PR_SLUG
 echo EVENT $EVENT
 
 if [[ "X$PR_SLUG" = "X"]]
+then
     # push event
     echo PUSH $REPO
-then
+else
     # pr event
     $REPO=$PR_SLUG
 
@@ -80,9 +81,10 @@ then
 fi
 
 if [[ "X$PR_BRANCH" = "X"]]
+then
     # push event
     echo PUSH $BRANCH
-then
+else
     # pr event
     $BRANCH=$PR_BRANCH
 
