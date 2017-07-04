@@ -372,18 +372,34 @@ NOTE: this assumes that your front-end repo has travis CI enabled.
 Some front-end code changes will require matching changes or extensions to the tests.
 Once the front-end changes are ready (or at least under way), use the `Local development environment - fullstack` environment described above to confirm if tests now fail.
 
-If so, create a new branch in your back-end repo. In the front-end branch under development, change the `./travis.yml` file to refer to this repo and branch.
+If so, follow these steps:
 
-In the back-end branch, make the necessary changes to the test files. Commit the changes and push this branch to your own repo origin.
+1) create a new branch in your back-end repo. In the front-end branch under development, change the `./travis.yml` file to refer to this repo and branch.
 
-Work on the front-end code and tests until the revised code is both tested and those tests pass. If you need assistance, ask on #backend channel of the Slack team and we will be happy to help you.
-**Do not** remove any tests without discussion with a senior repo member. If creating a PR that changes the tests, mention this in the PR description.
+2) In the back-end branch, make the necessary changes to the test files. 
 
-Once the front-end code is ready, commit the changes and push this branch to your own repo origin. Do the same for any back-end test changes, as before. The back-end repo branch is likely to fail the travis tests, this is expected.
+In the backend `travis.yml`, add a line to match up the backend branch with the frontend branch in the 
+`before_script:` section, e.g. for the `slfsvc-ui-adjust` branch of the `jkbits1` repo:
 
-The front-end repo should pass the travis tests once pushed to your origin. If not, there is a problem in either front-end code or the tests. Presuming the tests, have passed create a PR for the front-end.
+```
+  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/jkbits1/voteamerica.github.io --build-arg BRANCH_NAME=slfsvc-ui-adjust --build-arg CACHEBUST=$(date +%s cp-front-end
+```
 
-Once the front-end branch is accepted, a PR can be created for the back-end branch with the revised tests. When the back-end PR is accepted, the final step is to adjust the front-end `./travis.yml` to once again refer to the main repo and branch. These final steps should be done **promptly** after the front-end PR is accepted.
+Commit the changes and push this branch to your own repo origin. The back-end repo branch will fail the travis tests, this is expected.
+
+3) Work on the front-end code and related tests (in the backend repo) until tests for the revised code pass. If you need assistance, ask on #backend channel of the Slack team and we will be happy to help you. **Do not** remove any tests without discussion with a senior repo member. If creating a PR that changes the tests, **clearly** mention this in the PR description.
+
+4) Once the front-end code is ready, commit the changes and push this branch to your own repo origin. Do the same for any back-end test changes, as before. 
+
+NOTE: the backend tests should pass now. On the travis page for your backend repo, find the failing backend branch and click Rebuild
+
+5) The front-end repo should pass the travis tests once pushed to your origin. If not, there is a problem in either front-end code or the tests. Presuming the tests have passed, create a PR for the front-end.
+
+6) These final steps align the `travis.yml` files to the main branches again. 
+
+When the front-end branch is accepted, a PR can be created for the back-end branch with the revised tests. 
+
+NOTE:  the backend PR should ajdust the backend `travis.yml` file to refer to the main frontend repo and branch. Once the back-end PR is accepted, the final step is to adjust the front-end `./travis.yml` to once again refer to the main backend repo and branch. These final steps should be done **promptly** after the front-end PR is accepted.
 
 
 
