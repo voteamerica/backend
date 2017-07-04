@@ -43,4 +43,4 @@ pwd
 
 ls
 
-docker-compose -f compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=$R --build-arg BRANCH_NAME=$B --build-arg CACHEBUST=$C $M
+docker-compose -f docker/compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=$R --build-arg BRANCH_NAME=$B --build-arg CACHEBUST=$C $M
