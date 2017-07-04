@@ -366,6 +366,26 @@ https://alexanderzeitler.com/articles/debugging-a-nodejs-es6-application-in-a-do
 .\VBoxManage modifyvm "default" --natpf1 "pulp,tcp,127.0.0.1,1337,,1337"
 ```
 
-### create fr pr with revised tests
+### create fr PR with revised tests
+NOTE: this assumes that your front-end repo has travis CI enabled.
+
+Some front-end code changes will require matching changes or extensions to the tests.
+Once the front-end changes are ready (or at least under way), use the `Local development environment - fullstack` environment described above to confirm if tests now fail.
+
+If so, create a new branch in your back-end repo. In the front-end branch under development, change the `./travis.yml` file to refer to this repo and branch.
+
+In the back-end branch, make the necessary changes to the test files. Commit the changes and push this branch to your own repo origin.
+
+Work on the front-end code and tests until the revised code is both tested and those tests pass. If you need assistance, ask on #backend channel of the Slack team and we will be happy to help you.
+**Do not** remove any tests without discussion with a senior repo member. If creating a PR that changes the tests, mention this in the PR description.
+
+Once the front-end code is ready, commit the changes and push this branch to your own repo origin. Do the same for any back-end test changes, as before. The back-end repo branch is likely to fail the travis tests, this is expected.
+
+The front-end repo should pass the travis tests once pushed to your origin. If not, there is a problem in either front-end code or the tests. Presuming the tests, have passed create a PR for the front-end.
+
+Once the front-end branch is accepted, a PR can be created for the back-end branch with the revised tests. When the back-end PR is accepted, the final step is to adjust the front-end `./travis.yml` to once again refer to the main repo and branch. These final steps should be done **promptly** after the front-end PR is accepted.
+
+
+
 
 
