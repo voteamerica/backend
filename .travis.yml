@@ -36,15 +36,18 @@ install:
   - sudo mv docker-compose /usr/local/bin
   - docker-compose version
 
-  - echo "slug" https://github.com/$TRAVIS_REPO_SLUG
-  - echo "pr slug" $TRAVIS_PULL_REQUEST_SLUG
-  - echo "event" $TRAVIS_EVENT_TYPE
+  - echo "slug" $TRAVIS_REPO_SLUG
   - echo "branch" $TRAVIS_BRANCH
 
+  - echo "pr slug" $TRAVIS_PULL_REQUEST_SLUG
+  - echo "pr branch" $TRAVIS_PULL_REQUEST_BRANCH
+
+  - echo "event" $TRAVIS_EVENT_TYPE
+
 before_script:
-  - ./docker/specific-machine-test-travis.sh cp-test-runner R https://github.com/$TRAVIS_REPO_SLUG $TRAVIS_BRANCH
-  - ./docker/specific-machine-test-travis.sh cp-nodejs R https://github.com/$TRAVIS_REPO_SLUG $TRAVIS_BRANCH
-  - ./docker/specific-machine-test-travis.sh cp-pg-server R https://github.com/$TRAVIS_REPO_SLUG $TRAVIS_BRANCH
+  - ./docker/specific-machine-test-travis.sh cp-test-runner R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
+  - ./docker/specific-machine-test-travis.sh cp-nodejs R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
+  - ./docker/specific-machine-test-travis.sh cp-pg-server R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
 
   - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml up -d
 
