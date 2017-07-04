@@ -36,8 +36,8 @@ install:
   - sudo mv docker-compose /usr/local/bin
   - docker-compose version
   - echo "slug" https://github.com/$TRAVIS_REPO_SLUG
-  - echo "pr slug" TRAVIS_PULL_REQUEST_SLUG
-  - echo "event" TRAVIS_EVENT_TYPE
+  - echo "pr slug" $TRAVIS_PULL_REQUEST_SLUG
+  - echo "event" $TRAVIS_EVENT_TYPE
 
 before_script:
   - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/$TRAVIS_REPO_SLUG --build-arg BRANCH_NAME=$TRAVIS_BRANCH --build-arg CACHEBUST=$(date +%s) cp-test-runner
