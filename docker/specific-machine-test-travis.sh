@@ -69,26 +69,24 @@ echo REPO_SLUG $REPO_SLUG
 echo PR_SLUG $PR_SLUG
 echo EVENT $EVENT
 
-if [[ "X$PR_SLUG" = "X"]]
+if [[ "X$PR_SLUG" = "X" ]]
 then
     # push event
-    NOP=0
     echo PUSH $REPO
 else
     # pr event
-    $REPO=$PR_SLUG
+    REPO=$PR_SLUG
 
     echo PR $REPO
 fi
 
-if [[ "X$PR_BRANCH" = "X"]]
+if [[ "X$PR_BRANCH" = "X" ]]
 then
     # push event
-    NOP=0
     echo PUSH $BRANCH
 else
     # pr event
-    $BRANCH=$PR_BRANCH
+    BRANCH=$PR_BRANCH
 
     echo PR $BRANCH
 fi
