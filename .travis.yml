@@ -18,14 +18,22 @@ install:
   - sudo mv docker-compose /usr/local/bin
   - docker-compose version
 
+  - echo "slug" $TRAVIS_REPO_SLUG
+  - echo "branch" $TRAVIS_BRANCH
+
+  - echo "pr slug" $TRAVIS_PULL_REQUEST_SLUG
+  - echo "pr branch" $TRAVIS_PULL_REQUEST_BRANCH
+
+  - echo "event" $TRAVIS_EVENT_TYPE
+
 before_script:
 # this file is on a branch that currently matches a specific frontend branch being developed.
 # So specify this front-end branch here
-  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/jkbits1/voteamerica.github.io --build-arg BRANCH_NAME=slfsvc-ui-adjust --build-arg CACHEBUST=$(date +%s) cp-front-end
+  - ./docker/specific-machine-test-travis.sh cp-front-end R jkbits1/voteamerica.github.io slfsvc-ui-adjust 
 
-  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=$TRAVIS_BRANCH --build-arg CACHEBUST=$(date +%s) cp-test-runner
-  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=$TRAVIS_BRANCH --build-arg CACHEBUST=$(date +%s) cp-nodejs
-  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=$TRAVIS_BRANCH --build-arg CACHEBUST=$(date +%s) cp-pg-server
+  - ./docker/specific-machine-test-travis.sh cp-test-runner R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
+  - ./docker/specific-machine-test-travis.sh cp-nodejs R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
+  - ./docker/specific-machine-test-travis.sh cp-pg-server R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
 
   - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml up -d
 
