@@ -65,30 +65,30 @@ echo CACHEBUST $CACHEBUST
 echo REPO $REPO
 echo BRANCH $BRANCH
 
-echo REPO_SLUG $REPO_SLUG
-echo PR_SLUG $PR_SLUG
 echo EVENT $EVENT
+echo PR_SLUG $PR_SLUG
+echo PR_BRANCH $PR_BRANCH
 
 if [[ "X$PR_SLUG" = "X" ]]
 then
     # push event
-    echo PUSH $REPO
+    echo PUSH REPO $REPO
 else
     # pr event
     REPO=$PR_SLUG
 
-    echo PR $REPO
+    echo PR REPO $REPO
 fi
 
 if [[ "X$PR_BRANCH" = "X" ]]
 then
     # push event
-    echo PUSH $BRANCH
+    echo PUSH BRANCH $BRANCH
 else
     # pr event
     BRANCH=$PR_BRANCH
 
-    echo PR $BRANCH
+    echo PR BRANCH $BRANCH
 fi
 
 pwd
