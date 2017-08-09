@@ -164,7 +164,7 @@ sh ./start-compose-tests-fullstack.sh match
 
 docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml
 
-## Support for common development tasks
+## Common development tasks
 
 ### 1) Create a front-end PR that requires changes to tests
 NOTE: this assumes that your front-end repo has travis CI enabled.
