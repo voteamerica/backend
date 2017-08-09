@@ -195,14 +195,11 @@ NOTE: the backend tests should pass now. On the travis page for your backend rep
 
 5) The front-end repo should pass the travis tests once pushed to your origin. If not, there is a problem in either front-end code or the tests. Presuming the tests have passed, create a PR for the front-end.
 
-6) These final steps align the `travis.yml` files to the main branches again. 
+6) The final steps below re-align the `travis.yml` files to the main branches. 
 
 When the front-end branch is accepted, a PR can be created for the back-end branch with the revised tests. 
 
-NOTE:  the backend PR should ajdust the backend `travis.yml` file to refer to the main frontend repo and branch; this is to undo the change in step 2) above. Once the back-end PR is accepted, the final step is to adjust the front-end `./travis.yml` to once again refer to the main backend repo and branch. These final steps should be done **promptly** after the front-end PR is accepted.
-
-
-
+NOTE:  the backend PR should adjust the backend `travis.yml` file to refer to the main frontend repo and branch; this is to undo the change in step 2) above. Once the back-end PR is accepted, the final step is to adjust the front-end `./travis.yml` to once again refer to the main backend repo and branch. These final steps should be done **promptly** after the front-end PR is accepted.
 
 
 
