@@ -27,9 +27,9 @@ install:
   - echo "event" $TRAVIS_EVENT_TYPE
 
 before_script:
-# this file is on a branch that currently matches a specific frontend branch being developed.
-# So specify this front-end branch here
-  - ./docker/specific-machine-test-travis.sh cp-front-end R jkbits1/voteamerica.github.io slfsvc-ui-adjust 
+# When this file is on a branch that is used to match a specific frontend branch being developed,
+# then specify this front-end branch here
+  # - ./docker/specific-machine-test-travis.sh cp-front-end R jkbits1/voteamerica.github.io slfsvc-ui-adjust 
 
   - ./docker/specific-machine-test-travis.sh cp-test-runner R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
   - ./docker/specific-machine-test-travis.sh cp-nodejs R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
