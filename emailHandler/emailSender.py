@@ -26,29 +26,27 @@ rows = cur.fetchall()
 
 for row in rows:
 	print (row[1] + ' ' + row[2] + '\n' + row[3] + '\n')
-	
+
 	request = requests.post(request_url, auth=('api', key), data={
-		'from': 'noreply@carpoolvote.com',
+		'from': 'Carpool Vote <noreply@carpoolvote.com>',
 		'to': row[1],
 		'subject': row[2],
 		'html': row[3]
 		})
-	
+
 	print ('Status: {0}'.format(request.status_code))
 	print ('Body:   {0}'.format(request.text))
 
 	if request.status_code == 200:
 		cur.execute("""UPDATE carpoolvote.outgoing_email
-						SET status='Sent', emission_info = '200 - OK' 
+						SET status='Sent', emission_info = '200 - OK'
 						WHERE id = %s""", (row[0],))
 	else:
 		cur.execute("""UPDATE carpoolvote.outgoing_email
-						SET status='Failed', emission_info = %s 
+						SET status='Failed', emission_info = %s
 						WHERE id = %s""", ("{0}: {1}".format(request.status_code,request.text), "{0}".format(row[0]), ))
 
 	conn.commit()
-	
+
 cur.close()
 conn.close()
-
-
