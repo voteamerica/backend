@@ -1,6 +1,7 @@
 ---
 # Uses Ubuntu 'trusty' distribution
 sudo: required
+dist: trusty
 
 services:
   - docker

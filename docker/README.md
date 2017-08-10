@@ -112,6 +112,10 @@ The app, under the test setups, does not execute correctly in the standard brows
 
 ### 1) Github repos only - ignores any local code
 
+#### Go to the docker folder ... 
+... of your backend repo (here named voteUSbackend)
+`cd .../voteUSbackend/docker`
+
 #### Create specific machines (if required)
 E.g. for specific front-end, node app, db or test-runner repo branches.
  ```
@@ -131,6 +135,10 @@ sh ./start-compose-tests.sh match
 
 #### This overrides the frontend github repo with local code.
 
+#### Go to the docker folder ... 
+... of your backend repo (here named voteUSbackend)
+`cd .../voteUSbackend/docker`
+
 #### Create specific machines (if required)
 ##### e.g. to test a against a specific branch
  ```
@@ -148,6 +156,10 @@ sh ./start-compose-tests-frontend.sh match
 ### 3) Local development environment - fullstack 
 
 #### Local code overrides github repos for frontend, backend & test runner.
+
+#### Go to the docker folder ... 
+... of your backend repo (here named voteUSbackend)
+`cd .../voteUSbackend/docker`
 
 #### Create specific machines (if required)
 This may be necessary when making changes to the run-tests.sh script in the nightwatch docker folder. The same applies to changes to scripts in the other docker folders.
