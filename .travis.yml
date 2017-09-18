@@ -1,10 +1,7 @@
 ---
-# Use Ubuntu 'trusty' distribution
+# Uses Ubuntu 'trusty' distribution
 sudo: required
-# dist: trusty
-
-# may be a useful refactor at some point
-# https://docs.travis-ci.com/user/docker/
+dist: trusty
 
 services:
   - docker
@@ -15,20 +12,6 @@ env:
 language: ruby
 
 install:
-  # Update docker-engine using Ubuntu 'trusty' apt repo
-  # - >
-  #   curl -sSL "https://get.docker.com/gpg" |
-  #    sudo -E apt-key add -
-  # - >
-  #   echo "deb https://apt.dockerproject.org/repo ubuntu-trusty main" |
-  #    sudo tee -a /etc/apt/sources.list
-  # - sudo apt-get update
-  # - >
-  #   sudo apt-get -o Dpkg::Options::="--force-confdef" \
-  #    -o Dpkg::Options::="--force-confold" --assume-yes install docker-engine
-  # - docker version
-  # # Update docker-compose via pip
-  # - sudo pip install docker-compose
 
   - sudo rm /usr/local/bin/docker-compose
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
@@ -45,9 +28,13 @@ install:
   - echo "event" $TRAVIS_EVENT_TYPE
 
 before_script:
+# When this file is on a branch that is used to match a specific frontend branch being developed,
+# then specify this front-end branch here
+  # - ./docker/specific-machine-test-travis.sh cp-front-end R jkbits1/voteamerica.github.io slfsvc-ui-adjust 
+
   - ./docker/specific-machine-test-travis.sh cp-test-runner R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
-  - ./docker/specific-machine-test-travis.sh cp-nodejs R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
-  - ./docker/specific-machine-test-travis.sh cp-pg-server R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
+  - ./docker/specific-machine-test-travis.sh cp-nodejs      R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
+  - ./docker/specific-machine-test-travis.sh cp-pg-server   R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
 
   - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml up -d
 
@@ -56,8 +43,6 @@ before_script:
 # https://stackoverflow.com/questions/10516201/updating-file-permissions-only-in-git
 # https://stackoverflow.com/questions/14267441/automatically-apply-git-update-index-chmodx-to-executable-files
 script:
-  # - ./docker/compose-tests.sh
-  # - travis_retry ./docker/compose-tests.sh match
   - travis_retry ./docker/compose-tests.sh pause-cancel2
 
 after_script:

@@ -34,8 +34,7 @@ function createChainableTest (testFunction) {
 var testObject = {
   'currentClient' : undefined,
 
-  'dates' : ['2017-08-09', '2017-09-09', '2017-10-09'],
-  // 'dates' : ['2017-08-09'],
+  'dates' : ['2018-10-30', '2018-11-30', '2018-12-30'],
 
   'currentDateIndex' : 0,
 
@@ -333,13 +332,13 @@ var testObject = {
 
         .click('.button')
 
-        .waitForElementVisible('#driverInfo > h3.self-service-heading', 3000)
+        .waitForElementVisible('#driverInfo > #driverInfoHeader', 3000)
 
         .saveScreenshot('./reports/match-self-service-logged-in.png')
 
-        .assert.containsText('#driverInfo > h3.self-service-heading', 'Driver Info')
-        .waitForElementVisible('#driverProposedMatches > h3.self-service-heading', 3000)
-        .assert.containsText('#driverProposedMatches > h3.self-service-heading', 'Driver Proposed Matches');
+        .assert.containsText('#driverInfo > #driverInfoHeader', 'Driver Info')
+        .waitForElementVisible('#driverProposedMatches > #driverProposedHeader', 3000)
+        .assert.containsText('#driverProposedMatches > #driverProposedHeader', 'Driver Proposed Matches');
     }),
 
   // this test is called after first rider, then driver have been added - it's assumed 
@@ -418,11 +417,11 @@ var testObject = {
 
             .click('.button')
 
-            .waitForElementVisible('#riderInfo > h3.self-service-heading', 3000)
+            .waitForElementVisible('#riderInfo > #riderInfoHeader', 3000)
 
             .saveScreenshot('./reports/rider-self-service-logged-in.png')
 
-            .assert.containsText('#riderInfo > h3.self-service-heading', 'Rider Info');
+            .assert.containsText('#riderInfo > #riderInfoHeader', 'Rider Info');
 
           done();
         });

@@ -95,7 +95,7 @@ If you don't have a local clone of the front-end repo, create one as described a
 #### Start the environment
 
 ```
-sh ./start-compose-local.sh
+sh ./start-compose-local-fullstack.sh
 ```
 
 Ctrl-C to finish, then tidy up with this command
@@ -111,6 +111,10 @@ There are three types of tests, depending on whether it is required to override 
 The app, under the test setups, does not execute correctly in the standard browser. Instead, use a VNC viewer (e.g. [RealVNC](https://www.realvnc.com/download/viewer/)) to watch the test being executed on vnc://localhost:5900 (don't type vnc:// for RealVNC viewer)
 
 ### 1) Github repos only - ignores any local code
+
+#### Go to the docker folder ... 
+... of your backend repo (here named voteUSbackend)
+`cd .../voteUSbackend/docker`
 
 #### Create specific machines (if required)
 E.g. for specific front-end, node app, db or test-runner repo branches.
@@ -131,6 +135,10 @@ sh ./start-compose-tests.sh match
 
 #### This overrides the frontend github repo with local code.
 
+#### Go to the docker folder ... 
+... of your backend repo (here named voteUSbackend)
+`cd .../voteUSbackend/docker`
+
 #### Create specific machines (if required)
 ##### e.g. to test a against a specific branch
  ```
@@ -149,8 +157,12 @@ sh ./start-compose-tests-frontend.sh match
 
 #### Local code overrides github repos for frontend, backend & test runner.
 
+#### Go to the docker folder ... 
+... of your backend repo (here named voteUSbackend)
+`cd .../voteUSbackend/docker`
+
 #### Create specific machines (if required)
-Possibly needed if change change the run-tests.sh script in the nightwatch docker folder. The same applies to changes to scripts in the other docker folders.
+This may be necessary when making changes to the run-tests.sh script in the nightwatch docker folder. The same applies to changes to scripts in the other docker folders.
 ```
 sh ./specific-machine-test-fullstack.sh cp-test-runner R https://github.com/jkbits1/backend docker-test
 ```
@@ -164,9 +176,49 @@ sh ./start-compose-tests-fullstack.sh match
 
 docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml
 
+## Common development tasks
+
+### 1) Create a front-end PR that requires changes to tests
+NOTE: this assumes that your front-end repo has travis CI enabled.
+
+Some front-end code changes will require matching changes or extensions to the tests.
+Once the front-end changes are ready (or at least under way), use the `Local development environment - fullstack` environment described above to confirm if tests now fail.
+
+If so, follow these steps:
+
+1) create a new branch in your back-end repo. In the front-end branch under development, change the `./travis.yml` file to refer to this repo and branch.
+
+2) In the back-end branch, make the necessary changes to the test files. 
+
+In the backend `travis.yml`, add a line to match up the backend branch with the frontend branch in the 
+`before_script:` section, e.g. for the `slfsvc-ui-adjust` branch of the `jkbits1` repo:
+
+```
+  - ./docker/specific-machine-test-travis.sh cp-front-end R jkbits1/voteamerica.github.io slfsvc-ui-adjust 
+```
+
+Commit the changes and push this branch to your own repo origin. The back-end repo branch will fail the travis tests, this is expected.
+
+3) Work on the front-end code and make the required test changes (in the backend repo) until tests for the revised front-end code pass. If you need assistance, ask on #backend channel of the Slack team and we will be happy to help you. **Do not** remove any tests without discussion with a senior repo member. If creating a PR that changes the tests, **clearly** mention this in the PR description.
+
+4) Once the front-end code is ready, commit the changes and push this branch to your own repo origin. Do the same for any back-end test changes, as before. 
+
+NOTE: the backend tests should pass now. On the travis page for your backend repo, find the failing backend branch and click Rebuild
+
+5) The front-end repo should pass the travis tests once pushed to your origin. If not, there is a problem in either front-end code or the tests. Presuming the tests have passed, create a PR for the front-end.
+
+6) The final steps below re-align the `travis.yml` files to the main branches. 
+
+When the front-end branch is accepted, a PR can be created for the back-end branch with the revised tests. 
+
+NOTE:  the backend PR should adjust the backend `travis.yml` file to refer to the main frontend repo and branch; this is to undo the change in step 2) above. Once the back-end PR is accepted, the final step is to adjust the front-end `./travis.yml` to once again refer to the main backend repo and branch. These final steps should be done **promptly** after the front-end PR is accepted.
+
+
+
+
 ### The following instructions are being reviewed
 
-### c) Test Front-end PR
+### 2) Test Front-end PR
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 Push this new PR to origin (not upstream)
 
@@ -176,7 +228,7 @@ Push this new PR to origin (not upstream)
 #### 3) use docker-compose to create the full local system
 `docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up`
 
-### d) Test Backend-end PR
+### 3) Test Backend-end PR
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 
 Checkout this new pr branch.
@@ -364,7 +416,5 @@ https://alexanderzeitler.com/articles/debugging-a-nodejs-es6-application-in-a-do
 .\VBoxManage modifyvm "default" --natpf1 "jekyll,tcp,127.0.0.1,4000,,4000"
 .\VBoxManage modifyvm "default" --natpf1 "vnc,tcp,127.0.0.1,5900,,5900"
 .\VBoxManage modifyvm "default" --natpf1 "pulp,tcp,127.0.0.1,1337,,1337"
-
-
-
 ```
+
