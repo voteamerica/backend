@@ -194,7 +194,7 @@ In the backend `travis.yml`, add a line to match up the backend branch with the 
 `before_script:` section, e.g. for the `slfsvc-ui-adjust` branch of the `jkbits1` repo:
 
 ```
-  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/jkbits1/voteamerica.github.io --build-arg BRANCH_NAME=slfsvc-ui-adjust --build-arg CACHEBUST=$(date +%s cp-front-end
+  - ./docker/specific-machine-test-travis.sh cp-front-end R jkbits1/voteamerica.github.io slfsvc-ui-adjust 
 ```
 
 Commit the changes and push this branch to your own repo origin. The back-end repo branch will fail the travis tests, this is expected.
