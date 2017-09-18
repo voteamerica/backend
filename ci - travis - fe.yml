@@ -26,11 +26,13 @@ install:
 
   - echo "event" $TRAVIS_EVENT_TYPE
 
-  # - BE_REPO=voteamerica/backend
-  - BE_REPO=jkbits1/backend
+  - BE_REPO=voteamerica/backend
+  # if need to change tests on backend, specify repo to use
+  # - BE_REPO=jkbits1/backend
 
-  # - BE_BRANCH=master
-  - BE_BRANCH=docker-test
+  - BE_BRANCH=master
+  # if need to change tests on backend, specify branch to use
+  # - BE_BRANCH=docker-test
 
   - echo BE REPO $BE_REPO
   - echo BE BRANCH $BE_BRANCH
