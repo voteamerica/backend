@@ -6,7 +6,6 @@
     },
     "exclude": [
         "bunny",
-        "ETL",
         "nginx",
         // "nodeAppPostPg",
         "smsHandler",
