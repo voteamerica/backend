@@ -78,6 +78,9 @@ sh ./specific-machine-local-frontend.sh cp-pg-server R https://github.com/voteam
 sh ./start-compose-local-frontend.sh
 ```
 
+Awesome, you are up and running! Head to http://localhost:4000 in your browser to see the running app.
+
+##### Stopping & cleaning up the environment
 Ctrl-C to finish, then tidy up with this command
 ```
 docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml down
