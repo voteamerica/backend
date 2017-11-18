@@ -76,9 +76,6 @@ echo sct-travis pg-client status
 docker logs fullstacktest_cp-client_1 > cp-client-stdout.log 2>cp-pg-client-stderr.log
 cat cp-client-stdout.log | grep 'DO'
 
-echo sct-travis sleep 60
-sleep 60
-
 echo sct-travis curl status
 
 # curl 10.5.0.6:5432
