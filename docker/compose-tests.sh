@@ -66,6 +66,8 @@ cat cp-front-end-stdout.log | grep 'Server running'
 cat cp-front-end-stdout.log | grep 'Configuration file'
 cat cp-front-end-stdout.log | grep 'Source'
 cat cp-front-end-stdout.log | grep 'Destination'
+cat cp-front-end-stdout.log
+cat cp-front-end-stderr.log
 
 echo sct-travis sleep 10
 sleep 10
