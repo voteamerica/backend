@@ -23,6 +23,9 @@ RUN git clone --single-branch --branch $BRANCH_NAME $REPO frontend \
 
 WORKDIR $FE_PATH
 
+# give jekyll permission to create _site in this folder
+RUN chown -R jekyll $FE_PATH
+
 RUN pwd
 RUN ls
 
