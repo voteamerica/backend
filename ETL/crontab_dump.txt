@@ -1,2 +1,0 @@
-5,10,15,20,25,30,35,40,45,50,55 * * * * ~/backend/ETL/Drivers/webform_drivers_populate_carpooldb.py >/dev/null 2>&1
-* * * * * ~/backend/ETL/Riders/webform_riders_populate_carpooldb.py >/dev/null 2>&1
