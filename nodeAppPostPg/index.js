@@ -4,6 +4,10 @@ var Hapi = require("hapi");
 var Pool = require('pg').Pool;
 var Good = require('good');
 var GoodFile = require('good-file');
+var hapiAuthJwt = require('hapi-auth-jwt');
+var jwt = require('jsonwebtoken');
+var bcrypt = require('bcrypt');
+var Joi = require('joi');
 var config = require('./dbInfo.js');
 var logOptions = require('./logInfo.js');
 var dbQueries = require('./dbQueries.js');
@@ -196,13 +200,116 @@ server.route({
 //   path: '/' + routeNamesChange.PUT_DRIVER_ROUTE,
 //   handler: routeFns.confirmRide
 // });
-server.register({
-    register: Good,
-    options: logOptions
-}, function (err) {
+var hashPassword = function (password, cb) {
+    bcrypt.genSalt(10, function (err, salt) {
+        bcrypt.hash(password, salt, function (err, hash) {
+            return cb(err, hash);
+        });
+    });
+};
+var createUserSchema = Joi.object({
+    userName: Joi.string().alphanum().min(2).max(30).required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().required()
+});
+var verifyUniqueUser = function (req, res) {
+    res(req.payload);
+};
+var createToken = function (user) {
+    var scopes;
+    if (user.admin) {
+        scopes = 'admin';
+    }
+    return jwt.sign({ id: user.id, userName: user.userName, scopes: scopes }, 'secret', { algorithm: 'HS256', expiresIn: '1h'
+    });
+};
+var verifyCredentials = function (req, res) {
+    var _a = req.payload, password = _a.password, email = _a.email, userName = _a.userName;
+    var testUser = {
+        email: '',
+        userName: '',
+        admin: false
+    };
+    bcrypt.compare(password, 'password', function (err, isValid) {
+        if (err) {
+            return res(err);
+        }
+        res(testUser);
+    });
+};
+var authenticateUserSchema = Joi.alternatives().try(Joi.object({
+    userName: Joi.string().alphanum().min(2).max(30).required(),
+    password: Joi.string().required()
+}), Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().required()
+}));
+server.route({
+    method: 'POST',
+    path: '/users',
+    config: {
+        pre: [
+            { method: verifyUniqueUser }
+        ],
+        handler: function (req, res) {
+            var user = {
+                email: '',
+                userName: '',
+                password: '',
+                admin: false
+            };
+            var email = req.payload.email;
+            var userName = req.payload.userName;
+            hashPassword(req.payload.password, function (err, hash) {
+                if (err) {
+                    console.log("bad info");
+                    return;
+                }
+                var password = hash;
+                // store info,  hash not pwd
+                user.email = email;
+                user.userName = userName;
+                user.password = password;
+                res({ id_token: createToken(user) });
+            });
+        },
+        validate: {
+            payload: createUserSchema
+        }
+    }
+});
+server.route({
+    method: 'POST',
+    path: '/users/authenticate',
+    config: {
+        pre: [
+            {
+                method: verifyCredentials,
+                assign: 'user'
+            }
+        ],
+        handler: function (req, res) {
+            res({ id_token: createToken(req.pre.user) }).code(201);
+        },
+        validate: {
+            payload: authenticateUserSchema
+        }
+    }
+});
+server.register([{
+        register: hapiAuthJwt,
+        options: {}
+    }, {
+        register: Good,
+        options: logOptions
+    }], function (err) {
     if (err) {
         return console.error(err);
     }
+    server.auth.strategy('jwt', 'jwt', {
+        key: 'secret',
+        verifyOptions: { algorithms: ['HS256'] }
+    });
     server.start(function (err) {
         if (err) {
             throw err;
