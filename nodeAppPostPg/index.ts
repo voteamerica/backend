@@ -287,6 +287,10 @@ const createToken = user => {
 const verifyCredentials = (req, res) => {
   const {password, email, userName} = req.payload;
 
+  console.log("pwd", password);
+  console.log("email", email);
+  console.log("userName", userName);
+
   const testUser = {
     email: '',
     userName: '',

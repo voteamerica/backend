@@ -225,6 +225,9 @@ var createToken = function (user) {
 };
 var verifyCredentials = function (req, res) {
     var _a = req.payload, password = _a.password, email = _a.email, userName = _a.userName;
+    console.log("pwd", password);
+    console.log("email", email);
+    console.log("userName", userName);
     var testUser = {
         email: '',
         userName: '',
