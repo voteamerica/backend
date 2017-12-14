@@ -91,6 +91,12 @@ This works directly from the files in the folders for your front and back-end re
 
 If you don't have a local clone of the front-end repo, create one as described above.
 
+#### Create specific machines (if required)
+This is not usually necessary for this setup. However, if you change package.json for the node app for a specific branch/repo pair, create a specific machine for that pair, otherwise the node_modules folder will not be installed correctly before the node app starts. For example,
+```
+sh ./specific-machine-local.sh cp-nodejs R https://github.com/jkbits1/backend auth-users
+```
+
 #### Go to the docker folder ... 
 ##### ... of your forked repo (here named voteUSbackend)
 `cd .../voteUSbackend/docker`
