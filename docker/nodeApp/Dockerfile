@@ -1,4 +1,4 @@
-FROM node:6.6.0
+FROM node:8.9.3
 
 EXPOSE 8000
 EXPOSE 5858
@@ -13,6 +13,9 @@ RUN apt-get install -y netcat
 RUN apt-get install -y vim-tiny
 
 RUN apt-get install -y git
+
+# RUcurl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+# echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 
 #
 # It would be excellent to have this file run the
@@ -38,7 +41,14 @@ RUN git merge origin/$BRANCH_NAME
 
 RUN cd /usr/src/app/backend/nodeAppPostPg
 
-RUN npm install
+# reasons for yarn params
+# https://github.com/yarnpkg/yarn/issues/2240#issuecomment-300762981
+# https://github.com/yarnpkg/yarn/issues/3223#issuecomment-296373273
+RUN cat package.json
+# RUN npm install
+RUN yarn
+# RUN yarn install --check-files
+# RUN yarn install --force
 
 # can't get these two lines going yet
 # RUN . ./scripts/expo.sh
@@ -47,6 +57,7 @@ ENV PORT=8000 PGUSER=carpool_web PGDATABASE=carpoolvote
 # ENV PGHOST=$CP_PG_SVR_PORT_5432_TCP_ADDR PGPASSWORD=$CP_PG_SVR_ENV_POSTGRES_PASSWORD 
 
 COPY ./expo-start.sh /
+COPY ./expo-debug.sh /
 COPY ./expo-bash.sh /
 
 # these steps may be needed
@@ -57,7 +68,12 @@ RUN chmod +x /expo-bash.sh
 # RUN npm install -g nightwatch
 
 # ENTRYPOINT ["/expo-start.sh"]
-CMD ["/expo-start.sh"]
+# CMD ["/expo-start.sh"]
+# CMD ["/expo-debug.sh"]
+
+CMD ["/bin/bash"]
+
+# node --inspect=0.0.0.0:5858 --debug-brk index.js
 
 
 # CMD ["npm start"]

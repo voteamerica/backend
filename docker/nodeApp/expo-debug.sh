@@ -14,4 +14,5 @@ cd /usr/src/app/backend/nodeAppPostPg
 
 echo "debug"
 
-node --debug=0.0.0.0:5858 index.js
+# node --debug=0.0.0.0:5858 index.js
+node --inspect=0.0.0.0:5858 index.js
