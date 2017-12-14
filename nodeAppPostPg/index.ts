@@ -5,10 +5,14 @@ const Pool        = require('pg').Pool;
 const Good        = require('good');
 const GoodFile    = require('good-file');
 
+console.log("start requires");
+
 const hapiAuthJwt = require('hapi-auth-jwt');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const Joi         = require('joi');
+// const Joi         = require('joi');
+
+console.log("end requires");
 
 const config      = require('./dbInfo.js');
 const logOptions  = require('./logInfo.js');
@@ -259,11 +263,11 @@ const hashPassword = (password, cb) => {
   })
 };
 
-const createUserSchema = Joi.object({
-  userName: Joi.string().alphanum().min(2).max(30).required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().required()
-});
+// const createUserSchema = Joi.object({
+//   userName: Joi.string().alphanum().min(2).max(30).required(),
+//   email: Joi.string().email().required(),
+//   password: Joi.string().required()
+// });
 
 const verifyUniqueUser = (req, res) => {
   res(req.payload);
@@ -306,24 +310,24 @@ const verifyCredentials = (req, res) => {
   });
 };
 
-const authenticateUserSchema = Joi.alternatives().try(
-  Joi.object({
-    userName: Joi.string().alphanum().min(2).max(30).required(),
-    password: Joi.string().required()
-  }),
-  Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().required()
-  })
-);
+// const authenticateUserSchema = Joi.alternatives().try(
+//   Joi.object({
+//     userName: Joi.string().alphanum().min(2).max(30).required(),
+//     password: Joi.string().required()
+//   }),
+//   Joi.object({
+//     email: Joi.string().email().required(),
+//     password: Joi.string().required()
+//   })
+// );
 
 server.route({
   method: 'POST',
   path: '/users',
   config: {
-    pre: [
-      {method: verifyUniqueUser}
-    ],
+    // pre: [
+    //   {method: verifyUniqueUser}
+    // ],
     handler: (req, res) => {
 
       const user = {
@@ -352,13 +356,14 @@ server.route({
         user.password = password;
 
         res({ id_token: createToken(user)})
-      })
+      });
 
-
-    },
-    validate: {
-      payload: createUserSchema
+      // res(1);
     }
+    // ,
+    // validate: {
+    //   payload: createUserSchema
+    // }
   }
 });
 
@@ -374,17 +379,20 @@ server.route({
     ],
     handler: (req, res) => {
       res({id_token: createToken(req.pre.user)}).code(201);
-    },
-    validate: {
-      payload: authenticateUserSchema
     }
+    // ,
+    // validate: {
+    //   payload: authenticateUserSchema
+    // }
   }
 });
 
-server.register([{
+server.register([
+  {
     register: hapiAuthJwt,
     options:  {}
-  }, {
+  }, 
+  {
     register: Good,
     options:  logOptions
   }]
