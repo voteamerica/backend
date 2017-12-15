@@ -202,6 +202,13 @@ server.route({
 //   path: '/' + routeNamesChange.PUT_DRIVER_ROUTE,
 //   handler: routeFns.confirmRide
 // });
+var user = {
+    email: '',
+    userName: '',
+    password: '',
+    admin: false
+};
+var secret = 'secret';
 var hashPassword = function (password, cb) {
     bcrypt.genSalt(10, function (err, salt) {
         bcrypt.hash(password, salt, function (err, hash) {
@@ -222,7 +229,7 @@ var createToken = function (user) {
     if (user.admin) {
         scopes = 'admin';
     }
-    return jwt.sign({ id: user.id, userName: user.userName, scopes: scopes }, 'secret', { algorithm: 'HS256', expiresIn: '1h'
+    return jwt.sign({ id: user.id, userName: user.userName, scopes: scopes }, secret, { algorithm: 'HS256', expiresIn: '1h'
     });
 };
 var verifyCredentials = function (req, res) {
@@ -256,15 +263,9 @@ var verifyCredentials = function (req, res) {
 //     password: Joi.string().required()
 //   })
 // );
-var user = {
-    email: '',
-    userName: '',
-    password: '',
-    admin: false
-};
 server.route({
     method: 'POST',
-    path: '/users',
+    path: '/createuser',
     config: {
         // pre: [
         //   {method: verifyUniqueUser}
@@ -329,7 +330,7 @@ server.register([
         return console.error(err);
     }
     server.auth.strategy('jwt', 'jwt', {
-        key: 'secret',
+        key: secret,
         verifyOptions: { algorithms: ['HS256'] }
     });
     server.start(function (err) {

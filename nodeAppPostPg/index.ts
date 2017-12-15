@@ -255,6 +255,15 @@ server.route({
 //   handler: routeFns.confirmRide
 // });
 
+const user = {
+  email: '',
+  userName: '',
+  password: '',
+  admin: false
+};
+
+const secret = 'secret';
+
 const hashPassword = (password, cb) => {
   bcrypt.genSalt(10, (err, salt) => {
     bcrypt.hash(password, salt, (err, hash) => {
@@ -282,7 +291,7 @@ const createToken = user => {
 
   return jwt.sign(
     { id: user.id, userName: user.userName, scopes: scopes}, 
-      'secret', 
+      secret, 
       {algorithm: 'HS256', expiresIn: '1h'
     }
   );
@@ -326,16 +335,9 @@ const verifyCredentials = (req, res) => {
 //   })
 // );
 
-const user = {
-  email: '',
-  userName: '',
-  password: '',
-  admin: false
-}
-
 server.route({
   method: 'POST',
-  path: '/users',
+  path: '/createuser',
   config: {
     // pre: [
     //   {method: verifyUniqueUser}
@@ -390,7 +392,7 @@ server.route({
     ],
     handler: (req, res) => {
       const token = createToken(req.pre.user);
-      
+
       res({id_token: token}).code(201);
     }
     // ,
@@ -416,7 +418,7 @@ server.register([
     }
 
     server.auth.strategy('jwt', 'jwt', {
-      key: 'secret',
+      key: secret,
       verifyOptions: {algorithms: ['HS256']}
     });
 
