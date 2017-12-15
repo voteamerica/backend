@@ -295,18 +295,23 @@ const verifyCredentials = (req, res) => {
   console.log("email", email);
   console.log("userName", userName);
 
-  const testUser = {
-    email: '',
-    userName: '',
-    admin: false
-  };
+  // TODO get user from db
 
-  bcrypt.compare(password, 'password', (err, isValid) => {
+  if (email !== user.email || userName !== user.userName) {
+    res('invalid credentials');
+  }
+
+  bcrypt.compare(password, user.password, (err, isValid) => {
     if (err) {
       return res(err);
     }
 
-    res(testUser);
+    if (isValid) {
+      res(user);
+    }
+    else {
+      res('user not known');
+    }
   });
 };
 
@@ -321,6 +326,13 @@ const verifyCredentials = (req, res) => {
 //   })
 // );
 
+const user = {
+  email: '',
+  userName: '',
+  password: '',
+  admin: false
+}
+
 server.route({
   method: 'POST',
   path: '/users',
@@ -329,13 +341,6 @@ server.route({
     //   {method: verifyUniqueUser}
     // ],
     handler: (req, res) => {
-
-      const user = {
-        email: '',
-        userName: '',
-        password: '',
-        admin: false
-      }
 
       const email = req.payload.email;
       const userName = req.payload.userName;
@@ -355,7 +360,13 @@ server.route({
         user.userName = userName;
         user.password = password;
 
-        res({ id_token: createToken(user)})
+        console.log("user:", user);            
+
+        const token = createToken(user);
+
+        console.log("token:", token);
+
+        res({ id_token: token}).code(201);
       });
 
       // res(1);
@@ -378,7 +389,9 @@ server.route({
       }
     ],
     handler: (req, res) => {
-      res({id_token: createToken(req.pre.user)}).code(201);
+      const token = createToken(req.pre.user);
+      
+      res({id_token: token}).code(201);
     }
     // ,
     // validate: {

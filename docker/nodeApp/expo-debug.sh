@@ -14,5 +14,8 @@ cd /usr/src/app/backend/nodeAppPostPg
 
 echo "debug"
 
+# https://github.com/Microsoft/vscode/issues/23257
+# https://github.com/Microsoft/vscode/issues/13005
+# https://alexanderzeitler.com/articles/debugging-a-nodejs-es6-application-in-a-docker-container-using-visual-studio-code/
 # node --debug=0.0.0.0:5858 index.js
 node --inspect=0.0.0.0:5858 index.js

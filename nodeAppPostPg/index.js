@@ -230,16 +230,20 @@ var verifyCredentials = function (req, res) {
     console.log("pwd", password);
     console.log("email", email);
     console.log("userName", userName);
-    var testUser = {
-        email: '',
-        userName: '',
-        admin: false
-    };
-    bcrypt.compare(password, 'password', function (err, isValid) {
+    // TODO get user from db
+    if (email !== user.email || userName !== user.userName) {
+        res('invalid credentials');
+    }
+    bcrypt.compare(password, user.password, function (err, isValid) {
         if (err) {
             return res(err);
         }
-        res(testUser);
+        if (isValid) {
+            res(user);
+        }
+        else {
+            res('user not known');
+        }
     });
 };
 // const authenticateUserSchema = Joi.alternatives().try(
@@ -252,6 +256,12 @@ var verifyCredentials = function (req, res) {
 //     password: Joi.string().required()
 //   })
 // );
+var user = {
+    email: '',
+    userName: '',
+    password: '',
+    admin: false
+};
 server.route({
     method: 'POST',
     path: '/users',
@@ -260,12 +270,6 @@ server.route({
         //   {method: verifyUniqueUser}
         // ],
         handler: function (req, res) {
-            var user = {
-                email: '',
-                userName: '',
-                password: '',
-                admin: false
-            };
             var email = req.payload.email;
             var userName = req.payload.userName;
             hashPassword(req.payload.password, function (err, hash) {
@@ -278,7 +282,10 @@ server.route({
                 user.email = email;
                 user.userName = userName;
                 user.password = password;
-                res({ id_token: createToken(user) });
+                console.log("user:", user);
+                var token = createToken(user);
+                console.log("token:", token);
+                res({ id_token: token }).code(201);
             });
             // res(1);
         }
@@ -299,7 +306,8 @@ server.route({
             }
         ],
         handler: function (req, res) {
-            res({ id_token: createToken(req.pre.user) }).code(201);
+            var token = createToken(req.pre.user);
+            res({ id_token: token }).code(201);
         }
         // ,
         // validate: {
