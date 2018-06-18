@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var DbDefsSchema = (function () {
+var DbDefsSchema = /** @class */ (function () {
     function DbDefsSchema() {
         this.SCHEMA_NAME = 'carpoolvote';
     }
     return DbDefsSchema;
 }());
 exports.DbDefsSchema = DbDefsSchema;
-var DbDefsTables = (function () {
+var DbDefsTables = /** @class */ (function () {
     function DbDefsTables() {
         this.DRIVER_TABLE = 'driver';
         this.RIDER_TABLE = 'rider';
@@ -17,10 +17,12 @@ var DbDefsTables = (function () {
     return DbDefsTables;
 }());
 exports.DbDefsTables = DbDefsTables;
-var DbDefsViews = (function () {
+var DbDefsViews = /** @class */ (function () {
     function DbDefsViews() {
         this.UNMATCHED_DRIVERS_VIEW = 'vw_unmatched_drivers';
+        this.UNMATCHED_DRIVERS_DETAILS_VIEW = 'vw_unmatched_drivers_details';
         this.UNMATCHED_RIDERS_VIEW = 'vw_unmatched_riders';
+        this.UNMATCHED_RIDERS_DETAILS_VIEW = 'vw_unmatched_riders_details';
     }
     return DbDefsViews;
 }());
