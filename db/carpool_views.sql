@@ -233,7 +233,8 @@ GRANT SELECT ON TABLE carpoolvote.vw_unmatched_riders_details TO carpool_web_rol
 -- DROP VIEW carpoolvote.vw_drivers_details;
 
 CREATE OR REPLACE VIEW carpoolvote.vw_drivers_details AS 
-  SELECT "DriverCollectionZIP", 
+  SELECT 1 AS count, 
+    "DriverCollectionZIP", 
     "DriverCollectionRadius", 
     "AvailableDriveTimesLocal", 
     "DriverCanLoadRiderWithWheelchair", 
@@ -270,7 +271,8 @@ GRANT SELECT ON TABLE carpoolvote.vw_drivers_details TO carpool_web_role;
 -- DROP VIEW carpoolvote.vw_driver_matches_details;
 
 CREATE OR REPLACE VIEW carpoolvote.vw_driver_matches_details AS 
-  SELECT "DriverCollectionZIP", 
+  SELECT 1 AS count, 
+    "DriverCollectionZIP", 
     "DriverCollectionRadius", 
     "DriverCanLoadRiderWithWheelchair", 
     "SeatCount", 
