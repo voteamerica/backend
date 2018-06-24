@@ -51,7 +51,7 @@ module.exports = {
   dbGetUnmatchedDriversQueryString: dbGetUnmatchedDriversQueryString,
   dbGetUnmatchedRidersQueryString:  dbGetUnmatchedRidersQueryString,
   dbGetDriversDetailssQueryString: dbGetDriversDetailssQueryString,
-  dbGetDriverMatchesQueryString: dbGetDriverMatchesQueryString
+  dbGetDriverMatchesDetailsQueryString: dbGetDriverMatchesDetailsQueryString
   // dbGetInsertClause:            dbGetInsertClause
   // ,
   // dbGetSubmitDriverString:      dbGetSubmitDriverString,
@@ -131,7 +131,7 @@ function dbGetDriversDetailssQueryString(): string {
   return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsViews.DRIVERS_DETAILS_VIEW);
 }
 
-function dbGetDriverMatchesQueryString(): string {
+function dbGetDriverMatchesDetailsQueryString(): string {
   return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsViews.DRIVER_MATCHES_DETAILS_VIEW);
 }
 
