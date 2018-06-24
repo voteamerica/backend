@@ -227,3 +227,84 @@ GRANT SELECT ON TABLE carpoolvote.vw_unmatched_riders_details TO carpool_role;
 GRANT SELECT ON TABLE carpoolvote.vw_unmatched_riders_details TO carpool_web;
 GRANT SELECT ON TABLE carpoolvote.vw_unmatched_riders_details TO carpool_web_role;
 
+
+-- View: carpoolvote.vw_drivers_details
+
+-- DROP VIEW carpoolvote.vw_drivers_details;
+
+CREATE OR REPLACE VIEW carpoolvote.vw_drivers_details AS 
+  SELECT "DriverCollectionZIP", 
+    "DriverCollectionRadius", 
+    "AvailableDriveTimesLocal", 
+    "DriverCanLoadRiderWithWheelchair", 
+    "SeatCount", 
+    "DrivingOnBehalfOfOrganization", 
+    "DrivingOBOOrganizationName", 
+    "ReadyToMatch",  
+    status, 
+    created_ts, 
+    last_updated_ts, 
+    status_info,
+    carpoolvote.convert_datetime_to_local_format(driver."AvailableDriveTimesLocal"),
+    zip_codes.zip,
+    zip_codes.state,
+    zip_codes.city,
+    zip_codes.full_state,
+    zip_codes.latitude_numeric,
+    zip_codes.longitude_numeric
+  FROM carpoolvote.driver,
+    carpoolvote.zip_codes zip_codes
+  where status != 'Canceled'AND 
+    driver."DriverCollectionZIP"::text = zip_codes.zip::text;
+
+ALTER TABLE carpoolvote.vw_drivers_details
+  OWNER TO carpool_admins;
+GRANT ALL ON TABLE carpoolvote.vw_drivers_details TO carpool_admins;
+GRANT SELECT ON TABLE carpoolvote.vw_drivers_details TO carpool_role;
+GRANT SELECT ON TABLE carpoolvote.vw_drivers_details TO carpool_web;
+GRANT SELECT ON TABLE carpoolvote.vw_drivers_details TO carpool_web_role;
+
+
+-- View: carpoolvote.vw_driver_matches_details
+
+-- DROP VIEW carpoolvote.vw_driver_matches_details;
+
+CREATE OR REPLACE VIEW carpoolvote.vw_driver_matches_details AS 
+  SELECT "DriverCollectionZIP", 
+    "DriverCollectionRadius", 
+    "DriverCanLoadRiderWithWheelchair", 
+    "SeatCount", 
+    "DrivingOnBehalfOfOrganization", 
+    "DrivingOBOOrganizationName", 
+    driver."ReadyToMatch",  
+    driver.status, 
+    driver.created_ts, 
+    driver.last_updated_ts, 
+    driver.status_info,
+    carpoolvote.convert_datetime_to_local_format(driver."AvailableDriveTimesLocal"),
+    zip_codes.zip,
+    zip_codes.state,
+    zip_codes.city,
+    zip_codes.full_state,
+    zip_codes.latitude_numeric,
+    zip_codes.longitude_numeric,
+    "matchStatus", 
+    score, 
+    convert_datetime_to_local_format AS "Matches_convert_datetime_to_local_format", 
+    "TotalPartySize", 
+    "TwoWayTripNeeded", 
+    vw_driver_matches."ReadyToMatch" AS "Matches_ReadyToMatch", 
+    vw_driver_matches.status AS "Matches_Status", 
+    vw_driver_matches.status_info AS "Matches_StatusInfo"
+  FROM carpoolvote.driver,
+    carpoolvote.zip_codes zip_codes,carpoolvote.vw_driver_matches
+  where driver.status != 'Canceled'AND 
+    driver."DriverCollectionZIP"::text = zip_codes.zip::text AND
+    carpoolvote.vw_driver_matches.uuid_driver = carpoolvote.driver."UUID";
+
+ALTER TABLE carpoolvote.vw_driver_matches_details
+  OWNER TO carpool_admins;
+GRANT ALL ON TABLE carpoolvote.vw_driver_matches_details TO carpool_admins;
+GRANT SELECT ON TABLE carpoolvote.vw_driver_matches_details TO carpool_role;
+GRANT SELECT ON TABLE carpoolvote.vw_driver_matches_details TO carpool_web;
+GRANT SELECT ON TABLE carpoolvote.vw_driver_matches_details TO carpool_web_role;
