@@ -27,6 +27,7 @@ var routeNamesMatch = new RouteNames_2.RouteNamesMatch();
 var routeNamesSelfServiceInfoExists = new RouteNames_3.RouteNamesSelfServiceInfoExists();
 var routeNamesCancel = new RouteNames_4.RouteNamesCancel();
 var routeNamesUnmatched = new RouteNames_4.RouteNamesUnmatched();
+var routeNamesDetails = new RouteNames_4.RouteNamesDetails();
 var loggingItem = new logging_1.logging();
 config.user = process.env.PGUSER;
 config.database = process.env.PGDATABASE;
@@ -73,6 +74,16 @@ server.route({
     method: 'GET',
     path: '/' + routeNamesUnmatched.UNMATCHED_DRIVERS_ROUTE,
     handler: routeFns.getUnmatchedDrivers
+});
+server.route({
+    method: 'GET',
+    path: '/' + routeNamesDetails.DRIVERS_DETAILS_ROUTE,
+    handler: routeFns.getDriversDetails
+});
+server.route({
+    method: 'GET',
+    path: '/' + routeNamesDetails.DRIVER_MATCHES_DETAILS_ROUTE,
+    handler: routeFns.getDriverMatchesDetails
 });
 server.route({
     method: 'GET',
