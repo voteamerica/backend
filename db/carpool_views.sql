@@ -255,7 +255,7 @@ CREATE OR REPLACE VIEW carpoolvote.vw_drivers_details AS
     zip_codes.longitude_numeric
   FROM carpoolvote.driver,
     carpoolvote.zip_codes zip_codes
-  where status != 'Canceled'AND 
+  where status != 'Canceled'AND driver.status != 'Expired'AND
     driver."DriverCollectionZIP"::text = zip_codes.zip::text;
 
 ALTER TABLE carpoolvote.vw_drivers_details
@@ -300,7 +300,7 @@ CREATE OR REPLACE VIEW carpoolvote.vw_driver_matches_details AS
     vw_driver_matches.status_info AS "Matches_StatusInfo"
   FROM carpoolvote.driver,
     carpoolvote.zip_codes zip_codes,carpoolvote.vw_driver_matches
-  where driver.status != 'Canceled'AND 
+  where driver.status != 'Canceled'AND driver.status != 'Expired'AND
     driver."DriverCollectionZIP"::text = zip_codes.zip::text AND
     carpoolvote.vw_driver_matches.uuid_driver = carpoolvote.driver."UUID";
 
