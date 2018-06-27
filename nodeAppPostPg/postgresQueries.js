@@ -43,6 +43,48 @@ var PostgresQueries = (function () {
             reply(results.failure + message).code(500);
         });
     };
+    PostgresQueries.prototype.dbGetDriversDetails = function (pool, fnGetString, reply, results) {
+        var queryString = fnGetString();
+        pool.query(queryString)
+            .then(function (result) {
+            var firstRowAsString = "";
+            var rowsToSend = [];
+            if (result !== undefined && result.rows !== undefined) {
+                result.rows.forEach(function (val) {
+                    rowsToSend.push(val);
+                });
+            }
+            console.log("drivers details: ", rowsToSend);
+            reply(rowsToSend);
+        })
+            .catch(function (e) {
+            var message = e.message || '';
+            var stack = e.stack || '';
+            console.error(results.failure, message, stack);
+            reply(results.failure + message).code(500);
+        });
+    };
+    PostgresQueries.prototype.dbGetDriverMatchesDetails = function (pool, fnGetString, reply, results) {
+        var queryString = fnGetString();
+        pool.query(queryString)
+            .then(function (result) {
+            var firstRowAsString = "";
+            var rowsToSend = [];
+            if (result !== undefined && result.rows !== undefined) {
+                result.rows.forEach(function (val) {
+                    rowsToSend.push(val);
+                });
+            }
+            console.log("driver matches details: ", rowsToSend);
+            reply(rowsToSend);
+        })
+            .catch(function (e) {
+            var message = e.message || '';
+            var stack = e.stack || '';
+            console.error(results.failure, message, stack);
+            reply(results.failure + message).code(500);
+        });
+    };
     PostgresQueries.prototype.dbGetUnmatchedRiders = function (pool, fnGetString, reply, results) {
         var queryString = fnGetString();
         pool.query(queryString)
