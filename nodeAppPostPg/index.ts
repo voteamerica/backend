@@ -257,9 +257,10 @@ server.route({
 // });
 
 const user = {
-  email: '',
-  userName: '',
-  password: '',
+  email: '123',
+  userName: 'abc',
+  // password: 'xyz',
+  password: '$2a$10$Bt2vRGCw3udVph77lGBx8O1ffXFmEQv7d1gGI35nKzN.C1w.jeD32',
   admin: false
 };
 
@@ -305,7 +306,9 @@ const createToken = user => {
 };
 
 const verifyCredentials = (req, res) => {
-  const {password, email, userName} = req.payload;
+  const payload = JSON.parse( req.payload.info);
+
+  const {password, email, userName} = payload;
 
   console.log("pwd", password);
   console.log("email", email);
@@ -314,7 +317,7 @@ const verifyCredentials = (req, res) => {
   // TODO get user from db
 
   if (email !== user.email || userName !== user.userName) {
-    res('invalid credentials');
+    return res(Boom.badRequest('invalid credentials'));
   }
 
   bcrypt.compare(password, user.password, (err, isValid) => {
@@ -326,7 +329,7 @@ const verifyCredentials = (req, res) => {
       res(user);
     }
     else {
-      res('user not known');
+      res(Boom.badRequest('user not known'));
     }
   });
 };
