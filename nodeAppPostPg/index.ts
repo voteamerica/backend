@@ -10,6 +10,7 @@ console.log("start requires");
 const hapiAuthJwt = require('hapi-auth-jwt');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const Boom = require('boom');
 // const Joi         = require('joi');
 
 console.log("end requires");
@@ -279,6 +280,12 @@ const hashPassword = (password, cb) => {
 // });
 
 const verifyUniqueUser = (req, res) => {
+
+  if (false){
+    // examples don't use return, but seems to be needed
+    return res(Boom.badRequest("userName already used"));
+  }
+
   res(req.payload);
 };
 
@@ -339,9 +346,9 @@ server.route({
   method: 'POST',
   path: '/createuser',
   config: {
-    // pre: [
-    //   {method: verifyUniqueUser}
-    // ],
+    pre: [
+      {method: verifyUniqueUser}
+    ],
     handler: (req, res) => {
 
       const payload = JSON.parse( req.payload.info);
