@@ -451,5 +451,18 @@ server.register([
   }
 );
 
+server.route({
+  method: 'POST',
+  path: '/users/list',
+  config: {
+    handler: (req, res) => {
+      res([user]);
+    }, auth: {
+      strategy: 'jwt',
+      scope: ['admin']
+    }
+  }
+});
+
 loggingItem.logReqResp(server, pool);
 
