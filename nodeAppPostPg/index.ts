@@ -262,10 +262,9 @@ const user = {
   admin: false
 };
 
-const secret = 'secret';
+const secret = process.env.secret || 'secret';
 
 const hashPassword = (password, cb) => {
-  console.log("pwd", password)
   bcrypt.genSalt(10, (err, salt) => {
     bcrypt.hash(password, salt, (err, hash) => {
       return cb(err, hash);
@@ -347,11 +346,13 @@ server.route({
 
       const payload = JSON.parse( req.payload.info);
 
-      const email = payload.email;
-      const userName = payload.userName;
-      const password = payload.password;
+      let user = {}
 
-      console.log("email", email);
+      user.email = payload.email;
+      user.userName = payload.userName;
+      user.admin = false;
+
+      const password = payload.password;
 
       hashPassword(password, (err, hash) => {
         if (err) {
@@ -360,13 +361,9 @@ server.route({
           return;
         }
 
-        const password = hash;
+        // store info, and the hash rather than the pwd
 
-        // store info,  hash not pwd
-
-        user.email = email;
-        user.userName = userName;
-        user.password = password;
+        user.password = hash;
 
         console.log("user:", user);            
 
