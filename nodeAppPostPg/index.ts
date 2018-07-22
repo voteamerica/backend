@@ -265,6 +265,7 @@ const user = {
 const secret = 'secret';
 
 const hashPassword = (password, cb) => {
+  console.log("pwd", password)
   bcrypt.genSalt(10, (err, salt) => {
     bcrypt.hash(password, salt, (err, hash) => {
       return cb(err, hash);
@@ -344,10 +345,15 @@ server.route({
     // ],
     handler: (req, res) => {
 
-      const email = req.payload.email;
-      const userName = req.payload.userName;
+      const payload = JSON.parse( req.payload.info);
 
-      hashPassword(req.payload.password, (err, hash) => {
+      const email = payload.email;
+      const userName = payload.userName;
+      const password = payload.password;
+
+      console.log("email", email);
+
+      hashPassword(password, (err, hash) => {
         if (err) {
           console.log("bad info");
 

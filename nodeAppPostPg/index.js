@@ -210,6 +210,7 @@ var user = {
 };
 var secret = 'secret';
 var hashPassword = function (password, cb) {
+    console.log("pwd", password);
     bcrypt.genSalt(10, function (err, salt) {
         bcrypt.hash(password, salt, function (err, hash) {
             return cb(err, hash);
@@ -271,9 +272,12 @@ server.route({
         //   {method: verifyUniqueUser}
         // ],
         handler: function (req, res) {
-            var email = req.payload.email;
-            var userName = req.payload.userName;
-            hashPassword(req.payload.password, function (err, hash) {
+            var payload = JSON.parse(req.payload.info);
+            var email = payload.email;
+            var userName = payload.userName;
+            var password = payload.password;
+            console.log("email", email);
+            hashPassword(password, function (err, hash) {
                 if (err) {
                     console.log("bad info");
                     return;
