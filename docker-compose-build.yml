@@ -1,0 +1,36 @@
+version: '3'
+services:
+  # cp_api:
+  #   image: cp_api
+  #   container_name: cp_api
+  #   depends_on:
+  #    - cp_pg_server
+  #   links:
+  #    - cp_pg_server
+  #   environment:
+  #    - PGPASSWORD=carpool_app
+  #    - PGDATABASE=carpool
+  #    - PGHOST=cp-pg-server
+  #    - PGPORT=5432
+
+  #   ports:
+  #    - "3000:3000"
+  #   volumes:
+  #     - /var/vms/Jon/Documents/GitHub/voteUSbackend:/usr/src/app/backend
+  #     - node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/
+
+
+  cp_pg_server:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    image: carpool/cp_pg_server
+
+  cp_api:
+    build:
+      context: ./nodeAppPostPg
+      dockerfile: Dockerfile
+      args:
+        - PORT=3030
+        - PGDATABASE=LIVE
+    image: carpool/cp_api

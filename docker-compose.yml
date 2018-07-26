@@ -1,0 +1,59 @@
+version: '3'
+services:
+  # cp_api:
+  #   image: cp_api
+  #   container_name: cp_api
+  #   depends_on:
+  #    - cp_pg_server
+  #   links:
+  #    - cp_pg_server
+  #   environment:
+  #    - PGPASSWORD=carpool_app
+  #    - PGDATABASE=carpool
+  #    - PGHOST=cp-pg-server
+  #    - PGPORT=5432
+
+  #   ports:
+  #    - "3000:3000"
+  #   volumes:
+  #     - /var/vms/Jon/Documents/GitHub/voteUSbackend:/usr/src/app/backend
+  #     - node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/
+
+
+  cp_pg_server:
+    image: carpool/cp_pg_server
+    container_name: cp_pg_server
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: always
+    depends_on:
+      # use "cp_pg_server" as hostname to establish connection to postgres in cp_pg_server container
+      - cp_pg_server
+    links:
+      - cp_pg_server
+    ports:
+      # Don't export the unprotected adminer to the outside
+      - 127.0.0.1:8080:8080
+
+  cp_api:
+    image: carpool/cp_api
+    container_name: cp_api
+    depends_on:
+      - cp_pg_server
+    links:
+      - cp_pg_server
+    environment:
+      - PGUSER=carpool_web
+      - PGPASSWORD=null
+      - PGHOST=cp_pg_server
+      - PORT=3030
+      - PGDATABASE=LIVE
+    ports:
+      # Don't export the unprotected adminer to the outside
+      - 3030:3030
+      
+volumes:
+  pgdata:
