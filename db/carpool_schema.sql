@@ -67,6 +67,22 @@ CREATE TABLE bordering_state (
 
 ALTER TABLE bordering_state OWNER TO carpool_admins;
 
+
+--
+-- Name: user; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
+--
+
+CREATE TABLE user (
+    "UUID" character varying(50) DEFAULT gen_random_uuid() NOT NULL,
+    "email" character varying(250) NOT NULL,
+    "username" character varying(250) NOT NULL,
+    "password" character varying(250) NOT NULL,
+    "admin" boolean NOT NULL
+);
+
+
+ALTER TABLE user OWNER TO carpool_admins;
+
 --
 -- Name: driver; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
 --
