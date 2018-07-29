@@ -426,6 +426,14 @@ ALTER TABLE ONLY zip_codes
 
 
 --
+-- Name: user_pk; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY user
+    ADD CONSTRAINT user_pk PRIMARY KEY ("UUID");
+
+
+--
 -- Name: driver_pk; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
 --
 
@@ -559,6 +567,17 @@ GRANT ALL ON FUNCTION fct_modified_column() TO carpool_web_role;
 
 
 
+
+
+--
+-- Name: user; Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE user FROM PUBLIC;
+REVOKE ALL ON TABLE user FROM carpool_admins;
+GRANT ALL ON TABLE user TO carpool_admins;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE user TO carpool_role;
+GRANT SELECT,INSERT,UPDATE ON TABLE user TO carpool_web_role;
 
 
 --
