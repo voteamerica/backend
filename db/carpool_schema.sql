@@ -69,10 +69,10 @@ ALTER TABLE bordering_state OWNER TO carpool_admins;
 
 
 --
--- Name: user; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
+-- Name: operator; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
 --
 
-CREATE TABLE user (
+CREATE TABLE operator (
     "UUID" character varying(50) DEFAULT gen_random_uuid() NOT NULL,
     "email" character varying(250) NOT NULL,
     "username" character varying(250) NOT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE user (
 );
 
 
-ALTER TABLE user OWNER TO carpool_admins;
+ALTER TABLE operator OWNER TO carpool_admins;
 
 --
 -- Name: driver; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
@@ -429,7 +429,7 @@ ALTER TABLE ONLY zip_codes
 -- Name: user_pk; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
 --
 
-ALTER TABLE ONLY user
+ALTER TABLE ONLY operator
     ADD CONSTRAINT user_pk PRIMARY KEY ("UUID");
 
 
@@ -570,14 +570,14 @@ GRANT ALL ON FUNCTION fct_modified_column() TO carpool_web_role;
 
 
 --
--- Name: user; Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+-- Name: operator; Type: ACL; Schema: carpoolvote; Owner: carpool_admins
 --
 
-REVOKE ALL ON TABLE user FROM PUBLIC;
-REVOKE ALL ON TABLE user FROM carpool_admins;
-GRANT ALL ON TABLE user TO carpool_admins;
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE user TO carpool_role;
-GRANT SELECT,INSERT,UPDATE ON TABLE user TO carpool_web_role;
+REVOKE ALL ON TABLE operator FROM PUBLIC;
+REVOKE ALL ON TABLE operator FROM carpool_admins;
+GRANT ALL ON TABLE operator TO carpool_admins;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE operator TO carpool_role;
+GRANT SELECT,INSERT,UPDATE ON TABLE operator TO carpool_web_role;
 
 
 --
