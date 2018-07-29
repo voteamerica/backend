@@ -304,7 +304,7 @@ const createToken = user => {
   }
 
   return jwt.sign(
-    { id: user.id, userName: user.userName, scopes: scopes}, 
+    { id: user.id, userName: user.userName, scope: scopes}, 
       secret, 
       {algorithm: 'HS256', expiresIn: '1h'
     }
@@ -366,7 +366,8 @@ server.route({
 
       user.email = payload.email;
       user.userName = payload.userName;
-      user.admin = false;
+      // user.admin = false;
+      user.admin = payload.admin;
 
       const password = payload.password;
 
