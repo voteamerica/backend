@@ -24,6 +24,7 @@ class RouteNamesAddDriverRider {
   readonly DRIVER_ROUTE:string  = 'driver';
   readonly RIDER_ROUTE:string   = 'rider';
   readonly HELPER_ROUTE:string  = 'helper';
+  readonly USER_ROUTE:string  = 'user';
 }
 
 class RouteNamesMatch {

@@ -101,6 +101,12 @@ server.route({
 });
 
 server.route({
+  method: 'POST',
+  path: '/' + routeNamesAddDriverRider.USER_ROUTE,
+  handler: postFunctions.postUser
+});
+
+server.route({
   method: 'GET',
   path: '/' + routeNamesUnmatched.UNMATCHED_DRIVERS_ROUTE,
   handler: routeFns.getUnmatchedDrivers
@@ -457,6 +463,7 @@ server.register([
 
       console.log("driver ins: " + dbQueriesPosts.dbGetSubmitDriverString());
       console.log("rider ins: " + dbQueriesPosts.dbGetSubmitRiderString());
+      console.log("user ins: " + dbQueriesPosts.dbGetSubmitUserString());
       console.log("cancel ride fn: " + dbQueriesCancels.dbCancelRideRequestFunctionString());
       console.log("reject ride fn: " + dbQueries.dbRejectRideFunctionString());
       console.log("ops interval:" + logOptions.ops.interval);
