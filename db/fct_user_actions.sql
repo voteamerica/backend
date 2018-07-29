@@ -1900,7 +1900,7 @@ CREATE OR REPLACE FUNCTION carpoolvote.submit_new_user(
     email character varying,
     username character varying,
     userpassword character varying,
-    userIsAdmin boolean
+    userIsAdmin boolean,
 	OUT out_uuid character varying,
 	OUT out_error_code INTEGER,
 	OUT out_error_text TEXT) AS
