@@ -66,6 +66,8 @@ cat cp-front-end-stdout.log | grep 'Server running'
 cat cp-front-end-stdout.log | grep 'Configuration file'
 cat cp-front-end-stdout.log | grep 'Source'
 cat cp-front-end-stdout.log | grep 'Destination'
+cat cp-front-end-stdout.log
+cat cp-front-end-stderr.log
 
 echo sct-travis sleep 10
 sleep 10
@@ -73,6 +75,8 @@ sleep 10
 echo sct-travis pg-client status
 docker logs fullstacktest_cp-client_1 > cp-client-stdout.log 2>cp-pg-client-stderr.log
 cat cp-client-stdout.log | grep 'DO'
+
+echo sct-travis curl status
 
 # curl 10.5.0.6:5432
 curl 10.5.0.5:8000

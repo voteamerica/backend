@@ -34,8 +34,7 @@ function createChainableTest (testFunction) {
 var testObject = {
   'currentClient' : undefined,
 
-  'dates' : ['2017-08-09', '2017-09-09', '2017-10-09'],
-  // 'dates' : ['2017-08-09'],
+  'dates' : ['2018-10-30', '2018-11-30', '2018-12-30'],
 
   'currentDateIndex' : 0,
 
@@ -239,80 +238,6 @@ var testObject = {
 
       }),
 
-  // 'addRiderOrig' : 
-  //   function (client) {
-  //     var client = this.setClient(client);
-  //     var dates = this.dates;
-      
-  //     var self = this;
-
-  //     console.log("addRiderOrig");
-
-  //     client
-  //       .url('http://10.5.0.4:4000/#need-ride')
-  //       .waitForElementVisible('form#need-ride', 3000)
-  //       .assert.cssClassPresent('#RiderAvailableTimes', 'available-times')
-
-  //       // set date/time
-  //       .execute( function (data) {
-  //           console.log('passed args: ', arguments);
-  //           document.getElementById("RiderDate0").value = arguments[0];  
-  //           return arguments;
-  //         }
-  //         , dates 
-  //         , function (result) {
-  //             console.log("result", result.value);
-  //             client.assert.deepEqual(dates, result.value, 'Result matches');
-  //           }
-  //       )
-  //       // .setValue('input[name="RiderDate"]', '2017-05-12')
-
-  //       .setValue('input[id="riderCollectionAddress"]', '1 high st')
-  //       .assert.valueContains('input[id="riderCollectionAddress"]', '1')
-
-  //       .setValue('input[name="RiderCollectionZIP"]', '10036')
-  //       .setValue('input[id="riderDestinationAddress"]', '1 main st')
-  //       .setValue('input[id="rideDestinationZIP"]', '10036')
-
-  //       .setValue('input[id="rideSeats"]', '1')
-  //       .setValue('#RiderAccommodationNotes', 'comfy chair')
-
-  //       .setValue('input[name="RiderFirstName"]', 'anne')
-  //       .setValue('input[name="RiderLastName"]', 'test')
-  //       .setValue('input[name="RiderEmail"]', 'a@test.com')
-  //       .setValue('input[name="RiderPhone"]', '07755000111')
-
-  //       .click('input[name="RiderPreferredContact"]')
-  //       .click('input[name="RiderAgreeTnC"]')
-        
-  //       .saveScreenshot('./reports/rider-entries2.png')
-
-  //       .click('button[id="needRideSubmit"]')
-
-  //       .saveScreenshot('./reports/rider-submitted.png')
-
-  //       .waitForElementVisible('h1#thanks-header', 5000)
-  //       .assert.containsText('h1#thanks-header', 'Congratulations')
-
-  //       .waitForElementVisible('.self-service-url', 1000)
-  //       .assert.containsText('.self-service-url', 'self-service portal')
-
-  //       .getAttribute(".self-service-url", "href", function(result) {
-  //         console.log("rider self service url: ", result);
-  //         // this.assert.equal(typeof result, "object");
-  //         // this.assert.equal(result.status, 0);
-  //         // this.assert.equal(result.value, "#home");
-  //         self.riderSelfServicePageUrl = result.value;
-
-  //         console.log("rider url: ", self.riderSelfServicePageUrl);
-  //       });
-
-  //       // .assert.containsText('div.with-errors ul li', 'Please fill in')
-  //       // .assert.valueContains('div.with-errors ul li', 'Please')
-
-  //     return this;
-  //   },
-
   // this test is called after a driver has been added - it's assumed 
   // app is at thanks driver page
   'viewDriverSelfService' : 
@@ -333,13 +258,13 @@ var testObject = {
 
         .click('.button')
 
-        .waitForElementVisible('#driverInfo > h3.self-service-heading', 3000)
+        .waitForElementVisible('#driverInfo > #driverInfoHeader', 3000)
 
         .saveScreenshot('./reports/match-self-service-logged-in.png')
 
-        .assert.containsText('#driverInfo > h3.self-service-heading', 'Driver Info')
-        .waitForElementVisible('#driverProposedMatches > h3.self-service-heading', 3000)
-        .assert.containsText('#driverProposedMatches > h3.self-service-heading', 'Driver Proposed Matches');
+        .assert.containsText('#driverInfo > #driverInfoHeader', 'Driver Info')
+        .waitForElementVisible('#driverProposedMatches > #driverProposedHeader', 3000)
+        .assert.containsText('#driverProposedMatches > #driverProposedHeader', 'Driver Proposed Matches');
     }),
 
   // this test is called after first rider, then driver have been added - it's assumed 
@@ -418,11 +343,11 @@ var testObject = {
 
             .click('.button')
 
-            .waitForElementVisible('#riderInfo > h3.self-service-heading', 3000)
+            .waitForElementVisible('#riderInfo > #riderInfoHeader', 3000)
 
             .saveScreenshot('./reports/rider-self-service-logged-in.png')
 
-            .assert.containsText('#riderInfo > h3.self-service-heading', 'Rider Info');
+            .assert.containsText('#riderInfo > #riderInfoHeader', 'Rider Info');
 
           done();
         });

@@ -95,7 +95,8 @@ CREATE TABLE driver (
     last_updated_ts timestamp without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     status_info text,
     "DriverPreferredContact" character varying(50),
-    "DriverWillTakeCare" boolean NOT NULL
+    "DriverWillTakeCare" boolean NOT NULL,
+    uuid_organization character varying(50) NOT NULL
 );
 
 
@@ -184,6 +185,31 @@ ALTER TABLE match_engine_scheduler OWNER TO carpool_admins;
 COMMENT ON COLUMN match_engine_scheduler.need_run_flag IS 'the matching engine will process records only when need_run_flag is True
 The matching engine resets the flag at the end of its execution';
 
+--
+-- Name: organization; Type: TABLE; Schema: carpoolvote; Owner: carpool_admin
+--
+
+CREATE TABLE organization (
+    "OrganizationName" character varying(255) NOT NULL,
+    "UUID" character varying(50) DEFAULT gen_random_uuid() NOT NULL
+);
+
+
+ALTER TABLE organization OWNER TO carpool_admin;
+
+--
+-- Name: operator; Type: TABLE; Schema: carpoolvote; Owner: carpool_admin
+--
+
+CREATE TABLE operator (
+    "OperatorFirstName" character varying(255) NOT NULL,
+    "OperatorLastName" character varying(255) NOT NULL,
+    "UUID" character varying(50) DEFAULT gen_random_uuid() NOT NULL,
+    uuid_organization character varying(50) NOT NULL
+);
+
+
+ALTER TABLE operator OWNER TO carpool_admin;
 
 --
 -- Name: outgoing_email; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
@@ -308,7 +334,8 @@ CREATE TABLE rider (
     "RiderWillBeSafe" boolean NOT NULL,
 	"RiderCollectionStreetNumber" character varying(10),
     "RiderCollectionAddress" character varying(1000),
-    "RiderDestinationAddress" character varying(1000)
+    "RiderDestinationAddress" character varying(1000),
+    uuid_organization character varying(50) NOT NULL
 );
 
 
@@ -440,7 +467,19 @@ ALTER TABLE ONLY match_engine_activity_log
 ALTER TABLE ONLY match
     ADD CONSTRAINT match_pkey PRIMARY KEY (uuid_driver, uuid_rider);
 
+--
+-- Name: organization organization_pkey; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admin
+--
 
+ALTER TABLE ONLY organization
+    ADD CONSTRAINT organization_pkey PRIMARY KEY ("UUID");
+
+--
+-- Name: operator operator_pkey; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admin
+--
+
+ALTER TABLE ONLY operator
+    ADD CONSTRAINT operator_pkey PRIMARY KEY ("UUID");
 --
 -- Name: outgoing_email_pk; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
 --
@@ -530,6 +569,28 @@ ALTER TABLE ONLY match
 
 ALTER TABLE ONLY match
     ADD CONSTRAINT match_uuid_rider_fkey FOREIGN KEY (uuid_rider) REFERENCES rider("UUID") ON DELETE CASCADE;
+
+--
+-- Name: driver driver_uuid_organization_fkey; Type: FK CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY driver
+    ADD CONSTRAINT driver_uuid_organization_fkey FOREIGN KEY (uuid_organization) REFERENCES organization("UUID") ON DELETE CASCADE;
+
+--
+-- Name: rider rider_uuid_organization_fkey; Type: FK CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY rider
+    ADD CONSTRAINT rider_uuid_organization_fkey FOREIGN KEY (uuid_organization) REFERENCES organization("UUID") ON DELETE CASCADE;
+
+--
+-- Name: operator operator_uuid_organization_fkey; Type: FK CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY operator
+    ADD CONSTRAINT operator_uuid_organization_fkey FOREIGN KEY (uuid_organization) REFERENCES organization("UUID") ON DELETE CASCADE;
+
 
 --
 -- Name: fct_modified_column(); Type: ACL; Schema: carpoolvote; Owner: carpool_admins

@@ -3,6 +3,8 @@
 export interface DbQueries {
   dbGetData (pool, fnGetString, reply, results);
   dbGetUnmatchedDrivers (pool, fnGetString, reply, results);
+  dbGetDriversDetails (pool, fnGetString, reply, results);
+  dbGetDriverMatchesDetails (pool, fnGetString, reply, results);
   dbGetUnmatchedRiders (pool, fnGetString, reply, results);
   dbGetMatchesData (pool, fnGetString, reply, results);
   dbGetMatchSpecificData (pool, fnGetString, uuid, reply, results);
@@ -61,6 +63,64 @@ class PostgresQueries implements DbQueries {
       }
 
       console.log("unmatched drivers: ", rowsToSend);
+
+      reply(rowsToSend);
+    })
+    .catch(e => {
+      var message = e.message || '';
+      var stack   = e.stack   || '';
+
+      console.error(results.failure, message, stack);
+
+      reply(results.failure + message).code(500);
+    });
+  }
+
+  dbGetDriversDetails (pool, fnGetString, reply, results) {
+    var queryString =  fnGetString();
+
+    pool.query( queryString )
+    .then(result => {
+      var firstRowAsString = "";
+      var rowsToSend = [];
+
+      if (result !== undefined && result.rows !== undefined) {
+
+        result.rows.forEach( val => {          
+          rowsToSend.push(val);
+        });
+      }
+
+      console.log("drivers details: ", rowsToSend);
+
+      reply(rowsToSend);
+    })
+    .catch(e => {
+      var message = e.message || '';
+      var stack   = e.stack   || '';
+
+      console.error(results.failure, message, stack);
+
+      reply(results.failure + message).code(500);
+    });
+  }
+
+  dbGetDriverMatchesDetails (pool, fnGetString, reply, results) {
+    var queryString =  fnGetString();
+
+    pool.query( queryString )
+    .then(result => {
+      var firstRowAsString = "";
+      var rowsToSend = [];
+
+      if (result !== undefined && result.rows !== undefined) {
+
+        result.rows.forEach( val => {          
+          rowsToSend.push(val);
+        });
+      }
+
+      console.log("driver matches details: ", rowsToSend);
 
       reply(rowsToSend);
     })

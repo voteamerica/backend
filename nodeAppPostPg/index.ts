@@ -22,7 +22,7 @@ import { RouteNamesSelfService, RouteNamesMatch
   // , RouteNamesChange
   } from "./RouteNames";
 import { RouteNamesSelfServiceInfoExists } from "./RouteNames";
-import { RouteNamesCancel, RouteNamesUnmatched } from "./RouteNames";
+import { RouteNamesCancel, RouteNamesUnmatched,RouteNamesDetails  } from "./RouteNames";
 import { logging }          from "./logging";
 
 let dbQueriesPosts = new DbQueriesPosts();
@@ -36,6 +36,7 @@ let routeNamesMatch = new RouteNamesMatch();
 let routeNamesSelfServiceInfoExists = new RouteNamesSelfServiceInfoExists();
 let routeNamesCancel = new RouteNamesCancel();
 let routeNamesUnmatched = new RouteNamesUnmatched();
+let routeNamesDetails = new RouteNamesDetails();
 let loggingItem        = new logging();
 
 config.user       = process.env.PGUSER;
@@ -94,6 +95,18 @@ server.route({
   method: 'GET',
   path: '/' + routeNamesUnmatched.UNMATCHED_DRIVERS_ROUTE,
   handler: routeFns.getUnmatchedDrivers
+});
+
+server.route({
+  method: 'GET',
+  path: '/' + routeNamesDetails.DRIVERS_DETAILS_ROUTE,
+  handler: routeFns.getDriversDetails
+});
+
+server.route({
+  method: 'GET',
+  path: '/' + routeNamesDetails.DRIVER_MATCHES_DETAILS_ROUTE,
+  handler: routeFns.getDriverMatchesDetails
 });
 
 server.route({
