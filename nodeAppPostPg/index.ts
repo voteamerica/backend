@@ -435,6 +435,19 @@ server.register([
       verifyOptions: {algorithms: ['HS256']}
     });
 
+    server.route({
+      method: 'POST',
+      path: '/users/list',
+      config: {
+        handler: (req, res) => {
+          res([user]);
+        }, auth: {
+          strategy: 'jwt',
+          scope: ['admin']
+        }
+      }
+    });
+          
     server.start(err => {
       if (err) {
           throw err;
@@ -450,19 +463,6 @@ server.register([
     });
   }
 );
-
-server.route({
-  method: 'POST',
-  path: '/users/list',
-  config: {
-    handler: (req, res) => {
-      res([user]);
-    }, auth: {
-      strategy: 'jwt',
-      scope: ['admin']
-    }
-  }
-});
 
 loggingItem.logReqResp(server, pool);
 
