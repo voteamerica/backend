@@ -1943,7 +1943,7 @@ ALTER FUNCTION carpoolvote.submit_new_user(
     email character varying,
     username character varying,
     userpassword character varying,
-    userIsAdmin boolean
+    userIsAdmin boolean,
 	OUT out_uuid character varying,
 	OUT out_error_code INTEGER,
 	OUT out_error_text TEXT)
@@ -1952,7 +1952,7 @@ GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_user(
     email character varying,
     username character varying,
     userpassword character varying,
-    userIsAdmin boolean
+    userIsAdmin boolean,
 	OUT out_uuid character varying,
 	OUT out_error_code INTEGER,
 	OUT out_error_text TEXT) TO carpool_web_role;
@@ -1960,7 +1960,7 @@ GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_user(
     email character varying,
     username character varying,
     userpassword character varying,
-    userIsAdmin boolean
+    userIsAdmin boolean,
 	OUT out_uuid character varying,
 	OUT out_error_code INTEGER,
 	OUT out_error_text TEXT) TO carpool_role;
