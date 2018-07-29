@@ -9,6 +9,7 @@ class DbDefsTables {
   readonly RIDER_TABLE: string   = 'rider';
   readonly HELPER_TABLE: string  = 'helper';
   readonly MATCH_TABLE: string   = 'match';
+  readonly USER_TABLE: string   = 'operator';
 }
 
 class DbDefsViews {

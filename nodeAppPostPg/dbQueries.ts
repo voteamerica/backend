@@ -47,7 +47,10 @@ module.exports = {
   dbGetMatchRiderQueryString:   dbGetMatchRiderQueryString,
   dbGetMatchDriverQueryString:  dbGetMatchDriverQueryString,
   dbGetMatchesQueryString:      dbGetMatchesQueryString,
+  
   dbGetQueryString:             dbGetQueryString,
+  dbGetUsersQueryString:        dbGetUsersQueryString,
+
   dbGetUnmatchedDriversQueryString: dbGetUnmatchedDriversQueryString,
   dbGetUnmatchedRidersQueryString:  dbGetUnmatchedRidersQueryString,
   // dbGetInsertClause:            dbGetInsertClause
@@ -115,6 +118,10 @@ function dbGetMatchesQueryString (): string {
 
 function dbGetQueryString (): string {
   return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsTables.DRIVER_TABLE);
+}
+
+function dbGetUsersQueryString (): string {
+  return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsTables.USER_TABLE);
 }
 
 function dbGetUnmatchedDriversQueryString (): string {

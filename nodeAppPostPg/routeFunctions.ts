@@ -34,6 +34,17 @@ function getAnon (req: any, reply: any) {
   postgresQueries.dbGetData(rfPool, dbQueries.dbGetQueryString, reply, results);
 }
 
+function getUsers (req: any, reply: any) {
+  var results = {
+    success: 'GET users: ',
+    failure: 'GET users error: ' 
+  };
+
+  req.log();
+
+  postgresQueries.dbGetData(rfPool, dbQueries.dbGetUsersQueryString, reply, results);
+}
+
 function getUnmatchedDrivers (req: any, reply: any) {
   var results = {
     success: 'GET unmatched drivers: ',
@@ -373,7 +384,8 @@ function getCancelRideOfferPayloadAsArray (req: any, payload: any) {
 }
 
 module.exports = {
-  getAnon: getAnon,
+  getAnon:            getAnon,
+  getUsers:           getUsers,
 
   getUnmatchedDrivers:  getUnmatchedDrivers,
   getUnmatchedRiders:   getUnmatchedRiders,

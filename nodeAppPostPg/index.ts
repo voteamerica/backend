@@ -421,6 +421,26 @@ server.route({
   }
 });
 
+const usersHandler = 
+// (req, res) => {
+
+//   res([user]);
+// };
+// (req, res) => {
+
+//   var results = {
+//     success: 'GET match-driver: ',
+//     failure: 'GET match-driver: ' 
+//   };
+
+//   req.log(['request']);
+
+//   postgresQueries.dbGetMatchSpecificData(pool, dbQueries.dbGetMatchDriverQueryString, 
+//                           req.params.uuid, reply, results);
+// }
+ routeFns.getUsers;
+
+
 server.register([
   {
     register: hapiAuthJwt,
@@ -445,9 +465,9 @@ server.register([
       method: 'POST',
       path: '/users/list',
       config: {
-        handler: (req, res) => {
-          res([user]);
-        }, auth: {
+        handler: usersHandler
+      
+, auth: {
           strategy: 'jwt',
           scope: ['admin']
         }
