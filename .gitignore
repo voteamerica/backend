@@ -94,5 +94,5 @@ ENV/
 
 
 # The real stuff here
-nodeAppPostPg/node_modules
+*/node_modules
 

@@ -68,11 +68,15 @@ BEGIN
 	--SELECT need_run_flag INTO run_now from carpoolvote.match_engine_scheduler LIMIT 1;
 	IF run_now
 	THEN
-
-		CREATE TEMPORARY TABLE match_notifications_buffer (
-		 uuid_driver character varying(50) NOT NULL,
-		 uuid_rider character varying(50) NOT NULL
-		);
+		BEGIN
+			CREATE TEMPORARY TABLE match_notifications_buffer (
+		 		uuid_driver character varying(50) NOT NULL,
+		 		uuid_rider character varying(50) NOT NULL
+			);
+		EXCEPTION WHEN OTHERS
+		THEN
+			DELETE FROM match_notifications_buffer;
+		END;
 	
 		-- Initialize Counters
 		v_start_ts := now();

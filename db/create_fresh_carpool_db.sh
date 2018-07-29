@@ -1,24 +1,23 @@
-# needs to be executed as postgres user
+#!/usr/bin/sh
 
-# optional environment variables
-# For docker, use :
-# CARPOOL_DATABASE_NAME=LIVE
-# CARPOOL_SOURCE_FILES=/db
+# should be executed from the directory where the sql files are located
 
-CARPOOL_DATABASE_NAME=${CARPOOL_DATABASE_NAME:-LIVE}
-CARPOOL_SOURCE_FILES=${CARPOOL_SOURCE_FILES:-.}
+if [[ "X$1" = "X" ]]
+then
+	echo missing DB name
+	echo $0 \<DB name\>
+	exit 1
+fi
 
-cd $CARPOOL_SOURCE_FILES
-
-psql < carpool_roles.sql \
-&& createdb --owner carpool_admin $CARPOOL_DATABASE_NAME \
-&& psql $CARPOOL_DATABASE_NAME < carpool_schema_bootstrap.sql \
-&& psql $CARPOOL_DATABASE_NAME < carpool_schema.sql \
-&& psql $CARPOOL_DATABASE_NAME < carpool_static_data.sql \
-&& psql $CARPOOL_DATABASE_NAME < carpool_params_data.sql \
-&& psql $CARPOOL_DATABASE_NAME < fct_utilities.sql \
-&& psql $CARPOOL_DATABASE_NAME < carpool_views.sql \
-&& psql $CARPOOL_DATABASE_NAME < fct_outbound_notifications.sql \
-&& psql $CARPOOL_DATABASE_NAME < fct_user_actions.sql \
-&& psql $CARPOOL_DATABASE_NAME < fct_matching_engine.sql
+su postgres -c "psql < carpool_roles.sql" \
+&& su postgres -c "createdb --owner carpool_admin $1" \
+&& su postgres -c "psql $1 < carpool_schema_bootstrap.sql" \
+&& su carpool_admin -c "psql $1 < carpool_schema.sql" \
+&& su carpool_admin -c "psql $1 < carpool_static_data.sql" \
+&& su carpool_admin -c "psql $1 < carpool_params_data.sql" \
+&& su carpool_admin -c "psql $1 < fct_utilities.sql" \
+&& su carpool_admin -c "psql $1 < carpool_views.sql" \
+&& su carpool_admin -c "psql $1 < fct_outbound_notifications.sql" \
+&& su carpool_admin -c "psql $1 < fct_user_actions.sql" \
+&& su carpool_admin -c "psql $1 < fct_matching_engine.sql"
 
