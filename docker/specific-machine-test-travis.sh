@@ -1,5 +1,8 @@
 #!/bin/bash
 
+export DOCKER=docker
+export DOCKERCOMPOSE=docker-compose
+
 . ./common-sudo-fix.sh
 
 # https://docs.travis-ci.com/user/customizing-the-build#Implementing-Complex-Build-Steps
