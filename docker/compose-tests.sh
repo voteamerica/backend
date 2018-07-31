@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export DOCKER=docker
+export DOCKERCOMPOSE=docker-compose
 . ./common-sudo-fix.sh
 
 if [[ "X$1" = "X" ]]
