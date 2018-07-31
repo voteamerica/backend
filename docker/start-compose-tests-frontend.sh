@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. ./common-sudo-fix.sh
+
 if [[ "X$1" = "X" ]]
 then
     TEST_GROUP=match2
@@ -29,20 +31,20 @@ echo start compose tests - frontend
 # ls ./s*.sh
 
 # build specific machines
-# docker-compose -f ./compose/full-stack-test/docker-compose-test-frontend.yml build --build-arg REPO=https://github.com/jkbits1/backend --build-arg BRANCH_NAME=docker-test --build-arg CACHEBUST=$(date +%s) cp-test-runner
+# docker-compose -f ./compose/full-stack-test/docker-compose-test-frontend.yml build --build-arg REPO=https://github.com/voteamerica/backend.git --build-arg BRANCH_NAME=docker-test --build-arg CACHEBUST=$(date +%s) cp-test-runner
 
-docker-compose -f ./compose/full-stack-test/docker-compose-test-frontend.yml up -d
+$DOCKERCOMPOSE -f ./compose/full-stack-test/docker-compose-test-frontend.yml up -d
 
 sleep 60
 
-docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
+$DOCKER exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
 # docker logs $ (docker ps | grep nigh | cut -c 1-4)
 # docker wait fullstacktest_cp-test-runner_1
 EXIT_CODE=$?
 
-docker logs fullstacktest_cp-test-runner_1
+$DOCKER logs fullstacktest_cp-test-runner_1
 
-docker-compose -f ./compose/full-stack-test/docker-compose-test-frontend.yml down
+$DOCKERCOMPOSE -f ./compose/full-stack-test/docker-compose-test-frontend.yml down
 
 echo exit code: $EXIT_CODE
 

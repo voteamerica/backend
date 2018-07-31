@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. ./common-sudo-fix.sh
+
 if [[ "X$1" = "X" ]]
 then
     TEST_GROUP=match2
@@ -47,21 +49,21 @@ sleep 60
 
 echo sct-travis test runner status
 # https://stackoverflow.com/questions/34724980/finding-a-string-in-docker-logs-of-container
-docker logs fullstacktest_cp-test_1 > stdout.log 2>stderr.log
+$DOCKER logs fullstacktest_cp-test_1 > stdout.log 2>stderr.log
 cat stdout.log | grep Selenium
 cat stdout.log | grep ServerConnector
 
 echo sct-travis db status
-docker logs fullstacktest_cp-pg-server_1 > cp-pg-server-stdout.log 2>cp-pg-server-stderr.log
+$DOCKER logs fullstacktest_cp-pg-server_1 > cp-pg-server-stdout.log 2>cp-pg-server-stderr.log
 cat cp-pg-server-stdout.log | grep 'ALTER ROLE'
 cat cp-pg-server-stdout.log | grep 'autovacuum launcher started'
 
 echo sct-travis node app status
-docker logs fullstacktest_cp-nodejs_1 > cp-nodejs-stdout.log 2>cp-nodejs-stderr.log
+$DOCKER logs fullstacktest_cp-nodejs_1 > cp-nodejs-stdout.log 2>cp-nodejs-stderr.log
 cat cp-nodejs-stdout.log | grep 'Server running'
 
 echo sct-travis fe status
-docker logs fullstacktest_cp-front-end_1 > cp-front-end-stdout.log 2>cp-pg-front-end-stderr.log
+$DOCKER logs fullstacktest_cp-front-end_1 > cp-front-end-stdout.log 2>cp-pg-front-end-stderr.log
 cat cp-front-end-stdout.log | grep 'Server running'
 cat cp-front-end-stdout.log | grep 'Configuration file'
 cat cp-front-end-stdout.log | grep 'Source'
@@ -73,7 +75,7 @@ echo sct-travis sleep 10
 sleep 10
 
 echo sct-travis pg-client status
-docker logs fullstacktest_cp-client_1 > cp-client-stdout.log 2>cp-pg-client-stderr.log
+$DOCKER logs fullstacktest_cp-client_1 > cp-client-stdout.log 2>cp-pg-client-stderr.log
 cat cp-client-stdout.log | grep 'DO'
 
 echo sct-travis curl status
@@ -86,10 +88,10 @@ curl 10.5.0.3:4444 | grep "Selenium"
 curl http://10.5.0.3:4444/selenium-server/driver?cmd=getLogMessages
 
 
-docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
+$DOCKER exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
 EXIT_CODE=$?
 
-docker logs fullstacktest_cp-test-runner_1
+$DOCKER logs fullstacktest_cp-test-runner_1
 
 echo exit code: $EXIT_CODE
 
@@ -100,11 +102,11 @@ then
 else 
     echo "tests failed"
 
-    docker logs fullstacktest_cp-nodejs_1
-    docker logs fullstacktest_cp-pg-server_1
-    docker logs fullstacktest_cp-pg-client_1
-    docker logs fullstacktest_cp-front-end_1
-    docker logs fullstacktest_cp-test_1
+    $DOCKER logs fullstacktest_cp-nodejs_1
+    $DOCKER logs fullstacktest_cp-pg-server_1
+    $DOCKER logs fullstacktest_cp-pg-client_1
+    $DOCKER logs fullstacktest_cp-front-end_1
+    $DOCKER logs fullstacktest_cp-test_1
 
     exit $EXIT_CODE
 fi

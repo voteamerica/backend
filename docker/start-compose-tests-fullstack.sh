@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. common-sudo-fix.sh
+
 if [[ "X$1" = "X" ]]
 then
     TEST_GROUP=match2
@@ -24,7 +26,7 @@ fi
 
 echo start compose tests - fullstack
 
-docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml up -d
+$DOCKERCOMPOSE -f ./compose/full-stack-test/docker-compose-test-fullstack.yml up -d
 
 # echo sct-full sleep 60
 # sleep 60
@@ -41,21 +43,21 @@ sleep 45
 
 echo sct-full test runner status
 # https://stackoverflow.com/questions/34724980/finding-a-string-in-docker-logs-of-container
-docker logs fullstacktest_cp-test_1 > stdout.log 2>stderr.log
+$DOCKER logs fullstacktest_cp-test_1 > stdout.log 2>stderr.log
 cat stdout.log | grep Selenium
 cat stdout.log | grep ServerConnector
 
 echo sct-full db status
-docker logs fullstacktest_cp-pg-server_1 > cp-pg-server-stdout.log 2>cp-pg-server-stderr.log
+$DOCKER logs fullstacktest_cp-pg-server_1 > cp-pg-server-stdout.log 2>cp-pg-server-stderr.log
 cat cp-pg-server-stdout.log | grep 'ALTER ROLE'
 cat cp-pg-server-stdout.log | grep 'autovacuum launcher started'
 
 echo sct-full node app status
-docker logs fullstacktest_cp-nodejs_1 > cp-nodejs-stdout.log 2>cp-nodejs-stderr.log
+$DOCKER logs fullstacktest_cp-nodejs_1 > cp-nodejs-stdout.log 2>cp-nodejs-stderr.log
 cat cp-nodejs-stdout.log | grep 'Server running'
 
 echo sct-full fe status
-docker logs fullstacktest_cp-front-end_1 > cp-front-end-stdout.log 2>cp-pg-front-end-stderr.log
+$DOCKER logs fullstacktest_cp-front-end_1 > cp-front-end-stdout.log 2>cp-pg-front-end-stderr.log
 cat cp-front-end-stdout.log | grep 'Server running'
 cat cp-front-end-stdout.log | grep 'Configuration file'
 cat cp-front-end-stdout.log | grep 'Source'
@@ -65,7 +67,7 @@ echo sct-full sleep 10
 sleep 10
 
 echo sct-full pg-client status
-docker logs fullstacktest_cp-pg-client_1 > cp-pg-client-stdout.log 2>cp-pg-client-stderr.log
+$DOCKER logs fullstacktest_cp-pg-client_1 > cp-pg-client-stdout.log 2>cp-pg-client-stderr.log
 cat cp-pg-client-stdout.log | grep 'DO'
 
 # curl 10.5.0.6:5432
@@ -80,10 +82,10 @@ curl localhost:4000 | grep "Every American"
 # curl localhost:4444 | grep "Selenium"
 
 
-docker exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
+$DOCKER exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
 EXIT_CODE=$?
 
-docker logs fullstacktest_cp-test-runner_1
+$DOCKER logs fullstacktest_cp-test-runner_1
 
 if [[ $EXIT_CODE -ne 0 ]]
 then
@@ -96,7 +98,7 @@ then
     # docker logs fullstacktest_cp-test_1   
 fi
 
-docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml down
+$DOCKERCOMPOSE -f ./compose/full-stack-test/docker-compose-test-fullstack.yml down
 
 echo exit code: $EXIT_CODE
 

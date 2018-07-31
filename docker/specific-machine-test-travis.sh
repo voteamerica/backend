@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. ./common-sudo-fix.sh
+
 # https://docs.travis-ci.com/user/customizing-the-build#Implementing-Complex-Build-Steps
 set -ev
 
@@ -94,5 +96,5 @@ fi
 pwd
 ls
 
-docker-compose -f docker/compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/$REPO --build-arg BRANCH_NAME=$BRANCH --build-arg CACHEBUST=$CACHEBUST $MACHINE
+$DOCKERCOMPOSE -f docker/compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/$REPO --build-arg BRANCH_NAME=$BRANCH --build-arg CACHEBUST=$CACHEBUST $MACHINE
 
