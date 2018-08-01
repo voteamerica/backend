@@ -96,7 +96,7 @@ CREATE TABLE driver (
     status_info text,
     "DriverPreferredContact" character varying(50),
     "DriverWillTakeCare" boolean NOT NULL,
-    uuid_organization character varying(50) NOT NULL
+    uuid_organization character varying(50)
 );
 
 
@@ -335,7 +335,7 @@ CREATE TABLE rider (
 	"RiderCollectionStreetNumber" character varying(10),
     "RiderCollectionAddress" character varying(1000),
     "RiderDestinationAddress" character varying(1000),
-    uuid_organization character varying(50) NOT NULL
+    uuid_organization character varying(50)
 );
 
 
