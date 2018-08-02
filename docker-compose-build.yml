@@ -24,6 +24,12 @@ services:
         - PORT=3030
     image: carpool/api
 
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: carpool/nginx
+
   matching:
     build:
       context: ./matchingEngine
@@ -36,8 +42,9 @@ services:
 #      dockerfile: Dockerfile
 #    image: carpool/sms_handler
 
-#  email_handler:
-#    build:
-#      context: ./emailHandler
-#      dockerfile: Dockerfile
-#    image: carpool/email_handler
+  email_handler:
+    build:
+      context: ./emailHandler
+      dockerfile: Dockerfile
+    image: carpool/email_handler
+

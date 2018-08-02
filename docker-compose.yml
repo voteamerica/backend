@@ -1,5 +1,16 @@
 version: '3'
 services:
+  cp_nginx:
+    image: carpool/nginx
+    container_name: cp_nginx
+    depends_on:
+      - cp_api
+    links:
+      - cp_api
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+    ports:
+      - 443:443
 
   cp_pg_server:
     image: carpool/pg_server
@@ -40,8 +51,6 @@ services:
       - PGHOST=cp_pg_server
       - PORT=3030
       - PGDATABASE=LIVE
-    ports:
-      - 3030:3030
 
   cp_matching:
     image: carpool/matching
@@ -54,6 +63,17 @@ services:
       - PGUSER=carpool_app
       - PGPASSWORD=null
       - PGHOST=cp_pg_server
+      - PGDATABASE=LIVE
+
+  cp_emailer:
+    image: carpool/email_handler
+    container_name: cp_emailer
+    depends_on:
+      - cp_pg_server
+    links:
+      - cp_pg_server
+    environment:
+      - MAILGUNKEY=XXX
       - PGDATABASE=LIVE
 
 volumes:
