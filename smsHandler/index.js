@@ -1,4 +1,6 @@
 'use strict';
+var dateFormat = require('dateformat');
+
 var cfg = {
     // get info from env vars
     accountSid: process.env.TWILIO_ACCOUNT_SID,
@@ -17,25 +19,16 @@ var client = require('twilio')(cfg.accountSid, cfg.authToken);
 var DELAY = process.env.CP_DELAY || 10000;
 var Pool = require('pg').Pool;
 var pool = new Pool({
-    idleTimeoutMillis: 2000 //close idle clients after 2 seconds
+    idleTimeoutMillis: 60000 //close idle clients after 60 seconds
 });
 var SCHEMA_NAME = 'carpoolvote';
-var OUTGOING_EMAIL_TABLE = 'outgoing_email';
 var OUTGOING_SMS_TABLE = 'outgoing_sms';
 var currentFunction = 0;
 setInterval(function () {
     dbGetItemsToSend(pool, [
-        // dbGetOutgoingEmailString
         dbGetOutgoingSmsString
     ]);
 }, DELAY);
-function dbGetOutgoingEmailString() {
-    return 'SELECT * FROM '
-        + SCHEMA_NAME + '.'
-        + OUTGOING_EMAIL_TABLE
-        + ' WHERE status=' + " '" + 'Pending' + "' ";
-    ;
-}
 function dbGetOutgoingSmsString() {
     return 'SELECT * FROM '
         + SCHEMA_NAME + '.'
@@ -55,12 +48,11 @@ function dbGetItemsToSend(pool, executeFunctionArray) {
     pool
         .query(queryString)
         .then(function (result) {
-        var firstRowAsString = "";
         if (result !== undefined && result.rows !== undefined &&
             result.rows.length > 0) {
             result.rows.forEach(function (smsMessage) {
                 var smsMessageOutput = JSON.stringify(smsMessage);
-                console.log("message: " + smsMessageOutput);
+                console.log(dateFormat(new Date(),"yyyy-mm-dd HH:MM:ss") + ": SMS: " + smsMessageOutput);
                 var message = {
                     id: smsMessage.id,
                     status: smsMessage.status,
@@ -68,8 +60,9 @@ function dbGetItemsToSend(pool, executeFunctionArray) {
                     phoneNumber: smsMessage.recipient
                 };
                 makeCalls(message);
-                console.error("executed sms query: " + firstRowAsString);
             });
+        } else {
+           console.log(dateFormat(new Date(),"yyyy-mm-dd HH:MM:ss") + ": No SMS to send");
         }
     })
         .catch(function (e) {

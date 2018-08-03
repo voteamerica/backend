@@ -1,5 +1,5 @@
 {
-  "name": "sweeper",
+  "name": "sms_handler",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -10,8 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mailgun-js": "^0.7.12",
-    "pg": "^6.1.0",
+    "dateformat": "^3.0.3",
+    "pg": "^7.4.3",
     "twilio": "^2.11.0"
   },
   "devDependencies": {

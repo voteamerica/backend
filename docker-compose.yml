@@ -11,19 +11,18 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt
     ports:
       - 443:443
+    restart: on-failure
 
   cp_pg_server:
     image: carpool/pg_server
     container_name: cp_pg_server
     environment:
-      - MAILGUNKEY=CHANGE_ME
-      - TWILIO_NUMBER=CHANGE_ME
-      - TWILIO_AUTH_TOKEN=CHANGE_ME
-      - TWILIO_ACCOUNT_SID=CHANGE_ME
+      - CARPOOL_DATABASE_NAME=LIVE
     volumes:
       - pgdata:/var/lib/postgresql/data
     # ports:
     #   - 5432:5432
+    restart: on-failure
 
   cp_adminer:
     image: adminer
@@ -37,6 +36,7 @@ services:
     ports:
       # Don't export the unprotected adminer to the outside
       - 127.0.0.1:8080:8080
+    restart: on-failure
 
   cp_api:
     image: carpool/api
@@ -51,6 +51,7 @@ services:
       - PGHOST=cp_pg_server
       - PORT=3030
       - PGDATABASE=LIVE
+    restart: on-failure
 
   cp_matching:
     image: carpool/matching
@@ -64,6 +65,7 @@ services:
       - PGPASSWORD=null
       - PGHOST=cp_pg_server
       - PGDATABASE=LIVE
+    restart: on-failure
 
   cp_emailer:
     image: carpool/email_handler
@@ -75,6 +77,25 @@ services:
     environment:
       - MAILGUNKEY=XXX
       - PGDATABASE=LIVE
+    restart: on-failure
+
+
+  cp_sms_handler:
+    image: carpool/sms_handler
+    container_name: cp_sms_handler
+    depends_on:
+      - cp_pg_server
+    links:
+      - cp_pg_server
+    environment:
+      - TWILIO_ACCOUNT_SID=XXX
+      - TWILIO_AUTH_TOKEN=XXX
+      - TWILIO_NUMBER=XXX
+      - PGUSER=carpool_app
+      - PGPASSWORD=null
+      - PGHOST=cp_pg_server
+      - PGDATABASE=LIVE
+    restart: on-failure
 
 volumes:
   pgdata:

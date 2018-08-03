@@ -36,11 +36,11 @@ services:
       dockerfile: Dockerfile
     image: carpool/matching
 
-#  sms_handler:
-#    build:
-#      context: ./smsHandler
-#      dockerfile: Dockerfile
-#    image: carpool/sms_handler
+  sms_handler:
+    build:
+      context: ./smsHandler
+      dockerfile: Dockerfile
+    image: carpool/sms_handler
 
   email_handler:
     build:

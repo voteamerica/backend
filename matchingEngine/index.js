@@ -8,7 +8,7 @@ var pool = new Pool({
 
 setInterval(function () {
     pool
-    .query("select to_char(now(), 'YY/MM/DD HH24:MI:SS')  as now, * from carpoolvote.perform_match()")
+    .query("select to_char(now(), 'YYYY-MM-DD HH24:MI:SS')  as now, * from carpoolvote.perform_match()")
     .then(function (result) {
     if (result !== undefined && result.rows !== undefined &&
         result.rows.length > 0) {
