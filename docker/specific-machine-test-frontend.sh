@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. ./common-sudo-fix.sh
+
 if [[ "X$1" = "X" ]]
 then
 	echo missing machine name
@@ -20,7 +22,7 @@ else
 fi
 
 if [[ "X$3" = "X" ]]; then
-    R=https://github.com/jkbits1/backend
+    R=https://github.com/voteamerica/backend.git
     echo REPO $R
 else 
     R=$3
@@ -39,4 +41,4 @@ echo CACHEBUST $C
 echo REPO $R
 echo BRANCH_NAME $B
 
-docker-compose -f ./compose/full-stack-test/docker-compose-test-frontend.yml build --build-arg REPO=$R --build-arg BRANCH_NAME=$B --build-arg CACHEBUST=$C $M
+$DOCKERCOMPOSE -f ./compose/full-stack-test/docker-compose-test-frontend.yml build --build-arg REPO=$R --build-arg BRANCH_NAME=$B --build-arg CACHEBUST=$C $M

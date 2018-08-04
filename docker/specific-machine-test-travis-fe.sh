@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. ./common-sudo-fix.sh
+
 # NOTE: this script is used by the front-end travis, so the docker-compose path below
 #       relates to that environment
 
@@ -97,4 +99,4 @@ fi
 pwd
 ls
 
-docker-compose -f $HOME/build/voteamerica/be/docker/compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/$REPO --build-arg BRANCH_NAME=$BRANCH --build-arg CACHEBUST=$CACHEBUST $MACHINE
+$DOCKERCOMPOSE -f $HOME/build/voteamerica/be/docker/compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/$REPO --build-arg BRANCH_NAME=$BRANCH --build-arg CACHEBUST=$CACHEBUST $MACHINE
