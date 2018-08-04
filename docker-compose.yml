@@ -7,8 +7,9 @@ services:
       - cp_api
     links:
       - cp_api
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
+    # for LIVE operations, we must export the volume
+    #volumes:
+    #  - /etc/letsencrypt:/etc/letsencrypt
     ports:
       - 443:443
     restart: on-failure
