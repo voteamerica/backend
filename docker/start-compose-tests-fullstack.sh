@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. common-sudo-fix.sh
+. ./common-sudo-fix.sh
 
 if [[ "X$1" = "X" ]]
 then
