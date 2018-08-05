@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. ./common-sudo-fix.sh
+
 # useful info here
 # https://hharnisc.github.io/2016/06/19/integration-testing-with-docker-compose.html
 # 
@@ -16,4 +18,4 @@
 
 echo start compose local frontend
 
-docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml up
+$DOCKERCOMPOSE -f ./compose/full-stack-local/docker-compose-local-frontend.yml up

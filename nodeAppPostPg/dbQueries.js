@@ -40,6 +40,8 @@ module.exports = {
     dbGetQueryString: dbGetQueryString,
     dbGetUnmatchedDriversQueryString: dbGetUnmatchedDriversQueryString,
     dbGetUnmatchedRidersQueryString: dbGetUnmatchedRidersQueryString,
+    dbGetDriversDetailssQueryString: dbGetDriversDetailssQueryString,
+    dbGetDriverMatchesDetailsQueryString: dbGetDriverMatchesDetailsQueryString
 };
 // const dbDefs = require('./dbDefs.js');
 // exec fns
@@ -91,6 +93,12 @@ function dbGetUnmatchedDriversQueryString() {
 }
 function dbGetUnmatchedRidersQueryString() {
     return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsViews.UNMATCHED_RIDERS_VIEW);
+}
+function dbGetDriversDetailssQueryString() {
+    return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsViews.DRIVERS_DETAILS_VIEW);
+}
+function dbGetDriverMatchesDetailsQueryString() {
+    return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsViews.DRIVER_MATCHES_DETAILS_VIEW);
 }
 // custom items, due to be revised
 function dbGetMatchRiderQueryString(rider_uuid) {

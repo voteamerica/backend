@@ -56,6 +56,28 @@ function getUnmatchedDrivers (req: any, reply: any) {
   postgresQueries.dbGetUnmatchedDrivers(rfPool, dbQueries.dbGetUnmatchedDriversQueryString, reply, results);
 }
 
+function getDriversDetails (req: any, reply: any) {
+  var results = {
+    success: 'GET drivers details: ',
+    failure: 'GET drivers details error: ' 
+  };
+
+  req.log();
+
+  postgresQueries.dbGetDriversDetails(rfPool, dbQueries.dbGetDriversDetailssQueryString, reply, results);
+}
+
+function getDriverMatchesDetails (req: any, reply: any) {
+  var results = {
+    success: 'GET driver matches details: ',
+    failure: 'GET driver matches details error: ' 
+  };
+
+  req.log();
+
+  postgresQueries.dbGetDriverMatchesDetails(rfPool, dbQueries.dbGetDriverMatchesDetailsQueryString, reply, results);
+}
+
 function getUnmatchedRiders(req: any, reply: any) {
     var results = {
         success: 'GET unmatched riders: ',
@@ -388,6 +410,8 @@ module.exports = {
   getUsers:           getUsers,
 
   getUnmatchedDrivers:  getUnmatchedDrivers,
+  getDriversDetails: getDriversDetails,
+  getDriverMatchesDetails: getDriverMatchesDetails,
   getUnmatchedRiders:   getUnmatchedRiders,
   cancelRideRequest:  cancelRideRequest,
   cancelRiderMatch:   cancelRiderMatch,

@@ -53,6 +53,8 @@ module.exports = {
 
   dbGetUnmatchedDriversQueryString: dbGetUnmatchedDriversQueryString,
   dbGetUnmatchedRidersQueryString:  dbGetUnmatchedRidersQueryString,
+  dbGetDriversDetailssQueryString: dbGetDriversDetailssQueryString,
+  dbGetDriverMatchesDetailsQueryString: dbGetDriverMatchesDetailsQueryString
   // dbGetInsertClause:            dbGetInsertClause
   // ,
   // dbGetSubmitDriverString:      dbGetSubmitDriverString,
@@ -130,6 +132,14 @@ function dbGetUnmatchedDriversQueryString (): string {
 
 function dbGetUnmatchedRidersQueryString(): string {
   return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsViews.UNMATCHED_RIDERS_VIEW);
+}
+
+function dbGetDriversDetailssQueryString(): string {
+  return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsViews.DRIVERS_DETAILS_VIEW);
+}
+
+function dbGetDriverMatchesDetailsQueryString(): string {
+  return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsViews.DRIVER_MATCHES_DETAILS_VIEW);
 }
 
 // custom items, due to be revised

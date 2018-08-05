@@ -54,6 +54,14 @@ var RouteNamesUnmatched = (function () {
     return RouteNamesUnmatched;
 }());
 exports.RouteNamesUnmatched = RouteNamesUnmatched;
+var RouteNamesDetails = /** @class */ (function () {
+    function RouteNamesDetails() {
+        this.DRIVERS_DETAILS_ROUTE = 'drivers-details';
+        this.DRIVER_MATCHES_DETAILS_ROUTE = 'driver-matches-details';
+    }
+    return RouteNamesDetails;
+}());
+exports.RouteNamesDetails = RouteNamesDetails;
 // class RouteNamesChange {
 //   readonly DELETE_DRIVER_ROUTE: string           = 'driver';
 //   readonly PUT_RIDER_ROUTE: string               = 'rider';

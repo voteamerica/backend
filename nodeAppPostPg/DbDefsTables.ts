@@ -14,5 +14,9 @@ class DbDefsTables {
 
 class DbDefsViews {
   readonly UNMATCHED_DRIVERS_VIEW: string  = 'vw_unmatched_drivers';
+  readonly UNMATCHED_DRIVERS_DETAILS_VIEW: string  = 'vw_unmatched_drivers_details';
   readonly UNMATCHED_RIDERS_VIEW: string   = 'vw_unmatched_riders';
+  readonly UNMATCHED_RIDERS_DETAILS_VIEW: string  = 'vw_unmatched_riders_details';
+  readonly DRIVERS_DETAILS_VIEW: string  = 'vw_drivers_details';
+  readonly DRIVER_MATCHES_DETAILS_VIEW: string  = 'vw_driver_matches_details';
 }

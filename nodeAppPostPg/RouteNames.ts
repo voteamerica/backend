@@ -1,6 +1,7 @@
 export { RouteNamesAddDriverRider, 
           RouteNamesCancel,
           RouteNamesUnmatched, 
+          RouteNamesDetails,
           // RouteNamesChange,
           RouteNamesSelfService, 
           RouteNamesSelfServiceInfoExists, 
@@ -42,6 +43,11 @@ class RouteNamesCancel {
 class RouteNamesUnmatched {
   readonly UNMATCHED_DRIVERS_ROUTE: string = 'unmatched-drivers';
   readonly UNMATCHED_RIDERS_ROUTE: string = 'unmatched-riders';
+}
+
+class RouteNamesDetails {
+  readonly DRIVERS_DETAILS_ROUTE: string = 'drivers-details';
+  readonly DRIVER_MATCHES_DETAILS_ROUTE: string = 'driver-matches-details';
 }
 
 // class RouteNamesChange {
