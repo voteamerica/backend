@@ -115,8 +115,7 @@ Vagrant.configure("2") do |config|
 	########################  
 	mkdir -p /opt/carpool
 	cd /opt/carpool
-	#git clone https://github.com/voteamerica/backend.git
-	git clone https://github.com/dmilet/backend.git
+	git clone https://github.com/voteamerica/backend.git
 	cd backend
 	
 	# looks like there are some iptables issues with docker networking
