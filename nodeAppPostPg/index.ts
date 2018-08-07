@@ -299,9 +299,9 @@ const hashPassword = (password, cb) => {
 //   password: Joi.string().required()
 // });
 
-const verifyUniqueUser = (req, res) => {
+const verifyUniqueUser = async (req, res) => {
 
-  const x = routeFns.getUsersInternal(req, res);
+  const x = await routeFns.getUsersInternal(req, res);
 
   // pretty basic test for now
   const userExists = x !== undefined;

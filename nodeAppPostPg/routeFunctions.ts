@@ -45,6 +45,21 @@ function getUsers (req: any, reply: any) {
   postgresQueries.dbGetData(rfPool, dbQueries.dbGetUsersQueryString, reply, results);
 }
 
+async function getUsersInternal (req: any, reply: any) {
+  var results = {
+    success: 'GET users internal: ',
+    failure: 'GET users internal error: ' 
+  };
+
+  req.log();
+
+  const queryPlusWhere = queryFn => ()=> queryFn() + " where userName like '%' ";
+
+  const dbData = await postgresQueries.dbGetDataInternal(rfPool, queryPlusWhere(dbQueries.dbGetUsersQueryString), reply, results);
+
+  return dbData;
+}
+
 function getUnmatchedDrivers (req: any, reply: any) {
   var results = {
     success: 'GET unmatched drivers: ',
@@ -408,6 +423,7 @@ function getCancelRideOfferPayloadAsArray (req: any, payload: any) {
 module.exports = {
   getAnon:            getAnon,
   getUsers:           getUsers,
+  getUsersInternal,
 
   getUnmatchedDrivers:  getUnmatchedDrivers,
   getDriversDetails: getDriversDetails,

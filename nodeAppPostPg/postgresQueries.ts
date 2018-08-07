@@ -2,6 +2,7 @@
 
 export interface DbQueries {
   dbGetData (pool, fnGetString, reply, results);
+  dbGetDataInternal (pool, fnGetString, reply, results);
   dbGetUnmatchedDrivers (pool, fnGetString, reply, results);
   dbGetDriversDetails (pool, fnGetString, reply, results);
   dbGetDriverMatchesDetails (pool, fnGetString, reply, results);
@@ -45,6 +46,34 @@ class PostgresQueries implements DbQueries {
 
       reply(results.failure + message).code(500);
     });
+  }
+
+ async dbGetDataInternal(pool, fnGetString, reply, results) {
+    var queryString =  fnGetString();
+
+    try {
+    const result = await pool.query( queryString )
+
+    // .then(result => {
+      var firstRowAsString = "";
+
+      if (result !== undefined && result.rows !== undefined) {
+
+        // result.rows.forEach( val => console.log(val));
+        firstRowAsString = JSON.stringify(result.rows[0]);
+      }
+
+      return firstRowAsString;
+      // reply(results.success + firstRowAsString);
+    }
+    catch(e) {
+      var message = e.message || '';
+      var stack   = e.stack   || '';
+
+      console.error(results.failure, message, stack);
+
+      // reply(results.failure + message).code(500);      
+    };
   }
 
   dbGetUnmatchedDrivers (pool, fnGetString, reply, results) {
