@@ -218,12 +218,13 @@ ALTER TABLE organization OWNER TO carpool_admin;
 --
 
 CREATE TABLE operator (
-    "OperatorFirstName" character varying(255) NOT NULL,
-    "OperatorLastName" character varying(255) NOT NULL,
     "UUID" character varying(50) DEFAULT gen_random_uuid() NOT NULL,
+    email character varying(255) NOT NULL,
+    user_name character varying(255) NOT NULL,
+    user_password character varying(255) NOT NULL,
+    is_admin boolean NOT NULL,
     uuid_organization character varying(50) NOT NULL
 );
-
 
 ALTER TABLE operator OWNER TO carpool_admin;
 
