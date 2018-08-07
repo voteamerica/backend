@@ -301,7 +301,12 @@ const hashPassword = (password, cb) => {
 
 const verifyUniqueUser = (req, res) => {
 
-  if (false){
+  const x = routeFns.getUsersInternal(req, res);
+
+  // pretty basic test for now
+  const userExists = x !== undefined;
+
+  if (userExists) {
     // examples don't use return, but seems to be needed
     return res(Boom.badRequest("userName already used"));
   }
