@@ -60,6 +60,23 @@ async function getUsersInternal (req: any, reply: any) {
   return dbData;
 }
 
+async function addUserInternal (req: any, reply: any) {
+  var payload = req.query;
+      
+  var results = {
+    success: 'POST user internal: ',
+    failure: 'POST user internal error: ' 
+  };
+
+  req.log();
+
+  const insertPlusValues = queryFn => ()=> queryFn() + ' ("email", "username", "password", "admin") ' + " values ('a', 'b', 'c', false)";
+
+  const dbData = await postgresQueries.dbInsertDataInternal(payload, rfPool, insertPlusValues(dbQueries.dbAddUserQueryString), getInsertUserPayloadAsArray, req, reply, results);
+
+  return dbData;
+}
+
 function getUnmatchedDrivers (req: any, reply: any) {
   var results = {
     success: 'GET unmatched drivers: ',
@@ -414,6 +431,12 @@ function getCancelRidePayloadAsArray (req: any, payload: any) {
     ]
 }
 
+function getInsertUserPayloadAsArray (req: any, payload: any) {
+  return [      
+        payload.userName, payload.email, payload.password,payload.isAdmin
+    ]
+}
+
 function getCancelRideOfferPayloadAsArray (req: any, payload: any) {
   return [
         payload.UUID, payload.DriverPhone
@@ -424,6 +447,7 @@ module.exports = {
   getAnon:            getAnon,
   getUsers:           getUsers,
   getUsersInternal,
+  addUserInternal,
 
   getUnmatchedDrivers:  getUnmatchedDrivers,
   getDriversDetails: getDriversDetails,

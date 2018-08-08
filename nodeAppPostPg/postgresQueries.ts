@@ -11,6 +11,8 @@ export interface DbQueries {
   dbGetMatchSpecificData (pool, fnGetString, uuid, reply, results);
   dbInsertData( payload, pool, fnInsertString, fnPayloadArray,
                         req, reply, results);
+  dbInsertDataInternal (payload, pool, fnInsertString, fnPayloadArray,
+                          req, reply, results);
   dbExecuteFunction (payload, pool, fnExecuteFunctionString, fnPayloadArray,
                         req, reply, results);
   dbExecuteFunctionMultipleResults (payload, pool, fnExecuteFunctionString, fnPayloadArray,
@@ -48,7 +50,7 @@ class PostgresQueries implements DbQueries {
     });
   }
 
- async dbGetDataInternal(pool, fnGetString, reply, results) {
+  async dbGetDataInternal(pool, fnGetString, reply, results) {
     var queryString =  fnGetString();
 
     try {
@@ -286,7 +288,45 @@ class PostgresQueries implements DbQueries {
     });
   }
 
-	dbExecuteCarpoolAPIFunction_Insert (
+  async dbInsertDataInternal(payload, pool, fnInsertString, fnPayloadArray: any,
+    req, reply, results) {
+    var insertString = fnInsertString();
+
+    try {
+      const result = await pool.query(insertString, fnPayloadArray(req, payload));
+
+      var displayResult = result || '';
+      var uuid = "";
+
+      try {
+        displayResult = JSON.stringify(result);
+        uuid = result.rows[0].UUID;
+        console.error('row: ' + JSON.stringify(result.rows[0]) );
+      }
+      catch (err) {
+        console.error('no uuid returned');
+      }
+
+      console.log('insert: ', uuid + ' ' + displayResult);
+
+      if (payload._redirect) {
+        // reply.redirect(payload._redirect + '?uuid=' + uuid.toString());
+      } 
+      else {
+        // reply(results.success + ': ' + uuid);
+      }
+    }
+    catch(e) {
+      var message = e.message || '';
+      var stack   = e.stack   || '';
+
+      console.error('query error: ', message, stack);
+
+      // reply(results.failure + ': ' + message).code(500);
+    }
+  }
+
+  dbExecuteCarpoolAPIFunction_Insert (
     payload, pool, fnExecuteFunctionString, 
     fnPayloadArray: PayloadFunc2, req, reply, results) {
         var queryString = fnExecuteFunctionString();

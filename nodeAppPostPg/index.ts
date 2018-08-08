@@ -389,7 +389,7 @@ server.route({
 
       const password = payload.password;
 
-      hashPassword(password, (err, hash) => {
+      hashPassword(password, async (err, hash) => {
         if (err) {
           console.log("bad info");
 
@@ -401,6 +401,8 @@ server.route({
         user.password = hash;
 
         console.log("user:", user);            
+
+        const x = await routeFns.addUserInternal(req, res);
 
         const token = createToken(user);
 
