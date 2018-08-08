@@ -70,7 +70,7 @@ async function addUserInternal (req: any, reply: any) {
 
   req.log();
 
-  const insertPlusValues = queryFn => ()=> queryFn() + ' ("email", "username", "password", "admin") ' + " values ($1, $2, $3, $4)";
+  const insertPlusValues = queryFn => ()=> queryFn() + ' ("email", "username", "password", "admin") ' + " values ($1, $2, $3, $4) returning " + '"UUID", email, username, admin';
 
   const dbData = await postgresQueries.dbInsertDataInternal(payload, rfPool, insertPlusValues(dbQueries.dbAddUserQueryString), getInsertUserPayloadAsArray, req, reply, results);
 
