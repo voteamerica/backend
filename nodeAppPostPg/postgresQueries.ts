@@ -295,8 +295,8 @@ class PostgresQueries implements DbQueries {
     try {
       const result = await pool.query(insertString, fnPayloadArray(req, payload));
 
-      var displayResult = result || '';
-      var uuid = "";
+      let displayResult = result || '';
+      let uuid = "";
 
       try {
         displayResult = JSON.stringify(result);
@@ -313,6 +313,7 @@ class PostgresQueries implements DbQueries {
         // reply.redirect(payload._redirect + '?uuid=' + uuid.toString());
       } 
       else {
+        return uuid;
         // reply(results.success + ': ' + uuid);
       }
     }
