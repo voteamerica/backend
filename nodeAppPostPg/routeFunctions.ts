@@ -45,7 +45,7 @@ function getUsers (req: any, reply: any) {
   postgresQueries.dbGetData(rfPool, dbQueries.dbGetUsersQueryString, reply, results);
 }
 
-async function getUsersInternal (req: any, reply: any) {
+async function getUsersInternal (req: any, reply: any, payload: [any]) {
   var results = {
     success: 'GET users internal: ',
     failure: 'GET users internal error: ' 
@@ -53,7 +53,9 @@ async function getUsersInternal (req: any, reply: any) {
 
   req.log();
 
-  const queryPlusWhere = queryFn => ()=> queryFn() + " where userName like '%' ";
+  const [userName, email, ...info] = userPayloadAsArray(req, payload);
+
+  const queryPlusWhere = queryFn => ()=> queryFn() + ` WHERE username = '${userName}' OR email = '${email}' `;
 
   const dbData = await postgresQueries.dbGetDataInternal(rfPool, queryPlusWhere(dbQueries.dbGetUsersQueryString), reply, results);
 
@@ -68,9 +70,9 @@ async function addUserInternal (req: any, reply: any, payload: [any]) {
 
   req.log();
 
-  const insertPlusValues = queryFn => ()=> queryFn() + ' ("email", "username", "password", "admin") ' + " values ($1, $2, $3, $4) returning " + '"UUID", email, username, admin';
+  const insertPlusValues = queryFn => ()=> queryFn() + ' ("username", "email", "password", "admin") ' + " values ($1, $2, $3, $4) returning " + '"UUID", email, username, admin';
 
-  const dbData = await postgresQueries.dbInsertDataInternal(payload, rfPool, insertPlusValues(dbQueries.dbAddUserQueryString), getInsertUserPayloadAsArray, req, reply, results);
+  const dbData = await postgresQueries.dbInsertDataInternal(payload, rfPool, insertPlusValues(dbQueries.dbAddUserQueryString), userPayloadAsArray, req, reply, results);
 
   return dbData;
 }
@@ -429,7 +431,7 @@ function getCancelRidePayloadAsArray (req: any, payload: any) {
     ]
 }
 
-function getInsertUserPayloadAsArray (req: any, payload: any) {
+function userPayloadAsArray (req: any, payload: any) {
   return [      
         payload.userName, payload.email, payload.password,payload.isAdmin
     ]

@@ -301,14 +301,15 @@ const hashPassword = (password, cb) => {
 
 const verifyUniqueUser = async (req, res) => {
 
-  const x = await routeFns.getUsersInternal(req, res);
+  const payload = req.query;
+    
+  const x = await routeFns.getUsersInternal(req, res, payload);
 
   // pretty basic test for now
   const userExists = x !== undefined;
 
   if (userExists) {
-    // examples don't use return, but seems to be needed
-    return res(Boom.badRequest("userName already used"));
+    return res(Boom.badRequest("user already exists"));
   }
 
   res(req.payload);
