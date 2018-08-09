@@ -317,7 +317,7 @@ const verifyUniqueUser = async (req, res) => {
 const createToken = user => {
   let scopes;
 
-  if (user.admin) {
+  if (user.isAdmin) {
     scopes = 'admin';
   }
 
