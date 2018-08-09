@@ -378,22 +378,24 @@ server.route({
     ],
     handler: (req, res) => {
 
-      const payload = JSON.parse( req.payload.info);
+      const errorMessage = "failed to add user";
 
-      let user = {}
+      // const payload = JSON.parse( req.payload.info);
+      const payload = req.query;
+    
+      let user = payload || {}
 
-      user.email = payload.email;
-      user.userName = payload.userName;
-      // user.admin = false;
-      user.admin = payload.admin;
-
+      // user.email = payload.email;
+      // user.userName = payload.userName;
+      // // user.admin = false;
+      // user.admin = payload.admin;
       const password = payload.password;
 
       hashPassword(password, async (err, hash) => {
         if (err) {
           console.log("bad info");
 
-          return;
+          return res(Boom.badRequest(errorMessage));
         }
 
         // store info, and the hash rather than the pwd
@@ -402,16 +404,18 @@ server.route({
 
         console.log("user:", user);            
 
-        const x = await routeFns.addUserInternal(req, res);
+        const uuid = await routeFns.addUserInternal(req, res, user);
 
+        if (!uuid) {
+          return res(Boom.badRequest(errorMessage));
+        }
+      
         const token = createToken(user);
 
         console.log("token:", token);
 
-        res({ id_token: token}).code(201);
+        return res({ id_token: token}).code(201);
       });
-
-      // res(1);
     }
     // ,
     // validate: {

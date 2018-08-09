@@ -60,9 +60,7 @@ async function getUsersInternal (req: any, reply: any) {
   return dbData;
 }
 
-async function addUserInternal (req: any, reply: any) {
-  var payload = req.query;
-      
+async function addUserInternal (req: any, reply: any, payload: [any]) {
   var results = {
     success: 'POST user internal: ',
     failure: 'POST user internal error: ' 
