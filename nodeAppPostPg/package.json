@@ -29,8 +29,7 @@
     "hapi-auth-jwt": "^4.0.0",
     "jsonwebtoken": "^8.1.0",
     "moment": "^2.15.1",
-    "pg": "^6.1.0",
-    "query-string": "^6.1.0"
+    "pg": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "^6.0.45",
