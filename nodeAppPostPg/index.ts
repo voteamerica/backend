@@ -35,7 +35,7 @@ import { RouteNamesSelfServiceInfoExists } from "./RouteNames";
 import { RouteNamesCancel, RouteNamesUnmatched,RouteNamesDetails  } from "./RouteNames";
 import { logging }          from "./logging";
 
-import { verifyUniqueUser } from './login';
+import { hashPassword, verifyUniqueUser, verifyCredentials } from './login';
 import { createToken } from './token';
 
 let dbQueriesPosts = new DbQueriesPosts();
@@ -278,63 +278,7 @@ server.route({
 //   handler: routeFns.confirmRide
 // });
 
-const user = {
-  email: '123',
-  userName: 'abc',
-  // password: 'xyz',
-  password: '$2a$10$Bt2vRGCw3udVph77lGBx8O1ffXFmEQv7d1gGI35nKzN.C1w.jeD32',
-  admin: false
-};
-
 const secret = process.env.secret || 'secret';
-
-const hashPassword = (password, cb) => {
-  bcrypt.genSalt(10, (err, salt) => {
-    bcrypt.hash(password, salt, (err, hash) => {
-      return cb(err, hash);
-    })
-  })
-};
-
-const verifyCredentials = (req, res) => {
-  const payload = JSON.parse( req.payload.info);
-
-  const {password, email, userName} = payload;
-
-  console.log("pwd", password);
-  console.log("email", email);
-  console.log("userName", userName);
-
-  // TODO get user from db
-
-  if (email !== user.email || userName !== user.userName) {
-    return res(Boom.badRequest('invalid credentials'));
-  }
-
-  bcrypt.compare(password, user.password, (err, isValid) => {
-    if (err) {
-      return res(err);
-    }
-
-    if (isValid) {
-      res(user);
-    }
-    else {
-      res(Boom.badRequest('user not known'));
-    }
-  });
-};
-
-// const authenticateUserSchema = Joi.alternatives().try(
-//   Joi.object({
-//     userName: Joi.string().alphanum().min(2).max(30).required(),
-//     password: Joi.string().required()
-//   }),
-//   Joi.object({
-//     email: Joi.string().email().required(),
-//     password: Joi.string().required()
-//   })
-// );
 
 server.route({
   method: 'POST',
@@ -408,25 +352,7 @@ server.route({
   }
 });
 
-const usersHandler = 
-// (req, res) => {
-
-//   res([user]);
-// };
-// (req, res) => {
-
-//   var results = {
-//     success: 'GET match-driver: ',
-//     failure: 'GET match-driver: ' 
-//   };
-
-//   req.log(['request']);
-
-//   postgresQueries.dbGetMatchSpecificData(pool, dbQueries.dbGetMatchDriverQueryString, 
-//                           req.params.uuid, reply, results);
-// }
- routeFns.getUsers;
-
+const usersHandler = routeFns.getUsers;
 
 server.register([
   {
@@ -452,15 +378,14 @@ server.register([
       method: 'POST',
       path: '/users/list',
       config: {
-        handler: usersHandler
-      
-, auth: {
+        handler: usersHandler, 
+        auth: {
           strategy: 'jwt',
           scope: ['admin']
         }
       }
     });
-          
+
     server.start(err => {
       if (err) {
           throw err;
