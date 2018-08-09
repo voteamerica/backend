@@ -41,6 +41,8 @@ RUN git merge origin/$BRANCH_NAME
 
 RUN cd /usr/src/app/backend/nodeAppPostPg
 
+RUN npm install -g typescript
+
 # reasons for yarn params
 # https://github.com/yarnpkg/yarn/issues/2240#issuecomment-300762981
 # https://github.com/yarnpkg/yarn/issues/3223#issuecomment-296373273
