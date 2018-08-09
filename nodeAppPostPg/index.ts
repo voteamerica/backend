@@ -35,6 +35,9 @@ import { RouteNamesSelfServiceInfoExists } from "./RouteNames";
 import { RouteNamesCancel, RouteNamesUnmatched,RouteNamesDetails  } from "./RouteNames";
 import { logging }          from "./logging";
 
+import { verifyUniqueUser } from './login';
+import { createToken } from './token';
+
 let dbQueriesPosts = new DbQueriesPosts();
 let dbQueriesCancels = new DbQueriesCancels();
 
@@ -293,43 +296,6 @@ const hashPassword = (password, cb) => {
   })
 };
 
-// const createUserSchema = Joi.object({
-//   userName: Joi.string().alphanum().min(2).max(30).required(),
-//   email: Joi.string().email().required(),
-//   password: Joi.string().required()
-// });
-
-const verifyUniqueUser = async (req, res) => {
-
-  const payload = req.query;
-    
-  const x = await routeFns.getUsersInternal(req, res, payload);
-
-  // pretty basic test for now
-  const userExists = x !== undefined;
-
-  if (userExists) {
-    return res(Boom.badRequest("user already exists"));
-  }
-
-  res(req.payload);
-};
-
-const createToken = user => {
-  let scopes;
-
-  if (user.isAdmin) {
-    scopes = 'admin';
-  }
-
-  return jwt.sign(
-    { id: user.id, userName: user.userName, scope: scopes}, 
-      secret, 
-      {algorithm: 'HS256', expiresIn: '1h'
-    }
-  );
-};
-
 const verifyCredentials = (req, res) => {
   const payload = JSON.parse( req.payload.info);
 
@@ -386,10 +352,6 @@ server.route({
     
       let user = payload || {}
 
-      // user.email = payload.email;
-      // user.userName = payload.userName;
-      // // user.admin = false;
-      // user.admin = payload.admin;
       const password = payload.password;
 
       hashPassword(password, async (err, hash) => {
@@ -400,7 +362,6 @@ server.route({
         }
 
         // store info, and the hash rather than the pwd
-
         user.password = hash;
 
         console.log("user:", user);            
