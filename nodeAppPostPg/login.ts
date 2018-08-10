@@ -1,10 +1,12 @@
 const bcrypt = require('bcrypt');
 const routeFns    = require('./routeFunctions.js');
-
+const Boom = require('boom');
 
 import { createToken } from './token';
 
-const Boom = require('boom');
+const createUserErrorMessage = "failed to add user";  
+const existingUserError = "user already exists";
+const verifyCredentialsError = "bad credentials";
 
 const hashPassword = (password, cb) => {
   bcrypt.genSalt(10, (err, salt) => {
@@ -13,28 +15,6 @@ const hashPassword = (password, cb) => {
     })
   })
 };
-
-// const handler = (req, res)=>{
-
-//     console.log("login handler", req);
-
-//     let user = {        
-//     }
-
-//     user.email = req.payload.email
-//     user.username = req.payload.username
-//     user.admin = false
-
-//     hashPassword(req.payload.password, (err, hash) => {
-//         if (err) {
-//             return res.error();            
-//         }
-
-//         user.password = hash
-//         // save user
-//         res({id_token: createToken(user)}).code(201)
-//     })
-// }
 
 // const createUserSchema = Joi.object({
 //   userName: Joi.string().alphanum().min(2).max(30).required(),
@@ -51,36 +31,35 @@ const verifyUniqueUser = async (req, res) => {
     const userExists = userInfo !== undefined;
   
     if (userExists) {
-      return res(Boom.badRequest("user already exists"));
+      return res(Boom.badRequest(existingUserError));
     }
   
     res(req.payload);
   };
 
-  const user = {
-    email: '123',
-    userName: 'abc',
-    // password: 'xyz',
-    password: '$2a$10$Bt2vRGCw3udVph77lGBx8O1ffXFmEQv7d1gGI35nKzN.C1w.jeD32',
-    admin: false
-  };
+  // const user = {
+  //   email: '123',
+  //   userName: 'abc',
+  //   // password: 'xyz',
+  //   password: '$2a$10$Bt2vRGCw3udVph77lGBx8O1ffXFmEQv7d1gGI35nKzN.C1w.jeD32',
+  //   admin: false
+  // };
   
   const verifyCredentials = async (req, res) => {
-    const payload = req.query;
-      
-    const userInfo = await routeFns.getUsersInternal(req, res, payload);
     // const payload = JSON.parse( req.payload.info);
-  
+    const payload = req.query;
     const {password, email, userName} = payload;
-  
+        
     console.log("pwd", password);
     console.log("email", email);
     console.log("userName", userName);
   
-    // TODO get user from db
+    const userInfo = await routeFns.getUsersInternal(req, res, payload);
+
+    const user = JSON.parse(userInfo);
   
-    if (email !== user.email || userName !== user.userName) {
-      return res(Boom.badRequest('invalid credentials'));
+    if (email !== user.email && userName !== user.userName) {
+      return res(Boom.badRequest(verifyCredentialsError));
     }
   
     bcrypt.compare(password, user.password, (err, isValid) => {
@@ -88,11 +67,11 @@ const verifyUniqueUser = async (req, res) => {
         return res(err);
       }
   
-      if (isValid) {
-        res(user);
+      if (!isValid) {
+        res(Boom.badRequest(verifyCredentialsError));
       }
       else {
-        res(Boom.badRequest('user not known'));
+        res(user);
       }
     });
   };
@@ -109,9 +88,6 @@ const verifyUniqueUser = async (req, res) => {
   // );
 
   const createUser = (req, res) => {
-
-    const errorMessage = "failed to add user";
-  
     // const payload = JSON.parse( req.payload.info);
     const payload = req.query;
   
@@ -123,9 +99,10 @@ const verifyUniqueUser = async (req, res) => {
       if (err) {
         console.log("bad info");
   
-        return res(Boom.badRequest(errorMessage));
+        return res(Boom.badRequest(createUserErrorMessage));
       }
   
+      // correct querystring boolean to be an actual boolean
       user.isAdmin = user.isAdmin && user.isAdmin === "true" ? true : false;
   
       // store info, and the hash rather than the pwd
@@ -136,7 +113,7 @@ const verifyUniqueUser = async (req, res) => {
       const uuid = await routeFns.addUserInternal(req, res, user);
   
       if (!uuid) {
-        return res(Boom.badRequest(errorMessage));
+        return res(Boom.badRequest(createUserErrorMessage));
       }
     
       const token = createToken(user);
