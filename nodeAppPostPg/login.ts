@@ -107,8 +107,51 @@ const verifyUniqueUser = async (req, res) => {
   //     password: Joi.string().required()
   //   })
   // );
+
+  const createUser = (req, res) => {
+
+    const errorMessage = "failed to add user";
   
-  export { hashPassword, verifyUniqueUser, verifyCredentials };
+    // const payload = JSON.parse( req.payload.info);
+    const payload = req.query;
+  
+    let user = payload || {}
+  
+    const password = user.password;
+  
+    hashPassword(password, async (err, hash) => {
+      if (err) {
+        console.log("bad info");
+  
+        return res(Boom.badRequest(errorMessage));
+      }
+  
+      user.isAdmin = user.isAdmin && user.isAdmin === "true" ? true : false;
+  
+      // store info, and the hash rather than the pwd
+      user.password = hash;
+  
+      console.log("user:", user);            
+  
+      const uuid = await routeFns.addUserInternal(req, res, user);
+  
+      if (!uuid) {
+        return res(Boom.badRequest(errorMessage));
+      }
+    
+      const token = createToken(user);
+  
+      console.log("token:", token);
+  
+      return res({ id_token: token}).code(201);
+    });
+  }
+  // ,
+  // validate: {
+  //   payload: createUserSchema
+  // }
+    
+  export { hashPassword, verifyUniqueUser, verifyCredentials, createUser };
   
 // export server route
 // module.exports = {
