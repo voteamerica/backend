@@ -35,8 +35,7 @@ import { RouteNamesSelfServiceInfoExists } from "./RouteNames";
 import { RouteNamesCancel, RouteNamesUnmatched,RouteNamesDetails  } from "./RouteNames";
 import { logging }          from "./logging";
 
-import { verifyUniqueUser, verifyCredentials, createUser } from './login';
-import { createToken } from './token';
+import { verifyUniqueUser, verifyCredentials, createUser, createTokenAndRespond } from './login';
 
 let dbQueriesPosts = new DbQueriesPosts();
 let dbQueriesCancels = new DbQueriesCancels();
@@ -302,10 +301,11 @@ server.route({
       }
     ],
     handler: (req, res) => {
-      const token = createToken(req.pre.user);
+      const user = req.pre.user;
 
-      res({id_token: token}).code(201);
+      return createTokenAndRespond(res, user);
     }
+    
     // ,
     // validate: {
     //   payload: authenticateUserSchema

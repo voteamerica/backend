@@ -115,20 +115,22 @@ const verifyUniqueUser = async (req, res) => {
       if (!uuid) {
         return res(Boom.badRequest(createUserErrorMessage));
       }
-    
-      const token = createToken(user);
-  
-      console.log("token:", token);
-  
-      return res({ id_token: token}).code(201);
+
+      return createTokenAndRespond(res, user);
     });
   }
   // ,
   // validate: {
   //   payload: createUserSchema
   // }
-    
-  export { hashPassword, verifyUniqueUser, verifyCredentials, createUser };
+
+  const createTokenAndRespond =  (res, user) => {
+    const token = createToken(user);
+  
+    return res({ id_token: token }).code(201);
+  }
+      
+  export { hashPassword, verifyUniqueUser, verifyCredentials, createUser, createTokenAndRespond };
   
 // export server route
 // module.exports = {
