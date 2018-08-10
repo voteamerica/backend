@@ -1,5 +1,4 @@
 const bcrypt = require('bcrypt');
-const queryString = require('query-string');
 const routeFns    = require('./routeFunctions.js');
 
 
@@ -46,9 +45,6 @@ const hashPassword = (password, cb) => {
 const verifyUniqueUser = async (req, res) => {
     const payload = req.query;
 
-    const parsed = queryString.parse(req.query);
-
-      
     const userInfo = await routeFns.getUsersInternal(req, res, payload);
   
     // pretty basic test for now

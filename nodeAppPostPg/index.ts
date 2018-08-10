@@ -295,8 +295,8 @@ server.route({
       const payload = req.query;
     
       let user = payload || {}
-
-      const password = payload.password;
+    
+      const password = user.password;
 
       hashPassword(password, async (err, hash) => {
         if (err) {
@@ -304,6 +304,8 @@ server.route({
 
           return res(Boom.badRequest(errorMessage));
         }
+
+        user.isAdmin = user.isAdmin && user.isAdmin === "true" ? true : false;
 
         // store info, and the hash rather than the pwd
         user.password = hash;
