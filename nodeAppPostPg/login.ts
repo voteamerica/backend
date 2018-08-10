@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const routeFns    = require('./routeFunctions.js');
 const Boom = require('boom');
 
-import { createToken } from './token';
+import { UserType, createToken } from './token';
 
 const createUserErrorMessage = "failed to add user";  
 const existingUserError = "user already exists";
@@ -48,17 +48,24 @@ const verifyUniqueUser = async (req, res) => {
   const verifyCredentials = async (req, res) => {
     // const payload = JSON.parse( req.payload.info);
     const payload = req.query;
-    const {password, email, userName} = payload;
+    const {password, email, username} = payload;
         
     console.log("pwd", password);
     console.log("email", email);
-    console.log("userName", userName);
+    console.log("username", username);
   
     const userInfo = await routeFns.getUsersInternal(req, res, payload);
 
-    const user = JSON.parse(userInfo);
-  
-    if (email !== user.email && userName !== user.userName) {
+    let user:UserType = {}
+
+    try{
+      user = JSON.parse(userInfo);
+    } 
+    catch(e){
+      return res(Boom.badRequest(verifyCredentialsError));
+    }
+
+    if (email !== user.email && username !== user.username) {
       return res(Boom.badRequest(verifyCredentialsError));
     }
   
@@ -91,7 +98,7 @@ const verifyUniqueUser = async (req, res) => {
     // const payload = JSON.parse( req.payload.info);
     const payload = req.query;
   
-    let user = payload || {}
+    let user: UserType = payload || {}
   
     const password = user.password;
   
@@ -103,7 +110,7 @@ const verifyUniqueUser = async (req, res) => {
       }
   
       // correct querystring boolean to be an actual boolean
-      user.isAdmin = user.isAdmin && user.isAdmin === "true" ? true : false;
+      user.admin = user.admin && user.admin === "true" ? true : false;
   
       // store info, and the hash rather than the pwd
       user.password = hash;
@@ -124,7 +131,7 @@ const verifyUniqueUser = async (req, res) => {
   //   payload: createUserSchema
   // }
 
-  const createTokenAndRespond =  (res, user) => {
+  const createTokenAndRespond =  (res, user: UserType) => {
     const token = createToken(user);
   
     return res({ id_token: token }).code(201);

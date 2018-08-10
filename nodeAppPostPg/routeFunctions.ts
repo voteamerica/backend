@@ -15,6 +15,8 @@ let postFunctions = new PostFunctions();
 
 const dbQueries       = require('./dbQueries.js');
 
+import { UserType } from './token';
+
 var rfPool: any = undefined;
 
 // NOTE: module.exports at bottom of file
@@ -45,7 +47,7 @@ function getUsers (req: any, reply: any) {
   postgresQueries.dbGetData(rfPool, dbQueries.dbGetUsersQueryString, reply, results);
 }
 
-async function getUsersInternal (req: any, reply: any, payload: [any]) {
+async function getUsersInternal (req: any, reply: any, payload: UserType) {
   var results = {
     success: 'GET users internal: ',
     failure: 'GET users internal error: ' 
@@ -431,9 +433,9 @@ function getCancelRidePayloadAsArray (req: any, payload: any) {
     ]
 }
 
-function userPayloadAsArray (req: any, payload: any) {
+function userPayloadAsArray (req: any, payload: UserType) {
   return [      
-        payload.userName, payload.email, payload.password,payload.isAdmin
+        payload.username, payload.email, payload.password,payload.admin
     ]
 }
 
