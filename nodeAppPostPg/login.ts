@@ -47,8 +47,9 @@ const verifyUniqueUser = async (req, res) => {
   
   const verifyCredentials = async (req, res) => {
     // const payload = JSON.parse( req.payload.info);
-    const payload = req.query;
-    const {password, email, username} = payload;
+    // const payload = req.query;
+    const { payload } = req;
+    const { password, email, username } = payload;
         
     console.log("pwd", password);
     console.log("email", email);
@@ -131,10 +132,17 @@ const verifyUniqueUser = async (req, res) => {
   //   payload: createUserSchema
   // }
 
-  const createTokenAndRespond =  (res, user: UserType) => {
+  const createTokenAndRespond =  (reply, user: UserType) => {
     const token = createToken(user);
+
+    // const tokenString = JSON.stringify({ id_token: token });
   
-    return res({ id_token: token }).code(201);
+    // return res({ id_token: token }).code(201);
+    // return res.code(201).header('set-cookie', tokenString)();
+    reply.state('id_token', token);
+
+    return reply().code(201);
+    // return reply.response(201);
   }
       
   export { hashPassword, verifyUniqueUser, verifyCredentials, createUser, createTokenAndRespond };
