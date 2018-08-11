@@ -1,23 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
-# USAGE : $0 [dbname] [max-rows]
+# USAGE : $0 [max-rows]
 
-PGDATABASE=${PGDATABASE:=carpool_live}
-if [[ "X$1" != "X" ]]
-then
-PGDATABASE=$1
-fi
 
 LIMIT="LIMIT 25"
-if [[ "X$2" != "X" ]]
+if [[ "X$1" != "X" ]]
 then
-LIMIT="LIMIT $2"
+LIMIT="LIMIT $1"
 fi
 
-echo $PGDATABASE $LIMIT
+echo $LIMIT
 
-psql $PGDATABASE <<RPT
+psql <<RPT
 select * from carpoolvote.vw_ride_request order by last_updated_ts desc $LIMIT
 RPT
-
 
