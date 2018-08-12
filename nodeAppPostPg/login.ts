@@ -47,8 +47,8 @@ const verifyUniqueUser = async (req, res) => {
   
   const verifyCredentials = async (req, res) => {
     // const payload = JSON.parse( req.payload.info);
-    // const payload = req.query;
-    const { payload } = req;
+    const payload = req.query;
+    // const { payload } = req;
     const { password, email, username } = payload;
         
     console.log("pwd", password);
@@ -124,7 +124,7 @@ const verifyUniqueUser = async (req, res) => {
         return res(Boom.badRequest(createUserErrorMessage));
       }
 
-      return createTokenAndRespond(res, user);
+      return createTokenAndRespond(res, user, 201);
     });
   }
   // ,
@@ -132,17 +132,13 @@ const verifyUniqueUser = async (req, res) => {
   //   payload: createUserSchema
   // }
 
-  const createTokenAndRespond =  (reply, user: UserType) => {
+  const createTokenAndRespond =  (reply, user: UserType, code) => {
     const token = createToken(user);
 
-    // const tokenString = JSON.stringify({ id_token: token });
-  
-    // return res({ id_token: token }).code(201);
-    // return res.code(201).header('set-cookie', tokenString)();
-    reply.state('id_token', token);
-
-    return reply().code(201);
-    // return reply.response(201);
+    return reply({ id_token: token }).code(code);
+    
+    // reply.state('id_token', token);
+    // return reply().code(code);
   }
       
   export { hashPassword, verifyUniqueUser, verifyCredentials, createUser, createTokenAndRespond };
