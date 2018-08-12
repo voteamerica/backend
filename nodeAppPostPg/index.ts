@@ -291,7 +291,7 @@ server.route({
 });
 
 server.route({
-  method: 'POST',
+  method: 'GET',
   path: '/users/authenticate',
   config: {
     pre: [
@@ -303,7 +303,7 @@ server.route({
     handler: (req, res) => {
       const user = req.pre.user;
 
-      return createTokenAndRespond(res, user);
+      return createTokenAndRespond(res, user, 200);
     }
     
     // ,
@@ -336,7 +336,8 @@ server.register([
     });
 
     server.route({
-      method: 'POST',
+      // method: 'POST',
+      method: 'GET',
       path: '/users/list',
       config: {
         handler: usersHandler, 
