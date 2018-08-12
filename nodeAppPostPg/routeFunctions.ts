@@ -64,6 +64,19 @@ async function getUsersInternal (req: any, reply: any, payload: UserType) {
   return dbData;
 }
 
+async function getUsersListInternal (req: any, reply: any, payload: UserType) {
+  var results = {
+    success: 'GET users list internal: ',
+    failure: 'GET users list internal error: ' 
+  };
+
+  req.log();
+
+  const dbData = await postgresQueries.dbGetDataInternal(rfPool, dbQueries.dbGetUsersQueryString, reply, results);
+
+  return dbData;
+}
+
 async function addUserInternal (req: any, reply: any, payload: [any]) {
   var results = {
     success: 'POST user internal: ',
@@ -449,6 +462,7 @@ module.exports = {
   getAnon:            getAnon,
   getUsers:           getUsers,
   getUsersInternal,
+  getUsersListInternal,
   addUserInternal,
 
   getUnmatchedDrivers:  getUnmatchedDrivers,

@@ -313,12 +313,30 @@ server.route({
   }
 });
 
-const usersHandler = routeFns.getUsers;
+const getUsersListHandler = async (req, res) => {
+  const payload = req.query;
+
+  const userInfo = await routeFns.getUsersListInternal(req, res, payload);
+
+  if (!userInfo) {
+    return res(Boom.badRequest('get users list error'));
+  }
+
+  res(userInfo);
+};
+
+const usersHandler = getUsersListHandler;
 
 server.register([
   {
     register: hapiAuthJwt,
-    options:  {}
+    options:  {
+        state: {
+          strictHeader: false,
+          ignoreErrors: true
+      }
+    }
+    ,
   }, 
   {
     register: Good,
