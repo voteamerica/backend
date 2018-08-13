@@ -6,13 +6,19 @@
 
 # https://www.projectatomic.io/blog/2015/08/why-we-dont-let-non-root-users-run-docker-in-centos-fedora-or-rhel/
 
-export DOCKER=/usr/bin/docker
+
+if [[ -x /usr/local/bin/docker ]]; then
+    export DOCKER=/usr/local/bin/docker
+else 
+    export DOCKER=/usr/bin/docker
+fi
+
 export DOCKERCOMPOSE=/usr/local/bin/docker-compose
 
 # check if docker commands need sudo or not
-docker ps >/dev/null 2>&1
+$DOCKER ps >/dev/null 2>&1
 [[ $? != 0 ]] && {
-    export DOCKER="sudo /usr/bin/docker"
-    export DOCKERCOMPOSE="sudo /usr/local/bin/docker-compose"
+    export DOCKER="sudo $DOCKER"
+    export DOCKERCOMPOSE="sudo $DOCKERCOMPOSE"
 }
 
