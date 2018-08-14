@@ -224,7 +224,7 @@ NOTE:  the backend PR should adjust the backend `travis.yml` file to refer to th
 
 ### 2) Test Backend-end PR
 #### 1) on your local fork, create a branch, e.g. `pr123`, for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
-NOTE: in the text below, the repo owner `jkbits1` represents the PR tester. Replace this with your own github username.
+**NOTE:** in the text below, the repo owner `jkbits1` represents the PR tester. Replace this with your own github username.
 
 Checkout this new branch and follow these steps:
 
