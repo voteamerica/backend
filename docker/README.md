@@ -225,9 +225,7 @@ NOTE:  the backend PR should adjust the backend `travis.yml` file to refer to th
 ### 2) Test Backend-end PR
 #### 1) on your local fork, create a branch, e.g. `pr123`, for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 
-Checkout this new branch.
-
-Follow these steps:
+Checkout this new branch and follow these steps:
 
 i) merge with master if PR is behind master. If not merged automatically, stop at this step and mention this on the PR issue page. This is a situation for the PR owner to resolve. Otherwise, continue.
 
