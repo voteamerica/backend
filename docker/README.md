@@ -224,6 +224,7 @@ NOTE:  the backend PR should adjust the backend `travis.yml` file to refer to th
 
 ### 2) Test Backend-end PR
 #### 1) on your local fork, create a branch, e.g. `pr123`, for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
+NOTE: in the text below, the repo owner `jkbits1` represents the PR tester. Replace this with your own github username.
 
 Checkout this new branch and follow these steps:
 
@@ -236,8 +237,8 @@ iii) watch travis test the PR (e.g. https://travis-ci.org/jkbits1/backend/builds
 
 #### 2) create specific build of front-end docker machine using --build-arg BRANCH_NAME=pr...
 ```
-. ./specific-machine-test.sh cp-nodejs R https://github.com/jkbits1/backend pr162
-. ./specific-machine-test.sh cp-pg-server R https://github.com/jkbits1/backend pr162
+. ./specific-machine-test.sh cp-nodejs R https://github.com/jkbits1/backend pr123
+. ./specific-machine-test.sh cp-pg-server R https://github.com/jkbits1/backend pr123
 ```
 
 #### 3) Run the tests
