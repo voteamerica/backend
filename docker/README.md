@@ -189,7 +189,6 @@ docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml
 ## Common development tasks
 
 ### 1) Create a front-end PR that requires changes to tests
-NOTE: this assumes that your front-end repo has travis CI enabled.
 
 Some front-end code changes will require matching changes or extensions to the tests.
 Once the front-end changes are ready (or at least under way), use the `Local development environment - fullstack` environment described above to confirm if tests now fail.
@@ -223,7 +222,7 @@ When the front-end branch is accepted, a PR can be created for the back-end bran
 
 NOTE:  the backend PR should adjust the backend `travis.yml` file to refer to the main frontend repo and branch; this is to undo the change in step 2) above. Once the back-end PR is accepted, the final step is to adjust the front-end `./travis.yml` to once again refer to the main backend repo and branch. These final steps should be done **promptly** after the front-end PR is accepted.
 
-### 3) Test Backend-end PR
+### 2) Test Backend-end PR
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 
 Checkout this new pr... branch.
