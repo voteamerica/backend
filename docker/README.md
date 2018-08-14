@@ -223,9 +223,9 @@ When the front-end branch is accepted, a PR can be created for the back-end bran
 NOTE:  the backend PR should adjust the backend `travis.yml` file to refer to the main frontend repo and branch; this is to undo the change in step 2) above. Once the back-end PR is accepted, the final step is to adjust the front-end `./travis.yml` to once again refer to the main backend repo and branch. These final steps should be done **promptly** after the front-end PR is accepted.
 
 ### 2) Test Backend-end PR
-#### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
+#### 1) on your local fork, create a branch, e.g. `pr123` for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 
-Checkout this new pr... branch.
+Checkout this new branch.
 
 Follow these steps:
 
