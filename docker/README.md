@@ -223,35 +223,18 @@ When the front-end branch is accepted, a PR can be created for the back-end bran
 
 NOTE:  the backend PR should adjust the backend `travis.yml` file to refer to the main frontend repo and branch; this is to undo the change in step 2) above. Once the back-end PR is accepted, the final step is to adjust the front-end `./travis.yml` to once again refer to the main backend repo and branch. These final steps should be done **promptly** after the front-end PR is accepted.
 
-
-
-
-### The following instructions are being reviewed
-
-### 2) Test Front-end PR
-#### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
-Push this new PR to origin (not upstream)
-
-#### 2) create specific build of front-end docker machine using --build-arg BRANCH_NAME=pr...
-`docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) --build-arg BRANCH_NAME=pr270 cp-front-end`
-
-#### 3) use docker-compose to create the full local system
-`docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up`
-
 ### 3) Test Backend-end PR
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 
-Checkout this new pr branch.
+Checkout this new pr... branch.
 
-Now, if your repo is set up for travis, simply:
+Follow these steps:
 
-i) merge with master if PR is behind master. If not merged automatically, stop at this step and mention this on the PR issue page. Otherwise, continue.
+i) merge with master if PR is behind master. If not merged automatically, stop at this step and mention this on the PR issue page. This is a situation for the PR owner to resolve. Otherwise, continue.
 
-ii) add .travis.yml if necessary (e.g. https://github.com/jkbits1/backend/blob/docker-test/.travis.yml)
+ii) push this new PR to origin (not upstream)
 
-iii) push this new PR to origin (not upstream)
-
-iv) watch travis test the PR (e.g. https://travis-ci.org/jkbits1/backend/builds/240592981)
+iii) watch travis test the PR (e.g. https://travis-ci.org/jkbits1/backend/builds/240592981)
 
 
 #### 2) create specific build of front-end docker machine using --build-arg BRANCH_NAME=pr...
@@ -269,6 +252,21 @@ sh ./start-compose-tests-pr.sh match
 ```
 
 #### 4) Optional: use VNC viewer to watch the tests execute
+
+
+
+
+### The following instructions are being reviewed
+
+### 2) Test Front-end PR
+#### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
+Push this new PR to origin (not upstream)
+
+#### 2) create specific build of front-end docker machine using --build-arg BRANCH_NAME=pr...
+`docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) --build-arg BRANCH_NAME=pr270 cp-front-end`
+
+#### 3) use docker-compose to create the full local system
+`docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up`
 
 
 
