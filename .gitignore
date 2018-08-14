@@ -91,3 +91,8 @@ ENV/
 .ropeproject
 
 .idea/
+
+
+# The real stuff here
+*/node_modules
+

@@ -53,13 +53,13 @@ Vagrant.configure("2") do |config|
 		config.vm.synced_folder ".", "/vagrant", disabled: true
 		config.vm.network "private_network", type: "dhcp"
   
-		# Customize the amount of memory on the VM:
+		# this is on your local virtual box
 		vb.memory = "1024"
 		vb.cpus = 2
 	end
   end
   
-  
+  # https://github.com/devopsgroup-io/vagrant-digitalocean 
   config.vm.define "carpool-do" do |config|
       config.vm.provider :digital_ocean do |provider, override|
 		config.vm.synced_folder ".", "/vagrant", disabled: true
@@ -67,9 +67,9 @@ Vagrant.configure("2") do |config|
         override.vm.box = 'digital_ocean'
         override.vm.box_url = "https://github.com/devopsgroup-io/vagrant-digitalocean/raw/master/box/digital_ocean.box"
         provider.token = 'CHANGE_ME'  # use your API key here
-        provider.image = 'centos-7-0-x64'  # don't change this
-        provider.region = 'sgp1'    # use vagrant digitalocean-list  regions <apikey>  for list of regions close to you
-        provider.size = '512mb'
+        provider.image = 'centos-7-0-x64'  # don't change this, the provisioning steps rely on yum, which is a centos/rhel/fedora tool 
+        provider.region = 'nyc1'    # use vagrant digitalocean-list  regions <apikey>  for list of regions close to you
+        provider.size = '512mb'     # use vagrant digitalocean-list  sizes  <apikey>  for list of supported sizes
       end
   end
   
@@ -96,128 +96,56 @@ Vagrant.configure("2") do |config|
 	########################
 	# GENERAL STUFF
 	########################  
-	yum -y install epel-release
-	yum -y install wget.x86_64
-	yum -y install net-tools.x86_64
-	yum -y install gcc.x86_64
-	yum -y install git
-	yum -y install certbot.noarch
+	yum -y install \
+		epel-release \
+		curl \
+		wget \
+		net-tools \
+		git \
+		python2-certbot.noarch \
+		python2-certbot-nginx.noarch \
+		docker
+	
+	curl -L https://github.com/docker/compose/releases/download/1.22.0/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+	chmod +x /usr/local/bin/docker-compose
 	
 	
-	#################################################
-	# EXTERNAL IP AND PORT FOR LOCAL CARPOOL SITE
-	#################################################
-	export EXTERNAL_PORT=4000
-	export EXTERNAL_IP=$(ifconfig -a | grep inet | grep -v inet6 | grep -v 10.0 | grep -v 127.0  | head -n 1 | tr -s " " | cut -f 3 -d " ")
-	
-  
 	########################
-	# BACK END  DATABASE
-	########################
-	groupadd carpoolg
-	useradd -g carpoolg --no-user-group carpool_app	
-	useradd -g carpoolg --no-user-group carpool_admin
-    
-	mkdir /opt/carpool
+	#       BACK END 
+	########################  
+	mkdir -p /opt/carpool
 	cd /opt/carpool
-	chown -R carpool_admin:carpoolg /opt/carpool
-	chmod g+w /opt/carpool
-	#git clone https://github.com/voteamerica/backend.git
-	su carpool_admin -c "git clone https://github.com/dmilet/backend.git"
-	chown -R carpool_admin:carpoolg /opt/carpool/backend
-	chmod -R g+w /opt/carpool/backend
+	git clone https://github.com/voteamerica/backend.git
+	cd backend
 	
-	echo ". /opt/carpool/backend/db/bash_profile.carpool_app.test" >> /home/carpool_app/.bash_profile
-	
-	/opt/carpool/backend/vagrant/add_postgres_repo_for_CentOS7.sh
-	yum -y install postgresql96.x86_64
-	yum -y install postgresql96-server.x86_64
-	yum -y install postgresql96-contrib.x86_64
-	yum -y install postgresql96-devel.x86_64
-	ln -s /usr/pgsql-9.6/bin/pg_config /usr/bin/pg_config
-	yum -y install libpqxx.x86_64
-	yum -y install libpqxx-devel.x86_64
-	yum -y install python-devel.x86_64
-	yum -y install python-pip
-	yum -y install python-wheel
-	pip install --upgrade pip
-	pip install PyGreSQL
-	pip install pytest
-	pip install requests
-	pip install psycopg2
-		
-	# initialize and start postgres
-	#  DB location : /var/lib/pgsql/9.6/data/
-	/usr/pgsql-9.6/bin/postgresql96-setup initdb
-	ln -s /var/lib/pgsql/9.6/data /opt/carpool/pgdata
-	/opt/carpool/backend/vagrant/update_pg_hba_conf.sh
-	systemctl enable postgresql-9.6.service
-	systemctl start postgresql-9.6.service
-	
-	cd /opt/carpool/backend/db 
-	# Create a carpool database for live environment
-	# We create it here so that the same Vagrant file can be used to deploy a test environment or a live environment
-	./create_fresh_carpool_db.sh carpool_live
-	
-	# Create a carpool database for test purposes, through web page and node app
-	./create_fresh_carpool_db.sh carpool_test
-	
-	#                                                           DB name   apienv         carpool site URL   (use http://richardwestenra.com/voteamerica.github.io for regular test env on DO)
-	su carpool_admin -c "./configure_carpool_db_for_test.sh carpool_test   test     http://$EXTERNAL_IP:$EXTERNAL_PORT"
-	
-	# Create a carpool database for unit test purposes
-	./create_fresh_carpool_db.sh carpool_unittest
-	
-	# start the matching engine
-	# note that no e-mail or sms notifications will be generated without the correct API IDs
-	su carpool_app -c 'nohup ./start_matching_engine.sh carpool_test &'
-
+	# looks like there are some iptables issues with docker networking
+	# issue is that it's not possible to perform name resolution 
+	# from inside the container to a name on internet
+	# remember it's like this Container->VirtualBox VM->Windows->Router NAT
+	# Anyway, my lack of understanding of this issue 
+	# is acceptable when all we need to do stop the firewall and restart docker service
+	systemctl stop firewalld
+	systemctl stop docker
+	systemctl start docker
+	/usr/local/bin/docker-compose -f docker-compose-build.yml build
+	systemctl stop docker
+	systemctl start firewalld
+	systemctl start docker
+	systemctl enable docker
 	
 	
-	########################
-	# BACK END  WEB APP
-	########################
-	yum -y install npm
-	yum -y install nginx
-	npm install pm2 -g
-	
-	useradd -g carpoolg --no-user-group carpool_web
-	echo ". /opt/carpool/backend/nodeAppPostPg/bash_profile.carpool_web.test" >> /home/carpool_web/.bash_profile
-	chmod g+w /opt/carpool/backend/nodeAppPostPg
-	
-	su carpool_web -c 'cd /opt/carpool/backend/nodeAppPostPg && . /home/carpool_web/.bash_profile && npm install && pm2 start index.js --name TEST'
-	
-	cp -p /etc/nginx/nginx.conf /etc/nginx/nginx.conf.orig
-	cp -f /opt/carpool/backend/nginx/conf/nginx.conf.test /etc/nginx/nginx.conf
-	# allows nginx to create network connections --- used as a proxy
-	setsebool -P httpd_can_network_connect 1
-	
-	systemctl stop nginx 
-	systemctl start nginx
-	
-	
-	########################
-	# BACK END  SMS HANDLER
-	########################
-	chmod g+w /opt/carpool/backend/smsHandler
-	su carpool_app -c "cd /opt/carpool/backend/smsHandler && npm install"
-	chmod -R g+rw /opt/carpool/backend/node_modules
+	# allow olny https, not http incoming traffic
+	systemctl enable firewalld
+	systemctl start firewalld
+	firewall-cmd --remove-service=http
+	firewall-cmd --add-service=https
+	firewall-cmd --runtime-to-permanent
 	
 	
 	########################
 	# FRONT END
 	########################
-	yum -y install ruby.x86_64
-	yum -y install ruby-devel.x86_64
-	gem install jekyll bundler
-	cd /opt/carpool
-	su carpool_web -c "git clone https://github.com/voteamerica/voteamerica.github.io.git"
-	cd /opt/carpool/voteamerica.github.io
-	
-	echo "api: \"http://$EXTERNAL_IP:8080/test\"" > /opt/carpool/voteamerica.github.io/_config-localtest.yml
-	echo "cp_site: \"http://$EXTERNAL_IP:$EXTERNAL_PORT\"" >> /opt/carpool/voteamerica.github.io/_config-localtest.yml
-	chown -R carpool_web:carpoolg /opt/carpool/voteamerica.github.io/_config-localtest.yml
-	su carpool_web -c 'cd /opt/carpool/voteamerica.github.io &&  /usr/local/bin/jekyll serve --config _config.yml,_config-localtest.yml --detach --host $EXTERNAL_IP --port $EXTERNAL_PORT'
+	# add here instructions to create container for front end
 	
   SHELL
 end

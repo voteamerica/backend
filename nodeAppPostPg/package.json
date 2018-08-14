@@ -25,7 +25,7 @@
     "good-squeeze": "^5.0.0",
     "hapi": "^15.0.3",
     "moment": "^2.15.1",
-    "pg": "^6.1.0"
+    "pg": "^7.4.3"
   },
   "devDependencies": {
     "@types/node": "^6.0.45",

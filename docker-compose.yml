@@ -1,0 +1,104 @@
+version: '3'
+services:
+  cp_nginx:
+    image: carpool/nginx
+    container_name: cp_nginx
+    depends_on:
+      - cp_api
+    links:
+      - cp_api
+    # for LIVE operations, we must export the volume
+    #volumes:
+    #  - /etc/letsencrypt:/etc/letsencrypt
+    ports:
+      - 443:443
+    restart: on-failure
+
+  cp_pg_server:
+    image: carpool/pg_server
+    container_name: cp_pg_server
+    environment:
+      - CARPOOL_DATABASE_NAME=LIVE
+      - PGDATABASE=LIVE
+      - PGUSER=carpool_app
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # ports:
+    #   - 5432:5432
+    restart: on-failure
+
+  cp_adminer:
+    image: adminer
+    restart: always
+    container_name: cp_adminer
+    depends_on:
+      # use "cp_pg_server" as hostname to establish connection to postgres in cp_pg_server container
+      - cp_pg_server
+    links:
+      - cp_pg_server
+    ports:
+      # Don't export the unprotected adminer to the outside
+      - 127.0.0.1:8080:8080
+    restart: on-failure
+
+  cp_api:
+    image: carpool/api
+    container_name: cp_api
+    depends_on:
+      - cp_pg_server
+    links:
+      - cp_pg_server
+    environment:
+      - PGUSER=carpool_web
+      - PGPASSWORD=null
+      - PGHOST=cp_pg_server
+      - PORT=3030
+      - PGDATABASE=LIVE
+    restart: on-failure
+
+  cp_matching:
+    image: carpool/matching
+    container_name: cp_matching
+    depends_on:
+      - cp_pg_server
+    links:
+      - cp_pg_server
+    environment:
+      - PGUSER=carpool_app
+      - PGPASSWORD=null
+      - PGHOST=cp_pg_server
+      - PGDATABASE=LIVE
+    restart: on-failure
+
+  cp_emailer:
+    image: carpool/email_handler
+    container_name: cp_emailer
+    depends_on:
+      - cp_pg_server
+    links:
+      - cp_pg_server
+    environment:
+      - MAILGUNKEY=XXX
+      - PGDATABASE=LIVE
+    restart: on-failure
+
+
+  cp_sms_handler:
+    image: carpool/sms_handler
+    container_name: cp_sms_handler
+    depends_on:
+      - cp_pg_server
+    links:
+      - cp_pg_server
+    environment:
+      - TWILIO_ACCOUNT_SID=XXX
+      - TWILIO_AUTH_TOKEN=XXX
+      - TWILIO_NUMBER=XXX
+      - PGUSER=carpool_app
+      - PGPASSWORD=null
+      - PGHOST=cp_pg_server
+      - PGDATABASE=LIVE
+    restart: on-failure
+
+volumes:
+  pgdata:

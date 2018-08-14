@@ -1,0 +1,50 @@
+version: '3'
+services:
+
+  pg_server:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    image: carpool/pg_server
+
+  # backend image is used
+  # - as base for api image (the api server) 
+  # - to run the backend apps : matching engine, sms handler, email handler 
+  backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: carpool/backend
+
+  api:
+    build:
+      context: ./nodeAppPostPg
+      dockerfile: Dockerfile
+      args:
+        - PORT=3030
+    image: carpool/api
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: carpool/nginx
+
+  matching:
+    build:
+      context: ./matchingEngine
+      dockerfile: Dockerfile
+    image: carpool/matching
+
+  sms_handler:
+    build:
+      context: ./smsHandler
+      dockerfile: Dockerfile
+    image: carpool/sms_handler
+
+  email_handler:
+    build:
+      context: ./emailHandler
+      dockerfile: Dockerfile
+    image: carpool/email_handler
+
