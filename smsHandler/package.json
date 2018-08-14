@@ -12,7 +12,7 @@
   "dependencies": {
     "dateformat": "^3.0.3",
     "pg": "^7.4.3",
-    "twilio": "^2.11.0"
+    "twilio": "^3.19.1"
   },
   "devDependencies": {
     "@types/node": "^6.0.42"
