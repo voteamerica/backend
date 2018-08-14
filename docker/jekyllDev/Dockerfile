@@ -10,6 +10,12 @@ RUN apt-get install -y git
 
 # RUN apk --update add git vim
 
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN apt-get install -y nodejs
+
+RUN npm install -g webpack
+RUN npm install -g webpack-cli
+
 ARG CACHEBUST=1
 ARG FE_PATH=/usr/src/app/frontend/
 ARG BRANCH_NAME=master
@@ -28,6 +34,8 @@ RUN ls
 
 RUN git fetch origin
 RUN git merge origin/$BRANCH_NAME
+
+# RUN webpack-cli --info-verbosity verbose
 
 # RUN cd $FE_PATH
 
