@@ -35,16 +35,18 @@ RUN ls
 RUN git fetch origin
 RUN git merge origin/$BRANCH_NAME
 
-# RUN webpack-cli --info-verbosity verbose
-
-# RUN cd $FE_PATH
-
-# RUN mkdir $FE_PATH/_site
+# run webpack as background task
+# RUN webpack --watch --progress --info-verbosity verbose &
 
 COPY ./_config-local-host.yml /
 COPY ./_config-local-ip.yml /
 
+COPY ./expo-start.sh /
+RUN chmod +x /expo-start.sh
+
 # ENTRYPOINT ["jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml"]
 # ENTRYPOINT [""]
 # ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/expo-start.sh"]
 
+# CMD ["/bin/bash"]
