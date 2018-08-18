@@ -1,309 +1,369 @@
 // // functions that use postgresql pg library to execute db queries etc
 
 export interface DbQueries {
-  dbGetData (pool, fnGetString, reply, results);
-  dbGetDataInternal (pool, fnGetString, reply, results);
-  dbGetUnmatchedDrivers (pool, fnGetString, reply, results);
-  dbGetDriversDetails (pool, fnGetString, reply, results);
-  dbGetDriverMatchesDetails (pool, fnGetString, reply, results);
-  dbGetUnmatchedRiders (pool, fnGetString, reply, results);
-  dbGetMatchesData (pool, fnGetString, reply, results);
-  dbGetMatchSpecificData (pool, fnGetString, uuid, reply, results);
-  dbInsertData( payload, pool, fnInsertString, fnPayloadArray,
-                        req, reply, results);
-  dbInsertDataInternal (payload, pool, fnInsertString, fnPayloadArray,
-                          req, reply, results);
-  dbExecuteFunction (payload, pool, fnExecuteFunctionString, fnPayloadArray,
-                        req, reply, results);
-  dbExecuteFunctionMultipleResults (payload, pool, fnExecuteFunctionString, fnPayloadArray,
-                        req, reply, results);
+  dbGetData(pool, fnGetString, reply, results);
+  dbGetDataInternal(pool, fnGetString, reply, results);
+  dbGetDataListInternal(pool, fnGetString, reply, results);
+  dbGetUnmatchedDrivers(pool, fnGetString, reply, results);
+  dbGetDriversDetails(pool, fnGetString, reply, results);
+  dbGetDriverMatchesDetails(pool, fnGetString, reply, results);
+  dbGetUnmatchedRiders(pool, fnGetString, reply, results);
+  dbGetMatchesData(pool, fnGetString, reply, results);
+  dbGetMatchSpecificData(pool, fnGetString, uuid, reply, results);
+  dbInsertData(
+    payload,
+    pool,
+    fnInsertString,
+    fnPayloadArray,
+    req,
+    reply,
+    results
+  );
+  dbInsertDataInternal(
+    payload,
+    pool,
+    fnInsertString,
+    fnPayloadArray,
+    req,
+    reply,
+    results
+  );
+  dbExecuteFunction(
+    payload,
+    pool,
+    fnExecuteFunctionString,
+    fnPayloadArray,
+    req,
+    reply,
+    results
+  );
+  dbExecuteFunctionMultipleResults(
+    payload,
+    pool,
+    fnExecuteFunctionString,
+    fnPayloadArray,
+    req,
+    reply,
+    results
+  );
 }
 
 export { PostgresQueries };
 
-import { PayloadFunc2 } from "./PostFunctions"
+import { PayloadFunc2 } from './PostFunctions';
 
 class PostgresQueries implements DbQueries {
-
   dbGetData(pool, fnGetString, reply, results) {
-    var queryString =  fnGetString();
+    var queryString = fnGetString();
 
-    pool.query( queryString )
-    .then(result => {
-      var firstRowAsString = "";
+    pool
+      .query(queryString)
+      .then(result => {
+        var firstRowAsString = '';
 
-      if (result !== undefined && result.rows !== undefined) {
+        if (result !== undefined && result.rows !== undefined) {
+          // result.rows.forEach( val => console.log(val));
+          firstRowAsString = JSON.stringify(result.rows[0]);
+        }
 
-        // result.rows.forEach( val => console.log(val));
-        firstRowAsString = JSON.stringify(result.rows[0]);
-      }
+        reply(results.success + firstRowAsString);
+      })
+      .catch(e => {
+        var message = e.message || '';
+        var stack = e.stack || '';
 
-      reply(results.success + firstRowAsString);
-    })
-    .catch(e => {
-      var message = e.message || '';
-      var stack   = e.stack   || '';
+        console.error(results.failure, message, stack);
 
-      console.error(results.failure, message, stack);
-
-      reply(results.failure + message).code(500);
-    });
+        reply(results.failure + message).code(500);
+      });
   }
 
   async dbGetDataInternal(pool, fnGetString, reply, results) {
-    var queryString =  fnGetString();
+    var queryString = fnGetString();
 
     try {
-    const result = await pool.query( queryString )
+      const result = await pool.query(queryString);
 
-    // .then(result => {
-      var firstRowAsString = "";
+      // .then(result => {
+      var firstRowAsString = '';
 
       if (result !== undefined && result.rows !== undefined) {
-
         // result.rows.forEach( val => console.log(val));
         firstRowAsString = JSON.stringify(result.rows[0]);
       }
 
       return firstRowAsString;
       // reply(results.success + firstRowAsString);
+    } catch (e) {
+      var message = e.message || '';
+      var stack = e.stack || '';
+
+      console.error(results.failure, message, stack);
+
+      // reply(results.failure + message).code(500);
     }
-    catch(e) {
-      var message = e.message || '';
-      var stack   = e.stack   || '';
-
-      console.error(results.failure, message, stack);
-
-      // reply(results.failure + message).code(500);      
-    };
   }
 
-  dbGetUnmatchedDrivers (pool, fnGetString, reply, results) {
-    var queryString =  fnGetString();
-
-    pool.query( queryString )
-    .then(result => {
-      var firstRowAsString = "";
-      var rowsToSend = [];
-
-      if (result !== undefined && result.rows !== undefined) {
-
-        result.rows.forEach( val => {          
-          rowsToSend.push(val);
-        });
-      }
-
-      console.log("unmatched drivers: ", rowsToSend);
-
-      reply(rowsToSend);
-    })
-    .catch(e => {
-      var message = e.message || '';
-      var stack   = e.stack   || '';
-
-      console.error(results.failure, message, stack);
-
-      reply(results.failure + message).code(500);
-    });
-  }
-
-  dbGetDriversDetails (pool, fnGetString, reply, results) {
-    var queryString =  fnGetString();
-
-    pool.query( queryString )
-    .then(result => {
-      var firstRowAsString = "";
-      var rowsToSend = [];
-
-      if (result !== undefined && result.rows !== undefined) {
-
-        result.rows.forEach( val => {          
-          rowsToSend.push(val);
-        });
-      }
-
-      console.log("drivers details: ", rowsToSend);
-
-      reply(rowsToSend);
-    })
-    .catch(e => {
-      var message = e.message || '';
-      var stack   = e.stack   || '';
-
-      console.error(results.failure, message, stack);
-
-      reply(results.failure + message).code(500);
-    });
-  }
-
-  dbGetDriverMatchesDetails (pool, fnGetString, reply, results) {
-    var queryString =  fnGetString();
-
-    pool.query( queryString )
-    .then(result => {
-      var firstRowAsString = "";
-      var rowsToSend = [];
-
-      if (result !== undefined && result.rows !== undefined) {
-
-        result.rows.forEach( val => {          
-          rowsToSend.push(val);
-        });
-      }
-
-      console.log("driver matches details: ", rowsToSend);
-
-      reply(rowsToSend);
-    })
-    .catch(e => {
-      var message = e.message || '';
-      var stack   = e.stack   || '';
-
-      console.error(results.failure, message, stack);
-
-      reply(results.failure + message).code(500);
-    });
-  }
-
-  dbGetUnmatchedRiders (pool, fnGetString, reply, results) {
+  async dbGetDataListInternal(pool, fnGetString, reply, results) {
     var queryString = fnGetString();
-    pool.query(queryString)
-        .then(function (result) {
-        var firstRowAsString = "";
+
+    try {
+      const result = await pool.query(queryString);
+
+      const rowsAsJSON = [];
+
+      if (result !== undefined && result.rows !== undefined) {
+        result.rows.forEach(row => rowsAsJSON.push(JSON.stringify(row)));
+      }
+
+      return rowsAsJSON;
+    } catch (e) {
+      var message = e.message || '';
+      var stack = e.stack || '';
+
+      console.error(results.failure, message, stack);
+
+      // reply(results.failure + message).code(500);
+      return [];
+    }
+  }
+
+  dbGetUnmatchedDrivers(pool, fnGetString, reply, results) {
+    var queryString = fnGetString();
+
+    pool
+      .query(queryString)
+      .then(result => {
+        var firstRowAsString = '';
+        var rowsToSend = [];
+
+        if (result !== undefined && result.rows !== undefined) {
+          result.rows.forEach(val => {
+            rowsToSend.push(val);
+          });
+        }
+
+        console.log('unmatched drivers: ', rowsToSend);
+
+        reply(rowsToSend);
+      })
+      .catch(e => {
+        var message = e.message || '';
+        var stack = e.stack || '';
+
+        console.error(results.failure, message, stack);
+
+        reply(results.failure + message).code(500);
+      });
+  }
+
+  dbGetDriversDetails(pool, fnGetString, reply, results) {
+    var queryString = fnGetString();
+
+    pool
+      .query(queryString)
+      .then(result => {
+        var firstRowAsString = '';
+        var rowsToSend = [];
+
+        if (result !== undefined && result.rows !== undefined) {
+          result.rows.forEach(val => {
+            rowsToSend.push(val);
+          });
+        }
+
+        console.log('drivers details: ', rowsToSend);
+
+        reply(rowsToSend);
+      })
+      .catch(e => {
+        var message = e.message || '';
+        var stack = e.stack || '';
+
+        console.error(results.failure, message, stack);
+
+        reply(results.failure + message).code(500);
+      });
+  }
+
+  dbGetDriverMatchesDetails(pool, fnGetString, reply, results) {
+    var queryString = fnGetString();
+
+    pool
+      .query(queryString)
+      .then(result => {
+        var firstRowAsString = '';
+        var rowsToSend = [];
+
+        if (result !== undefined && result.rows !== undefined) {
+          result.rows.forEach(val => {
+            rowsToSend.push(val);
+          });
+        }
+
+        console.log('driver matches details: ', rowsToSend);
+
+        reply(rowsToSend);
+      })
+      .catch(e => {
+        var message = e.message || '';
+        var stack = e.stack || '';
+
+        console.error(results.failure, message, stack);
+
+        reply(results.failure + message).code(500);
+      });
+  }
+
+  dbGetUnmatchedRiders(pool, fnGetString, reply, results) {
+    var queryString = fnGetString();
+    pool
+      .query(queryString)
+      .then(function(result) {
+        var firstRowAsString = '';
         var rowsToSend = [];
         if (result !== undefined && result.rows !== undefined) {
-            result.rows.forEach(function (val) {
-                rowsToSend.push(val);
-            });
+          result.rows.forEach(function(val) {
+            rowsToSend.push(val);
+          });
         }
-        console.log("unmatched riders: ", rowsToSend);
+        console.log('unmatched riders: ', rowsToSend);
         reply(rowsToSend);
-    })
-        .catch(function (e) {
+      })
+      .catch(function(e) {
         var message = e.message || '';
         var stack = e.stack || '';
         console.error(results.failure, message, stack);
         reply(results.failure + message).code(500);
-    });
+      });
   }
 
-  dbGetMatchesData (pool, fnGetString, reply, results) {
-    var queryString =  fnGetString();
+  dbGetMatchesData(pool, fnGetString, reply, results) {
+    var queryString = fnGetString();
 
-    pool.query( queryString )
-    .then(result => {
-      var firstRowAsString = "";
+    pool
+      .query(queryString)
+      .then(result => {
+        var firstRowAsString = '';
 
-      if (result !== undefined && result.rows !== undefined) {
+        if (result !== undefined && result.rows !== undefined) {
+          result.rows.forEach(val => {
+            firstRowAsString += JSON.stringify(val);
+          });
 
-        result.rows.forEach( val => {
-          
-          firstRowAsString += JSON.stringify(val);
-        });
+          console.log(JSON.stringify(result.rows[0]));
+        }
 
-        console.log(JSON.stringify(result.rows[0]));        
-      }
+        reply(results.success + firstRowAsString);
+      })
+      .catch(e => {
+        var message = e.message || '';
+        var stack = e.stack || '';
 
-      reply(results.success + firstRowAsString);
-    })
-    .catch(e => {
-      var message = e.message || '';
-      var stack   = e.stack   || '';
+        console.error(results.failure, message, stack);
 
-      console.error(results.failure, message, stack);
-
-      reply(results.failure + message).code(500);
-    });
+        reply(results.failure + message).code(500);
+      });
   }
 
-  dbGetMatchSpecificData (pool, fnGetString, uuid, reply, results) {
-    var queryString =  fnGetString(uuid);
+  dbGetMatchSpecificData(pool, fnGetString, uuid, reply, results) {
+    var queryString = fnGetString(uuid);
 
     console.log('match rider query: ' + queryString);
 
-    pool.query( queryString )
-    .then(result => {
-      var firstRowAsString = "";
+    pool
+      .query(queryString)
+      .then(result => {
+        var firstRowAsString = '';
 
-      if (result !== undefined && result.rows !== undefined) {
+        if (result !== undefined && result.rows !== undefined) {
+          result.rows.forEach(val => {
+            firstRowAsString += JSON.stringify(val);
+          });
 
-        result.rows.forEach( val => {
-          
-          firstRowAsString += JSON.stringify(val);
-        });
+          console.log(JSON.stringify(result.rows[0]));
+        }
 
-        console.log(JSON.stringify(result.rows[0]));        
-      }
+        reply(results.success + firstRowAsString);
+      })
+      .catch(e => {
+        var message = e.message || '';
+        var stack = e.stack || '';
 
-      reply(results.success + firstRowAsString);
-    })
-    .catch(e => {
-      var message = e.message || '';
-      var stack   = e.stack   || '';
+        console.error(results.failure, message, stack);
 
-      console.error(results.failure, message, stack);
-
-      reply(results.failure + message).code(500);
-    });
+        reply(results.failure + message).code(500);
+      });
   }
 
-  dbInsertData (payload, pool, fnInsertString, fnPayloadArray: any,
-                        req, reply, results) {
+  dbInsertData(
+    payload,
+    pool,
+    fnInsertString,
+    fnPayloadArray: any,
+    req,
+    reply,
+    results
+  ) {
     var insertString = fnInsertString();
 
-    pool.query(
-      insertString,
-      fnPayloadArray(req, payload)
-    )
-    .then(result => {
-      var displayResult = result || '';
-      var uuid = "";
+    pool
+      .query(insertString, fnPayloadArray(req, payload))
+      .then(result => {
+        var displayResult = result || '';
+        var uuid = '';
 
-      try {
-        displayResult = JSON.stringify(result);
-        uuid = result.rows[0].UUID;
-        console.error('row: ' + JSON.stringify(result.rows[0]) );
-      }
-      catch (err) {
-        console.error('no uuid returned');
-      }
+        try {
+          displayResult = JSON.stringify(result);
+          uuid = result.rows[0].UUID;
+          console.error('row: ' + JSON.stringify(result.rows[0]));
+        } catch (err) {
+          console.error('no uuid returned');
+        }
 
-      console.log('insert: ', uuid + ' ' + displayResult);
+        console.log('insert: ', uuid + ' ' + displayResult);
 
-      if (payload._redirect) {
+        if (payload._redirect) {
+          reply.redirect(payload._redirect + '?uuid=' + uuid.toString());
+        } else {
+          reply(results.success + ': ' + uuid);
+        }
+      })
+      .catch(e => {
+        var message = e.message || '';
+        var stack = e.stack || '';
 
-        reply.redirect(payload._redirect + '?uuid=' + uuid.toString());
-      } 
-      else {
-        reply(results.success + ': ' + uuid);
-      }
-    })
-    .catch(e => {
-      var message = e.message || '';
-      var stack   = e.stack   || '';
+        console.error('query error: ', message, stack);
 
-      console.error('query error: ', message, stack);
-
-      reply(results.failure + ': ' + message).code(500);
-    });
+        reply(results.failure + ': ' + message).code(500);
+      });
   }
 
-  async dbInsertDataInternal(payload, pool, fnInsertString, fnPayloadArray: any,
-    req, reply, results) {
+  async dbInsertDataInternal(
+    payload,
+    pool,
+    fnInsertString,
+    fnPayloadArray: any,
+    req,
+    reply,
+    results
+  ) {
     var insertString = fnInsertString();
 
     try {
-      const result = await pool.query(insertString, fnPayloadArray(req, payload));
+      const result = await pool.query(
+        insertString,
+        fnPayloadArray(req, payload)
+      );
 
       let displayResult = result || '';
-      let uuid = "";
+      let uuid = '';
 
       try {
         displayResult = JSON.stringify(result);
         uuid = result.rows[0].UUID;
-        console.error('row: ' + JSON.stringify(result.rows[0]) );
-      }
-      catch (err) {
+        console.error('row: ' + JSON.stringify(result.rows[0]));
+      } catch (err) {
         console.error('no uuid returned');
       }
 
@@ -311,15 +371,13 @@ class PostgresQueries implements DbQueries {
 
       if (payload._redirect) {
         // reply.redirect(payload._redirect + '?uuid=' + uuid.toString());
-      } 
-      else {
+      } else {
         return uuid;
         // reply(results.success + ': ' + uuid);
       }
-    }
-    catch(e) {
+    } catch (e) {
       var message = e.message || '';
-      var stack   = e.stack   || '';
+      var stack = e.stack || '';
 
       console.error('query error: ', message, stack);
 
@@ -327,164 +385,201 @@ class PostgresQueries implements DbQueries {
     }
   }
 
-  dbExecuteCarpoolAPIFunction_Insert (
-    payload, pool, fnExecuteFunctionString, 
-    fnPayloadArray: PayloadFunc2, req, reply, results) {
-        var queryString = fnExecuteFunctionString();
-        console.log("executeFunctionString Insert: " + queryString);
-        pool.query(queryString, fnPayloadArray(req, payload))
-            .then(function (result) {
-            var firstRow = "";
+  dbExecuteCarpoolAPIFunction_Insert(
+    payload,
+    pool,
+    fnExecuteFunctionString,
+    fnPayloadArray: PayloadFunc2,
+    req,
+    reply,
+    results
+  ) {
+    var queryString = fnExecuteFunctionString();
+    console.log('executeFunctionString Insert: ' + queryString);
+    pool
+      .query(queryString, fnPayloadArray(req, payload))
+      .then(function(result) {
+        var firstRow = '';
 
-            var displayResult = result || '';
-            var uuid = "";
-            var code = "";
-            var info = "";
-            try {
-                displayResult = JSON.stringify(result);
-                uuid = result.rows[0].out_uuid;
-                code = result.rows[0].out_error_code;
-                info = result.rows[0].out_error_text;
-                console.error('row: ' + JSON.stringify(result.rows[0]));
-            }
-            catch (err) {
-                console.error('no uuid returned');
-            }
+        var displayResult = result || '';
+        var uuid = '';
+        var code = '';
+        var info = '';
+        try {
+          displayResult = JSON.stringify(result);
+          uuid = result.rows[0].out_uuid;
+          code = result.rows[0].out_error_code;
+          info = result.rows[0].out_error_text;
+          console.error('row: ' + JSON.stringify(result.rows[0]));
+        } catch (err) {
+          console.error('no uuid returned');
+        }
 
-            if (result !== undefined && result.rows !== undefined) {
-                // result.rows.forEach( val => console.log(val));
-                result.rows.forEach(function (val) {
-                    return console.log("exec fn: " + val);
-                });
-                firstRow = result.rows[0];
-            }
-            console.error("executed fn: " + firstRow);
-            
-            if (payload._redirect && uuid != undefined) {
-                var reply_url = payload._redirect + '&uuid=' + uuid.toString();
-                if (code != undefined) {
-                    reply_url += '&code=' + code.toString();
-                }
-                if (info != undefined) {
-                    reply_url += '&info=' + info.toString();
-                }
-                reply.redirect(reply_url);
-            }
-            else {
-                // reply(results.success + ': ' + uuid);
-                reply(//results.success + 
-                firstRow);
-            }
+        if (result !== undefined && result.rows !== undefined) {
+          // result.rows.forEach( val => console.log(val));
+          result.rows.forEach(function(val) {
+            return console.log('exec fn: ' + val);
+          });
+          firstRow = result.rows[0];
+        }
+        console.error('executed fn: ' + firstRow);
 
-        })
-            .catch(function (e) {
-            var message = e.message || '';
-            var stack = e.stack || '';
-            console.error(
-            // results.failure, 
-            message, stack);
-            reply(results.failure + message).code(500);
-        });
-    }
-	
-	dbExecuteCarpoolAPIFunction (payload, pool, fnExecuteFunctionString, fnPayloadArray: any, req, reply, results) {
-        var queryString = fnExecuteFunctionString();
-        console.log("executeFunctionString: " + queryString);
-        pool.query(queryString, fnPayloadArray(req, payload))
-            .then(function (result) {
-            var firstRow = "";
-            if (result !== undefined && result.rows !== undefined) {
-                // result.rows.forEach( val => console.log(val));
-                result.rows.forEach(function (val) {
-                    return console.log("exec fn: " + val);
-                });
-                firstRow = result.rows[0];
-            }
-            console.error("executed fn: " + firstRow);
-            reply(//results.success + 
-            firstRow);
-        })
-            .catch(function (e) {
-            var message = e.message || '';
-            var stack = e.stack || '';
-            console.error(
-            // results.failure, 
-            message, stack);
-            reply(results.failure + message).code(500);
-        });
-    }
-	
-  dbExecuteFunction (payload, pool, fnExecuteFunctionString, fnPayloadArray: any,
-                        req, reply, results) {
+        if (payload._redirect && uuid != undefined) {
+          var reply_url = payload._redirect + '&uuid=' + uuid.toString();
+          if (code != undefined) {
+            reply_url += '&code=' + code.toString();
+          }
+          if (info != undefined) {
+            reply_url += '&info=' + info.toString();
+          }
+          reply.redirect(reply_url);
+        } else {
+          // reply(results.success + ': ' + uuid);
+          reply(
+            //results.success +
+            firstRow
+          );
+        }
+      })
+      .catch(function(e) {
+        var message = e.message || '';
+        var stack = e.stack || '';
+        console.error(
+          // results.failure,
+          message,
+          stack
+        );
+        reply(results.failure + message).code(500);
+      });
+  }
+
+  dbExecuteCarpoolAPIFunction(
+    payload,
+    pool,
+    fnExecuteFunctionString,
+    fnPayloadArray: any,
+    req,
+    reply,
+    results
+  ) {
+    var queryString = fnExecuteFunctionString();
+    console.log('executeFunctionString: ' + queryString);
+    pool
+      .query(queryString, fnPayloadArray(req, payload))
+      .then(function(result) {
+        var firstRow = '';
+        if (result !== undefined && result.rows !== undefined) {
+          // result.rows.forEach( val => console.log(val));
+          result.rows.forEach(function(val) {
+            return console.log('exec fn: ' + val);
+          });
+          firstRow = result.rows[0];
+        }
+        console.error('executed fn: ' + firstRow);
+        reply(
+          //results.success +
+          firstRow
+        );
+      })
+      .catch(function(e) {
+        var message = e.message || '';
+        var stack = e.stack || '';
+        console.error(
+          // results.failure,
+          message,
+          stack
+        );
+        reply(results.failure + message).code(500);
+      });
+  }
+
+  dbExecuteFunction(
+    payload,
+    pool,
+    fnExecuteFunctionString,
+    fnPayloadArray: any,
+    req,
+    reply,
+    results
+  ) {
     var queryString = fnExecuteFunctionString();
 
-    console.log("executeFunctionString: " + queryString);
-    pool.query(
-      queryString, 
-      fnPayloadArray(req, payload)
-      )
-    .then(function (result) {
-      var firstRowAsString = "";
+    console.log('executeFunctionString: ' + queryString);
+    pool
+      .query(queryString, fnPayloadArray(req, payload))
+      .then(function(result) {
+        var firstRowAsString = '';
 
-      if (result !== undefined && result.rows !== undefined) {
+        if (result !== undefined && result.rows !== undefined) {
           // result.rows.forEach( val => console.log(val));
-          result.rows.forEach(function (val) { 
-            return console.log("exec fn: " + JSON.stringify(val)); 
+          result.rows.forEach(function(val) {
+            return console.log('exec fn: ' + JSON.stringify(val));
           });
 
           firstRowAsString = JSON.stringify(result.rows[0]);
-      }
-      console.error("executed fn: " + firstRowAsString);
+        }
+        console.error('executed fn: ' + firstRowAsString);
 
-      reply(//results.success + 
-              firstRowAsString);
-    })
-    .catch(function (e: any) {
-      var message = e.message || '';
-      var stack = e.stack || '';
+        reply(
+          //results.success +
+          firstRowAsString
+        );
+      })
+      .catch(function(e: any) {
+        var message = e.message || '';
+        var stack = e.stack || '';
 
-      console.error(
-      // results.failure, 
-      message, stack);
+        console.error(
+          // results.failure,
+          message,
+          stack
+        );
 
-      reply(results.failure + message).code(500);
-    });
+        reply(results.failure + message).code(500);
+      });
   }
 
-  dbExecuteFunctionMultipleResults (payload: any, pool: any, fnExecuteFunctionString: any, fnPayloadArray: any,
-                        req: any, reply: any, results: any) {
+  dbExecuteFunctionMultipleResults(
+    payload: any,
+    pool: any,
+    fnExecuteFunctionString: any,
+    fnPayloadArray: any,
+    req: any,
+    reply: any,
+    results: any
+  ) {
     var queryString = fnExecuteFunctionString();
 
-    console.log("executeFunctionMultipleResultsString: " + queryString);
-    pool.query(
-      queryString, 
-      fnPayloadArray(req, payload)
-      )
-    .then(function (result: any) {
-      var firstRowAsString = "";
-      var rowsToSend: any = [];
+    console.log('executeFunctionMultipleResultsString: ' + queryString);
+    pool
+      .query(queryString, fnPayloadArray(req, payload))
+      .then(function(result: any) {
+        var firstRowAsString = '';
+        var rowsToSend: any = [];
 
-      if (result !== undefined && result.rows !== undefined) {
+        if (result !== undefined && result.rows !== undefined) {
           // result.rows.forEach( val => console.log(val));
-          result.rows.forEach(function (val: any) { 
+          result.rows.forEach(function(val: any) {
             rowsToSend.push(val);
           });
 
-        console.log("multiple results: ", rowsToSend);
-      }
-      console.error("executed fn multiple results: " + firstRowAsString);
+          console.log('multiple results: ', rowsToSend);
+        }
+        console.error('executed fn multiple results: ' + firstRowAsString);
 
-      reply(rowsToSend);
-    })
-    .catch(function (e: any) {
-      var message = e.message || '';
-      var stack = e.stack || '';
+        reply(rowsToSend);
+      })
+      .catch(function(e: any) {
+        var message = e.message || '';
+        var stack = e.stack || '';
 
-      console.error(
-      // results.failure, 
-      message, stack);
+        console.error(
+          // results.failure,
+          message,
+          stack
+        );
 
-      reply(results.failure + message).code(500);
-    });
+        reply(results.failure + message).code(500);
+      });
   }
 }
