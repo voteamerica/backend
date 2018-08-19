@@ -24,33 +24,33 @@ NOTE: Looking to expand the operator page? That's great, thank you! It's most ef
 
 Here are the steps to adding a new area to the operator page.
 
-1. Find table mentioned in `DbDefsTables`
+### 1. Find table mentioned in `DbDefsTables`
 
 Add the table if it doesn't exist.
 
-2. Add a query to `dbQueries.ts` as follows:
+### 2. Add a query to `dbQueries.ts` as follows:
 
-NOTE: this instructions deal with Select queries only. If there is a Where clause for the query, that's added in a later step.
+NOTE: these instructions deal with Select queries only. If there is a Where clause for the query, that's added in a later step.
 
-Add a function for the query and export this function in `module.exports`. We recommend using the helper functions that you can see used for other queries. The property from Step 1 is used for the query function.
+If the base select query doesn't already exist, add a function for the query and export this function in `module.exports`. We recommend using the helper functions that you can see used for other queries. The property from Step 1 is used for the query function.
 
-3. Add a route handler support function to `routeFunctions.ts`
+### 3. Add a route handler support function to `routeFunctions.ts`
 
 It's most likely that your query will return a list of items. So follow the pattern of `getUsersListInternal()`. Adjust `results` for logging and later checks.
 
 NOTES:
 
-a. If you want to add a Where clause, look at `getUsersInternal` to see how that is done. IMPORTANT: Do follow the existing pattern as it is, as it creates a function to be called later. So don't just add the clause as text.
+#### a. If you want to add a Where clause, look at `getUsersInternal` to see how that is done. IMPORTANT: Do follow the existing pattern as it is, as it creates a function to be called later. So don't just add the clause as text.
 
-b. Do put `Internal` as part of your new function name, this helps other volunteers be aware this function returns data and does not respond directly to a http request.
+#### b. Do put `Internal` as part of your new function name, this helps other volunteers be aware this function returns data and does not respond directly to a http request.
 
-4. Add the route handler to `index.ts`
+### 4. Add the route handler to `index.ts`
 
 Create a function that follows the pattern of `getUsersListHandler`.
 
 Make the bad request error specific to this route.
 
-5. Add the secure route within `server.register()`
+### 5. Add the secure route within `server.register()`
 
 Follow the pattern of `server.route()` for path `/users/list`.
 
