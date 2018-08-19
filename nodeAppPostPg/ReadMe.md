@@ -24,7 +24,7 @@ NOTE: Looking to expand the operator page? That's great, thank you! It's most ef
 
 Here are the steps to adding a new area to the operator page.
 
-### 1. Find table mentioned in `DbDefsTables`
+### 1. Find the table in `DbDefsTables`
 
 Add the table if it doesn't exist.
 
