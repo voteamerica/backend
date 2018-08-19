@@ -33,7 +33,12 @@ function getAnon(req: any, reply: any) {
 
   req.log();
 
-  postgresQueries.dbGetData(rfPool, dbQueries.dbGetQueryString, reply, results);
+  postgresQueries.dbGetData(
+    rfPool,
+    dbQueries.dbGetDriversQueryString,
+    reply,
+    results
+  );
 }
 
 function getUsers(req: any, reply: any) {
@@ -86,6 +91,24 @@ async function getUsersListInternal(req: any, reply: any, payload: UserType) {
   const dbData = await postgresQueries.dbGetDataListInternal(
     rfPool,
     dbQueries.dbGetUsersQueryString,
+    reply,
+    results
+  );
+
+  return dbData;
+}
+
+async function getDriversListInternal(req: any, reply: any, payload: UserType) {
+  var results = {
+    success: 'GET drivers list internal: ',
+    failure: 'GET drivers list internal error: '
+  };
+
+  req.log();
+
+  const dbData = await postgresQueries.dbGetDataListInternal(
+    rfPool,
+    dbQueries.dbGetDriversQueryString,
     reply,
     results
   );
@@ -515,6 +538,7 @@ module.exports = {
   getUsers: getUsers,
   getUsersInternal,
   getUsersListInternal,
+  getDriversListInternal,
   addUserInternal,
 
   getUnmatchedDrivers: getUnmatchedDrivers,

@@ -36,13 +36,17 @@ If the base select query doesn't already exist, add a function for the query and
 
 ### 3. Add a route handler support function to `routeFunctions.ts`
 
-It's most likely that your query will return a list of items. So follow the pattern of `getUsersListInternal()`. Adjust `results` for logging and later checks.
+It's most likely that your query will return a list of items. So add a function for this by following the pattern of `getUsersListInternal()`. Adjust `results` for logging and later checks. Export the new function in `module.exports`.
 
 NOTES:
 
-#### a. If you want to add a Where clause, look at `getUsersInternal` to see how that is done. IMPORTANT: Do follow the existing pattern as it is, as it creates a function to be called later. So don't just add the clause as text.
+#### a.
 
-#### b. Do put `Internal` as part of your new function name, this helps other volunteers be aware this function returns data and does not respond directly to a http request.
+If you want to add a Where clause, look at `getUsersInternal` to see how that is done. IMPORTANT: Do follow the existing pattern as it is, as it creates a function to be called later. So don't just add the clause as text.
+
+#### b.
+
+Do put `Internal` as part of your new function name, this helps other volunteers be aware this function returns data and does not respond directly to a http request.
 
 ### 4. Add the route handler to `index.ts`
 

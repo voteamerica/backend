@@ -351,7 +351,22 @@ const getUsersListHandler = async (req, res) => {
   res({ data: userInfoJSON });
 };
 
+const getDriversListHandler = async (req, res) => {
+  const payload = req.query;
+
+  const driverInfo = await routeFns.getDriversListInternal(req, res, payload);
+
+  if (!driverInfo) {
+    return res(Boom.badRequest('get drivers list error'));
+  }
+
+  const driverInfoJSON = JSON.stringify(driverInfo);
+
+  res({ data: driverInfoJSON });
+};
+
 const usersHandler = getUsersListHandler;
+const driversHandler = getDriversListHandler;
 
 server.register(
   [
@@ -380,11 +395,22 @@ server.register(
     });
 
     server.route({
-      // method: 'POST',
       method: 'GET',
       path: '/users/list',
       config: {
         handler: usersHandler,
+        auth: {
+          strategy: 'jwt',
+          scope: ['admin']
+        }
+      }
+    });
+
+    server.route({
+      method: 'GET',
+      path: '/drivers/list',
+      config: {
+        handler: driversHandler,
         auth: {
           strategy: 'jwt',
           scope: ['admin']
