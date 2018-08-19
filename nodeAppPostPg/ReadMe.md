@@ -14,6 +14,8 @@ Work on the .ts files, and compile them, as show below, to create the .js files
 
 ```
 tsc -p .
+
+tsc  --target es2017 -w -p .
 ```
 
 

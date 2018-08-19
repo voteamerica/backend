@@ -113,7 +113,8 @@ class PostgresQueries implements DbQueries {
       const rowsAsJSON = [];
 
       if (result !== undefined && result.rows !== undefined) {
-        result.rows.forEach(row => rowsAsJSON.push(JSON.stringify(row)));
+        // result.rows.forEach(row => rowsAsJSON.push(JSON.stringify(row)));
+        result.rows.forEach(row => rowsAsJSON.push(row));
       }
 
       return rowsAsJSON;

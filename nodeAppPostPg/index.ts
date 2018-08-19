@@ -1,11 +1,11 @@
 'use strict';
 
-import * as Hapi        from 'hapi';
-const Pool        = require('pg').Pool;
-const Good        = require('good');
-const GoodFile    = require('good-file');
+import * as Hapi from 'hapi';
+const Pool = require('pg').Pool;
+const Good = require('good');
+const GoodFile = require('good-file');
 
-console.log("start requires");
+console.log('start requires');
 
 const hapiAuthJwt = require('hapi-auth-jwt');
 const jwt = require('jsonwebtoken');
@@ -13,29 +13,40 @@ const bcrypt = require('bcrypt');
 const Boom = require('boom');
 // const Joi         = require('joi');
 
-console.log("end requires");
+console.log('end requires');
 
-const config      = require('./dbInfo.js');
-const logOptions  = require('./logInfo.js');
+const config = require('./dbInfo.js');
+const logOptions = require('./logInfo.js');
 
-const dbQueries   = require('./dbQueries.js');
+const dbQueries = require('./dbQueries.js');
 
-const routeFns    = require('./routeFunctions.js');
+const routeFns = require('./routeFunctions.js');
 
-import { DbQueriesPosts } from "./DbQueriesPosts"
-import { DbQueriesCancels } from "./DbDefsCancels"
+import { DbQueriesPosts } from './DbQueriesPosts';
+import { DbQueriesCancels } from './DbDefsCancels';
 
-import { PostgresQueries }  from "./postgresQueries";
-import { PostFunctions } from "./PostFunctions";
-import { RouteNamesAddDriverRider } from "./RouteNames";
-import { RouteNamesSelfService, RouteNamesMatch
+import { PostgresQueries } from './postgresQueries';
+import { PostFunctions } from './PostFunctions';
+import { RouteNamesAddDriverRider } from './RouteNames';
+import {
+  RouteNamesSelfService,
+  RouteNamesMatch
   // , RouteNamesChange
-  } from "./RouteNames";
-import { RouteNamesSelfServiceInfoExists } from "./RouteNames";
-import { RouteNamesCancel, RouteNamesUnmatched,RouteNamesDetails  } from "./RouteNames";
-import { logging }          from "./logging";
+} from './RouteNames';
+import { RouteNamesSelfServiceInfoExists } from './RouteNames';
+import {
+  RouteNamesCancel,
+  RouteNamesUnmatched,
+  RouteNamesDetails
+} from './RouteNames';
+import { logging } from './logging';
 
-import { verifyUniqueUser, verifyCredentials, createUser, createTokenAndRespond } from './login';
+import {
+  verifyUniqueUser,
+  verifyCredentials,
+  createUser,
+  createTokenAndRespond
+} from './login';
 
 let dbQueriesPosts = new DbQueriesPosts();
 let dbQueriesCancels = new DbQueriesCancels();
@@ -49,13 +60,13 @@ let routeNamesSelfServiceInfoExists = new RouteNamesSelfServiceInfoExists();
 let routeNamesCancel = new RouteNamesCancel();
 let routeNamesUnmatched = new RouteNamesUnmatched();
 let routeNamesDetails = new RouteNamesDetails();
-let loggingItem        = new logging();
+let loggingItem = new logging();
 
-config.user       = process.env.PGUSER;
-config.database   = process.env.PGDATABASE;
-config.password   = process.env.PGPASSWORD;
-config.host       = process.env.PGHOST;
-config.port       = process.env.PGPORT;
+config.user = process.env.PGUSER;
+config.database = process.env.PGDATABASE;
+config.password = process.env.PGPASSWORD;
+config.host = process.env.PGHOST;
+config.port = process.env.PGPORT;
 
 // const pool = new Pool(config);
 // not passing config causes Client() to search for env vars
@@ -65,18 +76,18 @@ const server = new Hapi.Server();
 routeFns.setPool(pool);
 postFunctions.setPool(pool);
 
-const OPS_INTERVAL  = 300000; // 5 mins
-const DEFAULT_PORT  = process.env.PORT || 3000;
+const OPS_INTERVAL = 300000; // 5 mins
+const DEFAULT_PORT = process.env.PORT || 3000;
 
 var appPort = DEFAULT_PORT;
 
 logOptions.ops.interval = OPS_INTERVAL;
 
-server.connection({ 
-  port: appPort, 
-  routes: { 
-    cors: true 
-  } 
+server.connection({
+  port: appPort,
+  routes: {
+    cors: true
+  }
 });
 
 server.route({
@@ -181,12 +192,17 @@ server.route({
   handler: (req, reply) => {
     var results = {
       success: 'GET matches: ',
-      failure: 'GET matches: ' 
+      failure: 'GET matches: '
     };
 
     req.log(['request']);
 
-    postgresQueries.dbGetMatchesData(pool, dbQueries.dbGetMatchesQueryString, reply, results);
+    postgresQueries.dbGetMatchesData(
+      pool,
+      dbQueries.dbGetMatchesQueryString,
+      reply,
+      results
+    );
   }
 });
 
@@ -196,13 +212,18 @@ server.route({
   handler: (req, reply) => {
     var results = {
       success: 'GET match-rider: ',
-      failure: 'GET match-rider: ' 
+      failure: 'GET match-rider: '
     };
 
     req.log(['request']);
 
-    postgresQueries.dbGetMatchSpecificData(pool, dbQueries.dbGetMatchRiderQueryString, 
-                            req.params.uuid, reply, results);
+    postgresQueries.dbGetMatchSpecificData(
+      pool,
+      dbQueries.dbGetMatchRiderQueryString,
+      req.params.uuid,
+      reply,
+      results
+    );
   }
 });
 
@@ -212,13 +233,18 @@ server.route({
   handler: (req, reply) => {
     var results = {
       success: 'GET match-driver: ',
-      failure: 'GET match-driver: ' 
+      failure: 'GET match-driver: '
     };
 
     req.log(['request']);
 
-    postgresQueries.dbGetMatchSpecificData(pool, dbQueries.dbGetMatchDriverQueryString, 
-                            req.params.uuid, reply, results);
+    postgresQueries.dbGetMatchSpecificData(
+      pool,
+      dbQueries.dbGetMatchDriverQueryString,
+      req.params.uuid,
+      reply,
+      results
+    );
   }
 });
 
@@ -283,9 +309,7 @@ server.route({
   method: 'POST',
   path: '/createuser',
   config: {
-    pre: [
-      {method: verifyUniqueUser}
-    ],
+    pre: [{ method: verifyUniqueUser }],
     handler: createUser
   }
 });
@@ -296,7 +320,7 @@ server.route({
   config: {
     pre: [
       {
-        method: verifyCredentials, 
+        method: verifyCredentials,
         assign: 'user'
       }
     ],
@@ -305,7 +329,7 @@ server.route({
 
       return createTokenAndRespond(res, user, 200);
     }
-    
+
     // ,
     // validate: {
     //   payload: authenticateUserSchema
@@ -322,27 +346,29 @@ const getUsersListHandler = async (req, res) => {
     return res(Boom.badRequest('get users list error'));
   }
 
-  res(userInfo);
+  const userInfoJSON = JSON.stringify(userInfo);
+
+  res({ data: userInfoJSON });
 };
 
 const usersHandler = getUsersListHandler;
 
-server.register([
-  {
-    register: hapiAuthJwt,
-    options:  {
+server.register(
+  [
+    {
+      register: hapiAuthJwt,
+      options: {
         state: {
           strictHeader: false,
           ignoreErrors: true
+        }
       }
+    },
+    {
+      register: Good,
+      options: logOptions
     }
-    ,
-  }, 
-  {
-    register: Good,
-    options:  logOptions
-  }]
-  ,
+  ],
   err => {
     if (err) {
       return console.error(err);
@@ -350,7 +376,7 @@ server.register([
 
     server.auth.strategy('jwt', 'jwt', {
       key: secret,
-      verifyOptions: {algorithms: ['HS256']}
+      verifyOptions: { algorithms: ['HS256'] }
     });
 
     server.route({
@@ -358,7 +384,7 @@ server.register([
       method: 'GET',
       path: '/users/list',
       config: {
-        handler: usersHandler, 
+        handler: usersHandler,
         auth: {
           strategy: 'jwt',
           scope: ['admin']
@@ -368,20 +394,22 @@ server.register([
 
     server.start(err => {
       if (err) {
-          throw err;
+        throw err;
       }
 
       console.log(`Server running at: ${server.info.uri} \n`);
 
-      console.log("driver ins: " + dbQueriesPosts.dbGetSubmitDriverString());
-      console.log("rider ins: " + dbQueriesPosts.dbGetSubmitRiderString());
-      console.log("user ins: " + dbQueriesPosts.dbGetSubmitUserString());
-      console.log("cancel ride fn: " + dbQueriesCancels.dbCancelRideRequestFunctionString());
-      console.log("reject ride fn: " + dbQueries.dbRejectRideFunctionString());
-      console.log("ops interval:" + logOptions.ops.interval);
+      console.log('driver ins: ' + dbQueriesPosts.dbGetSubmitDriverString());
+      console.log('rider ins: ' + dbQueriesPosts.dbGetSubmitRiderString());
+      console.log('user ins: ' + dbQueriesPosts.dbGetSubmitUserString());
+      console.log(
+        'cancel ride fn: ' +
+          dbQueriesCancels.dbCancelRideRequestFunctionString()
+      );
+      console.log('reject ride fn: ' + dbQueries.dbRejectRideFunctionString());
+      console.log('ops interval:' + logOptions.ops.interval);
     });
   }
 );
 
 loggingItem.logReqResp(server, pool);
-
