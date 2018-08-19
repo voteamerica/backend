@@ -42,9 +42,11 @@ NOTES:
 
 1.
 
+
    If you want to add a Where clause, look at `getUsersInternal` to see how that is done. IMPORTANT: Do follow the existing pattern as it is, as it creates a function to be called later. So don't just add the clause as text.
 
 2.
+
 
    Do put `Internal` as part of your new function name, this helps other volunteers be aware this function returns data and does not respond directly to a http request.
 
@@ -57,6 +59,8 @@ Make the bad request error specific to this route.
 ### 5. Add the secure route within `server.register()`
 
 Follow the pattern of `server.route()` for path `/users/list`.
+
+That's it, the route is now ready to use for the operator page!
 
 ## Installation on linux - notes for deployment
 
