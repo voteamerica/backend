@@ -40,13 +40,13 @@ It's most likely that your query will return a list of items. So add a function 
 
 NOTES:
 
-#### a.
+1.
 
-If you want to add a Where clause, look at `getUsersInternal` to see how that is done. IMPORTANT: Do follow the existing pattern as it is, as it creates a function to be called later. So don't just add the clause as text.
+   If you want to add a Where clause, look at `getUsersInternal` to see how that is done. IMPORTANT: Do follow the existing pattern as it is, as it creates a function to be called later. So don't just add the clause as text.
 
-#### b.
+2.
 
-Do put `Internal` as part of your new function name, this helps other volunteers be aware this function returns data and does not respond directly to a http request.
+   Do put `Internal` as part of your new function name, this helps other volunteers be aware this function returns data and does not respond directly to a http request.
 
 ### 4. Add the route handler to `index.ts`
 
