@@ -87,7 +87,7 @@ sh ./specific-machine-local-frontend.sh cp-pg-server R https://github.com/voteam
 sh ./start-compose-local-frontend.sh
 ```
 
-Awesome, you are up and running! Head to http://localhost:4000 in your browser to see the running app.
+That's it, you are up and running! Head to http://localhost:4000 in your browser to see the running app.
 
 ##### Stopping & cleaning up the environment
 
@@ -122,6 +122,8 @@ sh ./specific-machine-local.sh cp-nodejs R https://github.com/jkbits1/backend au
 ```
 sh ./start-compose-local-fullstack.sh
 ```
+
+That's it, you are up and running! Head to http://localhost:4000 in your browser to see the running app.
 
 Ctrl-C to finish, then tidy up with this command
 

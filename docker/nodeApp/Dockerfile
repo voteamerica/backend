@@ -14,7 +14,7 @@ RUN apt-get install -y vim-tiny
 
 RUN apt-get install -y git
 
-# RUcurl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+# RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 # echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 
 #
@@ -77,8 +77,6 @@ CMD ["/expo-start.sh"]
 
 # CMD ["/bin/bash"]
 
-# node --inspect=0.0.0.0:5858 --debug-brk index.js
-
+# node --inspect=0.0.0.0:5858 --inspect-brk index.js
 
 # CMD ["npm start"]
-
