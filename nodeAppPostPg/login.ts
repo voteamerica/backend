@@ -2,11 +2,24 @@ const bcrypt = require('bcrypt');
 const routeFns = require('./routeFunctions.js');
 const Boom = require('boom');
 
-import { UserType, createToken } from './token';
-
 const createUserErrorMessage = 'failed to add user';
 const existingUserError = 'user already exists';
 const verifyCredentialsError = 'bad credentials';
+
+const getJWTSecretFromEnv = () => process.env.JWT_SECRET || '';
+
+// NOTE: this import must remain after definitition of getJWTSecretFromEnv
+import { UserType, createToken } from './token';
+
+const jwt_secret = getJWTSecretFromEnv();
+
+const validJWTSecret = () => {
+  if (jwt_secret !== undefined && jwt_secret.length > 0) {
+    return true;
+  }
+
+  return false;
+};
 
 const hashPassword = (password, cb) => {
   bcrypt.genSalt(10, (err, salt) => {
@@ -50,6 +63,12 @@ const verifyCredentials = async (req, res) => {
   const payload = req.query;
   // const { payload } = req;
   const { password, email, username } = payload;
+
+  if (!validJWTSecret()) {
+    console.log('verify credentials - bad secret');
+
+    return res(Boom.badRequest(verifyCredentialsError));
+  }
 
   console.log('pwd', password);
   console.log('email', email);
@@ -97,13 +116,19 @@ const createUser = (req, res) => {
   // const payload = JSON.parse( req.payload.info);
   const payload = req.query;
 
+  if (!validJWTSecret()) {
+    console.log('create user error - bad secret');
+
+    return res(Boom.badRequest(createUserErrorMessage));
+  }
+
   let userFromPayload: any = payload || {};
 
   const password = userFromPayload.password;
 
   hashPassword(password, async (err, hash) => {
     if (err) {
-      console.log('bad info');
+      console.log('create user error - bad info');
 
       return res(Boom.badRequest(createUserErrorMessage));
     }
@@ -134,6 +159,13 @@ const createUser = (req, res) => {
 // }
 
 const createTokenAndRespond = (reply, user: UserType, code) => {
+  // NOTE: shouldn't get this far with a bad secret, just adding another check
+  if (!validJWTSecret()) {
+    console.log('createTokenAndRespond - bad secret');
+
+    return reply(Boom.badRequest(verifyCredentialsError));
+  }
+
   const token = createToken(user);
 
   return reply({ id_token: token }).code(code);
@@ -143,6 +175,8 @@ const createTokenAndRespond = (reply, user: UserType, code) => {
 };
 
 export {
+  getJWTSecretFromEnv,
+  validJWTSecret,
   hashPassword,
   verifyUniqueUser,
   verifyCredentials,

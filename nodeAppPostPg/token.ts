@@ -1,32 +1,36 @@
-const jwt = require('jsonwebtoken')
-const jwt_secret = process.env.JWT_SECRET || ''
+const jwt = require('jsonwebtoken');
+
+import { getJWTSecretFromEnv } from './login';
+
+const jwt_secret = getJWTSecretFromEnv();
 
 interface UserType {
-    id: string;
-    email: string;
-    username: string;
-    password: string;
-    admin: boolean;
-  }
-  
+  id: string;
+  email: string;
+  username: string;
+  password: string;
+  admin: boolean;
+}
+
 const createToken = (user: UserType) => {
   let scopes;
 
   if (user.admin) {
-      scopes = 'admin';
+    scopes = 'admin';
   }
 
   return jwt.sign(
-    { 
-        //   id: user.id, 
-        username: user.username, 
-        scope: scopes
-    }, 
-    jwt_secret, 
     {
-        algorithm: 'HS256', expiresIn: '1h'
+      //   id: user.id,
+      username: user.username,
+      scope: scopes
+    },
+    jwt_secret,
+    {
+      algorithm: 'HS256',
+      expiresIn: '1h'
     }
   );
 };
-  
+
 export { UserType, createToken };

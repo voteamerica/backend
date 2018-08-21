@@ -73,7 +73,7 @@ RUN chmod +x /expo-bash.sh
 # CMD ["/expo-start.sh"]
 # CMD ["/expo-debug.sh"]
 
-RUN tsc  --target es2017 -w -p . &
+# RUN tsc  --target es2017 -w -p . &
 
 CMD ["/bin/bash"]
 

@@ -44,7 +44,9 @@ import {
   verifyUniqueUser,
   verifyCredentials,
   createUser,
-  createTokenAndRespond
+  createTokenAndRespond,
+  validJWTSecret,
+  getJWTSecretFromEnv
 } from './login';
 
 let dbQueriesPosts = new DbQueriesPosts();
@@ -66,6 +68,8 @@ config.database = process.env.PGDATABASE;
 config.password = process.env.PGPASSWORD;
 config.host = process.env.PGHOST;
 config.port = process.env.PGPORT;
+
+const jwt_secret = getJWTSecretFromEnv();
 
 // const pool = new Pool(config);
 // not passing config causes Client() to search for env vars
@@ -302,8 +306,6 @@ server.route({
 //   handler: routeFns.confirmRide
 // });
 
-const jwt_secret = process.env.JWT_SECRET || '';
-
 server.route({
   method: 'POST',
   path: '/createuser',
@@ -389,36 +391,36 @@ server.register(
     }
 
     // only allow use of jwt strategy is valid key was defined
-    if (jwt_secret !== undefined || jwt_secret.length > 0) {
+    if (validJWTSecret()) {
       server.auth.strategy('jwt', 'jwt', {
         key: jwt_secret,
         verifyOptions: { algorithms: ['HS256'] }
       });
+
+      server.route({
+        method: 'GET',
+        path: '/users/list',
+        config: {
+          handler: usersHandler,
+          auth: {
+            strategy: 'jwt',
+            scope: ['admin']
+          }
+        }
+      });
+
+      server.route({
+        method: 'GET',
+        path: '/drivers/list',
+        config: {
+          handler: driversHandler,
+          auth: {
+            strategy: 'jwt',
+            scope: ['admin']
+          }
+        }
+      });
     }
-
-    server.route({
-      method: 'GET',
-      path: '/users/list',
-      config: {
-        handler: usersHandler,
-        auth: {
-          strategy: 'jwt',
-          scope: ['admin']
-        }
-      }
-    });
-
-    server.route({
-      method: 'GET',
-      path: '/drivers/list',
-      config: {
-        handler: driversHandler,
-        auth: {
-          strategy: 'jwt',
-          scope: ['admin']
-        }
-      }
-    });
 
     server.start(err => {
       if (err) {
