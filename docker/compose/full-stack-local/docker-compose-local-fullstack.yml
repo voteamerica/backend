@@ -52,10 +52,10 @@ services:
     image: carpool
 
     depends_on:
-    - cp-pg-server
-    # command: bash
-    # command: /expo-start.sh
-    # command: /expo-bash.sh
+      - cp-pg-server
+      # command: bash
+      # command: /expo-start.sh
+      # command: /expo-bash.sh
     stdin_open: true
 
     # this setting causes /bin/bash to wait on input, not exit immediately
@@ -63,10 +63,11 @@ services:
     environment:
       - PGPASSWORD=pwd
       - PGHOST=10.4.0.6
+      - JWT_SECRET=secret
     ports:
-      - "8000:8000"
-      - "5858:5858"
-      - "8080:8080"
+      - '8000:8000'
+      - '5858:5858'
+      - '8080:8080'
     links:
       - cp-pg-server
     volumes:

@@ -70,12 +70,12 @@ RUN chmod +x /expo-bash.sh
 # RUN npm install -g nightwatch
 
 # ENTRYPOINT ["/expo-start.sh"]
-# CMD ["/expo-start.sh"]
+CMD ["/expo-start.sh"]
 # CMD ["/expo-debug.sh"]
 
 # RUN tsc  --target es2017 -w -p . &
 
-CMD ["/bin/bash"]
+# CMD ["/bin/bash"]
 
 # node --inspect=0.0.0.0:5858 --debug-brk index.js
 
