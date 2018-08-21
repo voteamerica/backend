@@ -7,7 +7,8 @@ const GoodFile = require('good-file');
 
 console.log('start requires');
 
-const hapiAuthJwt = require('hapi-auth-jwt');
+// const hapiAuthJwt = require('hapi-auth-jwt');
+const hapiAuthJwt = require('./hapi-auth-jwt-local');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const Boom = require('boom');
