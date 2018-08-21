@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken')
-const secret = process.env.secret || 'secret'
+const jwt_secret = process.env.JWT_SECRET || ''
 
 interface UserType {
     id: string;
@@ -22,7 +22,7 @@ const createToken = (user: UserType) => {
         username: user.username, 
         scope: scopes
     }, 
-    secret, 
+    jwt_secret, 
     {
         algorithm: 'HS256', expiresIn: '1h'
     }

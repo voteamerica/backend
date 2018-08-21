@@ -9,8 +9,6 @@ console.log('start requires');
 
 // const hapiAuthJwt = require('hapi-auth-jwt');
 const hapiAuthJwt = require('./hapi-auth-jwt-local');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 const Boom = require('boom');
 // const Joi         = require('joi');
 
@@ -304,7 +302,7 @@ server.route({
 //   handler: routeFns.confirmRide
 // });
 
-const secret = process.env.secret || 'secret';
+const jwt_secret = process.env.JWT_SECRET || '';
 
 server.route({
   method: 'POST',
@@ -390,10 +388,13 @@ server.register(
       return console.error(err);
     }
 
-    server.auth.strategy('jwt', 'jwt', {
-      key: secret,
-      verifyOptions: { algorithms: ['HS256'] }
-    });
+    // only allow use of jwt strategy is valid key was defined
+    if (jwt_secret !== undefined || jwt_secret.length > 0) {
+      server.auth.strategy('jwt', 'jwt', {
+        key: jwt_secret,
+        verifyOptions: { algorithms: ['HS256'] }
+      });
+    }
 
     server.route({
       method: 'GET',
