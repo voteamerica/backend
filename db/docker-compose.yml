@@ -1,0 +1,15 @@
+version: '3'
+services:  
+  cp_pg_server:
+    build: .
+    image: carpool/cp_pg_server
+    #ports:
+    # - "5432:5432"
+    environment:
+      CARPOOL_DATABASE_NAME: LIVE
+      CARPOOL_SOURCE_FILES: /db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

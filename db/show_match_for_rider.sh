@@ -1,22 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
-# USAGE : $0 [id-rider] [dbname] 
+# USAGE : $0 [id-rider]
 
-if [[ "X$1" = "X" ]]
-then 
-echo "Usage: $0 uuid_rider [dbname]"
-exit 1
+if [[ "X$1" = "X" ]]; then 
+    echo "Usage: $0 uuid_rider"
+    exit 1
 fi
 
-PGDATABASE=${PGDATABASE:=carpool_live}
-if [[ "X$2" != "X" ]]
-then
-PGDATABASE=$2
-fi
 
-echo $PGDATABASE 
 
-psql $PGDATABASE <<RPT
+psql <<RPT
 select * from carpoolvote.match where uuid_rider='$1' order by score desc;
 RPT
 

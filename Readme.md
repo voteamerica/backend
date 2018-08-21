@@ -38,3 +38,15 @@ The front-end repo is [here](https://github.com/voteamerica/voteamerica.github.i
 
 If you're interested in contributing to this project, read our guidelines for [how to contribute](docs/contributing.md) first, and also please be aware of our [code of conduct](https://github.com/voteamerica/voteamerica.github.io/blob/master/docs/code-of-conduct.md).
 
+
+# Alternate Docker configuration for backend
+- make sure you have docker and docker-compose installed
+- Clone your fork of the backend repo
+- In your /etc/hosts file, define
+	127.0.0.1 api.carpoolvote.com
+- Build the docker images
+	- docker-compose -f docker-compose-build.yml build
+- Run the containers
+	- docker-compose up -d
+- You can now run the front end (jekyll), it will reach the backend on https://api.carpoolvote.com/live
+	- Note: In this test environment, a self-signed certificate is used by the backend instead of the real official certificate from LetsEncrypt. That will cause some errors in your browser. You will likely have to add an exception to allow it.

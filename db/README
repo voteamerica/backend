@@ -1,3 +1,9 @@
+--- DOCKER ----
+
+
+
+
+--- standard, non-docker setup ---
 --- FRESH CARPOOL DB CREATION ---
 as root user
 cd backend/db

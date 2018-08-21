@@ -1,5 +1,5 @@
 {
-  "name": "sms_handler",
+  "name": "cp_matching_engine",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -10,9 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dateformat": "^3.0.3",
-    "pg": "^7.4.3",
-    "twilio": "^2.11.0"
+    "pg": "^7.4.3"
   },
   "devDependencies": {
     "@types/node": "^6.0.42"

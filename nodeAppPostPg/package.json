@@ -29,7 +29,7 @@
     "hoek": "^5.0.4",
     "jsonwebtoken": "^8.1.0",
     "moment": "^2.15.1",
-    "pg": "^6.1.0"
+    "pg": "^7.4.3"
   },
   "devDependencies": {
     "@types/node": "^6.0.45",

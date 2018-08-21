@@ -1,38 +1,30 @@
-#!/bin/sh
+#!/bin/bash
 
-# USAGE : $0 [id] [dbname]
+# USAGE : $0 [id]
 
-if [[ "X$1" = "X" ]]
-then
-exit 1
+if [[ "X$1" = "X" ]]; then
+    echo "Usage: $0 id-rider"
+    exit 1
 fi
 
 id=$1
 
-PGDATABASE=${PGDATABASE:=carpool_live}
-if [[ "X$2" != "X" ]]
-then
-PGDATABASE=$2
-fi
-
-echo $PGDATABASE 
-
 echo "Rider Details"
-psql $PGDATABASE <<RPT
+psql <<RPT
 select * from carpoolvote.vw_ride_request where uuid='${id}'
 RPT
 
 echo "Rider Matches"
-psql $PGDATABASE <<RPT
+psql <<RPT
 select * from carpoolvote.match where uuid_rider='${id}'
 RPT
 
 echo "Rider emails"
-psql $PGDATABASE <<RPT
+psql <<RPT
 select status, subject, created_ts, last_updated_ts, recipient, emission_info from carpoolvote.outgoing_email where uuid='${id}'
 RPT
 
 echo "Rider sms"
-psql $PGDATABASE <<RPT
+psql <<RPT
 select status, created_ts, last_updated_ts, recipient, emission_info from carpoolvote.outgoing_sms where uuid='${id}'
 RPT
