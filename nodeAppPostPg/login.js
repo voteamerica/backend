@@ -42,13 +42,6 @@ const verifyUniqueUser = async (req, res) => {
     res(req.payload);
 };
 exports.verifyUniqueUser = verifyUniqueUser;
-// const user = {
-//   email: '123',
-//   userName: 'abc',
-//   // password: 'xyz',
-//   password: '$2a$10$Bt2vRGCw3udVph77lGBx8O1ffXFmEQv7d1gGI35nKzN.C1w.jeD32',
-//   admin: false
-// };
 const verifyCredentials = async (req, res) => {
     // const payload = JSON.parse( req.payload.info);
     const payload = req.query;
