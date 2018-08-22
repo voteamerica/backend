@@ -41,16 +41,17 @@ RUN git merge origin/$BRANCH_NAME
 
 RUN cd /usr/src/app/backend/nodeAppPostPg
 
+RUN npm install 
 RUN npm install -g typescript
 
-# reasons for yarn params
-# https://github.com/yarnpkg/yarn/issues/2240#issuecomment-300762981
-# https://github.com/yarnpkg/yarn/issues/3223#issuecomment-296373273
-RUN cat package.json
-# RUN npm install
-RUN yarn
-# RUN yarn install --check-files
-# RUN yarn install --force
+# # reasons for yarn params
+# # https://github.com/yarnpkg/yarn/issues/2240#issuecomment-300762981
+# # https://github.com/yarnpkg/yarn/issues/3223#issuecomment-296373273
+# RUN cat package.json
+# # RUN npm install
+# RUN yarn
+# # RUN yarn install --check-files
+# # RUN yarn install --force
 
 ENV PORT=8000 PGUSER=carpool_web PGDATABASE=carpoolvote
 
