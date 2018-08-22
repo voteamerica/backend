@@ -52,11 +52,7 @@ RUN yarn
 # RUN yarn install --check-files
 # RUN yarn install --force
 
-# can't get these two lines going yet
-# RUN . ./scripts/expo.sh
-
 ENV PORT=8000 PGUSER=carpool_web PGDATABASE=carpoolvote
-# ENV PGHOST=$CP_PG_SVR_PORT_5432_TCP_ADDR PGPASSWORD=$CP_PG_SVR_ENV_POSTGRES_PASSWORD 
 
 COPY ./expo-start.sh /
 COPY ./expo-debug.sh /
@@ -67,16 +63,10 @@ COPY ./expo-bash.sh /
 RUN chmod +x /expo-start.sh
 RUN chmod +x /expo-bash.sh
 
-# RUN npm install -g nightwatch
-
-# ENTRYPOINT ["/expo-start.sh"]
 CMD ["/expo-start.sh"]
+
+# NOTES for dev support
 # CMD ["/expo-debug.sh"]
 
 # RUN tsc  --target es2017 -w -p . &
-
-# CMD ["/bin/bash"]
-
 # node --inspect=0.0.0.0:5858 --inspect-brk index.js
-
-# CMD ["npm start"]
