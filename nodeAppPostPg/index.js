@@ -221,14 +221,6 @@ server.route({
 //   handler: routeFns.confirmRide
 // });
 server.route({
-    method: 'POST',
-    path: '/createuser',
-    config: {
-        pre: [{ method: login_1.verifyUniqueUser }],
-        handler: login_1.createUser
-    }
-});
-server.route({
     method: 'GET',
     path: '/users/authenticate',
     config: {
@@ -291,6 +283,14 @@ server.register([
         server.auth.strategy('jwt', 'jwt', {
             key: jwt_secret,
             verifyOptions: { algorithms: ['HS256'] }
+        });
+        server.route({
+            method: 'POST',
+            path: '/createuser',
+            config: {
+                pre: [{ method: login_1.verifyUniqueUser }],
+                handler: login_1.createUser
+            }
         });
         server.route({
             method: 'GET',
