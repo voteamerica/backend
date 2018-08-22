@@ -8,11 +8,12 @@ const GoodFile = require('good-file');
 console.log('start requires');
 
 // const hapiAuthJwt = require('hapi-auth-jwt');
-const hapiAuthJwt = require('./hapi-auth-jwt-local');
 const Boom = require('boom');
 // const Joi         = require('joi');
 
 console.log('end requires');
+
+const hapiAuthJwt = require('./hapi-auth-jwt-local.js');
 
 const config = require('./dbInfo.js');
 const logOptions = require('./logInfo.js');
