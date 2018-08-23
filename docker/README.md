@@ -189,50 +189,64 @@ Once the front-end changes are ready (or at least under way), use the `Local dev
 
 If so, follow these steps:
 
-1) create a new branch in your back-end repo. In the front-end branch under development, change the `./travis.yml` file to refer to this repo and branch.
+1. create a new branch in your back-end repo. In the front-end branch under development, change the `./travis.yml` file to refer to this repo and branch.
 
-2) In the back-end branch, make the necessary changes to the test files. 
+2. In the back-end branch, make the necessary changes to the test files.
 
-In the backend `travis.yml`, add a line to match up the backend branch with the frontend branch in the 
+In the backend `travis.yml`, add a line to match up the backend branch with the frontend branch in the
 `before_script:` section, e.g. for the `slfsvc-ui-adjust` branch of the `jkbits1` repo:
 
 ```
-  - ./docker/specific-machine-test-travis.sh cp-front-end R jkbits1/voteamerica.github.io slfsvc-ui-adjust 
+  - ./docker/specific-machine-test-travis.sh cp-front-end R jkbits1/voteamerica.github.io slfsvc-ui-adjust
 ```
 
 Commit the changes and push this branch to your own repo origin. The back-end repo branch will fail the travis tests, this is expected.
 
-3) Work on the front-end code and make the required test changes (in the backend repo) until tests for the revised front-end code pass. If you need assistance, ask on #backend channel of the Slack team and we will be happy to help you. **Do not** remove any tests without discussion with a senior repo member. If creating a PR that changes the tests, **clearly** mention this in the PR description.
+3. Work on the front-end code and make the required test changes (in the backend repo) until tests for the revised front-end code pass. If you need assistance, ask on #backend channel of the Slack team and we will be happy to help you. **Do not** remove any tests without discussion with a senior repo member. If creating a PR that changes the tests, **clearly** mention this in the PR description.
 
-4) Once the front-end code is ready, commit the changes and push this branch to your own repo origin. Do the same for any back-end test changes, as before. 
+4. Once the front-end code is ready, commit the changes and push this branch to your own repo origin. Do the same for any back-end test changes, as before.
 
 NOTE: the backend tests should pass now. On the travis page for your backend repo, find the failing backend branch and click Rebuild
 
-5) The front-end repo should pass the travis tests once pushed to your origin. If not, there is a problem in either front-end code or the tests. Presuming the tests have passed, create a PR for the front-end.
+5. The front-end repo should pass the travis tests once pushed to your origin. If not, there is a problem in either front-end code or the tests. Presuming the tests have passed, create a PR for the front-end.
 
-6) The final steps below re-align the `travis.yml` files to the main branches. 
+6. The final steps below re-align the `travis.yml` files to the main branches.
 
-When the front-end branch is accepted, a PR can be created for the back-end branch with the revised tests. 
+When the front-end branch is accepted, a PR can be created for the back-end branch with the revised tests.
 
-NOTE:  the backend PR should adjust the backend `travis.yml` file to refer to the main frontend repo and branch; this is to undo the change in step 2) above. Once the back-end PR is accepted, the final step is to adjust the front-end `./travis.yml` to once again refer to the main backend repo and branch. These final steps should be done **promptly** after the front-end PR is accepted.
-
-
-
-
-### The following instructions are being reviewed
+NOTE: the backend PR should adjust the backend `travis.yml` file to refer to the main frontend repo and branch; this is to undo the change in step 2) above. Once the back-end PR is accepted, the final step is to adjust the front-end `./travis.yml` to once again refer to the main backend repo and branch. These final steps should be done **promptly** after the front-end PR is accepted.
 
 ### 2) Test Front-end PR
-#### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
-Push this new PR to origin (not upstream)
 
-#### 2) create specific build of front-end docker machine using --build-arg BRANCH_NAME=pr...
-`docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) --build-arg BRANCH_NAME=pr270 cp-front-end`
+#### On your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 
-#### 3) use docker-compose to create the full local system
-`docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up`
+**NOTE:** Fetch from the main repo on `upstream` not `origin` as in the article.
+
+Push this new PR to your fork on `origin` (not `upstream`).
+
+Checkout this new pr branch.
+
+#### Choose manual or automated tests
+
+For manual testing, create the local machine:
+`sh ./specific-machine-local-frontend.sh cp-front-end R https://github.com/jkbits1/voteamerica.github.io pr123`
+
+Follow the steps above from `Start the environment` in `1) Front-end Development`.
+
+For automated tests, create the local machine:
+`sh ./specific-machine-test-frontend.sh cp-front-end R https://github.com/jkbits1/voteamerica.github.io pr123`
+
+Proceed from `Run the tests` in `2) Local development environment - frontend`.
+
+Optional: use VNC viewer to watch the tests execute
 
 ### 3) Test Backend-end PR
+
 #### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
+
+**NOTE:** Fetch from the main repo on `upstream` not `origin` as in the article.
+
+Push this new PR to your fork on `origin` (not `upstream`).
 
 Checkout this new pr branch.
 
