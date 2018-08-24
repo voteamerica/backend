@@ -330,6 +330,15 @@ server.route({
   }
 });
 
+server.route({
+  method: 'POST',
+  path: '/createuser',
+  config: {
+    pre: [{ method: verifyUniqueUser }],
+    handler: createUser
+  }
+});
+
 const getUsersListHandler = async (req, res) => {
   const payload = req.query;
 
@@ -387,15 +396,6 @@ server.register(
       server.auth.strategy('jwt', 'jwt', {
         key: jwt_secret,
         verifyOptions: { algorithms: ['HS256'] }
-      });
-
-      server.route({
-        method: 'POST',
-        path: '/createuser',
-        config: {
-          pre: [{ method: verifyUniqueUser }],
-          handler: createUser
-        }
       });
 
       server.route({
