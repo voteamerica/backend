@@ -277,13 +277,12 @@ sh ./start-compose-tests-pr.sh match
 
 #### 4) Optional: use VNC viewer to watch the tests execute
 
+### The following instructions are being reviewed
 
-
-
-
-### Manual test steps 
+### Manual test steps
 
 #### 3) test environment
+
 In a new terminal, run
 `docker exec -it $(docker ps | grep nigh | cut -c 1-4) /bin/bash`
 
