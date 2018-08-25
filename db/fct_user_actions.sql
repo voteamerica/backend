@@ -1887,3 +1887,81 @@ GRANT EXECUTE ON FUNCTION carpoolvote.driver_update_match_details(character vary
 GRANT EXECUTE ON FUNCTION carpoolvote.driver_update_match_details(character varying, character varying, character varying, text,
 	out integer, out text) TO carpool_role;
 
+
+-- 
+-- 
+-- submit_new_user
+-- return codes : 
+-- -1 : ERROR - Generic Error
+-- 0  : SUCCESS
+-- 1  : ERROR - Input is disabled
+-- 2  : ERROR - Input validation
+CREATE OR REPLACE FUNCTION carpoolvote.submit_new_user(
+    email character varying,
+    username character varying,
+    userpassword character varying,
+    userIsAdmin boolean,
+	OUT out_uuid character varying,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT) AS
+$BODY$
+DECLARE
+	v_step character varying(200);
+	a_ip inet;
+BEGIN	
+	
+	out_uuid := '';
+	out_error_code := 0;
+	out_error_text := '';
+
+-- validation steps
+
+	BEGIN			
+		out_uuid := carpoolvote.gen_random_uuid();
+		
+		INSERT INTO carpoolvote.operator(
+		"UUID", "email", "username", "userpassword", "userIsAdmin")
+		VALUES (
+		out_uuid, email, username, userpassword, userIsAdmin
+		);
+			
+		RETURN;
+	EXCEPTION WHEN OTHERS
+	THEN
+		out_uuid := '';
+		out_error_code := carpoolvote.f_EXECUTION_ERROR();
+		out_error_text := 'Unexpected exception in submit_new_user, ' || v_step || ' (' || SQLSTATE || ')' || SQLERRM;
+		RETURN;
+	END;
+	
+END  
+
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION carpoolvote.submit_new_user(
+    email character varying,
+    username character varying,
+    userpassword character varying,
+    userIsAdmin boolean,
+	OUT out_uuid character varying,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT)
+  OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_user(
+    email character varying,
+    username character varying,
+    userpassword character varying,
+    userIsAdmin boolean,
+	OUT out_uuid character varying,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT) TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_user(
+    email character varying,
+    username character varying,
+    userpassword character varying,
+    userIsAdmin boolean,
+	OUT out_uuid character varying,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT) TO carpool_role;
+	

@@ -92,4 +92,16 @@ class DbQueriesPosts {
     */
 		
   }
+
+   dbGetSubmitUserString(): string {
+    return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsSubmits.SUBMIT_USER_FN)
+        + ' ($1, $2, $3, $4)';
+	
+    /*	
+    email character varying,
+    username character varying,
+    userpassword character varying,
+    userIsAdmin boolean
+    */
+  }
 }

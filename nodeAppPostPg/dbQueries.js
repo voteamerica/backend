@@ -1,30 +1,26 @@
 "use strict";
-// generate string for db query statements etc 
+// generate string for db query statements etc
 Object.defineProperty(exports, "__esModule", { value: true });
-var DbDefsTables_1 = require("./DbDefsTables");
-var DbDefsSubmits_1 = require("./DbDefsSubmits");
-var DbDefsMatches_1 = require("./DbDefsMatches");
-var DbDefsExistsInfo_1 = require("./DbDefsExistsInfo");
-var DbDefsMatchFunctions_1 = require("./DbDefsMatchFunctions");
-var DbDefsCancels_1 = require("./DbDefsCancels");
-var DbDefsLegacy_1 = require("./DbDefsLegacy");
-var DbQueriesPosts_1 = require("./DbQueriesPosts");
-var dbDefsSchema = new DbDefsTables_1.DbDefsSchema();
-var dbDefsTables = new DbDefsTables_1.DbDefsTables();
-var dbDefsViews = new DbDefsTables_1.DbDefsViews();
-var dbDefsSubmits = new DbDefsSubmits_1.DbDefsSubmits();
-var dbDefsMatches = new DbDefsMatches_1.DbDefsMatches();
-var dbDefsExistsInfo = new DbDefsExistsInfo_1.DbDefsExistsInfo();
-var dbDefsMatchFunctions = new DbDefsMatchFunctions_1.DbDefsMatchFunctions();
-var dbDefsCancels = new DbDefsCancels_1.DbDefsCancels();
-var dbDefsLegacy = new DbDefsLegacy_1.DbDefsLegacy();
-var dbQueriesHelpers = new DbQueriesPosts_1.DbQueriesHelpers();
+const DbDefsTables_1 = require("./DbDefsTables");
+const DbDefsSubmits_1 = require("./DbDefsSubmits");
+const DbDefsMatches_1 = require("./DbDefsMatches");
+const DbDefsExistsInfo_1 = require("./DbDefsExistsInfo");
+const DbDefsMatchFunctions_1 = require("./DbDefsMatchFunctions");
+const DbDefsCancels_1 = require("./DbDefsCancels");
+const DbDefsLegacy_1 = require("./DbDefsLegacy");
+const DbQueriesPosts_1 = require("./DbQueriesPosts");
+let dbDefsSchema = new DbDefsTables_1.DbDefsSchema();
+let dbDefsTables = new DbDefsTables_1.DbDefsTables();
+let dbDefsViews = new DbDefsTables_1.DbDefsViews();
+let dbDefsSubmits = new DbDefsSubmits_1.DbDefsSubmits();
+let dbDefsMatches = new DbDefsMatches_1.DbDefsMatches();
+let dbDefsExistsInfo = new DbDefsExistsInfo_1.DbDefsExistsInfo();
+let dbDefsMatchFunctions = new DbDefsMatchFunctions_1.DbDefsMatchFunctions();
+let dbDefsCancels = new DbDefsCancels_1.DbDefsCancels();
+let dbDefsLegacy = new DbDefsLegacy_1.DbDefsLegacy();
+let dbQueriesHelpers = new DbQueriesPosts_1.DbQueriesHelpers();
 module.exports = {
     dbRejectRideFunctionString: dbRejectRideFunctionString,
-    // dbCancelRideRequestFunctionString:  dbCancelRideRequestFunctionString,
-    // dbCancelRiderMatchFunctionString:   dbCancelRiderMatchFunctionString,
-    // dbCancelDriveOfferFunctionString:   dbCancelDriveOfferFunctionString,
-    // dbCancelDriverMatchFunctionString:  dbCancelDriverMatchFunctionString,
     dbAcceptDriverMatchFunctionString: dbAcceptDriverMatchFunctionString,
     dbPauseDriverMatchFunctionString: dbPauseDriverMatchFunctionString,
     dbDriverExistsFunctionString: dbDriverExistsFunctionString,
@@ -37,11 +33,18 @@ module.exports = {
     dbGetMatchRiderQueryString: dbGetMatchRiderQueryString,
     dbGetMatchDriverQueryString: dbGetMatchDriverQueryString,
     dbGetMatchesQueryString: dbGetMatchesQueryString,
-    dbGetQueryString: dbGetQueryString,
+    dbGetDriversQueryString,
+    dbGetUsersQueryString: dbGetUsersQueryString,
+    dbAddUserQueryString,
     dbGetUnmatchedDriversQueryString: dbGetUnmatchedDriversQueryString,
     dbGetUnmatchedRidersQueryString: dbGetUnmatchedRidersQueryString,
     dbGetDriversDetailssQueryString: dbGetDriversDetailssQueryString,
     dbGetDriverMatchesDetailsQueryString: dbGetDriverMatchesDetailsQueryString
+    // dbGetInsertClause:            dbGetInsertClause
+    // ,
+    // dbGetSubmitDriverString:      dbGetSubmitDriverString,
+    // dbGetSubmitRiderString:       dbGetSubmitRiderString,
+    // dbGetSubmitHelperString:      dbGetSubmitHelperString
 };
 // const dbDefs = require('./dbDefs.js');
 // exec fns
@@ -85,8 +88,14 @@ function dbCancelRideOfferFunctionString() {
 function dbGetMatchesQueryString() {
     return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsTables.MATCH_TABLE);
 }
-function dbGetQueryString() {
+function dbGetDriversQueryString() {
     return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsTables.DRIVER_TABLE);
+}
+function dbGetUsersQueryString() {
+    return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsTables.USER_TABLE);
+}
+function dbAddUserQueryString() {
+    return dbQueriesHelpers.dbGetInsertClause(dbDefsTables.USER_TABLE);
 }
 function dbGetUnmatchedDriversQueryString() {
     return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsViews.UNMATCHED_DRIVERS_VIEW);
@@ -102,17 +111,23 @@ function dbGetDriverMatchesDetailsQueryString() {
 }
 // custom items, due to be revised
 function dbGetMatchRiderQueryString(rider_uuid) {
-    return 'SELECT * FROM nov2016.match inner join carpoolvote.rider ' +
+    return ('SELECT * FROM nov2016.match inner join carpoolvote.rider ' +
         'on (nov2016.match.uuid_rider = carpoolvote.rider."UUID") ' +
         'inner join carpoolvote.driver ' +
         'on (nov2016.match.uuid_driver = carpoolvote.driver."UUID") ' +
-        'where nov2016.match.uuid_rider = ' + " '" + rider_uuid + "' ";
+        'where nov2016.match.uuid_rider = ' +
+        " '" +
+        rider_uuid +
+        "' ");
 }
 function dbGetMatchDriverQueryString(driver_uuid) {
-    return 'SELECT * FROM nov2016.match inner join carpoolvote.rider ' +
+    return ('SELECT * FROM nov2016.match inner join carpoolvote.rider ' +
         'on (nov2016.match.uuid_rider = carpoolvote.rider."UUID") ' +
         'inner join carpoolvote.driver ' +
         'on (nov2016.match.uuid_driver = carpoolvote.driver."UUID") ' +
-        'where nov2016.match.uuid_driver = ' + " '" + driver_uuid + "' ";
+        'where nov2016.match.uuid_driver = ' +
+        " '" +
+        driver_uuid +
+        "' ");
 }
 //# sourceMappingURL=dbQueries.js.map

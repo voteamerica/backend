@@ -35,6 +35,7 @@ class PostFunctions {
   postRider: any = undefined;
   postHelper: any = undefined;
   postDriver: any = undefined;
+  postUser: any = undefined;
 
   setPool (pool: any) {
     this.rfPool = pool;
@@ -59,7 +60,14 @@ class PostFunctions {
         dbQueriesPosts.dbGetSubmitRiderString, 
         this.createPayloadFn(this.getRiderPayloadAsArray), 
         this.logPostRider);
-  }
+
+    this.postUser = 
+      this.createPostFn 
+      (routeNamesAddDriverRider.USER_ROUTE, 
+        dbQueriesPosts.dbGetSubmitUserString, 
+        this.createPayloadFn(this.getUserPayloadAsArray), 
+        this.logPostUser);
+    }
 
   logPost (req: any) {
     req.log();
@@ -180,6 +188,17 @@ class PostFunctions {
     ];
   }
 
+  getUserPayloadAsArray (self: PostFunctions, req: any, payload: any): any[] {
+    var ip = self.getClientAddress(req);
+    return [
+        ip,
+        payload.email,
+        payload.username,
+        payload.password,
+        payload.admin
+    ]
+  }
+
   getClientAddress (req: any) {
 		// See http://stackoverflow.com/questions/10849687/express-js-how-to-get-remote-client-address
 		// and http://stackoverflow.com/questions/19266329/node-js-get-clients-ip/19267284
@@ -219,6 +238,16 @@ class PostFunctions {
 
     console.log("rider payload: " + JSON.stringify(payload, null, 4));
     console.log("rider zip: " + payload.RiderCollectionZIP);
+  }
+
+  logPostUser (self: PostFunctions, req: any) {
+    var payload = req.payload;
+
+    // self.sanitiseRider(payload);
+
+    req.log();
+
+    console.log("user payload: " + JSON.stringify(payload, null, 4));
   }
 
   sanitiseRider (payload: any) {

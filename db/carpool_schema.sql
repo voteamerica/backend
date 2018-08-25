@@ -67,6 +67,23 @@ CREATE TABLE bordering_state (
 
 ALTER TABLE bordering_state OWNER TO carpool_admins;
 
+
+--
+-- Name: operator; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
+--
+
+CREATE TABLE operator (
+    "UUID" character varying(50) DEFAULT gen_random_uuid() NOT NULL,
+    "email" character varying(250) NOT NULL,
+    "username" character varying(250) NOT NULL,
+    "password" character varying(250) NOT NULL,
+    "admin" boolean NOT NULL,
+    "UUID_organization" character varying(50)
+);
+
+
+ALTER TABLE operator OWNER TO carpool_admins;
+
 --
 -- Name: driver; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
 --
@@ -196,20 +213,6 @@ CREATE TABLE organization (
 
 
 ALTER TABLE organization OWNER TO carpool_admin;
-
---
--- Name: operator; Type: TABLE; Schema: carpoolvote; Owner: carpool_admin
---
-
-CREATE TABLE operator (
-    "OperatorFirstName" character varying(255) NOT NULL,
-    "OperatorLastName" character varying(255) NOT NULL,
-    "UUID" character varying(50) DEFAULT gen_random_uuid() NOT NULL,
-    uuid_organization character varying(50) NOT NULL
-);
-
-
-ALTER TABLE operator OWNER TO carpool_admin;
 
 --
 -- Name: outgoing_email; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
@@ -437,6 +440,14 @@ ALTER TABLE ONLY zip_codes
 
 
 --
+-- Name: user_pk; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY operator
+    ADD CONSTRAINT user_pk PRIMARY KEY ("UUID");
+
+
+--
 -- Name: driver_pk; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
 --
 
@@ -474,12 +485,6 @@ ALTER TABLE ONLY match
 ALTER TABLE ONLY organization
     ADD CONSTRAINT organization_pkey PRIMARY KEY ("UUID");
 
---
--- Name: operator operator_pkey; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admin
---
-
-ALTER TABLE ONLY operator
-    ADD CONSTRAINT operator_pkey PRIMARY KEY ("UUID");
 --
 -- Name: outgoing_email_pk; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
 --
@@ -589,8 +594,7 @@ ALTER TABLE ONLY rider
 --
 
 ALTER TABLE ONLY operator
-    ADD CONSTRAINT operator_uuid_organization_fkey FOREIGN KEY (uuid_organization) REFERENCES organization("UUID") ON DELETE CASCADE;
-
+    ADD CONSTRAINT operator_uuid_organization_fkey FOREIGN KEY ("UUID_organization") REFERENCES organization("UUID") ON DELETE CASCADE;
 
 --
 -- Name: fct_modified_column(); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
@@ -603,7 +607,15 @@ GRANT ALL ON FUNCTION fct_modified_column() TO carpool_role;
 GRANT ALL ON FUNCTION fct_modified_column() TO carpool_web_role;
 
 
+--
+-- Name: operator; Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
 
+REVOKE ALL ON TABLE operator FROM PUBLIC;
+REVOKE ALL ON TABLE operator FROM carpool_admins;
+GRANT ALL ON TABLE operator TO carpool_admins;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE operator TO carpool_role;
+GRANT SELECT,INSERT,UPDATE ON TABLE operator TO carpool_web_role;
 
 
 --

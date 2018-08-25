@@ -1,47 +1,55 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
-var Hapi = require("hapi");
-var Pool = require('pg').Pool;
-var Good = require('good');
-var GoodFile = require('good-file');
-var config = require('./dbInfo.js');
-var logOptions = require('./logInfo.js');
-var dbQueries = require('./dbQueries.js');
-var routeFns = require('./routeFunctions.js');
-var DbQueriesPosts_1 = require("./DbQueriesPosts");
-var DbDefsCancels_1 = require("./DbDefsCancels");
-var postgresQueries_1 = require("./postgresQueries");
-var PostFunctions_1 = require("./PostFunctions");
-var RouteNames_1 = require("./RouteNames");
-var RouteNames_2 = require("./RouteNames");
-var RouteNames_3 = require("./RouteNames");
-var RouteNames_4 = require("./RouteNames");
-var logging_1 = require("./logging");
-var dbQueriesPosts = new DbQueriesPosts_1.DbQueriesPosts();
-var dbQueriesCancels = new DbDefsCancels_1.DbQueriesCancels();
-var postgresQueries = new postgresQueries_1.PostgresQueries();
-var postFunctions = new PostFunctions_1.PostFunctions();
-var routeNamesAddDriverRider = new RouteNames_1.RouteNamesAddDriverRider();
-var routeNamesSelfService = new RouteNames_2.RouteNamesSelfService();
-var routeNamesMatch = new RouteNames_2.RouteNamesMatch();
-var routeNamesSelfServiceInfoExists = new RouteNames_3.RouteNamesSelfServiceInfoExists();
-var routeNamesCancel = new RouteNames_4.RouteNamesCancel();
-var routeNamesUnmatched = new RouteNames_4.RouteNamesUnmatched();
-var routeNamesDetails = new RouteNames_4.RouteNamesDetails();
-var loggingItem = new logging_1.logging();
+const Hapi = require("hapi");
+const Pool = require('pg').Pool;
+const Good = require('good');
+const GoodFile = require('good-file');
+console.log('start requires');
+// const hapiAuthJwt = require('hapi-auth-jwt');
+const Boom = require('boom');
+// const Joi         = require('joi');
+console.log('end requires');
+const hapiAuthJwt = require('./hapi-auth-jwt-local.js');
+const config = require('./dbInfo.js');
+const logOptions = require('./logInfo.js');
+const dbQueries = require('./dbQueries.js');
+const routeFns = require('./routeFunctions.js');
+const DbQueriesPosts_1 = require("./DbQueriesPosts");
+const DbDefsCancels_1 = require("./DbDefsCancels");
+const postgresQueries_1 = require("./postgresQueries");
+const PostFunctions_1 = require("./PostFunctions");
+const RouteNames_1 = require("./RouteNames");
+const RouteNames_2 = require("./RouteNames");
+const RouteNames_3 = require("./RouteNames");
+const RouteNames_4 = require("./RouteNames");
+const logging_1 = require("./logging");
+const login_1 = require("./login");
+let dbQueriesPosts = new DbQueriesPosts_1.DbQueriesPosts();
+let dbQueriesCancels = new DbDefsCancels_1.DbQueriesCancels();
+let postgresQueries = new postgresQueries_1.PostgresQueries();
+let postFunctions = new PostFunctions_1.PostFunctions();
+let routeNamesAddDriverRider = new RouteNames_1.RouteNamesAddDriverRider();
+let routeNamesSelfService = new RouteNames_2.RouteNamesSelfService();
+let routeNamesMatch = new RouteNames_2.RouteNamesMatch();
+let routeNamesSelfServiceInfoExists = new RouteNames_3.RouteNamesSelfServiceInfoExists();
+let routeNamesCancel = new RouteNames_4.RouteNamesCancel();
+let routeNamesUnmatched = new RouteNames_4.RouteNamesUnmatched();
+let routeNamesDetails = new RouteNames_4.RouteNamesDetails();
+let loggingItem = new logging_1.logging();
 config.user = process.env.PGUSER;
 config.database = process.env.PGDATABASE;
 config.password = process.env.PGPASSWORD;
 config.host = process.env.PGHOST;
 config.port = process.env.PGPORT;
+const jwt_secret = login_1.getJWTSecretFromEnv();
 // const pool = new Pool(config);
 // not passing config causes Client() to search for env vars
-var pool = new Pool();
-var server = new Hapi.Server();
+const pool = new Pool();
+const server = new Hapi.Server();
 routeFns.setPool(pool);
 postFunctions.setPool(pool);
-var OPS_INTERVAL = 300000; // 5 mins
-var DEFAULT_PORT = process.env.PORT || 3000;
+const OPS_INTERVAL = 300000; // 5 mins
+const DEFAULT_PORT = process.env.PORT || 3000;
 var appPort = DEFAULT_PORT;
 logOptions.ops.interval = OPS_INTERVAL;
 server.connection({
@@ -69,6 +77,11 @@ server.route({
     method: 'POST',
     path: '/' + routeNamesAddDriverRider.HELPER_ROUTE,
     handler: postFunctions.postHelper
+});
+server.route({
+    method: 'POST',
+    path: '/' + routeNamesAddDriverRider.USER_ROUTE,
+    handler: postFunctions.postUser
 });
 server.route({
     method: 'GET',
@@ -128,7 +141,7 @@ server.route({
 server.route({
     method: 'GET',
     path: '/matches',
-    handler: function (req, reply) {
+    handler: (req, reply) => {
         var results = {
             success: 'GET matches: ',
             failure: 'GET matches: '
@@ -140,7 +153,7 @@ server.route({
 server.route({
     method: 'GET',
     path: '/match-rider/{uuid}',
-    handler: function (req, reply) {
+    handler: (req, reply) => {
         var results = {
             success: 'GET match-rider: ',
             failure: 'GET match-rider: '
@@ -152,7 +165,7 @@ server.route({
 server.route({
     method: 'GET',
     path: '/match-driver/{uuid}',
-    handler: function (req, reply) {
+    handler: (req, reply) => {
         var results = {
             success: 'GET match-driver: ',
             failure: 'GET match-driver: '
@@ -207,23 +220,113 @@ server.route({
 //   path: '/' + routeNamesChange.PUT_DRIVER_ROUTE,
 //   handler: routeFns.confirmRide
 // });
-server.register({
-    register: Good,
-    options: logOptions
-}, function (err) {
+server.route({
+    method: 'GET',
+    path: '/users/authenticate',
+    config: {
+        pre: [
+            {
+                method: login_1.verifyCredentials,
+                assign: 'user'
+            }
+        ],
+        handler: (req, res) => {
+            const user = req.pre.user;
+            return login_1.createTokenAndRespond(res, user, 200);
+        }
+        // ,
+        // validate: {
+        //   payload: authenticateUserSchema
+        // }
+    }
+});
+server.route({
+    method: 'POST',
+    path: '/createuser',
+    config: {
+        pre: [{ method: login_1.verifyUniqueUser }],
+        handler: login_1.createUser
+    }
+});
+const getUsersListHandler = async (req, res) => {
+    const payload = req.query;
+    const userInfo = await routeFns.getUsersListInternal(req, res, payload);
+    if (!userInfo) {
+        return res(Boom.badRequest('get users list error'));
+    }
+    const userInfoJSON = JSON.stringify(userInfo);
+    res({ data: userInfoJSON });
+};
+const getDriversListHandler = async (req, res) => {
+    const payload = req.query;
+    const driverInfo = await routeFns.getDriversListInternal(req, res, payload);
+    if (!driverInfo) {
+        return res(Boom.badRequest('get drivers list error'));
+    }
+    const driverInfoJSON = JSON.stringify(driverInfo);
+    res({ data: driverInfoJSON });
+};
+const usersHandler = getUsersListHandler;
+const driversHandler = getDriversListHandler;
+server.register([
+    {
+        register: hapiAuthJwt,
+        options: {
+            state: {
+                strictHeader: false,
+                ignoreErrors: true
+            }
+        }
+    },
+    {
+        register: Good,
+        options: logOptions
+    }
+], err => {
     if (err) {
         return console.error(err);
     }
-    server.start(function (err) {
+    // only allow use of jwt strategy is valid key was defined
+    if (login_1.validJWTSecret()) {
+        server.auth.strategy('jwt', 'jwt', {
+            key: jwt_secret,
+            verifyOptions: { algorithms: ['HS256'] }
+        });
+        server.route({
+            method: 'GET',
+            path: '/users/list',
+            config: {
+                handler: usersHandler,
+                auth: {
+                    strategy: 'jwt',
+                    scope: ['admin']
+                }
+            }
+        });
+        server.route({
+            method: 'GET',
+            path: '/drivers/list',
+            config: {
+                handler: driversHandler,
+                auth: {
+                    strategy: 'jwt',
+                    scope: ['admin']
+                }
+            }
+        });
+    }
+    server.start(err => {
         if (err) {
             throw err;
         }
-        console.log("Server running at: " + server.info.uri + " \n");
-        console.log("driver ins: " + dbQueriesPosts.dbGetSubmitDriverString());
-        console.log("rider ins: " + dbQueriesPosts.dbGetSubmitRiderString());
-        console.log("cancel ride fn: " + dbQueriesCancels.dbCancelRideRequestFunctionString());
-        console.log("reject ride fn: " + dbQueries.dbRejectRideFunctionString());
-        console.log("ops interval:" + logOptions.ops.interval);
+        console.log(`Server running at: ${server.info.uri} \n`);
+        console.log('driver ins: ' + dbQueriesPosts.dbGetSubmitDriverString());
+        console.log('rider ins: ' + dbQueriesPosts.dbGetSubmitRiderString());
+        console.log('user ins: ' + dbQueriesPosts.dbGetSubmitUserString());
+        console.log('cancel ride fn: ' +
+            dbQueriesCancels.dbCancelRideRequestFunctionString());
+        console.log('reject ride fn: ' + dbQueries.dbRejectRideFunctionString());
+        console.log('ops interval:' + logOptions.ops.interval);
     });
 });
 loggingItem.logReqResp(server, pool);

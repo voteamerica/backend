@@ -10,6 +10,12 @@ RUN apt-get install -y git
 
 # RUN apk --update add git vim
 
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN apt-get install -y nodejs
+
+RUN npm install -g webpack
+RUN npm install -g webpack-cli
+
 ARG CACHEBUST=1
 ARG FE_PATH=/usr/src/app/frontend/
 ARG BRANCH_NAME=master
@@ -29,14 +35,18 @@ RUN ls
 RUN git fetch origin
 RUN git merge origin/$BRANCH_NAME
 
-# RUN cd $FE_PATH
-
-# RUN mkdir $FE_PATH/_site
+# run webpack as background task
+# RUN webpack --watch --progress --info-verbosity verbose &
 
 COPY ./_config-local-host.yml /
 COPY ./_config-local-ip.yml /
 
+COPY ./expo-start.sh /
+RUN chmod +x /expo-start.sh
+
 # ENTRYPOINT ["jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml"]
 # ENTRYPOINT [""]
 # ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/expo-start.sh"]
 
+# CMD ["/bin/bash"]
