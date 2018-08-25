@@ -6,6 +6,9 @@
 CARPOOL_DATABASE_NAME=${CARPOOL_DATABASE_NAME:-LIVE}
 CARPOOL_SOURCE_FILES=${CARPOOL_SOURCE_FILES:-.}
 
+unset PGDATABASE
+unset PGUSER
+
 cd $CARPOOL_SOURCE_FILES
 
 psql -d postgres -U postgres < carpool_roles.sql  \
