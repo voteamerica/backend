@@ -256,11 +256,39 @@ When the front-end branch is accepted, a PR can be created for the back-end bran
 
 NOTE: the backend PR should adjust the backend `travis.yml` file to refer to the main frontend repo and branch; this is to undo the change in step 2) above. Once the back-end PR is accepted, the final step is to adjust the front-end `./travis.yml` to once again refer to the main backend repo and branch. These final steps should be done **promptly** after the front-end PR is accepted.
 
-### 2) Test Backend-end PR
+### 2) Test Front-end PR
+
+#### On your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
+
+**NOTE:** Fetch from the main repo on `upstream` not `origin` as in the article.
+
+Push this new PR to your fork on `origin` (not `upstream`).
+
+Checkout this new pr branch.
+
+#### Choose manual or automated tests
+
+For manual testing, create the local machine:
+`sh ./specific-machine-local-frontend.sh cp-front-end R https://github.com/jkbits1/voteamerica.github.io pr123`
+
+Follow the steps above from `Start the environment` in `1) Front-end Development`.
+
+For automated tests, create the local machine:
+`sh ./specific-machine-test-frontend.sh cp-front-end R https://github.com/jkbits1/voteamerica.github.io pr123`
+
+Proceed from `Run the tests` in `2) Local development environment - frontend`.
+
+Optional: use VNC viewer to watch the tests execute
+
+### 3) Test Backend-end PR
 
 #### 1) on your local fork, create a branch, e.g. `pr123`, for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 
+**NOTE:** Fetch from the main repo on `upstream` not `origin` as in the article.
+
 **NOTE:** in the text below, the repo owner `jkbits1` represents the PR tester. Replace this with your own github username.
+
+Push this new PR to your fork on `origin` (not `upstream`).
 
 Checkout this new branch and follow these steps:
 
@@ -289,20 +317,6 @@ sh ./start-compose-tests-pr.sh match
 #### 4) Optional: use VNC viewer to watch the tests execute
 
 ### The following instructions are being reviewed
-
-### 2) Test Front-end PR
-
-#### 1) on your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
-
-Push this new PR to origin (not upstream)
-
-#### 2) create specific build of front-end docker machine using --build-arg BRANCH_NAME=pr...
-
-`docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml build --build-arg CACHEBUST=$(date +%s) --build-arg BRANCH_NAME=pr270 cp-front-end`
-
-#### 3) use docker-compose to create the full local system
-
-`docker-compose -f ./compose/docker-compose-static-ip-dev-build.yml up`
 
 ### Manual test steps
 
