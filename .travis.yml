@@ -1,4 +1,3 @@
----
 # Uses Ubuntu 'trusty' distribution
 sudo: required
 dist: trusty
@@ -12,7 +11,6 @@ env:
 language: ruby
 
 install:
-
   - sudo rm /usr/local/bin/docker-compose
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
@@ -27,23 +25,29 @@ install:
 
   - echo "event" $TRAVIS_EVENT_TYPE
 
+  - pwd
+
+  - ls $HOME
+
 before_script:
-# When this file is on a branch that is used to match a specific frontend branch being developed,
-# then specify this front-end branch here
-  # - ./docker/specific-machine-test-travis.sh cp-front-end R jkbits1/voteamerica.github.io slfsvc-ui-adjust 
+  # When this file is on a branch that is used to match a specific frontend branch being developed,
+  # then specify this front-end branch here
+  # - ./docker/specific-machine-test-travis.sh cp-front-end R jkbits1/voteamerica.github.io slfsvc-ui-adjust
 
-  - ./docker/specific-machine-test-travis.sh cp-test-runner R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
-  - ./docker/specific-machine-test-travis.sh cp-nodejs      R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
-  - ./docker/specific-machine-test-travis.sh cp-pg-server   R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
+  - cd ./docker
 
-  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml up -d
+  - ./specific-machine-test-travis.sh cp-test-runner R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
+  - ./specific-machine-test-travis.sh cp-nodejs      R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
+  - ./specific-machine-test-travis.sh cp-pg-server   R $TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_EVENT_TYPE $TRAVIS_PULL_REQUEST_SLUG $TRAVIS_PULL_REQUEST_BRANCH
+
+  - docker-compose -f ./compose/full-stack-test/docker-compose-test.yml up -d
 
 # permissions needed, two suggestions here
 # https://stackoverflow.com/questions/42154912/permission-denied-for-build-sh-file
 # https://stackoverflow.com/questions/10516201/updating-file-permissions-only-in-git
 # https://stackoverflow.com/questions/14267441/automatically-apply-git-update-index-chmodx-to-executable-files
 script:
-  - travis_retry ./docker/compose-tests.sh pause-cancel2
+  - travis_retry ./compose-tests.sh pause-cancel2
 
 after_script:
-  - docker-compose -f ./docker/compose/full-stack-test/docker-compose-test.yml down
+  - docker-compose -f ./compose/full-stack-test/docker-compose-test.yml down

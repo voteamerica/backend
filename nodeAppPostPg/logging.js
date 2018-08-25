@@ -1,11 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 // lower case class name to avoid git rename issues 
-var logging = (function () {
-    function logging() {
-    }
-    logging.prototype.logReqResp = function (server, pool) {
-        server.on('request', function (request, event, tags) {
+class logging {
+    logReqResp(server, pool) {
+        server.on('request', (request, event, tags) => {
             // Include the Requestor's IP Address on every log
             if (!event.remoteAddress) {
                 event.remoteAddress = request.headers['x-forwarded-for'] || request.info.remoteAddress;
@@ -16,20 +14,19 @@ var logging = (function () {
             }
             console.log('server req: %j', event);
         });
-        server.on('response', function (request) {
+        server.on('response', (request) => {
             console.log("server resp: "
                 + request.info.remoteAddress
                 + ': ' + request.method.toUpperCase()
                 + ' ' + request.url.path
                 + ' --> ' + request.response.statusCode);
         });
-        pool.on('error', function (err, client) {
+        pool.on('error', (err, client) => {
             if (err) {
                 console.error("db err: " + err);
             }
         });
-    };
-    return logging;
-}());
+    }
+}
 exports.logging = logging;
 //# sourceMappingURL=logging.js.map

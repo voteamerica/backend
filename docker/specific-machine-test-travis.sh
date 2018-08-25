@@ -99,5 +99,5 @@ fi
 pwd
 ls
 
-$DOCKERCOMPOSE -f docker/compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/$REPO --build-arg BRANCH_NAME=$BRANCH --build-arg CACHEBUST=$CACHEBUST $MACHINE
+$DOCKERCOMPOSE -f ./compose/full-stack-test/docker-compose-test.yml build --build-arg REPO=https://github.com/$REPO --build-arg BRANCH_NAME=$BRANCH --build-arg CACHEBUST=$CACHEBUST $MACHINE
 

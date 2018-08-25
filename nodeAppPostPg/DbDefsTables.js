@@ -1,24 +1,23 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var DbDefsSchema = /** @class */ (function () {
-    function DbDefsSchema() {
+class DbDefsSchema {
+    constructor() {
         this.SCHEMA_NAME = 'carpoolvote';
     }
-    return DbDefsSchema;
-}());
+}
 exports.DbDefsSchema = DbDefsSchema;
-var DbDefsTables = /** @class */ (function () {
-    function DbDefsTables() {
+class DbDefsTables {
+    constructor() {
         this.DRIVER_TABLE = 'driver';
         this.RIDER_TABLE = 'rider';
         this.HELPER_TABLE = 'helper';
         this.MATCH_TABLE = 'match';
+        this.USER_TABLE = 'operator';
     }
-    return DbDefsTables;
-}());
+}
 exports.DbDefsTables = DbDefsTables;
-var DbDefsViews = /** @class */ (function () {
-    function DbDefsViews() {
+class DbDefsViews {
+    constructor() {
         this.UNMATCHED_DRIVERS_VIEW = 'vw_unmatched_drivers';
         this.UNMATCHED_DRIVERS_DETAILS_VIEW = 'vw_unmatched_drivers_details';
         this.UNMATCHED_RIDERS_VIEW = 'vw_unmatched_riders';
@@ -26,7 +25,6 @@ var DbDefsViews = /** @class */ (function () {
         this.DRIVERS_DETAILS_VIEW = 'vw_drivers_details';
         this.DRIVER_MATCHES_DETAILS_VIEW = 'vw_driver_matches_details';
     }
-    return DbDefsViews;
-}());
+}
 exports.DbDefsViews = DbDefsViews;
 //# sourceMappingURL=DbDefsTables.js.map
