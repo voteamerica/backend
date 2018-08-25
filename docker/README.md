@@ -280,7 +280,7 @@ Proceed from `Run the tests` in `2) Local development environment - frontend`.
 
 Optional: use VNC viewer to watch the tests execute
 
-### 2) Test Backend-end PR
+### 3) Test Backend-end PR
 
 #### 1) on your local fork, create a branch, e.g. `pr123`, for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 
