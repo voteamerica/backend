@@ -69,20 +69,20 @@ ALTER TABLE bordering_state OWNER TO carpool_admins;
 
 
 --
--- Name: operator; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
+-- Name: tb_user; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
 --
 
-CREATE TABLE operator (
+CREATE TABLE tb_user (
     "UUID" character varying(50) DEFAULT gen_random_uuid() NOT NULL,
-    "email" character varying(250) NOT NULL,
-    "username" character varying(250) NOT NULL,
-    "password" character varying(250) NOT NULL,
-    "admin" boolean NOT NULL,
+    email character varying(250) NOT NULL,
+    username character varying(250) NOT NULL,
+    password character varying(250) NOT NULL,
+    is_admin boolean DEFAULT FALSE NOT NULL,
     "UUID_organization" character varying(50)
 );
 
 
-ALTER TABLE operator OWNER TO carpool_admins;
+ALTER TABLE tb_user OWNER TO carpool_admins;
 
 --
 -- Name: driver; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
@@ -443,7 +443,7 @@ ALTER TABLE ONLY zip_codes
 -- Name: user_pk; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
 --
 
-ALTER TABLE ONLY operator
+ALTER TABLE ONLY tb_user
     ADD CONSTRAINT user_pk PRIMARY KEY ("UUID");
 
 
@@ -590,11 +590,11 @@ ALTER TABLE ONLY rider
     ADD CONSTRAINT rider_uuid_organization_fkey FOREIGN KEY (uuid_organization) REFERENCES organization("UUID") ON DELETE CASCADE;
 
 --
--- Name: operator operator_uuid_organization_fkey; Type: FK CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
+-- Name: user user_uuid_organization_fkey; Type: FK CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
 --
 
-ALTER TABLE ONLY operator
-    ADD CONSTRAINT operator_uuid_organization_fkey FOREIGN KEY ("UUID_organization") REFERENCES organization("UUID") ON DELETE CASCADE;
+ALTER TABLE ONLY tb_user
+    ADD CONSTRAINT user_uuid_organization_fkey FOREIGN KEY ("UUID_organization") REFERENCES carpoolvote.organization("UUID") ON DELETE CASCADE;
 
 --
 -- Name: fct_modified_column(); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
@@ -608,14 +608,14 @@ GRANT ALL ON FUNCTION fct_modified_column() TO carpool_web_role;
 
 
 --
--- Name: operator; Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+-- Name: user; Type: ACL; Schema: carpoolvote; Owner: carpool_admins
 --
 
-REVOKE ALL ON TABLE operator FROM PUBLIC;
-REVOKE ALL ON TABLE operator FROM carpool_admins;
-GRANT ALL ON TABLE operator TO carpool_admins;
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE operator TO carpool_role;
-GRANT SELECT,INSERT,UPDATE ON TABLE operator TO carpool_web_role;
+REVOKE ALL ON TABLE tb_user FROM PUBLIC;
+REVOKE ALL ON TABLE tb_user FROM carpool_admins;
+GRANT ALL ON TABLE tb_user TO carpool_admins;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE tb_user TO carpool_role;
+GRANT SELECT,INSERT,UPDATE ON TABLE tb_user TO carpool_web_role;
 
 
 --
