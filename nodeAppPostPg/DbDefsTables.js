@@ -12,7 +12,7 @@ class DbDefsTables {
         this.RIDER_TABLE = 'rider';
         this.HELPER_TABLE = 'helper';
         this.MATCH_TABLE = 'match';
-        this.USER_TABLE = 'operator';
+        this.USER_TABLE = 'tb_user';
     }
 }
 exports.DbDefsTables = DbDefsTables;
