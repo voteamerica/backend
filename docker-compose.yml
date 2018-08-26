@@ -17,10 +17,6 @@ services:
   cp_pg_server:
     image: carpool/pg_server
     container_name: cp_pg_server
-    environment:
-      - CARPOOL_DATABASE_NAME=LIVE
-      - PGDATABASE=LIVE
-      - PGUSER=carpool_app
     volumes:
       - pgdata:/var/lib/postgresql/data
     # ports:

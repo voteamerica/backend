@@ -1919,8 +1919,8 @@ BEGIN
 	BEGIN			
 		out_uuid := carpoolvote.gen_random_uuid();
 		
-		INSERT INTO carpoolvote.operator(
-		"UUID", "email", "username", "userpassword", "userIsAdmin")
+		INSERT INTO carpoolvote.tb_user(
+		"UUID", email, username, password, is_admin)
 		VALUES (
 		out_uuid, email, username, userpassword, userIsAdmin
 		);
