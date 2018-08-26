@@ -77,7 +77,7 @@ CREATE TABLE tb_user (
     email character varying(250) NOT NULL,
     username character varying(250) NOT NULL,
     password character varying(250) NOT NULL,
-    is_admin boolean DEFAULT FALSE NOT NULL,
+    admin boolean DEFAULT FALSE NOT NULL,
     "UUID_organization" character varying(50)
 );
 
