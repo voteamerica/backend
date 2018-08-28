@@ -26,3 +26,4 @@ psql < carpool_roles.sql \
 && psql $DB < fct_user_actions.sql \
 && psql $DB < fct_matching_engine.sql \
 && psql $DB < /usr/src/app/backend/docker/pg-auto/alter.sql \
+&& psql $DB < /usr/src/app/backend/docker/pg-auto/test-user.sql \
