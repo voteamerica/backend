@@ -218,8 +218,6 @@ sh ./start-compose-tests-fullstack.sh
 sh ./start-compose-tests-fullstack.sh match
 ```
 
-docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml
-
 ## Common development tasks
 
 ### 1) Create a front-end PR that requires changes to tests

@@ -456,7 +456,8 @@ var testObject = {
       .url('http://10.5.0.4:4000/operator-page')
       .pause(3000)
       .waitForElementVisible('#manage', 1000)
-      .assert.containsText('#manage', 'MANAGE THE SYSTEM');
+      .assert.containsText('h1.bannerbox__title', 'MANAGE THE SYSTEM')
+      .assert.containsText('#manage', 'Welcome to the new operator admin page');
   })
 };
 
