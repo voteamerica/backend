@@ -449,6 +449,14 @@ var testObject = {
         .viewDriverSelfService()
         .viewProposedMatch()
         .acceptMatch();
+  }),
+
+  'viewOperatorPage': createChainableTest(function(client) {
+    client
+      .url('http://10.5.0.4:4000/operator-page')
+      .pause(3000)
+      .waitForElementVisible('#manage', 1000)
+      .assert.containsText('#manage', 'MANAGE THE SYSTEM');
   })
 };
 
