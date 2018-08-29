@@ -20,6 +20,8 @@ module.exports = {
       .viewRiderSelfService()
       .viewRiderMatch()
       .riderCancelMatch()
+      
+      .viewOperatorPage()
       .finish();
   }
 };
