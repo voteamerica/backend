@@ -458,6 +458,7 @@ var testObject = {
       .waitForElementVisible('#manage', 1000)
       .assert.containsText('h1.bannerbox__title', 'MANAGE THE SYSTEM')
       .assert.containsText('#manage', 'Welcome to the new operator admin page')
+
       .setValue('#root #username', 'fail')
       .setValue('#root #password', 'abc')
       .click('#root button')
@@ -466,15 +467,50 @@ var testObject = {
 
     client
       .clearValue('#root #username')
-      .setValue('#root #username', 'test')
+      .setValue('#root #username', 'notadmin')
 
       .clearValue('#root #password')
       .setValue('#root #password', 'abc')
-      
+
       .click('#root button')
       .pause(3000)
       .assert.containsText('#root', 'Welcome,')
-  })
+
+      .waitForElementVisible('#showGetDriversList', 3000)
+      .click('#showGetDriversList')
+      .pause(3000)
+      .waitForElementVisible('#showGetDriversList', 3000) // info not shown for non-admin user
+
+      .waitForElementVisible('#logout', 3000)
+      .click('#logout') // now the logout button
+      .pause(3000)
+      .expect.element('#root').text.to.not.contain('Welcome,');
+
+    client
+      .clearValue('#root #username')
+      .setValue('#root #username', 'admin')
+
+      .clearValue('#root #password')
+      .setValue('#root #password', 'abc')
+
+      .click('#root button')
+      .pause(3000)
+      .assert.containsText('#root', 'Welcome,')
+
+      .waitForElementVisible('#showGetDriversList', 3000)
+      .click('#showGetDriversList')
+      .pause(3000)
+      .waitForElementVisible('#hideGetDriversList', 3000)
+      .click('#hideGetDriversList')
+      .pause(3000)
+      .waitForElementVisible('#showGetDriversList', 3000)
+
+      // showGetDriversList
+      // hideGetDriversList
+      .pause(3000)
+
+
+    })
 };
 
 module.exports = testObject;
