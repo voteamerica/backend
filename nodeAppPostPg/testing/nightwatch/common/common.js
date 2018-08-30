@@ -482,7 +482,7 @@ var testObject = {
       .waitForElementVisible('#showGetDriversList', 3000) // info not shown for non-admin user
 
       .waitForElementVisible('#logout', 3000)
-      .click('#logout') // now the logout button
+      .click('#logout')
       .pause(3000)
       .expect.element('#root').text.to.not.contain('Welcome,');
 
@@ -504,11 +504,12 @@ var testObject = {
       .click('#hideGetDriversList')
       .pause(3000)
       .waitForElementVisible('#showGetDriversList', 3000)
-
-      // showGetDriversList
-      // hideGetDriversList
       .pause(3000)
 
+      .waitForElementVisible('#logout', 3000)
+      .click('#logout')
+      .pause(3000)
+      .expect.element('#root').text.to.not.contain('Welcome,');
 
     })
 };
