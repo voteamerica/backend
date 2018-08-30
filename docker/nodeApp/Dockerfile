@@ -41,6 +41,7 @@ RUN git merge origin/$BRANCH_NAME
 
 RUN cd /usr/src/app/backend/nodeAppPostPg
 
+RUN npm -v 
 RUN npm install 
 RUN npm install -g typescript
 

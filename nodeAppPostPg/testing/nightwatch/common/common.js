@@ -457,7 +457,23 @@ var testObject = {
       .pause(3000)
       .waitForElementVisible('#manage', 1000)
       .assert.containsText('h1.bannerbox__title', 'MANAGE THE SYSTEM')
-      .assert.containsText('#manage', 'Welcome to the new operator admin page');
+      .assert.containsText('#manage', 'Welcome to the new operator admin page')
+      .setValue('#root #username', 'fail')
+      .setValue('#root #password', 'abc')
+      .click('#root button')
+      .pause(3000)
+      .expect.element('#root').text.to.not.contain('Welcome,');
+
+    client
+      .clearValue('#root #username')
+      .setValue('#root #username', 'test')
+
+      .clearValue('#root #password')
+      .setValue('#root #password', 'abc')
+      
+      .click('#root button')
+      .pause(3000)
+      .assert.containsText('#root', 'Welcome,')
   })
 };
 
