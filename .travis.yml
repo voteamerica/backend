@@ -47,7 +47,8 @@ before_script:
 # https://stackoverflow.com/questions/10516201/updating-file-permissions-only-in-git
 # https://stackoverflow.com/questions/14267441/automatically-apply-git-update-index-chmodx-to-executable-files
 script:
-  - travis_retry ./compose-tests.sh pause-cancel2
+  # - travis_retry ./compose-tests.sh pause-cancel2
+  - travis_retry ./compose-tests.sh full-tests
 
 after_script:
   - docker-compose -f ./compose/full-stack-test/docker-compose-test.yml down

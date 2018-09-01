@@ -31,6 +31,18 @@ function getUsers(req, reply) {
     req.log();
     postgresQueries.dbGetData(rfPool, dbQueries.dbGetUsersQueryString, reply, results);
 }
+const mapDbUserToNodeAppUser = dbData => {
+    let userInfo = {};
+    try {
+        userInfo = JSON.parse(dbData);
+    }
+    catch (error) {
+        console.log('invalid user returned from db');
+        return undefined;
+    }
+    const userInfoAdmin = Object.assign({}, userInfo, { admin: userInfo.is_admin });
+    return userInfoAdmin;
+};
 async function getUsersInternal(req, reply, payload) {
     var results = {
         success: 'GET users internal: ',
@@ -40,7 +52,11 @@ async function getUsersInternal(req, reply, payload) {
     const [userName, email, ...info] = userPayloadAsArray(req, payload);
     const queryPlusWhere = queryFn => () => queryFn() + ` WHERE username = '${userName}' OR email = '${email}' `;
     const dbData = await postgresQueries.dbGetDataInternal(rfPool, queryPlusWhere(dbQueries.dbGetUsersQueryString), reply, results);
-    return dbData;
+    if (dbData === undefined) {
+        return undefined;
+    }
+    const nodeAppUser = mapDbUserToNodeAppUser(dbData);
+    return JSON.stringify(nodeAppUser);
 }
 async function getUsersListInternal(req, reply, payload) {
     var results = {
@@ -67,11 +83,11 @@ async function addUserInternal(req, reply, payload) {
     };
     req.log();
     const insertPlusValues = queryFn => () => queryFn() +
-        ' ("username", "email", "password", "admin") ' +
+        ' ("username", "email", "password", "is_admin") ' +
         ' values ($1, $2, $3, $4) returning ' +
-        '"UUID", email, username, admin';
-    const dbData = await postgresQueries.dbInsertDataInternal(payload, rfPool, insertPlusValues(dbQueries.dbAddUserQueryString), userPayloadAsArray, req, reply, results);
-    return dbData;
+        '"UUID", email, username, is_admin';
+    const newUserUUID = await postgresQueries.dbInsertDataInternal(payload, rfPool, insertPlusValues(dbQueries.dbAddUserQueryString), userPayloadAsArray, req, reply, results);
+    return newUserUUID;
 }
 function getUnmatchedDrivers(req, reply) {
     var results = {

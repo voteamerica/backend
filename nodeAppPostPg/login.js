@@ -51,7 +51,6 @@ const verifyCredentials = async (req, res) => {
         console.log('verify credentials - bad secret');
         return res(Boom.badRequest(verifyCredentialsError));
     }
-    console.log('pwd', password);
     console.log('email', email);
     console.log('username', username);
     const userInfo = await routeFns.getUsersInternal(req, res, payload);

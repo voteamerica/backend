@@ -57,6 +57,22 @@ function getUsers(req: any, reply: any) {
   );
 }
 
+const mapDbUserToNodeAppUser = dbData => {
+  let userInfo: any = {};
+
+  try {
+    userInfo = JSON.parse(dbData);
+  } catch (error) {
+    console.log('invalid user returned from db');
+
+    return undefined;
+  }
+
+  const userInfoAdmin: UserType = { ...userInfo, admin: userInfo.is_admin };
+
+  return userInfoAdmin;
+};
+
 async function getUsersInternal(req: any, reply: any, payload: UserType) {
   var results = {
     success: 'GET users internal: ',
@@ -77,7 +93,13 @@ async function getUsersInternal(req: any, reply: any, payload: UserType) {
     results
   );
 
-  return dbData;
+  if (dbData === undefined) {
+    return undefined;
+  }
+
+  const nodeAppUser = mapDbUserToNodeAppUser(dbData);
+
+  return JSON.stringify(nodeAppUser);
 }
 
 async function getUsersListInternal(req: any, reply: any, payload: UserType) {
@@ -126,11 +148,11 @@ async function addUserInternal(req: any, reply: any, payload: [any]) {
 
   const insertPlusValues = queryFn => () =>
     queryFn() +
-    ' ("username", "email", "password", "admin") ' +
+    ' ("username", "email", "password", "is_admin") ' +
     ' values ($1, $2, $3, $4) returning ' +
-    '"UUID", email, username, admin';
+    '"UUID", email, username, is_admin';
 
-  const dbData = await postgresQueries.dbInsertDataInternal(
+  const newUserUUID = await postgresQueries.dbInsertDataInternal(
     payload,
     rfPool,
     insertPlusValues(dbQueries.dbAddUserQueryString),
@@ -140,7 +162,7 @@ async function addUserInternal(req: any, reply: any, payload: [any]) {
     results
   );
 
-  return dbData;
+  return newUserUUID;
 }
 
 function getUnmatchedDrivers(req: any, reply: any) {

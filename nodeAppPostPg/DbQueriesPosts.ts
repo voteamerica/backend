@@ -101,7 +101,7 @@ class DbQueriesPosts {
     email character varying,
     username character varying,
     password character varying,
-    admin boolean
+    is_admin boolean
     */
   }
 }

@@ -139,6 +139,8 @@ There are three types of tests, depending on whether it is required to override 
 
 The app, under the test setups, does not execute correctly in the standard browser. Instead, use a VNC viewer (e.g. [RealVNC](https://www.realvnc.com/download/viewer/)) to watch the test being executed on vnc://localhost:5900 (don't type vnc:// for RealVNC viewer)
 
+Password requested is set by `selenium/standalone-chrome-debug` and is `secret`.
+
 ### 1) Github repos only - ignores any local code
 
 #### Go to the docker folder ...
@@ -217,8 +219,6 @@ Parameter is nightwatch test group. If not specified, a default is used.
 sh ./start-compose-tests-fullstack.sh
 sh ./start-compose-tests-fullstack.sh match
 ```
-
-docker-compose -f ./compose/full-stack-test/docker-compose-test-fullstack.yml
 
 ## Common development tasks
 

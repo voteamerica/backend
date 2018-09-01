@@ -62,7 +62,6 @@ const verifyCredentials = async (req, res) => {
     return res(Boom.badRequest(verifyCredentialsError));
   }
 
-  console.log('pwd', password);
   console.log('email', email);
   console.log('username', username);
 

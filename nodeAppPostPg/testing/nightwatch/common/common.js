@@ -449,7 +449,69 @@ var testObject = {
         .viewDriverSelfService()
         .viewProposedMatch()
         .acceptMatch();
-  })
+  }),
+
+  'viewOperatorPage': createChainableTest(function(client) {
+    client
+      .url('http://10.5.0.4:4000/operator-page')
+      .pause(3000)
+      .waitForElementVisible('#manage', 1000)
+      .assert.containsText('h1.bannerbox__title', 'MANAGE THE SYSTEM')
+      .assert.containsText('#manage', 'Welcome to the new operator admin page')
+
+      .setValue('#root #username', 'fail')
+      .setValue('#root #password', 'abc')
+      .click('#root button')
+      .pause(3000)
+      .expect.element('#root').text.to.not.contain('Welcome,');
+
+    client
+      .clearValue('#root #username')
+      .setValue('#root #username', 'notadmin')
+
+      .clearValue('#root #password')
+      .setValue('#root #password', 'abc')
+
+      .click('#root button')
+      .pause(3000)
+      .assert.containsText('#root', 'Welcome,')
+
+      .waitForElementVisible('#showGetDriversList', 3000)
+      .click('#showGetDriversList')
+      .pause(3000)
+      .waitForElementVisible('#showGetDriversList', 3000) // info not shown for non-admin user
+
+      .waitForElementVisible('#logout', 3000)
+      .click('#logout')
+      .pause(3000)
+      .expect.element('#root').text.to.not.contain('Welcome,');
+
+    client
+      .clearValue('#root #username')
+      .setValue('#root #username', 'admin')
+
+      .clearValue('#root #password')
+      .setValue('#root #password', 'abc')
+
+      .click('#root button')
+      .pause(3000)
+      .assert.containsText('#root', 'Welcome,')
+
+      .waitForElementVisible('#showGetDriversList', 3000)
+      .click('#showGetDriversList')
+      .pause(3000)
+      .waitForElementVisible('#hideGetDriversList', 3000)
+      .click('#hideGetDriversList')
+      .pause(3000)
+      .waitForElementVisible('#showGetDriversList', 3000)
+      .pause(3000)
+
+      .waitForElementVisible('#logout', 3000)
+      .click('#logout')
+      .pause(3000)
+      .expect.element('#root').text.to.not.contain('Welcome,');
+
+    })
 };
 
 module.exports = testObject;
