@@ -289,7 +289,11 @@ server.register([
             path: '/createuser',
             config: {
                 pre: [{ method: login_1.verifyUniqueUser }],
-                handler: login_1.createUser
+                handler: login_1.createUser,
+                auth: {
+                    strategy: 'jwt',
+                    scope: ['admin']
+                }
             }
         });
         server.route({
