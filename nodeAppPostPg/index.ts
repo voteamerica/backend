@@ -394,7 +394,11 @@ server.register(
         path: '/createuser',
         config: {
           pre: [{ method: verifyUniqueUser }],
-          handler: createUser
+          handler: createUser,
+          auth: {
+            strategy: 'jwt',
+            scope: ['admin']
+          }
         }
       });
 
