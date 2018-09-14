@@ -32,9 +32,10 @@ module.exports = {
     dbRiderConfirmedMatchFunctionString: dbRiderConfirmedMatchFunctionString,
     dbGetMatchRiderQueryString: dbGetMatchRiderQueryString,
     dbGetMatchDriverQueryString: dbGetMatchDriverQueryString,
-    dbGetMatchesQueryString: dbGetMatchesQueryString,
+    dbGetMatchesQueryString,
     dbGetDriversQueryString,
-    dbGetUsersQueryString: dbGetUsersQueryString,
+    dbGetRidersQueryString,
+    dbGetUsersQueryString,
     dbAddUserQueryString,
     dbGetUnmatchedDriversQueryString: dbGetUnmatchedDriversQueryString,
     dbGetUnmatchedRidersQueryString: dbGetUnmatchedRidersQueryString,
@@ -90,6 +91,9 @@ function dbGetMatchesQueryString() {
 }
 function dbGetDriversQueryString() {
     return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsTables.DRIVER_TABLE);
+}
+function dbGetRidersQueryString() {
+    return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsTables.RIDER_TABLE);
 }
 function dbGetUsersQueryString() {
     return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsTables.USER_TABLE);

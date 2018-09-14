@@ -258,8 +258,28 @@ const getDriversListHandler = async (req, res) => {
     const driverInfoJSON = JSON.stringify(driverInfo);
     res({ data: driverInfoJSON });
 };
+const getRidersListHandler = async (req, res) => {
+    const payload = req.query;
+    const riderInfo = await routeFns.getRidersListInternal(req, res, payload);
+    if (!riderInfo) {
+        return res(Boom.badRequest('get riders list error'));
+    }
+    const riderInfoJSON = JSON.stringify(riderInfo);
+    res({ data: riderInfoJSON });
+};
+const getMatchesListHandler = async (req, res) => {
+    const payload = req.query;
+    const matchInfo = await routeFns.getMatchesListInternal(req, res, payload);
+    if (!matchInfo) {
+        return res(Boom.badRequest('get matches list error'));
+    }
+    const matchInfoJSON = JSON.stringify(matchInfo);
+    res({ data: matchInfoJSON });
+};
 const usersHandler = getUsersListHandler;
 const driversHandler = getDriversListHandler;
+const ridersHandler = getRidersListHandler;
+const matchesHandler = getMatchesListHandler;
 server.register([
     {
         register: hapiAuthJwt,
@@ -312,6 +332,28 @@ server.register([
             path: '/drivers/list',
             config: {
                 handler: driversHandler,
+                auth: {
+                    strategy: 'jwt',
+                    scope: ['admin']
+                }
+            }
+        });
+        server.route({
+            method: 'GET',
+            path: '/riders/list',
+            config: {
+                handler: ridersHandler,
+                auth: {
+                    strategy: 'jwt',
+                    scope: ['admin']
+                }
+            }
+        });
+        server.route({
+            method: 'GET',
+            path: '/matches/list',
+            config: {
+                handler: matchesHandler,
                 auth: {
                     strategy: 'jwt',
                     scope: ['admin']
