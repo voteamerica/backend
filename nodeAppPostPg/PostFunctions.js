@@ -115,8 +115,8 @@ class PostFunctions {
             payload.RiderAccommodationNotes,
             (payload.RiderLegalConsent ? 'true' : 'false'),
             (payload.RiderWillBeSafe ? 'true' : 'false'),
-            payload.RidingOnBehalfOfOrganization ? 'true' : 'false',
-            payload.RidingOBOOrganizationName,
+            payload.RiderCollectionAddress,
+            payload.RiderDestinationAddress,
             payload.RidingOnBehalfOfOrganization ? 'true' : 'false',
             payload.RidingOBOOrganizationName
         ];
