@@ -41,11 +41,6 @@ module.exports = {
     dbGetUnmatchedRidersQueryString: dbGetUnmatchedRidersQueryString,
     dbGetDriversDetailssQueryString: dbGetDriversDetailssQueryString,
     dbGetDriverMatchesDetailsQueryString: dbGetDriverMatchesDetailsQueryString
-    // dbGetInsertClause:            dbGetInsertClause
-    // ,
-    // dbGetSubmitDriverString:      dbGetSubmitDriverString,
-    // dbGetSubmitRiderString:       dbGetSubmitRiderString,
-    // dbGetSubmitHelperString:      dbGetSubmitHelperString
 };
 // const dbDefs = require('./dbDefs.js');
 // exec fns

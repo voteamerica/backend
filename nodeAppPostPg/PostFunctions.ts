@@ -163,7 +163,8 @@ class PostFunctions {
 
   getRiderPayloadAsArray (self: PostFunctions, req: any, payload: any): any[] {
     var ip = self.getClientAddress(req);
-    return [
+
+    const payloadAsArray = [
         ip,
         payload.RiderFirstName,
         payload.RiderLastName,
@@ -183,9 +184,13 @@ class PostFunctions {
         payload.RiderAccommodationNotes,
         (payload.RiderLegalConsent ? 'true' : 'false'),
         (payload.RiderWillBeSafe ? 'true' : 'false'),
-        payload.RiderCollectionAddress,
-        payload.RiderDestinationAddress
-    ];
+        payload.RidingOnBehalfOfOrganization ? 'true' : 'false',
+        payload.RidingOBOOrganizationName,
+        payload.RidingOnBehalfOfOrganization ? 'true' : 'false',
+        payload.RidingOBOOrganizationName
+      ];
+
+    return payloadAsArray;
   }
 
   getUserPayloadAsArray (self: PostFunctions, req: any, payload: any): any[] {

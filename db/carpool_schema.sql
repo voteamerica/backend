@@ -749,6 +749,17 @@ GRANT ALL ON TABLE zip_codes TO carpool_role;
 
 
 --
+-- Name: organization; Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE organization FROM PUBLIC;
+REVOKE ALL ON TABLE organization FROM carpool_admins;
+GRANT SELECT ON TABLE organization TO carpool_web_role;
+GRANT ALL ON TABLE organization TO carpool_admins;
+GRANT ALL ON TABLE organization TO carpool_role;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
