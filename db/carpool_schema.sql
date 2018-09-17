@@ -763,3 +763,8 @@ GRANT ALL ON TABLE organization TO carpool_role;
 -- PostgreSQL database dump complete
 --
 
+INSERT INTO carpoolvote.organization("OrganizationName") VALUES ('None');
+INSERT INTO carpoolvote.organization("OrganizationName") VALUES ('NAACP');
+INSERT INTO carpoolvote.organization("OrganizationName") VALUES ('AAPD');
+INSERT INTO carpoolvote.organization("OrganizationName") VALUES ('PPC');
+INSERT INTO carpoolvote.organization("OrganizationName") VALUES ('MDCC');
