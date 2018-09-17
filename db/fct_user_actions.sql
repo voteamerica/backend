@@ -459,14 +459,14 @@ BEGIN
 		"DriverCanLoadRiderWithWheelchair", "SeatCount", "DriverLicenseNumber", 
 		"DriverFirstName", "DriverLastName", "DriverEmail", "DriverPhone",
 		"DrivingOnBehalfOfOrganization", "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails",
-		"DriverWillNotTalkPolitics", "PleaseStayInTouch", "DriverPreferredContact", "DriverWillTakeCare")
+		"DriverWillNotTalkPolitics", "PleaseStayInTouch", "DriverPreferredContact", "DriverWillTakeCare", "uuid_organization")
 		VALUES (
 		out_uuid, 
 		a_IPAddress, a_DriverCollectionZIP, a_DriverCollectionRadius, a_AvailableDriveTimesLocal, 
 		a_DriverCanLoadRiderWithWheelchair, a_SeatCount, a_DriverLicenseNumber, 
 		a_DriverFirstName, a_DriverLastName, a_DriverEmail, a_DriverPhone,
 		a_DrivingOnBehalfOfOrganization, a_DrivingOBOOrganizationName, a_RidersCanSeeDriverDetails,
-		a_DriverWillNotTalkPolitics, a_PleaseStayInTouch, a_DriverPreferredContact, a_DriverWillTakeCare
+		a_DriverWillNotTalkPolitics, a_PleaseStayInTouch, a_DriverPreferredContact, a_DriverWillTakeCare, uuid_organization
 		);
 		
 		v_step := 'S9';
