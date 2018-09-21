@@ -95,7 +95,7 @@ class PostFunctions {
     }
     getRiderPayloadAsArray(self, req, payload) {
         var ip = self.getClientAddress(req);
-        return [
+        const payloadAsArray = [
             ip,
             payload.RiderFirstName,
             payload.RiderLastName,
@@ -116,8 +116,11 @@ class PostFunctions {
             (payload.RiderLegalConsent ? 'true' : 'false'),
             (payload.RiderWillBeSafe ? 'true' : 'false'),
             payload.RiderCollectionAddress,
-            payload.RiderDestinationAddress
+            payload.RiderDestinationAddress,
+            payload.RidingOnBehalfOfOrganization ? 'true' : 'false',
+            payload.RidingOBOOrganizationName
         ];
+        return payloadAsArray;
     }
     getUserPayloadAsArray(self, req, payload) {
         var ip = self.getClientAddress(req);

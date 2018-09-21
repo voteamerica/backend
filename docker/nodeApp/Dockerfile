@@ -63,12 +63,14 @@ COPY ./expo-bash.sh /
 # these steps may be needed
 # https://github.com/moby/moby/issues/27182
 RUN chmod +x /expo-start.sh
+RUN chmod +x /expo-debug.sh
 RUN chmod +x /expo-bash.sh
 
 CMD ["/expo-start.sh"]
 
 # NOTES for dev support
 # CMD ["/expo-debug.sh"]
+# CMD ["/expo-bash.sh"]
 
 # RUN tsc  --target es2017 -w -p . &
 # node --inspect=0.0.0.0:5858 --inspect-brk index.js
