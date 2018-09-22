@@ -21,7 +21,7 @@ module.exports = {
       .viewRiderMatch()
       .riderCancelMatch()
       
-      .viewOperatorPage()
+      // .viewOperatorPage()
       .finish();
   }
 };

@@ -87,7 +87,7 @@ var testObject = {
       client
         .url('http://10.5.0.4:4000/#offer-ride')
         .waitForElementVisible('body', 3000)
-        .assert.containsText('form#offer-ride legend', 'What can you offer?')
+        .assert.containsText('form#offer-ride legend', 'Choose your organisation')
 
         .getAttribute('form#offer-ride', 'action', function (result) {
           console.log("form attribute result: ", result);
