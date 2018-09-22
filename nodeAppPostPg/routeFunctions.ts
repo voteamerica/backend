@@ -126,11 +126,18 @@ async function getDriversListInternal(req: any, reply: any, payload: UserType) {
     failure: 'GET drivers list internal error: '
   };
 
+  // debugger;
+
+  // console.log('drivers list int');
+
   req.log();
 
   const dbData = await postgresQueries.dbGetDataListInternal(
     rfPool,
-    dbQueries.dbGetDriversQueryString,
+    // dbQueries.dbGetDriversQueryString,
+    dbQueries.dbGetDriversByUserOrganizationQueryString(
+      req.auth.credentials.username
+    ),
     reply,
     results
   );

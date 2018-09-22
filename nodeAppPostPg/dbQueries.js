@@ -32,6 +32,7 @@ module.exports = {
     dbRiderConfirmedMatchFunctionString: dbRiderConfirmedMatchFunctionString,
     dbGetMatchRiderQueryString: dbGetMatchRiderQueryString,
     dbGetMatchDriverQueryString: dbGetMatchDriverQueryString,
+    dbGetDriversByUserOrganizationQueryString,
     dbGetMatchesQueryString,
     dbGetDriversQueryString,
     dbGetRidersQueryString,
@@ -128,5 +129,15 @@ function dbGetMatchDriverQueryString(driver_uuid) {
         " '" +
         driver_uuid +
         "' ");
+}
+function dbGetDriversByUserOrganizationQueryString(username) {
+    const dbQueryFn = () => ` SELECT *
+  FROM carpoolvote.driver
+  INNER JOIN carpoolvote.organization ON "DrivingOBOOrganizationName" = "OrganizationName"
+  INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
+  WHERE carpoolvote.tb_user.username = '` +
+        username +
+        "'";
+    return dbQueryFn;
 }
 //# sourceMappingURL=dbQueries.js.map

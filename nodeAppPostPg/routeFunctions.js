@@ -72,8 +72,12 @@ async function getDriversListInternal(req, reply, payload) {
         success: 'GET drivers list internal: ',
         failure: 'GET drivers list internal error: '
     };
+    // debugger;
+    // console.log('drivers list int');
     req.log();
-    const dbData = await postgresQueries.dbGetDataListInternal(rfPool, dbQueries.dbGetDriversQueryString, reply, results);
+    const dbData = await postgresQueries.dbGetDataListInternal(rfPool, 
+    // dbQueries.dbGetDriversQueryString,
+    dbQueries.dbGetDriversByUserOrganizationQueryString(req.auth.credentials.username), reply, results);
     return dbData;
 }
 async function getRidersListInternal(req, reply, payload) {
