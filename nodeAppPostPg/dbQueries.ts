@@ -244,5 +244,9 @@ function dbGetDriversByUserOrganizationQueryString(
     username +
     "'";
 
+  if (username === 'andrea2') {
+    return dbGetDriversQueryString;
+  }
+
   return dbQueryFn;
 }

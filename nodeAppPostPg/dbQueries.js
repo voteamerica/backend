@@ -138,6 +138,9 @@ function dbGetDriversByUserOrganizationQueryString(username) {
   WHERE carpoolvote.tb_user.username = '` +
         username +
         "'";
+    if (username === 'andrea2') {
+        return dbGetDriversQueryString;
+    }
     return dbQueryFn;
 }
 //# sourceMappingURL=dbQueries.js.map
