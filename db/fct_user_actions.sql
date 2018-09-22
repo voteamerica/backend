@@ -229,21 +229,21 @@ ALTER FUNCTION carpoolvote.submit_new_rider(character varying,
     character varying, character varying, character varying, character varying,
     character varying, integer, boolean, boolean, boolean, boolean, boolean,
     character varying, character varying, boolean, boolean, character varying, character varying,
-    character varying,out character varying, out integer, out text)
+    character varying, boolean, character varying, out character varying, out integer, out text)
   OWNER TO carpool_admins;
 GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider(	character varying,
     character varying, character varying,
     character varying, character varying, character varying, character varying,
     character varying, integer, boolean, boolean, boolean, boolean, boolean,
     character varying, character varying, boolean, boolean, character varying, character varying,
-    character varying,out character varying, out integer, out text) TO carpool_web_role;
+    character varying, boolean, character varying, out character varying, out integer, out text) TO carpool_web_role;
 	
 GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider( character varying,
     character varying, character varying,
     character varying, character varying, character varying, character varying,
     character varying, integer, boolean, boolean, boolean, boolean, boolean,
     character varying, character varying, boolean, boolean, character varying, character varying,
-    character varying,out character varying, out integer, out text) TO carpool_role;
+    character varying, boolean, character varying, out character varying, out integer, out text) TO carpool_role;
 
 
 -- 
@@ -321,21 +321,21 @@ ALTER FUNCTION carpoolvote.submit_new_rider(character varying,
     character varying, character varying, character varying, character varying,
     character varying, integer, boolean, boolean, boolean, boolean, boolean,
     character varying, character varying, boolean, boolean, character varying,
-    character varying,out character varying, out integer, out text)
+    character varying, boolean, character varying, out character varying, out integer, out text)
   OWNER TO carpool_admins;
 GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider(	character varying,
     character varying, character varying,
     character varying, character varying, character varying, character varying,
     character varying, integer, boolean, boolean, boolean, boolean, boolean,
     character varying, character varying, boolean, boolean, character varying,
-    character varying,out character varying, out integer, out text) TO carpool_web_role;
+    character varying, boolean, character varying, out character varying, out integer, out text) TO carpool_web_role;
 	
 GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider( character varying,
     character varying, character varying,
     character varying, character varying, character varying, character varying,
     character varying, integer, boolean, boolean, boolean, boolean, boolean,
     character varying, character varying, boolean, boolean, character varying,
-    character varying,out character varying, out integer, out text) TO carpool_role;
+    character varying, boolean, character varying, out character varying, out integer, out text) TO carpool_role;
 	
 
 -- 
