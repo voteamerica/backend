@@ -173,7 +173,10 @@ async function getMatchesListInternal(req: any, reply: any, payload: UserType) {
 
   const dbData = await postgresQueries.dbGetDataListInternal(
     rfPool,
-    dbQueries.dbGetMatchesQueryString,
+    // dbQueries.dbGetMatchesQueryString,
+    dbQueries.dbGetMatchesByUserOrganizationQueryString(
+      req.auth.credentials.username
+    ),
     reply,
     results
   );

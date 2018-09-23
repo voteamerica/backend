@@ -95,7 +95,9 @@ async function getMatchesListInternal(req, reply, payload) {
         failure: 'GET matches list internal error: '
     };
     req.log();
-    const dbData = await postgresQueries.dbGetDataListInternal(rfPool, dbQueries.dbGetMatchesQueryString, reply, results);
+    const dbData = await postgresQueries.dbGetDataListInternal(rfPool, 
+    // dbQueries.dbGetMatchesQueryString,
+    dbQueries.dbGetMatchesByUserOrganizationQueryString(req.auth.credentials.username), reply, results);
     return dbData;
 }
 async function addUserInternal(req, reply, payload) {

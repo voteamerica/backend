@@ -33,6 +33,7 @@ module.exports = {
     dbGetMatchRiderQueryString: dbGetMatchRiderQueryString,
     dbGetMatchDriverQueryString: dbGetMatchDriverQueryString,
     dbGetDriversByUserOrganizationQueryString,
+    dbGetMatchesByUserOrganizationQueryString,
     dbGetMatchesQueryString,
     dbGetDriversQueryString,
     dbGetRidersQueryString,
@@ -140,6 +141,22 @@ function dbGetDriversByUserOrganizationQueryString(username) {
        status_info, "DriverPreferredContact", "DriverWillTakeCare", 
        uuid_organization
   FROM carpoolvote.driver
+  INNER JOIN carpoolvote.organization ON "DrivingOBOOrganizationName" = "OrganizationName"
+  INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
+  WHERE carpoolvote.tb_user.username = '` +
+        username +
+        "'";
+    if (username === 'andrea2') {
+        return dbGetDriversQueryString;
+    }
+    return dbQueryFn;
+}
+function dbGetMatchesByUserOrganizationQueryString(username) {
+    const dbQueryFn = () => ` SELECT carpoolvote.match.status, uuid_driver, uuid_rider, score, driver_notes, rider_notes, 
+       carpoolvote.match.created_ts, carpoolvote.match.last_updated_ts,
+       "DriverCollectionZIP", "AvailableDriveTimesLocal", "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", "DrivingOBOOrganizationName" 
+  FROM carpoolvote.match
+  INNER JOIN carpoolvote.driver ON uuid_driver = carpoolvote.driver."UUID"
   INNER JOIN carpoolvote.organization ON "DrivingOBOOrganizationName" = "OrganizationName"
   INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
   WHERE carpoolvote.tb_user.username = '` +
