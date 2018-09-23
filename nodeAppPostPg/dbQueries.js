@@ -163,7 +163,7 @@ function dbGetMatchesByUserOrganizationQueryString(username) {
         username +
         "'";
     if (username === 'andrea2') {
-        return dbGetDriversQueryString;
+        return dbGetMatchesQueryString;
     }
     return dbQueryFn;
 }
