@@ -131,7 +131,14 @@ function dbGetMatchDriverQueryString(driver_uuid) {
         "' ");
 }
 function dbGetDriversByUserOrganizationQueryString(username) {
-    const dbQueryFn = () => ` SELECT *
+    const dbQueryFn = () => ` SELECT carpoolvote.driver."UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", 
+       "AvailableDriveTimesLocal", "DriverCanLoadRiderWithWheelchair", 
+       "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", 
+       "DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization", 
+       "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics", 
+       "ReadyToMatch", "PleaseStayInTouch", status, created_ts, last_updated_ts, 
+       status_info, "DriverPreferredContact", "DriverWillTakeCare", 
+       uuid_organization
   FROM carpoolvote.driver
   INNER JOIN carpoolvote.organization ON "DrivingOBOOrganizationName" = "OrganizationName"
   INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
