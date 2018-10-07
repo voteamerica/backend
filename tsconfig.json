@@ -10,6 +10,7 @@
         // "nodeAppPostPg",
         "smsHandler",
         "typings",
+        "csvImport/node_modules",
         "nodeAppPostPg/node_modules",
         "smsHandler/node_modules",
         "smsHandler/typings",
