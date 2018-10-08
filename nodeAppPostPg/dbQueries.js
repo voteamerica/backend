@@ -32,6 +32,7 @@ module.exports = {
     dbRiderConfirmedMatchFunctionString: dbRiderConfirmedMatchFunctionString,
     dbGetMatchRiderQueryString: dbGetMatchRiderQueryString,
     dbGetMatchDriverQueryString: dbGetMatchDriverQueryString,
+    dbGetRidersAndOrganizationQueryString,
     dbGetDriversByUserOrganizationQueryString,
     dbGetMatchesByUserOrganizationQueryString,
     dbGetMatchesQueryString,
@@ -131,6 +132,22 @@ function dbGetMatchDriverQueryString(driver_uuid) {
         driver_uuid +
         "' ");
 }
+// NOTE: for the riders query, there is no difference if username is 'andrea2'
+function dbGetRidersAndOrganizationQueryString() {
+    const dbQueryFn = () => ` SELECT carpoolvote.rider."UUID", "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail", 
+       "RiderPhone", "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesLocal", 
+       "TotalPartySize", "TwoWayTripNeeded", "RiderIsVulnerable", "RiderWillNotTalkPolitics", 
+       "PleaseStayInTouch", "NeedWheelchair", "RiderPreferredContact", 
+       "RiderAccommodationNotes", "RiderLegalConsent", "ReadyToMatch", 
+       status, created_ts, last_updated_ts, status_info, "RiderWillBeSafe", 
+       "RiderCollectionStreetNumber", "RiderCollectionAddress", "RiderDestinationAddress", 
+       uuid_organization, carpoolvote.organization."OrganizationName", 
+       city, state, full_state, timezone
+  FROM carpoolvote.rider
+  INNER JOIN carpoolvote.organization ON rider.uuid_organization = organization."UUID"
+  INNER JOIN carpoolvote.zip_codes ON "RiderCollectionZIP" = zip`;
+    return dbQueryFn;
+}
 function dbGetDriversByUserOrganizationQueryString(username) {
     const dbQueryFn = () => ` SELECT carpoolvote.driver."UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", 
        "AvailableDriveTimesLocal", "DriverCanLoadRiderWithWheelchair", 
@@ -139,10 +156,11 @@ function dbGetDriversByUserOrganizationQueryString(username) {
        "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics", 
        "ReadyToMatch", "PleaseStayInTouch", status, created_ts, last_updated_ts, 
        status_info, "DriverPreferredContact", "DriverWillTakeCare", 
-       uuid_organization
+       uuid_organization, city, state, full_state, timezone
   FROM carpoolvote.driver
   INNER JOIN carpoolvote.organization ON "DrivingOBOOrganizationName" = "OrganizationName"
   INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
+  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip
   WHERE carpoolvote.tb_user.username = '` +
         username +
         "'";
@@ -154,11 +172,13 @@ function dbGetDriversByUserOrganizationQueryString(username) {
 function dbGetMatchesByUserOrganizationQueryString(username) {
     const dbQueryFn = () => ` SELECT carpoolvote.match.status, uuid_driver, uuid_rider, score, driver_notes, rider_notes, 
        carpoolvote.match.created_ts, carpoolvote.match.last_updated_ts,
-       "DriverCollectionZIP", "AvailableDriveTimesLocal", "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", "DrivingOBOOrganizationName" 
+       "DriverCollectionZIP", "AvailableDriveTimesLocal", "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", "DrivingOBOOrganizationName", 
+       city, state, full_state, timezone
   FROM carpoolvote.match
   INNER JOIN carpoolvote.driver ON uuid_driver = carpoolvote.driver."UUID"
   INNER JOIN carpoolvote.organization ON "DrivingOBOOrganizationName" = "OrganizationName"
   INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
+  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip
   WHERE carpoolvote.tb_user.username = '` +
         username +
         "'";

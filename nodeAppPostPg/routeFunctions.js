@@ -86,7 +86,7 @@ async function getRidersListInternal(req, reply, payload) {
         failure: 'GET riders list internal error: '
     };
     req.log();
-    const dbData = await postgresQueries.dbGetDataListInternal(rfPool, dbQueries.dbGetRidersQueryString, reply, results);
+    const dbData = await postgresQueries.dbGetDataListInternal(rfPool, dbQueries.dbGetRidersAndOrganizationQueryString(), reply, results);
     return dbData;
 }
 async function getMatchesListInternal(req, reply, payload) {
