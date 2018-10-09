@@ -6,7 +6,7 @@ const createUserErrorMessage = 'failed to add user';
 const existingUserError = 'user already exists';
 const verifyCredentialsError = 'bad credentials';
 
-const getJWTSecretFromEnv = () => process.env.JWT_SECRET || '';
+const getJWTSecretFromEnv = () => process.env.JWT_SECRET || 'secret';
 
 // NOTE: this import must remain after definitition of getJWTSecretFromEnv
 import { UserType, createToken } from './token';

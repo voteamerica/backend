@@ -331,22 +331,14 @@ server.register([
             method: 'GET',
             path: '/drivers/list',
             config: {
-                handler: driversHandler,
-                auth: {
-                    strategy: 'jwt',
-                    scope: ['admin']
-                }
+                handler: driversHandler
             }
         });
         server.route({
             method: 'GET',
             path: '/riders/list',
             config: {
-                handler: ridersHandler,
-                auth: {
-                    strategy: 'jwt',
-                    scope: ['admin']
-                }
+                handler: ridersHandler
             }
         });
         server.route({

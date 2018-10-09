@@ -91,6 +91,7 @@ ENV/
 .ropeproject
 
 .idea/
+.DS_Store
 
 smsHandler/node_modules
 
@@ -98,4 +99,3 @@ nodeAppPostPg/testing
 
 # The real stuff here
 */node_modules
-

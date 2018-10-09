@@ -8,8 +8,8 @@ services:
     image: carpool/pg_server
 
   # backend image is used
-  # - as base for api image (the api server) 
-  # - to run the backend apps : matching engine, sms handler, email handler 
+  # - as base for api image (the api server)
+  # - to run the backend apps : matching engine, sms handler, email handler
   backend:
     build:
       context: ./
@@ -47,4 +47,3 @@ services:
       context: ./emailHandler
       dockerfile: Dockerfile
     image: carpool/email_handler
-
