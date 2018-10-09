@@ -302,3 +302,30 @@ function dbGetMatchesByUserOrganizationQueryString(
 
   return dbQueryFn;
 }
+
+// query for seats available
+// SELECT * FROM carpoolvote.match inner join carpoolvote.rider on(carpoolvote.match.uuid_rider = carpoolvote.rider."UUID") inner join carpoolvote.driver on carpoolvote.match.uuid_driver = carpoolvote.driver."UUID"
+// where rider."TotalPartySize" < driver."SeatCount"
+
+// calculate seats remaining
+// SELECT(driver."SeatCount" - rider."TotalPartySize") AS xxx FROM carpoolvote.match inner join carpoolvote.rider on(carpoolvote.match.uuid_rider = carpoolvote.rider."UUID") inner join carpoolvote.driver on carpoolvote.match.uuid_driver = carpoolvote.driver."UUID"
+// where rider."TotalPartySize" < driver."SeatCount"
+
+// create new driver with seats remaining as seatcount
+// INSERT into carpoolvote.driver("SeatCount", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius",
+//   "AvailableDriveTimesLocal", "DriverCanLoadRiderWithWheelchair",
+//   "DriverLicenseNumber", "DriverFirstName", "DriverLastName",
+//   "DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization",
+//   "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics",
+//   "ReadyToMatch", "PleaseStayInTouch", status, created_ts, last_updated_ts,
+//   status_info, "DriverPreferredContact", "DriverWillTakeCare",
+//   uuid_organization)
+// SELECT(driver."SeatCount" - rider."TotalPartySize") AS "SeatCount", driver."IPAddress", "DriverCollectionZIP", "DriverCollectionRadius",
+//   "AvailableDriveTimesLocal", "DriverCanLoadRiderWithWheelchair",
+//   "DriverLicenseNumber", "DriverFirstName", "DriverLastName",
+//   "DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization",
+//   "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics",
+//   driver."ReadyToMatch", driver."PleaseStayInTouch", carpoolvote.driver.status, carpoolvote.driver.created_ts, carpoolvote.driver.last_updated_ts,
+//     carpoolvote.driver.status_info, "DriverPreferredContact", "DriverWillTakeCare",
+//     carpoolvote.driver.uuid_organization FROM carpoolvote.match inner join carpoolvote.rider on(carpoolvote.match.uuid_rider = carpoolvote.rider."UUID") inner join carpoolvote.driver on carpoolvote.match.uuid_driver = carpoolvote.driver."UUID"
+// where rider."TotalPartySize" < driver."SeatCount"

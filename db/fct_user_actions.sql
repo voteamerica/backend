@@ -656,6 +656,7 @@ CREATE OR REPLACE FUNCTION carpoolvote.update_drive_offer_status(
 $BODY$
 DECLARE
 	v_step character varying(200);
+	rider_total_party_size integer;
 BEGIN	
 
 	BEGIN
@@ -674,6 +675,40 @@ BEGIN
 		SET status='MatchConfirmed'
 		WHERE "UUID" = a_UUID
 		AND status NOT IN ('Canceled', 'Expired');
+
+		SELECT rider."TotalPartySize" INTO rider_total_party_size
+		FROM carpoolvote.match 
+		inner join carpoolvote.rider on (carpoolvote.match.uuid_rider = carpoolvote.rider."UUID") 
+		inner join carpoolvote.driver on carpoolvote.match.uuid_driver = carpoolvote.driver."UUID"
+		where driver."UUID" = a_UUID;
+
+		INSERT into carpoolvote.driver(
+			"SeatCount", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius",
+			"AvailableDriveTimesLocal", "DriverCanLoadRiderWithWheelchair",
+			"DriverLicenseNumber", "DriverFirstName", "DriverLastName",
+			"DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization",
+			"DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics",
+			"ReadyToMatch", "PleaseStayInTouch", status, created_ts, last_updated_ts,
+			status_info, "DriverPreferredContact", "DriverWillTakeCare",
+			uuid_organization)
+		SELECT
+			(driver."SeatCount" - rider."TotalPartySize") AS "SeatCount", driver."IPAddress", "DriverCollectionZIP", "DriverCollectionRadius",
+			"AvailableDriveTimesLocal", "DriverCanLoadRiderWithWheelchair",
+			"DriverLicenseNumber", "DriverFirstName", "DriverLastName",
+			"DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization",
+			"DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics",
+			driver."ReadyToMatch", driver."PleaseStayInTouch", 'Pending', carpoolvote.driver.created_ts, carpoolvote.driver.last_updated_ts,
+			carpoolvote.driver.status_info, "DriverPreferredContact", "DriverWillTakeCare",
+			carpoolvote.driver.uuid_organization 
+		FROM carpoolvote.match 
+		inner join carpoolvote.rider on (carpoolvote.match.uuid_rider = carpoolvote.rider."UUID") 
+		inner join carpoolvote.driver on carpoolvote.match.uuid_driver = carpoolvote.driver."UUID"
+		where rider."TotalPartySize" < driver."SeatCount" and driver.status='MatchConfirmed' and driver."UUID" = a_UUID;
+
+		UPDATE carpoolvote.driver 
+		SET "SeatCount" = rider_total_party_size 
+		where driver.status='MatchConfirmed' and driver."UUID" = a_UUID;
+
 	ELSIF EXISTS (   -- If there is at least one match in MatchProposed or MatchConfirmed -> MatchProposed
 		SELECT 1
 		FROM carpoolvote.match
