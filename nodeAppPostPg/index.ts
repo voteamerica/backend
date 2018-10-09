@@ -448,7 +448,11 @@ server.register(
         method: 'GET',
         path: '/drivers/list',
         config: {
-          handler: driversHandler
+          handler: driversHandler,
+          auth: {
+            strategy: 'jwt',
+            scope: ['admin']
+          }
         }
       });
 
@@ -456,7 +460,11 @@ server.register(
         method: 'GET',
         path: '/riders/list',
         config: {
-          handler: ridersHandler
+          handler: ridersHandler,
+          auth: {
+            strategy: 'jwt',
+            scope: ['admin']
+          }
         }
       });
 

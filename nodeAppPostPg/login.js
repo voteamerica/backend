@@ -6,7 +6,7 @@ const Boom = require('boom');
 const createUserErrorMessage = 'failed to add user';
 const existingUserError = 'user already exists';
 const verifyCredentialsError = 'bad credentials';
-const getJWTSecretFromEnv = () => process.env.JWT_SECRET || 'secret';
+const getJWTSecretFromEnv = () => process.env.JWT_SECRET || '';
 exports.getJWTSecretFromEnv = getJWTSecretFromEnv;
 // NOTE: this import must remain after definitition of getJWTSecretFromEnv
 const token_1 = require("./token");
