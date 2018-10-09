@@ -155,7 +155,7 @@ async function getRidersListInternal(req: any, reply: any, payload: UserType) {
 
   const dbData = await postgresQueries.dbGetDataListInternal(
     rfPool,
-    dbQueries.dbGetRidersQueryString,
+    dbQueries.dbGetRidersAndOrganizationQueryString(),
     reply,
     results
   );
