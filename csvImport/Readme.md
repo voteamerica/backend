@@ -1,8 +1,6 @@
-The csv format is intended for organizations to bulk import riders and drivers into the database. The existing csv format mirrors the database and has the following fields:
+The csv format is intended for organizations to bulk import riders and drivers into the database.
 
-```
-Usage: --file=[csv file] --org_uuid=[organization identifier]
-```
+The existing csv format mirrors the database and has the following fields:
 
 For RIDERS:
 
