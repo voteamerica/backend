@@ -255,8 +255,7 @@ function dbGetRidersAndOrganizationQueryString(): () => string {
 function dbGetDriversByUserOrganizationQueryString(
   username: string
 ): () => string {
-  const dbQueryFn = () =>
-    ` SELECT carpoolvote.driver."UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", 
+  const baseQueryString = `SELECT carpoolvote.driver."UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", 
        "AvailableDriveTimesLocal", "DriverCanLoadRiderWithWheelchair", 
        "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", 
        "DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization", 
@@ -267,14 +266,17 @@ function dbGetDriversByUserOrganizationQueryString(
   FROM carpoolvote.driver
   INNER JOIN carpoolvote.organization ON "DrivingOBOOrganizationName" = "OrganizationName"
   INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
-  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip
-  WHERE carpoolvote.tb_user.username = '` +
-    username +
-    "'";
+  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip `;
 
-  if (username === 'andrea2') {
-    return dbGetDriversQueryString;
-  }
+  const queryString =
+    username === 'andrea2'
+      ? baseQueryString
+      : baseQueryString +
+        " WHERE carpoolvote.tb_user.username = '" +
+        username +
+        "'";
+
+  const dbQueryFn = () => queryString;
 
   return dbQueryFn;
 }
@@ -282,8 +284,7 @@ function dbGetDriversByUserOrganizationQueryString(
 function dbGetMatchesByUserOrganizationQueryString(
   username: string
 ): () => string {
-  const dbQueryFn = () =>
-    ` SELECT carpoolvote.match.status, uuid_driver, uuid_rider, score, driver_notes, rider_notes, 
+  const baseQueryString = `SELECT carpoolvote.match.status, uuid_driver, uuid_rider, score, driver_notes, rider_notes, 
        carpoolvote.match.created_ts, carpoolvote.match.last_updated_ts,
        "DriverCollectionZIP", "AvailableDriveTimesLocal", "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", "DrivingOBOOrganizationName", 
        city, state, full_state, timezone
@@ -291,14 +292,17 @@ function dbGetMatchesByUserOrganizationQueryString(
   INNER JOIN carpoolvote.driver ON uuid_driver = carpoolvote.driver."UUID"
   INNER JOIN carpoolvote.organization ON "DrivingOBOOrganizationName" = "OrganizationName"
   INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
-  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip
-  WHERE carpoolvote.tb_user.username = '` +
-    username +
-    "'";
+  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip `;
 
-  if (username === 'andrea2') {
-    return dbGetMatchesQueryString;
-  }
+  const queryString =
+    username === 'andrea2'
+      ? baseQueryString
+      : baseQueryString +
+        " WHERE carpoolvote.tb_user.username = '" +
+        username +
+        "'";
+
+  const dbQueryFn = () => queryString;
 
   return dbQueryFn;
 }

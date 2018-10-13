@@ -149,7 +149,7 @@ function dbGetRidersAndOrganizationQueryString() {
     return dbQueryFn;
 }
 function dbGetDriversByUserOrganizationQueryString(username) {
-    const dbQueryFn = () => ` SELECT carpoolvote.driver."UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", 
+    const baseQueryString = `SELECT carpoolvote.driver."UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", 
        "AvailableDriveTimesLocal", "DriverCanLoadRiderWithWheelchair", 
        "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", 
        "DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization", 
@@ -160,17 +160,18 @@ function dbGetDriversByUserOrganizationQueryString(username) {
   FROM carpoolvote.driver
   INNER JOIN carpoolvote.organization ON "DrivingOBOOrganizationName" = "OrganizationName"
   INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
-  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip
-  WHERE carpoolvote.tb_user.username = '` +
-        username +
-        "'";
-    if (username === 'andrea2') {
-        return dbGetDriversQueryString;
-    }
+  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip `;
+    const queryString = username === 'andrea2'
+        ? baseQueryString
+        : baseQueryString +
+            " WHERE carpoolvote.tb_user.username = '" +
+            username +
+            "'";
+    const dbQueryFn = () => queryString;
     return dbQueryFn;
 }
 function dbGetMatchesByUserOrganizationQueryString(username) {
-    const dbQueryFn = () => ` SELECT carpoolvote.match.status, uuid_driver, uuid_rider, score, driver_notes, rider_notes, 
+    const baseQueryString = `SELECT carpoolvote.match.status, uuid_driver, uuid_rider, score, driver_notes, rider_notes, 
        carpoolvote.match.created_ts, carpoolvote.match.last_updated_ts,
        "DriverCollectionZIP", "AvailableDriveTimesLocal", "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", "DrivingOBOOrganizationName", 
        city, state, full_state, timezone
@@ -178,13 +179,38 @@ function dbGetMatchesByUserOrganizationQueryString(username) {
   INNER JOIN carpoolvote.driver ON uuid_driver = carpoolvote.driver."UUID"
   INNER JOIN carpoolvote.organization ON "DrivingOBOOrganizationName" = "OrganizationName"
   INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
-  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip
-  WHERE carpoolvote.tb_user.username = '` +
-        username +
-        "'";
-    if (username === 'andrea2') {
-        return dbGetMatchesQueryString;
-    }
+  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip `;
+    const queryString = username === 'andrea2'
+        ? baseQueryString
+        : baseQueryString +
+            " WHERE carpoolvote.tb_user.username = '" +
+            username +
+            "'";
+    const dbQueryFn = () => queryString;
     return dbQueryFn;
 }
+// query for seats available
+// SELECT * FROM carpoolvote.match inner join carpoolvote.rider on(carpoolvote.match.uuid_rider = carpoolvote.rider."UUID") inner join carpoolvote.driver on carpoolvote.match.uuid_driver = carpoolvote.driver."UUID"
+// where rider."TotalPartySize" < driver."SeatCount"
+// calculate seats remaining
+// SELECT(driver."SeatCount" - rider."TotalPartySize") AS xxx FROM carpoolvote.match inner join carpoolvote.rider on(carpoolvote.match.uuid_rider = carpoolvote.rider."UUID") inner join carpoolvote.driver on carpoolvote.match.uuid_driver = carpoolvote.driver."UUID"
+// where rider."TotalPartySize" < driver."SeatCount"
+// create new driver with seats remaining as seatcount
+// INSERT into carpoolvote.driver("SeatCount", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius",
+//   "AvailableDriveTimesLocal", "DriverCanLoadRiderWithWheelchair",
+//   "DriverLicenseNumber", "DriverFirstName", "DriverLastName",
+//   "DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization",
+//   "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics",
+//   "ReadyToMatch", "PleaseStayInTouch", status, created_ts, last_updated_ts,
+//   status_info, "DriverPreferredContact", "DriverWillTakeCare",
+//   uuid_organization)
+// SELECT(driver."SeatCount" - rider."TotalPartySize") AS "SeatCount", driver."IPAddress", "DriverCollectionZIP", "DriverCollectionRadius",
+//   "AvailableDriveTimesLocal", "DriverCanLoadRiderWithWheelchair",
+//   "DriverLicenseNumber", "DriverFirstName", "DriverLastName",
+//   "DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization",
+//   "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics",
+//   driver."ReadyToMatch", driver."PleaseStayInTouch", carpoolvote.driver.status, carpoolvote.driver.created_ts, carpoolvote.driver.last_updated_ts,
+//     carpoolvote.driver.status_info, "DriverPreferredContact", "DriverWillTakeCare",
+//     carpoolvote.driver.uuid_organization FROM carpoolvote.match inner join carpoolvote.rider on(carpoolvote.match.uuid_rider = carpoolvote.rider."UUID") inner join carpoolvote.driver on carpoolvote.match.uuid_driver = carpoolvote.driver."UUID"
+// where rider."TotalPartySize" < driver."SeatCount"
 //# sourceMappingURL=dbQueries.js.map
