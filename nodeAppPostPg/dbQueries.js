@@ -158,13 +158,13 @@ function dbGetDriversByUserOrganizationQueryString(username) {
        status_info, "DriverPreferredContact", "DriverWillTakeCare", 
        uuid_organization, city, state, full_state, timezone
   FROM carpoolvote.driver
-  INNER JOIN carpoolvote.organization ON "DrivingOBOOrganizationName" = "OrganizationName"
-  INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
+  INNER JOIN carpoolvote.organization ON (("DrivingOnBehalfOfOrganization" is TRUE and "DrivingOBOOrganizationName" = "OrganizationName") or ("DrivingOnBehalfOfOrganization" is FALSE and 'None' = "OrganizationName"))
   INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip `;
     const queryString = username === 'andrea2'
         ? baseQueryString
         : baseQueryString +
-            " WHERE carpoolvote.tb_user.username = '" +
+            ` INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
+   WHERE carpoolvote.tb_user.username = '` +
             username +
             "'";
     const dbQueryFn = () => queryString;
@@ -177,13 +177,13 @@ function dbGetMatchesByUserOrganizationQueryString(username) {
        city, state, full_state, timezone
   FROM carpoolvote.match
   INNER JOIN carpoolvote.driver ON uuid_driver = carpoolvote.driver."UUID"
-  INNER JOIN carpoolvote.organization ON "DrivingOBOOrganizationName" = "OrganizationName"
-  INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
+  INNER JOIN carpoolvote.organization ON (("DrivingOnBehalfOfOrganization" is TRUE and "DrivingOBOOrganizationName" = "OrganizationName") or ("DrivingOnBehalfOfOrganization" is FALSE and 'None' = "OrganizationName"))
   INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip `;
     const queryString = username === 'andrea2'
         ? baseQueryString
         : baseQueryString +
-            " WHERE carpoolvote.tb_user.username = '" +
+            ` INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
+ WHERE carpoolvote.tb_user.username = '` +
             username +
             "'";
     const dbQueryFn = () => queryString;
