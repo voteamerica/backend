@@ -386,10 +386,29 @@ const getMatchesListHandler = async (req, res) => {
   res({ data: matchInfoJSON });
 };
 
+const getMatchesOtherDriverListHandler = async (req, res) => {
+  const payload = req.query;
+
+  const matchInfo = await routeFns.getMatchesOtherDriverListInternal(
+    req,
+    res,
+    payload
+  );
+
+  if (!matchInfo) {
+    return res(Boom.badRequest('get matches other list error'));
+  }
+
+  const matchInfoJSON = JSON.stringify(matchInfo);
+
+  res({ data: matchInfoJSON });
+};
+
 const usersHandler = getUsersListHandler;
 const driversHandler = getDriversListHandler;
 const ridersHandler = getRidersListHandler;
 const matchesHandler = getMatchesListHandler;
+const matchesOtherDriverHandler = getMatchesOtherDriverListHandler;
 
 server.register(
   [
@@ -473,6 +492,18 @@ server.register(
         path: '/matches/list',
         config: {
           handler: matchesHandler,
+          auth: {
+            strategy: 'jwt',
+            scope: ['admin']
+          }
+        }
+      });
+
+      server.route({
+        method: 'GET',
+        path: '/matches-other/list',
+        config: {
+          handler: matchesOtherDriverHandler,
           auth: {
             strategy: 'jwt',
             scope: ['admin']

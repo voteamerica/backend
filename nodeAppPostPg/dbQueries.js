@@ -35,6 +35,7 @@ module.exports = {
     dbGetRidersAndOrganizationQueryString,
     dbGetDriversByUserOrganizationQueryString,
     dbGetMatchesByUserOrganizationQueryString,
+    dbGetMatchesByRiderOrganizationQueryString,
     dbGetMatchesQueryString,
     dbGetDriversQueryString,
     dbGetRidersQueryString,
@@ -170,6 +171,7 @@ function dbGetDriversByUserOrganizationQueryString(username) {
     const dbQueryFn = () => queryString;
     return dbQueryFn;
 }
+// matches where driver org matches user org
 function dbGetMatchesByUserOrganizationQueryString(username) {
     const baseQueryString = `SELECT carpoolvote.match.status, uuid_driver, uuid_rider, score, driver_notes, rider_notes, 
        carpoolvote.match.created_ts, carpoolvote.match.last_updated_ts,
@@ -186,6 +188,28 @@ function dbGetMatchesByUserOrganizationQueryString(username) {
  WHERE carpoolvote.tb_user.username = '` +
             username +
             "'";
+    const dbQueryFn = () => queryString;
+    return dbQueryFn;
+}
+// matches where rider org matches user org and driver org is different
+// NOTE: for this query, org for username 'andrea2' is applied (as need org to be other than something)
+function dbGetMatchesByRiderOrganizationQueryString(username) {
+    const queryString = `SELECT carpoolvote.match.status, uuid_driver, uuid_rider, score, driver_notes, rider_notes, 
+       carpoolvote.match.created_ts, carpoolvote.match.last_updated_ts,
+       "DriverCollectionZIP", "AvailableDriveTimesLocal", "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", "DrivingOBOOrganizationName", 
+       city, state, full_state, timezone
+  FROM carpoolvote.match
+    INNER JOIN carpoolvote.rider ON uuid_rider = carpoolvote.rider."UUID"
+  INNER JOIN carpoolvote.driver ON uuid_driver = carpoolvote.driver."UUID"
+  INNER JOIN carpoolvote.organization ON 
+  not(("DrivingOnBehalfOfOrganization" is TRUE and "DrivingOBOOrganizationName" = "OrganizationName") 
+  or ("DrivingOnBehalfOfOrganization" is FALSE and 'None' = "OrganizationName")) 
+   and 
+  carpoolvote.rider.uuid_organization =  carpoolvote.organization."UUID"
+  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
+ WHERE carpoolvote.tb_user.username = '` +
+        username +
+        "'";
     const dbQueryFn = () => queryString;
     return dbQueryFn;
 }

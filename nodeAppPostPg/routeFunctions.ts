@@ -184,6 +184,30 @@ async function getMatchesListInternal(req: any, reply: any, payload: UserType) {
   return dbData;
 }
 
+async function getMatchesOtherDriverListInternal(
+  req: any,
+  reply: any,
+  payload: UserType
+) {
+  var results = {
+    success: 'GET matches other list internal: ',
+    failure: 'GET matches other list internal error: '
+  };
+
+  req.log();
+
+  const dbData = await postgresQueries.dbGetDataListInternal(
+    rfPool,
+    dbQueries.dbGetMatchesByRiderOrganizationQueryString(
+      req.auth.credentials.username
+    ),
+    reply,
+    results
+  );
+
+  return dbData;
+}
+
 async function addUserInternal(req: any, reply: any, payload: [any]) {
   var results = {
     success: 'POST user internal: ',
@@ -609,6 +633,7 @@ module.exports = {
   getDriversListInternal,
   getRidersListInternal,
   getMatchesListInternal,
+  getMatchesOtherDriverListInternal,
   addUserInternal,
 
   getUnmatchedDrivers: getUnmatchedDrivers,
