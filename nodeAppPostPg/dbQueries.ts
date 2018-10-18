@@ -273,7 +273,7 @@ function dbGetDriversByUserOrganizationQueryString(
       ? baseQueryString
       : baseQueryString +
         ` INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
-   WHERE carpoolvote.tb_user.username = '` +
+        WHERE carpoolvote.tb_user.username = '` +
         username +
         "'";
 
@@ -289,8 +289,12 @@ function dbGetMatchesByUserOrganizationQueryString(
   const baseQueryString = `SELECT carpoolvote.match.status, uuid_driver, uuid_rider, score, driver_notes, rider_notes, 
        carpoolvote.match.created_ts, carpoolvote.match.last_updated_ts,
        "DriverCollectionZIP", "AvailableDriveTimesLocal", "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", "DrivingOBOOrganizationName", 
-       city, state, full_state, timezone
+       city, state, full_state, timezone,
+       "RiderFirstName", "RiderLastName", "RiderEmail", 
+       "RiderPhone", "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesLocal",        
+       "RiderCollectionStreetNumber", "RiderCollectionAddress", "RiderDestinationAddress"
   FROM carpoolvote.match
+  INNER JOIN carpoolvote.rider ON uuid_rider = carpoolvote.rider."UUID"
   INNER JOIN carpoolvote.driver ON uuid_driver = carpoolvote.driver."UUID"
   INNER JOIN carpoolvote.organization ON (("DrivingOnBehalfOfOrganization" is TRUE and "DrivingOBOOrganizationName" = "OrganizationName") or ("DrivingOnBehalfOfOrganization" is FALSE and 'None' = "OrganizationName"))
   INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip `;
@@ -300,7 +304,7 @@ function dbGetMatchesByUserOrganizationQueryString(
       ? baseQueryString
       : baseQueryString +
         ` INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
- WHERE carpoolvote.tb_user.username = '` +
+        WHERE carpoolvote.tb_user.username = '` +
         username +
         "'";
 
@@ -318,17 +322,19 @@ function dbGetMatchesByRiderOrganizationQueryString(
     `SELECT carpoolvote.match.status, uuid_driver, uuid_rider, score, driver_notes, rider_notes, 
        carpoolvote.match.created_ts, carpoolvote.match.last_updated_ts,
        "DriverCollectionZIP", "AvailableDriveTimesLocal", "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", "DrivingOBOOrganizationName", 
-       city, state, full_state, timezone
+       city, state, full_state, timezone,
+       "RiderFirstName", "RiderLastName", "RiderEmail", 
+       "RiderPhone", "RiderCollectionZIP", "RiderDropOffZIP", "AvailableRideTimesLocal",        
+       "RiderCollectionStreetNumber", "RiderCollectionAddress", "RiderDestinationAddress"
   FROM carpoolvote.match
-    INNER JOIN carpoolvote.rider ON uuid_rider = carpoolvote.rider."UUID"
+  INNER JOIN carpoolvote.rider ON uuid_rider = carpoolvote.rider."UUID"
   INNER JOIN carpoolvote.driver ON uuid_driver = carpoolvote.driver."UUID"
   INNER JOIN carpoolvote.organization ON 
   not(("DrivingOnBehalfOfOrganization" is TRUE and "DrivingOBOOrganizationName" = "OrganizationName") 
   or ("DrivingOnBehalfOfOrganization" is FALSE and 'None' = "OrganizationName")) 
-   and 
-  carpoolvote.rider.uuid_organization =  carpoolvote.organization."UUID"
+  and carpoolvote.rider.uuid_organization =  carpoolvote.organization."UUID"
   INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
- WHERE carpoolvote.tb_user.username = '` +
+  WHERE carpoolvote.tb_user.username = '` +
     username +
     "'";
 
