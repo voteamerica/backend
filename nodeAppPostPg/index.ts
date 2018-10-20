@@ -5,6 +5,18 @@ const Pool = require('pg').Pool;
 const Good = require('good');
 const GoodFile = require('good-file');
 
+const es = require('event-stream');
+
+// const {
+//   Readable
+// ,
+// Writable,
+// Transform,
+// Duplex,
+// pipeline,
+// finished
+// } = require('readable-stream');
+
 console.log('start requires');
 
 // const hapiAuthJwt = require('hapi-auth-jwt');
@@ -404,6 +416,124 @@ const getMatchesOtherDriverListHandler = async (req, res) => {
   res({ data: matchInfoJSON });
 };
 
+// const bulkUploadHandler = async (req, res) => {
+const bulkUploadHandler = (request, reply) => {
+  // const payload = req.query;
+
+  // const matchInfo = await routeFns.getMatchesOtherDriverListInternal(
+  //   req,
+  //   res,
+  //   payload
+  // );
+
+  // if (!matchInfo) {
+  //   return res(Boom.badRequest('get matches other list error'));
+  // }
+
+  // const matchInfoJSON = JSON.stringify(matchInfo);
+
+  // function (request, reply) {
+  try {
+    const data = request.payload;
+
+    debugger;
+
+    // console.log('data', data);
+    console.log('file', data.file);
+
+    // const file = data['avatar']; // accept a field call avatar
+
+    // save the file
+    // const fileDetails = await uploader(file, fileOptions);
+
+    // save data to database
+    // const col = await loadCollection(COLLECTION_NAME, db);
+    // const result = col.insert(fileDetails);
+    // db.saveDatabase();
+
+    var string = '';
+
+    var lineNr = 0;
+
+    const s =
+      // fs.createReadStream('very-large-file.csv')
+      data.file.pipe(es.split()).pipe(
+        es
+          .mapSync(function(line) {
+            // pause the readstream
+            s.pause();
+
+            debugger;
+
+            lineNr += 1;
+
+            console.log(line);
+
+            // process line here and call s.resume() when rdy
+            // function below was for logging memory usage
+            // logMemoryUsage(lineNr);
+
+            // resume the readstream, possibly from a callback
+            s.resume();
+          })
+          .on('error', function(err) {
+            console.log('Error while reading file.', err);
+          })
+          .on('end', function() {
+            console.log('Read entire file.');
+
+            reply({
+              // id: result.$loki,
+              // fileName: result.filename,
+              // originalName: result.originalname
+            });
+          })
+      );
+
+    // data.file.on('readable', function(buffer) {
+    //   debugger;
+
+    //   if (!buffer) {
+    //     return;
+    //   }
+    //   var part = buffer.read().toString();
+    //   string += part;
+    //   console.log('stream data ' + part);
+    // });
+
+    // data.file.on('data', function(buffer) {
+    //   debugger;
+
+    //   if (!buffer) {
+    //     return;
+    //   }
+    //   // var part = buffer.read().toString();
+    //   var part = buffer.toString();
+    //   string += part;
+    //   console.log('stream data ' + part);
+    // });
+
+    // data.file.on('end', function() {
+    //   debugger;
+
+    //   console.log('final output ' + string);
+
+    //   // return result
+    //   reply({
+    //     // id: result.$loki,
+    //     // fileName: result.filename,
+    //     // originalName: result.originalname
+    //   });
+    //   // }
+    // });
+  } catch (err) {
+    // error handling
+    reply(Boom.badRequest(err.message, err));
+  }
+
+  // res({ data: matchInfoJSON });
+};
+
 const usersHandler = getUsersListHandler;
 const driversHandler = getDriversListHandler;
 const ridersHandler = getRidersListHandler;
@@ -508,6 +638,22 @@ server.register(
             strategy: 'jwt',
             scope: ['admin']
           }
+        }
+      });
+
+      server.route({
+        method: 'POST',
+        path: '/bulk-upload',
+        config: {
+          payload: {
+            output: 'stream',
+            allow: 'multipart/form-data'
+          },
+          handler: bulkUploadHandler
+          // auth: {
+          //   strategy: 'jwt',
+          //   scope: ['admin']
+          // }
         }
       });
     }
