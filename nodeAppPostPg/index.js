@@ -24,6 +24,7 @@ const config = require('./dbInfo.js');
 const logOptions = require('./logInfo.js');
 const dbQueries = require('./dbQueries.js');
 const routeFns = require('./routeFunctions.js');
+const csvImport_1 = require("./csvImport");
 const DbQueriesPosts_1 = require("./DbQueriesPosts");
 const DbDefsCancels_1 = require("./DbDefsCancels");
 const postgresQueries_1 = require("./postgresQueries");
@@ -320,8 +321,12 @@ const bulkUploadHandler = (request, reply) => {
         // const col = await loadCollection(COLLECTION_NAME, db);
         // const result = col.insert(fileDetails);
         // db.saveDatabase();
-        var string = '';
-        var lineNr = 0;
+        let string = '';
+        let lineNr = 0;
+        let ridersCsv = false;
+        let driversCsv = false;
+        let headerLine = '';
+        let parsingStarted = false;
         const s = 
         // fs.createReadStream('very-large-file.csv')
         data.file.pipe(es.split()).pipe(es
@@ -331,6 +336,28 @@ const bulkUploadHandler = (request, reply) => {
             debugger;
             lineNr += 1;
             console.log(line);
+            if (parsingStarted === false) {
+                if (line.indexOf('RiderFirstName') >= 0) {
+                    parsingStarted = true;
+                    ridersCsv = true;
+                    headerLine = line;
+                }
+                else if (line.indexOf('DriverFirstName') >= 0) {
+                    parsingStarted = true;
+                    driversCsv = true;
+                    headerLine = line;
+                }
+            }
+            else {
+                if (ridersCsv) {
+                    const data = headerLine + '\n' + line;
+                    csvImport_1.uploadRiders(data, 'NAACP', function (err, data) {
+                        if (err)
+                            console.log(err);
+                        console.log('successful upload:', data);
+                    });
+                }
+            }
             // process line here and call s.resume() when rdy
             // function below was for logging memory usage
             // logMemoryUsage(lineNr);

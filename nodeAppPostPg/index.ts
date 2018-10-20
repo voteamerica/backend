@@ -34,6 +34,8 @@ const dbQueries = require('./dbQueries.js');
 
 const routeFns = require('./routeFunctions.js');
 
+import { uploadRiders } from './csvImport';
+
 import { DbQueriesPosts } from './DbQueriesPosts';
 import { DbQueriesCancels } from './DbDefsCancels';
 
@@ -451,9 +453,15 @@ const bulkUploadHandler = (request, reply) => {
     // const result = col.insert(fileDetails);
     // db.saveDatabase();
 
-    var string = '';
+    let string = '';
 
-    var lineNr = 0;
+    let lineNr = 0;
+
+    let ridersCsv = false;
+    let driversCsv = false;
+
+    let headerLine = '';
+    let parsingStarted = false;
 
     const s =
       // fs.createReadStream('very-large-file.csv')
@@ -468,6 +476,28 @@ const bulkUploadHandler = (request, reply) => {
             lineNr += 1;
 
             console.log(line);
+
+            if (parsingStarted === false) {
+              if (line.indexOf('RiderFirstName') >= 0) {
+                parsingStarted = true;
+                ridersCsv = true;
+                headerLine = line;
+              } else if (line.indexOf('DriverFirstName') >= 0) {
+                parsingStarted = true;
+                driversCsv = true;
+                headerLine = line;
+              }
+            } else {
+              if (ridersCsv) {
+                const data = headerLine + '\n' + line;
+
+                uploadRiders(data, 'NAACP', function(err, data) {
+                  if (err) console.log(err);
+
+                  console.log('successful upload:', data);
+                });
+              }
+            }
 
             // process line here and call s.resume() when rdy
             // function below was for logging memory usage
