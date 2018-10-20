@@ -1,9 +1,9 @@
 'use strict';
 
-const csvParse = require('csv-parse');
-const fs = require('fs');
-const request = require('request');
-const minimist = require('minimist');
+import csvParse = require('csv-parse');
+import fs = require('fs');
+import request = require('request');
+import minimist = require('minimist');
 
 // const riderUrl = 'http://localhost:8000/rider';
 // const driverUrl = 'http://localhost:8000/driver';
