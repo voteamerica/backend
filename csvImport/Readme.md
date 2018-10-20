@@ -23,4 +23,5 @@ RiderLegalConsent (required) - true/false
 RiderWillBeSafe (required) - true/false
 RiderCollectionAddress - Address of rider's pick up location
 RiderDestinationAddress - Address of the destination
+RidingOnBehalfOfOrganization - true
 ```

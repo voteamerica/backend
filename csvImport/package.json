@@ -18,12 +18,12 @@
   },
   "homepage": "https://github.com/voteamerica/backend#readme",
   "dependencies": {
-    "csv": "3.1.0",,
+    "csv": "3.1.0",
     "minimist": "1.2.0",
     "request": "2.88.0"
   },
   "devDependencies": {
-    "@types/node": "^6.0.45",
+    "@types/node": "^6.14.0",
     "typescript": "^2.0.6",
     "typings": "^1.4.0"
   }
