@@ -8,10 +8,11 @@ var __rest = (this && this.__rest) || function (s, e) {
             t[p[i]] = s[p[i]];
     return t;
 };
-const csvParse = require('csv-parse');
-const fs = require('fs');
-const request = require('request');
-const minimist = require('minimist');
+Object.defineProperty(exports, "__esModule", { value: true });
+const csvParse = require("csv-parse");
+const fs = require("fs");
+const request = require("request");
+const minimist = require("minimist");
 // const riderUrl = 'http://localhost:8000/rider';
 // const driverUrl = 'http://localhost:8000/driver';
 const riderUrl = 'https://api.carpoolvote.com/live/rider';
