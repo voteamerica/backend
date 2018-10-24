@@ -2,10 +2,10 @@
 
 import * as Hapi from 'hapi';
 const Pool = require('pg').Pool;
-const Good = require('good');
-const GoodFile = require('good-file');
+import Good = require('good');
+import GoodFile = require('good-file');
 
-const es = require('event-stream');
+import es = require('event-stream');
 
 // const {
 //   Readable
@@ -463,62 +463,68 @@ const bulkUploadHandler = (request, reply) => {
     let headerLine = '';
     let parsingStarted = false;
 
-    const s =
-      // fs.createReadStream('very-large-file.csv')
-      data.file.pipe(es.split()).pipe(
-        es
-          .mapSync(function(line) {
-            // pause the readstream
-            s.pause();
+    uploadRiders(data.file, 'NAACP', function (err, data) {
+      if (err) console.log(err);
 
-            debugger;
+      console.log('successful upload:', data);
+    });
 
-            lineNr += 1;
+    // const s =
+    //   // fs.createReadStream('very-large-file.csv')
+    //   data.file.pipe(es.split()).pipe(
+    //     es
+    //       .mapSync(function (line) {
+    //         // pause the readstream
+    //         s.pause();
 
-            console.log(line);
+    //         lineNr += 1;
 
-            if (parsingStarted === false) {
-              if (line.indexOf('RiderFirstName') >= 0) {
-                parsingStarted = true;
-                ridersCsv = true;
-                headerLine = line;
-              } else if (line.indexOf('DriverFirstName') >= 0) {
-                parsingStarted = true;
-                driversCsv = true;
-                headerLine = line;
-              }
-            } else {
-              if (ridersCsv) {
-                const data = headerLine + '\n' + line;
+    //         console.log(line);
 
-                uploadRiders(data, 'NAACP', function(err, data) {
-                  if (err) console.log(err);
+    //         if (parsingStarted === false) {
+    //           if (line.indexOf('RiderFirstName') >= 0) {
+    //             parsingStarted = true;
+    //             ridersCsv = true;
+    //             headerLine = line;
+    //           } else if (line.indexOf('DriverFirstName') >= 0) {
+    //             parsingStarted = true;
+    //             driversCsv = true;
+    //             headerLine = line;
+    //           }
+    //         } else {
+    //           if (ridersCsv) {
+    //             const data = headerLine + '\n' + line;
 
-                  console.log('successful upload:', data);
-                });
-              }
-            }
+    //             uploadRiders(data, 'NAACP', function (err, data) {
+    //               if (err) console.log(err);
 
-            // process line here and call s.resume() when rdy
-            // function below was for logging memory usage
-            // logMemoryUsage(lineNr);
+    //               console.log('successful upload:', data);
+    //             });
+    //           }
+    //         }
 
-            // resume the readstream, possibly from a callback
-            s.resume();
-          })
-          .on('error', function(err) {
-            console.log('Error while reading file.', err);
-          })
-          .on('end', function() {
-            console.log('Read entire file.');
+    //         // process line here and call s.resume() when rdy
+    //         // function below was for logging memory usage
+    //         // logMemoryUsage(lineNr);
 
-            reply({
-              // id: result.$loki,
-              // fileName: result.filename,
-              // originalName: result.originalname
-            });
-          })
-      );
+    //         // resume the readstream, possibly from a callback
+    //         s.resume();
+    //       })
+    //       .on('error', function (err) {
+    //         console.log('Error while reading file.', err);
+    //       })
+    //       .on('end', function () {
+    //         console.log('Read entire file.');
+
+    //         debugger;
+
+    //         reply({
+    //           // id: result.$loki,
+    //           // fileName: result.filename,
+    //           // originalName: result.originalname
+    //         });
+    //       })
+    //   );
 
     // data.file.on('readable', function(buffer) {
     //   debugger;
@@ -700,7 +706,7 @@ server.register(
       console.log('user ins: ' + dbQueriesPosts.dbGetSubmitUserString());
       console.log(
         'cancel ride fn: ' +
-          dbQueriesCancels.dbCancelRideRequestFunctionString()
+        dbQueriesCancels.dbCancelRideRequestFunctionString()
       );
       console.log('reject ride fn: ' + dbQueries.dbRejectRideFunctionString());
       console.log('ops interval:' + logOptions.ops.interval);

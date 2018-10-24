@@ -2,9 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Hapi = require("hapi");
 const Pool = require('pg').Pool;
-const Good = require('good');
-const GoodFile = require('good-file');
-const es = require('event-stream');
+const Good = require("good");
 // const {
 //   Readable
 // ,
@@ -327,54 +325,58 @@ const bulkUploadHandler = (request, reply) => {
         let driversCsv = false;
         let headerLine = '';
         let parsingStarted = false;
-        const s = 
-        // fs.createReadStream('very-large-file.csv')
-        data.file.pipe(es.split()).pipe(es
-            .mapSync(function (line) {
-            // pause the readstream
-            s.pause();
-            debugger;
-            lineNr += 1;
-            console.log(line);
-            if (parsingStarted === false) {
-                if (line.indexOf('RiderFirstName') >= 0) {
-                    parsingStarted = true;
-                    ridersCsv = true;
-                    headerLine = line;
-                }
-                else if (line.indexOf('DriverFirstName') >= 0) {
-                    parsingStarted = true;
-                    driversCsv = true;
-                    headerLine = line;
-                }
-            }
-            else {
-                if (ridersCsv) {
-                    const data = headerLine + '\n' + line;
-                    csvImport_1.uploadRiders(data, 'NAACP', function (err, data) {
-                        if (err)
-                            console.log(err);
-                        console.log('successful upload:', data);
-                    });
-                }
-            }
-            // process line here and call s.resume() when rdy
-            // function below was for logging memory usage
-            // logMemoryUsage(lineNr);
-            // resume the readstream, possibly from a callback
-            s.resume();
-        })
-            .on('error', function (err) {
-            console.log('Error while reading file.', err);
-        })
-            .on('end', function () {
-            console.log('Read entire file.');
-            reply({
-            // id: result.$loki,
-            // fileName: result.filename,
-            // originalName: result.originalname
-            });
-        }));
+        csvImport_1.uploadRiders(data.file, 'NAACP', function (err, data) {
+            if (err)
+                console.log(err);
+            console.log('successful upload:', data);
+        });
+        // const s =
+        //   // fs.createReadStream('very-large-file.csv')
+        //   data.file.pipe(es.split()).pipe(
+        //     es
+        //       .mapSync(function (line) {
+        //         // pause the readstream
+        //         s.pause();
+        //         lineNr += 1;
+        //         console.log(line);
+        //         if (parsingStarted === false) {
+        //           if (line.indexOf('RiderFirstName') >= 0) {
+        //             parsingStarted = true;
+        //             ridersCsv = true;
+        //             headerLine = line;
+        //           } else if (line.indexOf('DriverFirstName') >= 0) {
+        //             parsingStarted = true;
+        //             driversCsv = true;
+        //             headerLine = line;
+        //           }
+        //         } else {
+        //           if (ridersCsv) {
+        //             const data = headerLine + '\n' + line;
+        //             uploadRiders(data, 'NAACP', function (err, data) {
+        //               if (err) console.log(err);
+        //               console.log('successful upload:', data);
+        //             });
+        //           }
+        //         }
+        //         // process line here and call s.resume() when rdy
+        //         // function below was for logging memory usage
+        //         // logMemoryUsage(lineNr);
+        //         // resume the readstream, possibly from a callback
+        //         s.resume();
+        //       })
+        //       .on('error', function (err) {
+        //         console.log('Error while reading file.', err);
+        //       })
+        //       .on('end', function () {
+        //         console.log('Read entire file.');
+        //         debugger;
+        //         reply({
+        //           // id: result.$loki,
+        //           // fileName: result.filename,
+        //           // originalName: result.originalname
+        //         });
+        //       })
+        //   );
         // data.file.on('readable', function(buffer) {
         //   debugger;
         //   if (!buffer) {

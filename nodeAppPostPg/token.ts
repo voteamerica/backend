@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+import jwt = require('jsonwebtoken');
 
 import { getJWTSecretFromEnv } from './login';
 

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 const login_1 = require("./login");
 const jwt_secret = login_1.getJWTSecretFromEnv();
 const createToken = (user) => {
