@@ -296,36 +296,11 @@ const getMatchesOtherDriverListHandler = async (req, res) => {
 };
 // const bulkUploadHandler = async (req, res) => {
 const bulkUploadHandler = (request, reply) => {
-    // const payload = req.query;
-    // const matchInfo = await routeFns.getMatchesOtherDriverListInternal(
-    //   req,
-    //   res,
-    //   payload
-    // );
-    // if (!matchInfo) {
-    //   return res(Boom.badRequest('get matches other list error'));
-    // }
-    // const matchInfoJSON = JSON.stringify(matchInfo);
-    // function (request, reply) {
     try {
         const data = request.payload;
         debugger;
-        // console.log('data', data);
         console.log('file', data.file);
-        // const file = data['avatar']; // accept a field call avatar
-        // save the file
-        // const fileDetails = await uploader(file, fileOptions);
-        // save data to database
-        // const col = await loadCollection(COLLECTION_NAME, db);
-        // const result = col.insert(fileDetails);
-        // db.saveDatabase();
-        let string = "";
-        let lineNr = 0;
-        let ridersCsv = false;
-        let driversCsv = false;
-        let headerLine = "";
-        let parsingStarted = false;
-        csvImport_1.uploadRiders(data.file, "NAACP", function (err, data) {
+        csvImport_1.uploadRidersOrDrivers(data.file, 'NAACP', function (err, data) {
             if (err) {
                 console.log(err);
                 const { error, type } = err;
@@ -333,96 +308,16 @@ const bulkUploadHandler = (request, reply) => {
                     err,
                     error,
                     type
-                    // id: result.$loki,
-                    // fileName: result.filename,
-                    // originalName: result.originalname
                 });
             }
-            console.log("successful upload:", data);
+            console.log('successful upload:', data);
+            return reply(data);
         });
-        // const s =
-        //   // fs.createReadStream('very-large-file.csv')
-        //   data.file.pipe(es.split()).pipe(
-        //     es
-        //       .mapSync(function (line) {
-        //         // pause the readstream
-        //         s.pause();
-        //         lineNr += 1;
-        //         console.log(line);
-        //         if (parsingStarted === false) {
-        //           if (line.indexOf('RiderFirstName') >= 0) {
-        //             parsingStarted = true;
-        //             ridersCsv = true;
-        //             headerLine = line;
-        //           } else if (line.indexOf('DriverFirstName') >= 0) {
-        //             parsingStarted = true;
-        //             driversCsv = true;
-        //             headerLine = line;
-        //           }
-        //         } else {
-        //           if (ridersCsv) {
-        //             const data = headerLine + '\n' + line;
-        //             uploadRiders(data, 'NAACP', function (err, data) {
-        //               if (err) console.log(err);
-        //               console.log('successful upload:', data);
-        //             });
-        //           }
-        //         }
-        //         // process line here and call s.resume() when rdy
-        //         // function below was for logging memory usage
-        //         // logMemoryUsage(lineNr);
-        //         // resume the readstream, possibly from a callback
-        //         s.resume();
-        //       })
-        //       .on('error', function (err) {
-        //         console.log('Error while reading file.', err);
-        //       })
-        //       .on('end', function () {
-        //         console.log('Read entire file.');
-        //         debugger;
-        //         reply({
-        //           // id: result.$loki,
-        //           // fileName: result.filename,
-        //           // originalName: result.originalname
-        //         });
-        //       })
-        //   );
-        // data.file.on('readable', function(buffer) {
-        //   debugger;
-        //   if (!buffer) {
-        //     return;
-        //   }
-        //   var part = buffer.read().toString();
-        //   string += part;
-        //   console.log('stream data ' + part);
-        // });
-        // data.file.on('data', function(buffer) {
-        //   debugger;
-        //   if (!buffer) {
-        //     return;
-        //   }
-        //   // var part = buffer.read().toString();
-        //   var part = buffer.toString();
-        //   string += part;
-        //   console.log('stream data ' + part);
-        // });
-        // data.file.on('end', function() {
-        //   debugger;
-        //   console.log('final output ' + string);
-        //   // return result
-        //   reply({
-        //     // id: result.$loki,
-        //     // fileName: result.filename,
-        //     // originalName: result.originalname
-        //   });
-        //   // }
-        // });
     }
     catch (err) {
         // error handling
         reply(Boom.badRequest(err.message, err));
     }
-    // res({ data: matchInfoJSON });
 };
 const usersHandler = getUsersListHandler;
 const driversHandler = getDriversListHandler;
