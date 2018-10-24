@@ -22,7 +22,9 @@ const driverUrl = "http://localhost:8000/driver";
 //       return callback(err);
 //     }
 
-const addRow = async (postUrl, row) => {
+const inputErrors = [];
+
+const addRow = async (postUrl, row, callback) => {
   console.log(row);
   const postOptions = {
     method: "POST",
@@ -65,8 +67,16 @@ const addRow = async (postUrl, row) => {
   } catch (error) {
     debugger;
     console.log("error", error);
-    // callback(err);
 
+    const inputErr = {
+      error: error.message,
+      type: "db input error",
+      data: error.options.form
+    };
+
+    inputErrors.push(inputErr);
+
+    return JSON.stringify(inputErr);
     // return Promise.reject(error);
   }
 };
@@ -174,7 +184,7 @@ function uploadCsv(postUrl, itemsStream, orgUuid, isRider, callback) {
 
   csvParse.on("error", function(err) {
     debugger;
-    return callback(err);
+    return callback({ error: err.message, type: "parse error" });
   });
 
   csvParse.on("end", async function() {
@@ -187,12 +197,16 @@ function uploadCsv(postUrl, itemsStream, orgUuid, isRider, callback) {
     // rows.forEach(async row => {
     // for await (const x of addRow(row)) {
     for (const row of rows) {
-      const r = await addRow(postUrl, row);
+      const r = await addRow(postUrl, row, callback);
 
       debugger;
-      console.log(r);
+      const inputtedItem = JSON.parse(r);
+      console.log(inputtedItem);
 
-      rs.push(r);
+      if (inputtedItem.error === undefined) {
+        debugger;
+        rs.push(inputtedItem);
+      }
     }
     // rows.forEach(
     // await Promise.all(rows.map(async row => addRow(row)));
@@ -205,7 +219,25 @@ function uploadCsv(postUrl, itemsStream, orgUuid, isRider, callback) {
     console.log("rows done:", rs.length);
     // });
 
-    return callback(null, items);
+    const replyDetailsLength = {
+      recordsReceived: rows.length,
+      uploadCount: rs.length
+    };
+
+    const errorOccurred = inputErrors.length > 0;
+    const replyDetailsFull = errorOccurred
+      ? {
+          replyDetailsLength,
+          inputErrorsCount: inputErrors.length,
+          inputErrors
+        }
+      : replyDetailsLength;
+
+    if (errorOccurred) {
+      return callback(replyDetailsFull);
+    } else {
+      return callback(null, replyDetailsFull);
+    }
     //         console.log('Read entire file.');
 
     //         debugger;

@@ -319,16 +319,26 @@ const bulkUploadHandler = (request, reply) => {
         // const col = await loadCollection(COLLECTION_NAME, db);
         // const result = col.insert(fileDetails);
         // db.saveDatabase();
-        let string = '';
+        let string = "";
         let lineNr = 0;
         let ridersCsv = false;
         let driversCsv = false;
-        let headerLine = '';
+        let headerLine = "";
         let parsingStarted = false;
-        csvImport_1.uploadRiders(data.file, 'NAACP', function (err, data) {
-            if (err)
+        csvImport_1.uploadRiders(data.file, "NAACP", function (err, data) {
+            if (err) {
                 console.log(err);
-            console.log('successful upload:', data);
+                const { error, type } = err;
+                return reply({
+                    err,
+                    error,
+                    type
+                    // id: result.$loki,
+                    // fileName: result.filename,
+                    // originalName: result.originalname
+                });
+            }
+            console.log("successful upload:", data);
         });
         // const s =
         //   // fs.createReadStream('very-large-file.csv')
