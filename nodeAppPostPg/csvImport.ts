@@ -22,6 +22,55 @@ const driverUrl = "http://localhost:8000/driver";
 //       return callback(err);
 //     }
 
+const addRow = async (postUrl, row) => {
+  console.log(row);
+  const postOptions = {
+    method: "POST",
+    url: postUrl,
+    rejectUnauthorized: false,
+    form: row
+  };
+  // request.post(postOptions, function(err, httpResponse, body) {
+  //   callback(err, httpResponse);
+  // });
+  // rp.post(postOptions)
+  //   .then(httpResponse => {
+  //     debugger;
+  //     callback(null, httpResponse);
+  //   })
+  //   .catch(err => {
+  //     debugger;
+  //     callback(err);
+  //   });
+
+  try {
+    debugger;
+    // const httpResponse = await rp(postOptions);
+
+    // const xxx = rp(postOptions);
+    // debugger;
+    // return xxx;
+
+    const response = await rp.post(postOptions);
+
+    debugger;
+
+    // const r = JSON.parse(response);
+    // rs.push(r);
+
+    // return Promise.resolve(r.out_uuid);
+
+    // callback(null, httpResponse);
+    return response;
+  } catch (error) {
+    debugger;
+    console.log("error", error);
+    // callback(err);
+
+    // return Promise.reject(error);
+  }
+};
+
 const createItem = (row, isRider, orgUuid) => {
   let copy = { ...row };
 
@@ -128,9 +177,33 @@ function uploadCsv(postUrl, itemsStream, orgUuid, isRider, callback) {
     return callback(err);
   });
 
-  csvParse.on("end", function() {
+  csvParse.on("end", async function() {
     debugger;
     console.log("new items:", newItems);
+
+    const rows = newItems;
+    const rs = [];
+
+    // rows.forEach(async row => {
+    // for await (const x of addRow(row)) {
+    for (const row of rows) {
+      const r = await addRow(postUrl, row);
+
+      debugger;
+      console.log(r);
+
+      rs.push(r);
+    }
+    // rows.forEach(
+    // await Promise.all(rows.map(async row => addRow(row)));
+
+    // const xs = pMap(rows, addRow);
+
+    debugger;
+    // console.log('x rows done:', xs);
+    console.log("rows done:", rs);
+    console.log("rows done:", rs.length);
+    // });
 
     return callback(null, items);
     //         console.log('Read entire file.');
@@ -156,79 +229,8 @@ function uploadCsv(postUrl, itemsStream, orgUuid, isRider, callback) {
   //   // rows.forEach(async row => {
   //   //   for await
   //   // rows.forEach(
-  //   const addRow = async row => {
-  //     console.log(row);
-  //     const postOptions = {
-  //       method: 'POST',
-  //       url: postUrl,
-  //       rejectUnauthorized: false,
-  //       form: copy
-  //     };
-  //     // request.post(postOptions, function(err, httpResponse, body) {
-  //     //   callback(err, httpResponse);
-  //     // });
-  //     // rp.post(postOptions)
-  //     //   .then(httpResponse => {
-  //     //     debugger;
-  //     //     callback(null, httpResponse);
-  //     //   })
-  //     //   .catch(err => {
-  //     //     debugger;
-  //     //     callback(err);
-  //     //   });
-
-  //     try {
-  //       // debugger;
-  //       // const httpResponse = await rp(postOptions);
-
-  //       // const xxx = rp(postOptions);
-  //       // debugger;
-  //       // return xxx;
-
-  //       const response = await rp.post(postOptions);
-
-  //       debugger;
-
-  //       // const r = JSON.parse(response);
-  //       // rs.push(r);
-
-  //       // return Promise.resolve(r.out_uuid);
-
-  //       // callback(null, httpResponse);
-  //       return response;
-  //     } catch (error) {
-  //       debugger;
-  //       console.log('error', error);
-  //       // callback(err);
-
-  //       // return Promise.reject(error);
-  //     }
-  //   };
   // );
   // };
-
-  // const rs = [];
-
-  // rows.forEach(async row => {
-  // for await (const x of addRow(row)) {
-  // for (const row of rows) {
-  //   const r = await addRow(row);
-
-  //   debugger;
-  //   console.log(r);
-
-  //   rs.push(r);
-  // }
-  // rows.forEach(
-
-  // await Promise.all(rows.map(async row => addRow(row)));
-
-  //   const xs = pMap(rows, addRow);
-
-  //   debugger;
-  //   console.log('x rows done:', xs);
-  //   console.log('rows done:', rs);
-  // });
 }
 
 function uploadCsvX(postUrl, fileData, orgUuid, isRider, callback) {
