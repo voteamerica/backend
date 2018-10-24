@@ -24,6 +24,53 @@ const driverUrl = "http://localhost:8000/driver";
 //     if (err) {
 //       return callback(err);
 //     }
+const createItem = (row, isRider, orgUuid) => {
+    let copy = Object.assign({}, row);
+    debugger;
+    // NOTE: node app is based around the form coming from html (rather than a
+    // js function) to support the widest range of clients. So it expects a false
+    // value to be signified by a property not being present, otherwise the value
+    // is true. So any boolean property that is not true is removed.
+    const removeFalseProp = (key, rowData) => {
+        let newRow = {};
+        const _a = key, field = rowData[_a], oneTrip = __rest(rowData, [typeof _a === "symbol" ? _a : _a + ""]);
+        console.log("key", field);
+        if (field && field.toUpperCase() !== "TRUE") {
+            console.log("true");
+            newRow = oneTrip;
+        }
+        else {
+            console.log("false");
+            newRow = rowData;
+        }
+        return newRow;
+    };
+    if (isRider === true) {
+        copy = removeFalseProp("TwoWayTripNeeded", copy);
+        copy = removeFalseProp("RiderIsVulnrable", copy);
+        copy = removeFalseProp("RiderWillNotTalkPolitics", copy);
+        copy = removeFalseProp("PleaseStayInTouch", copy);
+        copy = removeFalseProp("NeedWheelchair", copy);
+        copy = removeFalseProp("RiderLegalConsent", copy);
+        copy = removeFalseProp("RiderWillBeSafe", copy);
+        copy.RidingOnBehalfOfOrganization = true;
+        copy.RidingOBOOrganizationName = orgUuid;
+        console.log("rider", copy);
+    }
+    else {
+        copy = removeFalseProp("DriverWillTakeCare", copy);
+        copy = removeFalseProp("DriverCanLoadRiderWithWheelchair", copy);
+        copy = removeFalseProp("DriverWillNotTalkPolitics", copy);
+        copy = removeFalseProp("PleaseStayInTouch", copy);
+        copy = removeFalseProp("RidersCanSeeDriverDetails", copy);
+        copy = removeFalseProp("DriverWillTakeCare", copy);
+        copy = removeFalseProp("RiderWillBeSafe", copy);
+        copy.DrivingOnBehalfOfOrganization = true;
+        copy.DrivingOBOOrganizationName = orgUuid;
+        console.log("driver", copy);
+    }
+    return copy;
+};
 function uploadCsv(postUrl, itemsStream, orgUuid, isRider, callback) {
     const options = {
         columns: true,
@@ -32,30 +79,31 @@ function uploadCsv(postUrl, itemsStream, orgUuid, isRider, callback) {
     };
     const items = [];
     const newItems = [];
+    let ridersCsv = false;
+    let driversCsv = false;
+    let headerLine = "";
+    let parsingStarted = false;
     debugger;
     const csvParse = csvParsex(options);
     const transformer = transform(record => {
         console.log("rec:", record);
+        items.push(record);
+        if (parsingStarted === false) {
+            if (record.RiderFirstName !== undefined) {
+                parsingStarted = true;
+                ridersCsv = true;
+            }
+            else if (record.DriverFirstName !== undefined) {
+                parsingStarted = true;
+                driversCsv = true;
+            }
+        }
+        const newRecord = createItem(record, ridersCsv, orgUuid);
         debugger;
-        newItems.push(record);
-        return record;
+        newItems.push(newRecord);
+        return newRecord;
     });
-    // transformer.on("readable", () => {
-    //   let row = {};
-    //   debugger;
-    //   while ((row = transformer.read())) {
-    //     console.log("t row", row);
-    //     newItems.push(row);
-    //   }
-    // });
     itemsStream.pipe(csvParse).pipe(transformer);
-    // csvParse.on("readable", function() {
-    //   let record = {};
-    //   debugger;
-    //   while ((record = csvParse.read())) {
-    //     items.push(record);
-    //   }
-    // });
     csvParse.on("error", function (err) {
         debugger;
         return callback(err);
@@ -83,49 +131,6 @@ function uploadCsv(postUrl, itemsStream, orgUuid, isRider, callback) {
     //   // rows.forEach(
     //   const addRow = async row => {
     //     console.log(row);
-    //     let copy = { ...row };
-    //     // debugger;
-    //     // const rs = [];
-    //     // NOTE: node app is based around the form coming from html (rather than a
-    //     // js function) to support the widest range of clients. So it expects a false
-    //     // value to be signified by a property not being present, otherwise the value
-    //     // is true. So any boolean property that is not true is removed.
-    //     const removeFalseProp = (key, rowData) => {
-    //       let newRow = {};
-    //       const { [key]: tw, ...oneTrip } = rowData;
-    //       console.log('key', tw);
-    //       if (tw && tw.toUpperCase() !== 'TRUE') {
-    //         console.log('true');
-    //         newRow = oneTrip;
-    //       } else {
-    //         console.log('false');
-    //         newRow = rowData;
-    //       }
-    //       return newRow;
-    //     };
-    //     if (isRider === true) {
-    //       copy = removeFalseProp('TwoWayTripNeeded', copy);
-    //       copy = removeFalseProp('RiderIsVulnrable', copy);
-    //       copy = removeFalseProp('RiderWillNotTalkPolitics', copy);
-    //       copy = removeFalseProp('PleaseStayInTouch', copy);
-    //       copy = removeFalseProp('NeedWheelchair', copy);
-    //       copy = removeFalseProp('RiderLegalConsent', copy);
-    //       copy = removeFalseProp('RiderWillBeSafe', copy);
-    //       copy.RidingOnBehalfOfOrganization = true;
-    //       copy.RidingOBOOrganizationName = orgUuid;
-    //       console.log('rider', copy);
-    //     } else {
-    //       copy = removeFalseProp('DriverWillTakeCare', copy);
-    //       copy = removeFalseProp('DriverCanLoadRiderWithWheelchair', copy);
-    //       copy = removeFalseProp('DriverWillNotTalkPolitics', copy);
-    //       copy = removeFalseProp('PleaseStayInTouch', copy);
-    //       copy = removeFalseProp('RidersCanSeeDriverDetails', copy);
-    //       copy = removeFalseProp('DriverWillTakeCare', copy);
-    //       copy = removeFalseProp('RiderWillBeSafe', copy);
-    //       copy.DrivingOnBehalfOfOrganization = true;
-    //       copy.DrivingOBOOrganizationName = orgUuid;
-    //       console.log('driver', copy);
-    //     }
     //     const postOptions = {
     //       method: 'POST',
     //       url: postUrl,
