@@ -299,6 +299,7 @@ const bulkUploadHandler = async (request, reply) => {
         const data = request.payload;
         const payload = request.query;
         const userInfoError = 'bulk upload error'; // occurs after successful token, but a strange error. Limit info returned to client
+        const noRowsInputError = 'no rows input into db'; // occurs after successful token, but a strange error. Limit info returned to client
         debugger;
         console.log('file', data.file);
         const userInfo = await routeFns.getUserOrganizationInternal(request, reply, payload);
@@ -309,11 +310,12 @@ const bulkUploadHandler = async (request, reply) => {
             if (err) {
                 console.log(err);
                 const { error, type } = err;
-                return reply({
-                    err,
-                    error,
-                    type
-                });
+                const errorReport = { err, error, type };
+                // if (err.replyDetailsLength) {
+                return reply(errorReport);
+                // } else {
+                //   // reply(Boom.badRequest(noRowsInputError, errorReport));
+                // }
             }
             console.log('successful upload:', data);
             return reply(data);
