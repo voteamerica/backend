@@ -2,7 +2,7 @@
 
 import fs = require('fs');
 import request = require('request');
-import csvParsex = require('csv-parse');
+import csvParseBase = require('csv-parse');
 import transform = require('stream-transform');
 import rp = require('request-promise');
 import minimist = require('minimist');
@@ -15,8 +15,6 @@ const driverUrl = 'http://localhost:8000/driver';
 
 const createItem = (row, isRider, orgUuid) => {
   let adjustedItem = { ...row };
-
-  debugger;
 
   // NOTE: node app is based around the form coming from html (rather than a
   // js function) to support the widest range of clients. So it expects a false
@@ -52,7 +50,7 @@ const createItem = (row, isRider, orgUuid) => {
     adjustedItem.RidingOnBehalfOfOrganization = true;
     adjustedItem.RidingOBOOrganizationName = orgUuid;
 
-    console.log('rider', adjustedItem);
+    // console.log('rider', adjustedItem);
   } else {
     adjustedItem = removeFalseProp('DriverWillTakeCare', adjustedItem);
     adjustedItem = removeFalseProp(
@@ -68,21 +66,24 @@ const createItem = (row, isRider, orgUuid) => {
     adjustedItem.DrivingOnBehalfOfOrganization = true;
     adjustedItem.DrivingOBOOrganizationName = orgUuid;
 
-    console.log('driver', adjustedItem);
+    // console.log('driver', adjustedItem);
   }
 
   return adjustedItem;
 };
 
-function uploadCsv(itemsStream, orgUuid, isRider, callback) {
+function uploadCsv(itemsStream, orgUuid, callback) {
   const options = {
     columns: true,
     trim: true,
     skip_lines_with_error: false
   };
 
+  const uploadParseErrorType = 'parse error';
+  const uploadDbInputErrorType = 'db input error';
+
   const items = [];
-  const newItems = [];
+  const adjustedItems = [];
 
   let ridersCsv = false; // if false after parsingStarted === true, this is a drivers csv
 
@@ -91,16 +92,17 @@ function uploadCsv(itemsStream, orgUuid, isRider, callback) {
 
   debugger;
 
-  const csvParse = csvParsex(options);
+  const csvParse = csvParseBase(options);
 
   const transformer = transform(record => {
-    console.log('rec:', record);
+    // console.log('rec:', record);
     items.push(record);
 
     if (parsingStarted === false) {
       if (record.RiderFirstName !== undefined) {
-        parsingStarted = true;
         ridersCsv = true;
+
+        parsingStarted = true;
         postUrl = riderUrl;
       } else if (record.DriverFirstName !== undefined) {
         parsingStarted = true;
@@ -110,8 +112,7 @@ function uploadCsv(itemsStream, orgUuid, isRider, callback) {
 
     const newRecord = createItem(record, ridersCsv, orgUuid);
 
-    debugger;
-    newItems.push(newRecord);
+    adjustedItems.push(newRecord);
     return newRecord;
   });
 
@@ -119,20 +120,19 @@ function uploadCsv(itemsStream, orgUuid, isRider, callback) {
 
   csvParse.on('error', function(err) {
     debugger;
-    return callback({ error: err.message, type: 'parse error' });
+    return callback({ error: err.message, type: uploadParseErrorType });
   });
 
   csvParse.on('end', async function() {
-    debugger;
-    console.log('new items:', newItems);
+    // console.log('new items:', adjustedItems);
 
-    const rows = newItems;
-    const rs = [];
+    const rows = adjustedItems;
+    const rowsAddedToDb = [];
 
     const inputErrors = [];
 
-    const addRow = async (postUrl, row, callback) => {
-      console.log(row);
+    const addRowToDb = async (postUrl, row, callback) => {
+      // console.log(row);
       const postOptions = {
         method: 'POST',
         url: postUrl,
@@ -141,7 +141,6 @@ function uploadCsv(itemsStream, orgUuid, isRider, callback) {
       };
 
       try {
-        debugger;
         const response = await rp.post(postOptions);
 
         debugger;
@@ -155,7 +154,7 @@ function uploadCsv(itemsStream, orgUuid, isRider, callback) {
 
         const inputErr = {
           error: error.message,
-          type: 'db input error',
+          type: uploadDbInputErrorType,
           data: error.options.form
         };
 
@@ -166,25 +165,25 @@ function uploadCsv(itemsStream, orgUuid, isRider, callback) {
     };
 
     for (const row of rows) {
-      const resp = await addRow(postUrl, row, callback);
+      const resp = await addRowToDb(postUrl, row, callback);
 
       debugger;
       const inputtedItem = resp;
-      console.log(inputtedItem);
+      // console.log(inputtedItem);
 
       if (inputtedItem.error === undefined) {
         debugger;
-        rs.push(inputtedItem);
+        rowsAddedToDb.push(inputtedItem);
       }
     }
 
     debugger;
-    console.log('rows done:', rs);
-    console.log('rows done:', rs.length);
+    // console.log('rows done:', rowsAddedToDb);
+    console.log('rows added count :', rowsAddedToDb.length);
 
     const replyDetailsLength = {
       recordsReceived: rows.length,
-      uploadCount: rs.length
+      uploadCount: rowsAddedToDb.length
     };
 
     const errorOccurred = inputErrors.length > 0;
@@ -206,7 +205,7 @@ function uploadCsv(itemsStream, orgUuid, isRider, callback) {
 }
 
 function uploadRidersOrDrivers(fileData, orgUuid, callback) {
-  uploadCsv(fileData, orgUuid, true, function(err, httpResponse) {
+  uploadCsv(fileData, orgUuid, function(err, httpResponse) {
     if (err) {
       return callback(err);
     }

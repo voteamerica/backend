@@ -423,6 +423,8 @@ const bulkUploadHandler = async (request, reply) => {
     const data = request.payload;
     const payload = request.query;
 
+    const userInfoError = 'bulk upload error'; // occurs after successful token, but a strange error. Limit info returned to client
+
     debugger;
 
     console.log('file', data.file);
@@ -433,11 +435,14 @@ const bulkUploadHandler = async (request, reply) => {
       payload
     );
 
-    if (!userInfo) {
-      return reply(Boom.badRequest('bulk upload error'));
+    if (!userInfo || userInfo.length === 0) {
+      return reply(Boom.badRequest(userInfoError));
     }
 
-    uploadRidersOrDrivers(data.file, 'NAACP', function(err, data) {
+    uploadRidersOrDrivers(data.file, userInfo[0].OrganizationName, function(
+      err,
+      data
+    ) {
       if (err) {
         console.log(err);
 
@@ -455,6 +460,7 @@ const bulkUploadHandler = async (request, reply) => {
       return reply(data);
     });
   } catch (err) {
+    debugger;
     reply(Boom.badRequest(err.message, err));
   }
 };
