@@ -239,9 +239,9 @@ server.route({
                 assign: 'user'
             }
         ],
-        handler: (req, res) => {
+        handler: (req, reply) => {
             const user = req.pre.user;
-            return login_1.createTokenAndRespond(res, user, 200);
+            return login_1.createTokenAndRespond(reply, user, 200);
         }
         // ,
         // validate: {
@@ -249,57 +249,61 @@ server.route({
         // }
     }
 });
-const getUsersListHandler = async (req, res) => {
+const getUsersListHandler = async (req, reply) => {
     const payload = req.query;
-    const userInfo = await routeFns.getUsersListInternal(req, res, payload);
+    const userInfo = await routeFns.getUsersListInternal(req, reply, payload);
     if (!userInfo) {
-        return res(Boom.badRequest('get users list error'));
+        return reply(Boom.badRequest('get users list error'));
     }
     const userInfoJSON = JSON.stringify(userInfo);
-    res({ data: userInfoJSON });
+    reply({ data: userInfoJSON });
 };
-const getDriversListHandler = async (req, res) => {
+const getDriversListHandler = async (req, reply) => {
     const payload = req.query;
-    const driverInfo = await routeFns.getDriversListInternal(req, res, payload);
+    const driverInfo = await routeFns.getDriversListInternal(req, reply, payload);
     if (!driverInfo) {
-        return res(Boom.badRequest('get drivers list error'));
+        return reply(Boom.badRequest('get drivers list error'));
     }
     const driverInfoJSON = JSON.stringify(driverInfo);
-    res({ data: driverInfoJSON });
+    reply({ data: driverInfoJSON });
 };
-const getRidersListHandler = async (req, res) => {
+const getRidersListHandler = async (req, reply) => {
     const payload = req.query;
-    const riderInfo = await routeFns.getRidersListInternal(req, res, payload);
+    const riderInfo = await routeFns.getRidersListInternal(req, reply, payload);
     if (!riderInfo) {
-        return res(Boom.badRequest('get riders list error'));
+        return reply(Boom.badRequest('get riders list error'));
     }
     const riderInfoJSON = JSON.stringify(riderInfo);
-    res({ data: riderInfoJSON });
+    reply({ data: riderInfoJSON });
 };
-const getMatchesListHandler = async (req, res) => {
+const getMatchesListHandler = async (req, reply) => {
     const payload = req.query;
-    const matchInfo = await routeFns.getMatchesListInternal(req, res, payload);
+    const matchInfo = await routeFns.getMatchesListInternal(req, reply, payload);
     if (!matchInfo) {
-        return res(Boom.badRequest('get matches list error'));
+        return reply(Boom.badRequest('get matches list error'));
     }
     const matchInfoJSON = JSON.stringify(matchInfo);
-    res({ data: matchInfoJSON });
+    reply({ data: matchInfoJSON });
 };
-const getMatchesOtherDriverListHandler = async (req, res) => {
+const getMatchesOtherDriverListHandler = async (req, reply) => {
     const payload = req.query;
-    const matchInfo = await routeFns.getMatchesOtherDriverListInternal(req, res, payload);
+    const matchInfo = await routeFns.getMatchesOtherDriverListInternal(req, reply, payload);
     if (!matchInfo) {
-        return res(Boom.badRequest('get matches other list error'));
+        return reply(Boom.badRequest('get matches other list error'));
     }
     const matchInfoJSON = JSON.stringify(matchInfo);
-    res({ data: matchInfoJSON });
+    reply({ data: matchInfoJSON });
 };
-// const bulkUploadHandler = async (req, res) => {
-const bulkUploadHandler = (request, reply) => {
+const bulkUploadHandler = async (request, reply) => {
     try {
         const data = request.payload;
+        const payload = request.query;
         debugger;
         console.log('file', data.file);
+        const userInfo = await routeFns.getUserOrganizationInternal(request, reply, payload);
+        if (!userInfo) {
+            return reply(Boom.badRequest('bulk upload error'));
+        }
         csvImport_1.uploadRidersOrDrivers(data.file, 'NAACP', function (err, data) {
             if (err) {
                 console.log(err);
@@ -315,7 +319,6 @@ const bulkUploadHandler = (request, reply) => {
         });
     }
     catch (err) {
-        // error handling
         reply(Boom.badRequest(err.message, err));
     }
 };
@@ -423,11 +426,11 @@ server.register([
                     output: 'stream',
                     allow: 'multipart/form-data'
                 },
-                handler: bulkUploadHandler
-                // auth: {
-                //   strategy: 'jwt',
-                //   scope: ['admin']
-                // }
+                handler: bulkUploadHandler,
+                auth: {
+                    strategy: 'jwt',
+                    scope: ['admin']
+                }
             }
         });
     }
