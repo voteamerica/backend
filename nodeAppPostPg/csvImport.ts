@@ -8,10 +8,10 @@ import rp = require('request-promise');
 import minimist = require('minimist');
 import { map as pMap } from 'p-iteration';
 
-const riderUrl = 'http://localhost:8000/rider';
-const driverUrl = 'http://localhost:8000/driver';
-// const riderUrl = 'https://api.carpoolvote.com/live/rider';
-// const driverUrl = 'https://api.carpoolvote.com/live/driver';
+// const riderUrl = 'http://localhost:8000/rider';
+// const driverUrl = 'http://localhost:8000/driver';
+const riderUrl = 'https://api.carpoolvote.com/live/rider';
+const driverUrl = 'https://api.carpoolvote.com/live/driver';
 
 const createItem = (row, isRider, orgUuid) => {
   let adjustedItem = { ...row };

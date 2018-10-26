@@ -12,10 +12,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const csvParseBase = require("csv-parse");
 const transform = require("stream-transform");
 const rp = require("request-promise");
-const riderUrl = 'http://localhost:8000/rider';
-const driverUrl = 'http://localhost:8000/driver';
-// const riderUrl = 'https://api.carpoolvote.com/live/rider';
-// const driverUrl = 'https://api.carpoolvote.com/live/driver';
+// const riderUrl = 'http://localhost:8000/rider';
+// const driverUrl = 'http://localhost:8000/driver';
+const riderUrl = 'https://api.carpoolvote.com/live/rider';
+const driverUrl = 'https://api.carpoolvote.com/live/driver';
 const createItem = (row, isRider, orgUuid) => {
     let adjustedItem = Object.assign({}, row);
     // NOTE: node app is based around the form coming from html (rather than a
