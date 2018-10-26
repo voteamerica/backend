@@ -15,6 +15,17 @@ RUN apt-get install -y nodejs
 
 RUN npm install -g webpack
 RUN npm install -g webpack-cli
+RUN npm install -g webpack-merge
+
+RUN echo "install yarn"
+
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+
+RUN apt-get update && apt-get install yarn
+
+# test
+# RUN yarn global add bs-platform
 
 ARG CACHEBUST=1
 ARG FE_PATH=/usr/src/app/frontend/
@@ -34,6 +45,13 @@ RUN ls
 
 RUN git fetch origin
 RUN git merge origin/$BRANCH_NAME
+
+# RUN npm install --only=dev
+# RUN npm install 
+# RUN yarn install --production=false
+
+# TEST  
+# RUN bsb -make-world
 
 # run webpack as background task
 # RUN webpack --watch --progress --info-verbosity verbose &

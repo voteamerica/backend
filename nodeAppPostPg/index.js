@@ -2,8 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Hapi = require("hapi");
 const Pool = require('pg').Pool;
-const Good = require('good');
-const GoodFile = require('good-file');
+const Good = require("good");
+// const {
+//   Readable
+// ,
+// Writable,
+// Transform,
+// Duplex,
+// pipeline,
+// finished
+// } = require('readable-stream');
 console.log('start requires');
 // const hapiAuthJwt = require('hapi-auth-jwt');
 const Boom = require('boom');
@@ -14,6 +22,7 @@ const config = require('./dbInfo.js');
 const logOptions = require('./logInfo.js');
 const dbQueries = require('./dbQueries.js');
 const routeFns = require('./routeFunctions.js');
+const csvImport_1 = require("./csvImport");
 const DbQueriesPosts_1 = require("./DbQueriesPosts");
 const DbDefsCancels_1 = require("./DbDefsCancels");
 const postgresQueries_1 = require("./postgresQueries");
@@ -230,9 +239,9 @@ server.route({
                 assign: 'user'
             }
         ],
-        handler: (req, res) => {
+        handler: (req, reply) => {
             const user = req.pre.user;
-            return login_1.createTokenAndRespond(res, user, 200);
+            return login_1.createTokenAndRespond(reply, user, 200);
         }
         // ,
         // validate: {
@@ -240,50 +249,82 @@ server.route({
         // }
     }
 });
-const getUsersListHandler = async (req, res) => {
+const getUsersListHandler = async (req, reply) => {
     const payload = req.query;
-    const userInfo = await routeFns.getUsersListInternal(req, res, payload);
+    const userInfo = await routeFns.getUsersListInternal(req, reply, payload);
     if (!userInfo) {
-        return res(Boom.badRequest('get users list error'));
+        return reply(Boom.badRequest('get users list error'));
     }
     const userInfoJSON = JSON.stringify(userInfo);
-    res({ data: userInfoJSON });
+    reply({ data: userInfoJSON });
 };
-const getDriversListHandler = async (req, res) => {
+const getDriversListHandler = async (req, reply) => {
     const payload = req.query;
-    const driverInfo = await routeFns.getDriversListInternal(req, res, payload);
+    const driverInfo = await routeFns.getDriversListInternal(req, reply, payload);
     if (!driverInfo) {
-        return res(Boom.badRequest('get drivers list error'));
+        return reply(Boom.badRequest('get drivers list error'));
     }
     const driverInfoJSON = JSON.stringify(driverInfo);
-    res({ data: driverInfoJSON });
+    reply({ data: driverInfoJSON });
 };
-const getRidersListHandler = async (req, res) => {
+const getRidersListHandler = async (req, reply) => {
     const payload = req.query;
-    const riderInfo = await routeFns.getRidersListInternal(req, res, payload);
+    const riderInfo = await routeFns.getRidersListInternal(req, reply, payload);
     if (!riderInfo) {
-        return res(Boom.badRequest('get riders list error'));
+        return reply(Boom.badRequest('get riders list error'));
     }
     const riderInfoJSON = JSON.stringify(riderInfo);
-    res({ data: riderInfoJSON });
+    reply({ data: riderInfoJSON });
 };
-const getMatchesListHandler = async (req, res) => {
+const getMatchesListHandler = async (req, reply) => {
     const payload = req.query;
-    const matchInfo = await routeFns.getMatchesListInternal(req, res, payload);
+    const matchInfo = await routeFns.getMatchesListInternal(req, reply, payload);
     if (!matchInfo) {
-        return res(Boom.badRequest('get matches list error'));
+        return reply(Boom.badRequest('get matches list error'));
     }
     const matchInfoJSON = JSON.stringify(matchInfo);
-    res({ data: matchInfoJSON });
+    reply({ data: matchInfoJSON });
 };
-const getMatchesOtherDriverListHandler = async (req, res) => {
+const getMatchesOtherDriverListHandler = async (req, reply) => {
     const payload = req.query;
-    const matchInfo = await routeFns.getMatchesOtherDriverListInternal(req, res, payload);
+    const matchInfo = await routeFns.getMatchesOtherDriverListInternal(req, reply, payload);
     if (!matchInfo) {
-        return res(Boom.badRequest('get matches other list error'));
+        return reply(Boom.badRequest('get matches other list error'));
     }
     const matchInfoJSON = JSON.stringify(matchInfo);
-    res({ data: matchInfoJSON });
+    reply({ data: matchInfoJSON });
+};
+const bulkUploadHandler = async (request, reply) => {
+    try {
+        const data = request.payload;
+        const payload = request.query;
+        const userInfoError = 'bulk upload error'; // occurs after successful token, but a strange error. Limit info returned to client
+        const noRowsInputError = 'no rows input into db'; // occurs after successful token, but a strange error. Limit info returned to client
+        debugger;
+        console.log('file', data.file);
+        const userInfo = await routeFns.getUserOrganizationInternal(request, reply, payload);
+        if (!userInfo || userInfo.length === 0) {
+            return reply(Boom.badRequest(userInfoError));
+        }
+        csvImport_1.uploadRidersOrDrivers(data.file, userInfo[0].OrganizationName, function (err, data) {
+            if (err) {
+                console.log(err);
+                const { error, type } = err;
+                const errorReport = { err, error, type };
+                // if (err.replyDetailsLength) {
+                return reply(errorReport);
+                // } else {
+                //   // reply(Boom.badRequest(noRowsInputError, errorReport));
+                // }
+            }
+            console.log('successful upload:', data);
+            return reply(data);
+        });
+    }
+    catch (err) {
+        debugger;
+        reply(Boom.badRequest(err.message, err));
+    }
 };
 const usersHandler = getUsersListHandler;
 const driversHandler = getDriversListHandler;
@@ -375,6 +416,21 @@ server.register([
             path: '/matches-other/list',
             config: {
                 handler: matchesOtherDriverHandler,
+                auth: {
+                    strategy: 'jwt',
+                    scope: ['admin']
+                }
+            }
+        });
+        server.route({
+            method: 'POST',
+            path: '/bulk-upload',
+            config: {
+                payload: {
+                    output: 'stream',
+                    allow: 'multipart/form-data'
+                },
+                handler: bulkUploadHandler,
                 auth: {
                     strategy: 'jwt',
                     scope: ['admin']

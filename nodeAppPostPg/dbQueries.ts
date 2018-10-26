@@ -46,6 +46,7 @@ module.exports = {
   dbGetDriversByUserOrganizationQueryString,
   dbGetMatchesByUserOrganizationQueryString,
   dbGetMatchesByRiderOrganizationQueryString,
+  dbGetUserOrganizationQueryString,
 
   dbGetMatchesQueryString,
   dbGetDriversQueryString,
@@ -335,6 +336,22 @@ function dbGetMatchesByRiderOrganizationQueryString(
   and carpoolvote.rider.uuid_organization =  carpoolvote.organization."UUID"
   INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
   WHERE carpoolvote.tb_user.username = '` +
+    username +
+    "'";
+
+  const dbQueryFn = () => queryString;
+
+  return dbQueryFn;
+}
+
+// matches where rider org matches user org and driver org is different
+// NOTE: for this query, org for username 'andrea2' is applied (as need org to be other than something)
+function dbGetUserOrganizationQueryString(username: string): () => string {
+  const queryString =
+    ` SELECT "OrganizationName", "UUID_organization"
+    FROM carpoolvote.organization
+    INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
+    WHERE carpoolvote.tb_user.username = '` +
     username +
     "'";
 
