@@ -8,6 +8,14 @@ For the development environment, folders nodeApp and pg-auto contain the Dockerf
 
 The testing environment has two further folders, one for a selenium standalone server, and another for the app that runs the tests.
 
+## What is your development machine?
+
+The environments below work on Windows, Linux and Mac machines. Having problems? Get in touch on Slack or raise an issue on Github.
+
+### Using Docker Toolbox on Windows
+
+This legacy environment works well. Follow the brief initial steps below to [setup the Virtualbox environment](/Using-Docker-Toolbox-on-Windows).
+
 ## Install docker compose (if not already installed)
 
 #### Details at [the docker compose install page](https://docs.docker.com/compose/install)
@@ -260,13 +268,11 @@ NOTE: the backend PR should adjust the backend `travis.yml` file to refer to the
 
 ### 2) Test Front-end PR
 
-#### On your local fork, create a branch pr... for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
+#### On your local fork, create a branch, e.g. `pr123`, for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 
 **NOTE:** Fetch from the main repo on `upstream` not `origin` as in the article.
 
-Push this new PR to your fork on `origin` (not `upstream`).
-
-Checkout this new pr branch.
+Checkout this new `pr123` branch and push the branch to your fork on `origin` (not `upstream`).
 
 #### Choose manual or automated tests
 
@@ -284,7 +290,7 @@ Optional: use VNC viewer to watch the tests execute
 
 ### 3) Test Backend-end PR
 
-#### 1) on your local fork, create a branch, e.g. `pr123`, for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
+#### 1) on your local fork, create a branch, e.g. `pr456`, for the PR [(how to do this)](https://help.github.com/articles/checking-out-pull-requests-locally/)
 
 **NOTE:** Fetch from the main repo on `upstream` not `origin` as in the article.
 
@@ -317,6 +323,55 @@ sh ./start-compose-tests-pr.sh match
 ```
 
 #### 4) Optional: use VNC viewer to watch the tests execute
+
+### 4) Using Docker Toolbox on Windows
+
+By default, VirtualBox (technology to enable Docker Toolbox) does not expose the ports the environment uses. Follow these steps to expose those ports. You may need to restart the VirtualBox services after running these commands.
+
+NOTE: to run these commands in Command Prompt, remove `./` from the start. Otherwise, use them as shown in Git Bash.
+
+To see exposed ports, run:
+
+```
+./vboxmanage showvminfo default | grep 'host port'
+```
+
+#### Modify Virtualbox port forwarding list
+
+To access the website in your browser, expose port 4000:
+
+```
+./VBoxManage modifyvm "default" --natpf1 "jekyll,tcp,127.0.0.1,4000,,4000"
+```
+
+To access the node app API in your browser, expose port 8000:
+
+```
+./VBoxManage modifyvm "default" --natpf1 "NodeApp,tcp,127.0.0.1,8000,,8000"
+```
+
+To debug the node app, expose ports 5858 and 8080:
+
+```
+./VBoxManage modifyvm "default" --natpf1 "NodeDebug,tcp,127.0.0.1,5858,,5858"
+./VBoxManage modifyvm "default" --natpf1 "NodeDebug2,tcp,127.0.0.1,8080,,8080"
+```
+
+To access the Postgres db server, expose ports 5432:
+
+```
+./VBoxManage modifyvm "default" --natpf1 "Postgres,tcp,127.0.0.1,5432,,5432"
+```
+
+To watch automated tests with the VNC viewer:
+
+```
+./VBoxManage modifyvm "default" --natpf1 "vnc,tcp,127.0.0.1,5900,,5900"
+```
+
+```
+./VBoxManage modifyvm "default" --natpf1 "pulp,tcp,127.0.0.1,1337,,1337"
+```
 
 ### The following instructions are being reviewed
 
@@ -481,16 +536,3 @@ https://blog.docker.com/2016/07/live-debugging-docker/
 
 https://code.visualstudio.com/docs/nodejs/nodejs-debugging
 https://alexanderzeitler.com/articles/debugging-a-nodejs-es6-application-in-a-docker-container-using-visual-studio-code/
-
-### virtualbox portforward list, update
-
-```
-./vboxmanage showvminfo default | grep 'host port'
-.\VBoxManage modifyvm "default" --natpf1 "NodeApp,tcp,127.0.0.1,8000,,8000"
-.\VBoxManage modifyvm "default" --natpf1 "NodeDebug,tcp,127.0.0.1,5858,,5858"
-.\VBoxManage modifyvm "default" --natpf1 "NodeDebug2,tcp,127.0.0.1,8080,,8080"
-.\VBoxManage modifyvm "default" --natpf1 "Postgres,tcp,127.0.0.1,5432,,5432"
-.\VBoxManage modifyvm "default" --natpf1 "jekyll,tcp,127.0.0.1,4000,,4000"
-.\VBoxManage modifyvm "default" --natpf1 "vnc,tcp,127.0.0.1,5900,,5900"
-.\VBoxManage modifyvm "default" --natpf1 "pulp,tcp,127.0.0.1,1337,,1337"
-```
