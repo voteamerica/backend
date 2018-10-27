@@ -35,20 +35,14 @@ function dbGetOutgoingEmailString() {
         SCHEMA_NAME +
         '.' +
         OUTGOING_EMAIL_TABLE +
-        ' WHERE status=' +
-        " '" +
-        'Pending' +
-        "' ");
+        ` WHERE status= 'Pending' `);
 }
 function dbGetOutgoingSmsString() {
     return ('SELECT * FROM ' +
         SCHEMA_NAME +
         '.' +
         OUTGOING_SMS_TABLE +
-        ' WHERE status=' +
-        " '" +
-        'Pending' +
-        "' ");
+        ` WHERE status= 'Pending' `);
 }
 function dbGetItemsToSend(pool, executeFunctionArray) {
     const fnExecuteFunction = executeFunctionArray[currentFunction++];
@@ -73,7 +67,7 @@ function dbGetItemsToSend(pool, executeFunctionArray) {
                     smsMessageOutput);
                 const message = {
                     id: smsMessage.id,
-                    status: smsMessage.state,
+                    status: smsMessage.status,
                     body: smsMessage.body,
                     phoneNumber: smsMessage.recipient
                 };
@@ -119,20 +113,14 @@ function dbUpdateSentString(tableName) {
         SCHEMA_NAME +
         '.' +
         OUTGOING_SMS_TABLE +
-        ' SET status=' +
-        " '" +
-        'Sent' +
-        "' WHERE id=$1");
+        ` SET status= 'Sent' WHERE id=$1`);
 }
 function dbUpdateFailedString(tableName) {
     return ('UPDATE ' +
         SCHEMA_NAME +
         '.' +
         OUTGOING_SMS_TABLE +
-        ' SET status=' +
-        " '" +
-        'Failed' +
-        "' WHERE id=$1");
+        ` SET status= 'Failed' WHERE id=$1`);
 }
 function dbUpdateMessageItemStatus(id, pool, fnUpdateString) {
     var updateString = fnUpdateString();
