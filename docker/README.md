@@ -91,7 +91,9 @@ That's it, you are up and running! Head to http://localhost:4000 in your browser
 
 ##### Stopping & cleaning up the environment
 
-Ctrl-C to finish, then tidy up with this command
+Ctrl-C to finish. Just enter the same command to restart with the same environment and db.
+
+When you want to reset the database, tidy up with this command.
 
 ```
 docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml down
