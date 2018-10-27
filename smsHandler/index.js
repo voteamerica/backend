@@ -1,4 +1,5 @@
 'use strict';
+const dateFormat = require('dateformat');
 const cfg = {
     // get info from env vars
     accountSid: process.env.TWILIO_ACCOUNT_SID,
@@ -67,7 +68,9 @@ function dbGetItemsToSend(pool, executeFunctionArray) {
             result.rows.length > 0) {
             result.rows.forEach(smsMessage => {
                 const smsMessageOutput = JSON.stringify(smsMessage);
-                console.log('message: ' + smsMessageOutput);
+                console.log(dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') +
+                    ': SMS: ' +
+                    smsMessageOutput);
                 const message = {
                     id: smsMessage.id,
                     status: smsMessage.state,

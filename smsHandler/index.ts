@@ -1,5 +1,7 @@
 'use strict';
 
+const dateFormat = require('dateformat');
+
 interface TwilioConfig {
   accountSid: String;
   authToken: String;
@@ -107,7 +109,11 @@ function dbGetItemsToSend(pool, executeFunctionArray) {
         result.rows.forEach(smsMessage => {
           const smsMessageOutput = JSON.stringify(smsMessage);
 
-          console.log('message: ' + smsMessageOutput);
+          console.log(
+            dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss') +
+              ': SMS: ' +
+              smsMessageOutput
+          );
 
           const message: SMSMessage = {
             id: smsMessage.id,
