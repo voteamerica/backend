@@ -1,21 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var DbQueriesPosts_1 = require("./DbQueriesPosts");
-var postgresQueries_1 = require("./postgresQueries");
-var RouteNames_1 = require("./RouteNames");
-var dbQueriesPosts = new DbQueriesPosts_1.DbQueriesPosts();
-var routeNamesAddDriverRider = new RouteNames_1.RouteNamesAddDriverRider();
-var postgresQueries = new postgresQueries_1.PostgresQueries();
-var PostFunctions = (function () {
-    function PostFunctions() {
+const DbQueriesPosts_1 = require("./DbQueriesPosts");
+const postgresQueries_1 = require("./postgresQueries");
+const RouteNames_1 = require("./RouteNames");
+let dbQueriesPosts = new DbQueriesPosts_1.DbQueriesPosts();
+let routeNamesAddDriverRider = new RouteNames_1.RouteNamesAddDriverRider();
+let postgresQueries = new postgresQueries_1.PostgresQueries();
+class PostFunctions {
+    constructor() {
         this.rfPool = undefined;
         this.getExecResultStrings = undefined;
         this.postRider = undefined;
         this.postHelper = undefined;
         this.postDriver = undefined;
+        this.postUser = undefined;
         this.getExecResultStrings = this.createResultStringFn(' fn called: ', ' fn call failed: ');
     }
-    PostFunctions.prototype.setPool = function (pool) {
+    setPool(pool) {
         this.rfPool = pool;
         this.postDriver =
             this.createPostFn(routeNamesAddDriverRider.DRIVER_ROUTE, dbQueriesPosts.dbGetSubmitDriverString, this.createPayloadFn(this.getDriverPayloadAsArray), this.logPostDriver);
@@ -23,11 +24,13 @@ var PostFunctions = (function () {
             this.createPostFn(routeNamesAddDriverRider.HELPER_ROUTE, dbQueriesPosts.dbGetSubmitHelperString, this.createPayloadFn(this.getHelperPayloadAsArray), this.logPostHelper);
         this.postRider =
             this.createPostFn(routeNamesAddDriverRider.RIDER_ROUTE, dbQueriesPosts.dbGetSubmitRiderString, this.createPayloadFn(this.getRiderPayloadAsArray), this.logPostRider);
-    };
-    PostFunctions.prototype.logPost = function (req) {
+        this.postUser =
+            this.createPostFn(routeNamesAddDriverRider.USER_ROUTE, dbQueriesPosts.dbGetSubmitUserString, this.createPayloadFn(this.getUserPayloadAsArray), this.logPostUser);
+    }
+    logPost(req) {
         req.log();
-    };
-    PostFunctions.prototype.createResultStringFn = function (successText, failureText) {
+    }
+    createResultStringFn(successText, failureText) {
         function getResultStrings(tableName) {
             var resultStrings = {
                 success: ' xxx ' + successText,
@@ -38,8 +41,8 @@ var PostFunctions = (function () {
             return resultStrings;
         }
         return getResultStrings;
-    };
-    PostFunctions.prototype.createPostFn = function (resultStringText, dbQueryFn, payloadFn, logFn) {
+    }
+    createPostFn(resultStringText, dbQueryFn, payloadFn, logFn) {
         var self = this;
         function postFn(req, reply) {
             var payload = req.payload;
@@ -53,15 +56,15 @@ var PostFunctions = (function () {
             postgresQueries.dbExecuteCarpoolAPIFunction_Insert(payload, self.rfPool, dbQueryFn, payloadFn, req, reply, results);
         }
         return postFn;
-    };
-    PostFunctions.prototype.createPayloadFn = function (payloadFn) {
+    }
+    createPayloadFn(payloadFn) {
         var self = this;
         function callPayloadFn(req, payload) {
             return payloadFn(self, req, payload);
         }
         return callPayloadFn;
-    };
-    PostFunctions.prototype.getDriverPayloadAsArray = function (self, req, payload) {
+    }
+    getDriverPayloadAsArray(self, req, payload) {
         var ip = self.getClientAddress(req);
         return [
             ip,
@@ -83,16 +86,16 @@ var PostFunctions = (function () {
             payload.DriverPreferredContact.toString(),
             (payload.DriverWillTakeCare ? 'true' : 'false')
         ];
-    };
-    PostFunctions.prototype.getHelperPayloadAsArray = function (self, req, payload) {
+    }
+    getHelperPayloadAsArray(self, req, payload) {
         return [
             payload.Name, payload.Email, payload.Capability
             // 1, moment().toISOString()
         ];
-    };
-    PostFunctions.prototype.getRiderPayloadAsArray = function (self, req, payload) {
+    }
+    getRiderPayloadAsArray(self, req, payload) {
         var ip = self.getClientAddress(req);
-        return [
+        const payloadAsArray = [
             ip,
             payload.RiderFirstName,
             payload.RiderLastName,
@@ -113,16 +116,29 @@ var PostFunctions = (function () {
             (payload.RiderLegalConsent ? 'true' : 'false'),
             (payload.RiderWillBeSafe ? 'true' : 'false'),
             payload.RiderCollectionAddress,
-            payload.RiderDestinationAddress
+            payload.RiderDestinationAddress,
+            payload.RidingOnBehalfOfOrganization ? 'true' : 'false',
+            payload.RidingOBOOrganizationName
         ];
-    };
-    PostFunctions.prototype.getClientAddress = function (req) {
+        return payloadAsArray;
+    }
+    getUserPayloadAsArray(self, req, payload) {
+        var ip = self.getClientAddress(req);
+        return [
+            ip,
+            payload.email,
+            payload.username,
+            payload.password,
+            payload.admin
+        ];
+    }
+    getClientAddress(req) {
         // See http://stackoverflow.com/questions/10849687/express-js-how-to-get-remote-client-address
         // and http://stackoverflow.com/questions/19266329/node-js-get-clients-ip/19267284
         return (req.headers['x-forwarded-for'] || '').split(',')[0]
             || req.connection.remoteAddress;
-    };
-    PostFunctions.prototype.logPostDriver = function (self, req) {
+    }
+    logPostDriver(self, req) {
         var payload = req.payload;
         console.log("driver radius1 : " + payload.DriverCollectionRadius);
         self.sanitiseDriver(payload);
@@ -130,13 +146,13 @@ var PostFunctions = (function () {
         console.log("driver payload: " + JSON.stringify(payload, null, 4));
         console.log("driver zip: " + payload.DriverCollectionZIP);
         req.log();
-    };
-    PostFunctions.prototype.logPostHelper = function (self, req) {
+    }
+    logPostHelper(self, req) {
         var payload = req.payload;
         req.log();
         console.log("helper payload: " + JSON.stringify(payload, null, 4));
-    };
-    PostFunctions.prototype.logPostRider = function (self, req) {
+    }
+    logPostRider(self, req) {
         var payload = req.payload;
         //console.log("rider state1 : " + payload.RiderVotingState);
         self.sanitiseRider(payload);
@@ -144,20 +160,25 @@ var PostFunctions = (function () {
         req.log();
         console.log("rider payload: " + JSON.stringify(payload, null, 4));
         console.log("rider zip: " + payload.RiderCollectionZIP);
-    };
-    PostFunctions.prototype.sanitiseRider = function (payload) {
+    }
+    logPostUser(self, req) {
+        var payload = req.payload;
+        // self.sanitiseRider(payload);
+        req.log();
+        console.log("user payload: " + JSON.stringify(payload, null, 4));
+    }
+    sanitiseRider(payload) {
         // if (payload.RiderVotingState === undefined) {
         //   payload.RiderVotingState = "MO";
         // }
-    };
-    PostFunctions.prototype.sanitiseDriver = function (payload) {
+    }
+    sanitiseDriver(payload) {
         if (payload.DriverCollectionRadius === undefined ||
             payload.DriverCollectionRadius === "") {
             // console.log("santising...");
             payload.DriverCollectionRadius = 0;
         }
-    };
-    return PostFunctions;
-}());
+    }
+}
 exports.PostFunctions = PostFunctions;
 //# sourceMappingURL=PostFunctions.js.map

@@ -35,6 +35,7 @@ class PostFunctions {
   postRider: any = undefined;
   postHelper: any = undefined;
   postDriver: any = undefined;
+  postUser: any = undefined;
 
   setPool (pool: any) {
     this.rfPool = pool;
@@ -59,7 +60,14 @@ class PostFunctions {
         dbQueriesPosts.dbGetSubmitRiderString, 
         this.createPayloadFn(this.getRiderPayloadAsArray), 
         this.logPostRider);
-  }
+
+    this.postUser = 
+      this.createPostFn 
+      (routeNamesAddDriverRider.USER_ROUTE, 
+        dbQueriesPosts.dbGetSubmitUserString, 
+        this.createPayloadFn(this.getUserPayloadAsArray), 
+        this.logPostUser);
+    }
 
   logPost (req: any) {
     req.log();
@@ -155,7 +163,8 @@ class PostFunctions {
 
   getRiderPayloadAsArray (self: PostFunctions, req: any, payload: any): any[] {
     var ip = self.getClientAddress(req);
-    return [
+
+    const payloadAsArray = [
         ip,
         payload.RiderFirstName,
         payload.RiderLastName,
@@ -176,8 +185,23 @@ class PostFunctions {
         (payload.RiderLegalConsent ? 'true' : 'false'),
         (payload.RiderWillBeSafe ? 'true' : 'false'),
         payload.RiderCollectionAddress,
-        payload.RiderDestinationAddress
-    ];
+        payload.RiderDestinationAddress,
+        payload.RidingOnBehalfOfOrganization ? 'true' : 'false',
+        payload.RidingOBOOrganizationName
+      ];
+
+    return payloadAsArray;
+  }
+
+  getUserPayloadAsArray (self: PostFunctions, req: any, payload: any): any[] {
+    var ip = self.getClientAddress(req);
+    return [
+        ip,
+        payload.email,
+        payload.username,
+        payload.password,
+        payload.admin
+    ]
   }
 
   getClientAddress (req: any) {
@@ -219,6 +243,16 @@ class PostFunctions {
 
     console.log("rider payload: " + JSON.stringify(payload, null, 4));
     console.log("rider zip: " + payload.RiderCollectionZIP);
+  }
+
+  logPostUser (self: PostFunctions, req: any) {
+    var payload = req.payload;
+
+    // self.sanitiseRider(payload);
+
+    req.log();
+
+    console.log("user payload: " + JSON.stringify(payload, null, 4));
   }
 
   sanitiseRider (payload: any) {

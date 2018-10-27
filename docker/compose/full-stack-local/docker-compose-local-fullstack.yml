@@ -10,6 +10,8 @@ services:
         # JEKYLL_VERSION: jekyll@3.4.4
     # image: gc-jekyll
 
+    # this setting causes /bin/bash to wait on input, not exit immediately
+    tty: true
     ports: 
       - "4000:4000"
     depends_on:
@@ -25,9 +27,13 @@ services:
     # command: jekyll serve --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-host.yml
 
     # command: serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --config /_config-local-host.yml
-    command: serve -H 0.0.0.0 --force_polling --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-host.yml
 
-    
+    # this is the working version
+    # command: serve -H 0.0.0.0 --force_polling --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-host.yml
+
+    # entrypoint: /bin/bash
+    # entrypoint: jekyll build
+    # entrypoint: ""
     # command: /bin/bash
 
     volumes:
@@ -46,19 +52,22 @@ services:
     image: carpool
 
     depends_on:
-    - cp-pg-server
-    # command: bash
-    # command: /expo-start.sh
-    # command: /expo-bash.sh
+      - cp-pg-server
+      # command: bash
+      # command: /expo-start.sh
+      # command: /expo-bash.sh
     stdin_open: true
+
+    # this setting causes /bin/bash to wait on input, not exit immediately
     tty: true
     environment:
       - PGPASSWORD=pwd
       - PGHOST=10.4.0.6
+      - JWT_SECRET=test_weak_secret
     ports:
-      - "8000:8000"
-      - "5858:5858"
-      - "8080:8080"
+      - '8000:8000'
+      - '5858:5858'
+      - '8080:8080'
     links:
       - cp-pg-server
     volumes:

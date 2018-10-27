@@ -67,6 +67,23 @@ CREATE TABLE bordering_state (
 
 ALTER TABLE bordering_state OWNER TO carpool_admins;
 
+
+--
+-- Name: tb_user; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
+--
+
+CREATE TABLE tb_user (
+    "UUID" character varying(50) DEFAULT gen_random_uuid() NOT NULL,
+    email character varying(250) NOT NULL,
+    username character varying(250) NOT NULL,
+    password character varying(250) NOT NULL,
+    is_admin boolean DEFAULT FALSE NOT NULL,
+    "UUID_organization" character varying(50)
+);
+
+
+ALTER TABLE tb_user OWNER TO carpool_admins;
+
 --
 -- Name: driver; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
 --
@@ -196,20 +213,6 @@ CREATE TABLE organization (
 
 
 ALTER TABLE organization OWNER TO carpool_admin;
-
---
--- Name: operator; Type: TABLE; Schema: carpoolvote; Owner: carpool_admin
---
-
-CREATE TABLE operator (
-    "OperatorFirstName" character varying(255) NOT NULL,
-    "OperatorLastName" character varying(255) NOT NULL,
-    "UUID" character varying(50) DEFAULT gen_random_uuid() NOT NULL,
-    uuid_organization character varying(50) NOT NULL
-);
-
-
-ALTER TABLE operator OWNER TO carpool_admin;
 
 --
 -- Name: outgoing_email; Type: TABLE; Schema: carpoolvote; Owner: carpool_admins
@@ -437,6 +440,14 @@ ALTER TABLE ONLY zip_codes
 
 
 --
+-- Name: user_pk; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
+--
+
+ALTER TABLE ONLY tb_user
+    ADD CONSTRAINT user_pk PRIMARY KEY ("UUID");
+
+
+--
 -- Name: driver_pk; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
 --
 
@@ -474,12 +485,6 @@ ALTER TABLE ONLY match
 ALTER TABLE ONLY organization
     ADD CONSTRAINT organization_pkey PRIMARY KEY ("UUID");
 
---
--- Name: operator operator_pkey; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admin
---
-
-ALTER TABLE ONLY operator
-    ADD CONSTRAINT operator_pkey PRIMARY KEY ("UUID");
 --
 -- Name: outgoing_email_pk; Type: CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
 --
@@ -585,12 +590,11 @@ ALTER TABLE ONLY rider
     ADD CONSTRAINT rider_uuid_organization_fkey FOREIGN KEY (uuid_organization) REFERENCES organization("UUID") ON DELETE CASCADE;
 
 --
--- Name: operator operator_uuid_organization_fkey; Type: FK CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
+-- Name: user user_uuid_organization_fkey; Type: FK CONSTRAINT; Schema: carpoolvote; Owner: carpool_admins
 --
 
-ALTER TABLE ONLY operator
-    ADD CONSTRAINT operator_uuid_organization_fkey FOREIGN KEY (uuid_organization) REFERENCES organization("UUID") ON DELETE CASCADE;
-
+ALTER TABLE ONLY tb_user
+    ADD CONSTRAINT user_uuid_organization_fkey FOREIGN KEY ("UUID_organization") REFERENCES carpoolvote.organization("UUID") ON DELETE CASCADE;
 
 --
 -- Name: fct_modified_column(); Type: ACL; Schema: carpoolvote; Owner: carpool_admins
@@ -603,7 +607,15 @@ GRANT ALL ON FUNCTION fct_modified_column() TO carpool_role;
 GRANT ALL ON FUNCTION fct_modified_column() TO carpool_web_role;
 
 
+--
+-- Name: user; Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
 
+REVOKE ALL ON TABLE tb_user FROM PUBLIC;
+REVOKE ALL ON TABLE tb_user FROM carpool_admins;
+GRANT ALL ON TABLE tb_user TO carpool_admins;
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE tb_user TO carpool_role;
+GRANT SELECT,INSERT,UPDATE ON TABLE tb_user TO carpool_web_role;
 
 
 --
@@ -737,6 +749,23 @@ GRANT ALL ON TABLE zip_codes TO carpool_role;
 
 
 --
+-- Name: organization; Type: ACL; Schema: carpoolvote; Owner: carpool_admins
+--
+
+REVOKE ALL ON TABLE organization FROM PUBLIC;
+REVOKE ALL ON TABLE organization FROM carpool_admins;
+GRANT SELECT ON TABLE organization TO carpool_web_role;
+GRANT ALL ON TABLE organization TO carpool_admins;
+GRANT ALL ON TABLE organization TO carpool_role;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
+INSERT INTO carpoolvote.organization("OrganizationName", "UUID") VALUES ('None', '8fd36810-1ecf-437b-9c74-b5fe317a4609');
+INSERT INTO carpoolvote.organization("OrganizationName", "UUID") VALUES ('NAACP', '6055b1af-8ee0-4f88-9768-16cc7d7b1674');
+INSERT INTO carpoolvote.organization("OrganizationName", "UUID") VALUES ('AAPD', '8b8b907d-cb69-4f2e-bf1a-65681ff2f35e');
+INSERT INTO carpoolvote.organization("OrganizationName", "UUID") VALUES ('PPC', '53ddcbc4-78b0-449b-ad00-612eae939bf1');
+INSERT INTO carpoolvote.organization("OrganizationName", "UUID") VALUES ('MDCC', 'ede64456-4fa6-4e72-a695-a0857d496857');
+INSERT INTO carpoolvote.organization("OrganizationName", "UUID") VALUES ('MarchOn', '91b628d6-e149-4323-97a3-fe862450d858');

@@ -1,39 +1,144 @@
 "use strict";
 // // functions that use postgresql pg library to execute db queries etc
 Object.defineProperty(exports, "__esModule", { value: true });
-var PostgresQueries = (function () {
-    function PostgresQueries() {
-    }
-    PostgresQueries.prototype.dbGetData = function (pool, fnGetString, reply, results) {
+class PostgresQueries {
+    dbGetData(pool, fnGetString, reply, results) {
         var queryString = fnGetString();
-        pool.query(queryString)
-            .then(function (result) {
-            var firstRowAsString = "";
+        pool
+            .query(queryString)
+            .then(result => {
+            var firstRowAsString = '';
             if (result !== undefined && result.rows !== undefined) {
                 // result.rows.forEach( val => console.log(val));
                 firstRowAsString = JSON.stringify(result.rows[0]);
             }
             reply(results.success + firstRowAsString);
         })
-            .catch(function (e) {
+            .catch(e => {
             var message = e.message || '';
             var stack = e.stack || '';
             console.error(results.failure, message, stack);
             reply(results.failure + message).code(500);
         });
-    };
-    PostgresQueries.prototype.dbGetUnmatchedDrivers = function (pool, fnGetString, reply, results) {
+    }
+    async dbGetDataInternal(pool, fnGetString, reply, results) {
         var queryString = fnGetString();
-        pool.query(queryString)
+        try {
+            const result = await pool.query(queryString);
+            // .then(result => {
+            var firstRowAsString = '';
+            if (result !== undefined && result.rows !== undefined) {
+                // result.rows.forEach( val => console.log(val));
+                firstRowAsString = JSON.stringify(result.rows[0]);
+            }
+            return firstRowAsString;
+            // reply(results.success + firstRowAsString);
+        }
+        catch (e) {
+            var message = e.message || '';
+            var stack = e.stack || '';
+            console.error(results.failure, message, stack);
+            // reply(results.failure + message).code(500);
+        }
+    }
+    async dbGetDataListInternal(pool, fnGetString, reply, results) {
+        var queryString = fnGetString();
+        try {
+            const result = await pool.query(queryString);
+            const rowsAsJSON = [];
+            if (result !== undefined && result.rows !== undefined) {
+                // result.rows.forEach(row => rowsAsJSON.push(JSON.stringify(row)));
+                result.rows.forEach(row => rowsAsJSON.push(row));
+            }
+            return rowsAsJSON;
+        }
+        catch (e) {
+            var message = e.message || '';
+            var stack = e.stack || '';
+            console.error(results.failure, message, stack);
+            // reply(results.failure + message).code(500);
+            return [];
+        }
+    }
+    dbGetUnmatchedDrivers(pool, fnGetString, reply, results) {
+        var queryString = fnGetString();
+        pool
+            .query(queryString)
+            .then(result => {
+            var firstRowAsString = '';
+            var rowsToSend = [];
+            if (result !== undefined && result.rows !== undefined) {
+                result.rows.forEach(val => {
+                    rowsToSend.push(val);
+                });
+            }
+            console.log('unmatched drivers: ', rowsToSend);
+            reply(rowsToSend);
+        })
+            .catch(e => {
+            var message = e.message || '';
+            var stack = e.stack || '';
+            console.error(results.failure, message, stack);
+            reply(results.failure + message).code(500);
+        });
+    }
+    dbGetDriversDetails(pool, fnGetString, reply, results) {
+        var queryString = fnGetString();
+        pool
+            .query(queryString)
+            .then(result => {
+            var firstRowAsString = '';
+            var rowsToSend = [];
+            if (result !== undefined && result.rows !== undefined) {
+                result.rows.forEach(val => {
+                    rowsToSend.push(val);
+                });
+            }
+            console.log('drivers details: ', rowsToSend);
+            reply(rowsToSend);
+        })
+            .catch(e => {
+            var message = e.message || '';
+            var stack = e.stack || '';
+            console.error(results.failure, message, stack);
+            reply(results.failure + message).code(500);
+        });
+    }
+    dbGetDriverMatchesDetails(pool, fnGetString, reply, results) {
+        var queryString = fnGetString();
+        pool
+            .query(queryString)
+            .then(result => {
+            var firstRowAsString = '';
+            var rowsToSend = [];
+            if (result !== undefined && result.rows !== undefined) {
+                result.rows.forEach(val => {
+                    rowsToSend.push(val);
+                });
+            }
+            console.log('driver matches details: ', rowsToSend);
+            reply(rowsToSend);
+        })
+            .catch(e => {
+            var message = e.message || '';
+            var stack = e.stack || '';
+            console.error(results.failure, message, stack);
+            reply(results.failure + message).code(500);
+        });
+    }
+    dbGetUnmatchedRiders(pool, fnGetString, reply, results) {
+        var queryString = fnGetString();
+        pool
+            .query(queryString)
             .then(function (result) {
-            var firstRowAsString = "";
+            var firstRowAsString = '';
             var rowsToSend = [];
             if (result !== undefined && result.rows !== undefined) {
                 result.rows.forEach(function (val) {
                     rowsToSend.push(val);
                 });
             }
-            console.log("unmatched drivers: ", rowsToSend);
+            console.log('unmatched riders: ', rowsToSend);
             reply(rowsToSend);
         })
             .catch(function (e) {
@@ -42,117 +147,57 @@ var PostgresQueries = (function () {
             console.error(results.failure, message, stack);
             reply(results.failure + message).code(500);
         });
-    };
-    PostgresQueries.prototype.dbGetDriversDetails = function (pool, fnGetString, reply, results) {
+    }
+    dbGetMatchesData(pool, fnGetString, reply, results) {
         var queryString = fnGetString();
-        pool.query(queryString)
-            .then(function (result) {
-            var firstRowAsString = "";
-            var rowsToSend = [];
+        pool
+            .query(queryString)
+            .then(result => {
+            var firstRowAsString = '';
             if (result !== undefined && result.rows !== undefined) {
-                result.rows.forEach(function (val) {
-                    rowsToSend.push(val);
-                });
-            }
-            console.log("drivers details: ", rowsToSend);
-            reply(rowsToSend);
-        })
-            .catch(function (e) {
-            var message = e.message || '';
-            var stack = e.stack || '';
-            console.error(results.failure, message, stack);
-            reply(results.failure + message).code(500);
-        });
-    };
-    PostgresQueries.prototype.dbGetDriverMatchesDetails = function (pool, fnGetString, reply, results) {
-        var queryString = fnGetString();
-        pool.query(queryString)
-            .then(function (result) {
-            var firstRowAsString = "";
-            var rowsToSend = [];
-            if (result !== undefined && result.rows !== undefined) {
-                result.rows.forEach(function (val) {
-                    rowsToSend.push(val);
-                });
-            }
-            console.log("driver matches details: ", rowsToSend);
-            reply(rowsToSend);
-        })
-            .catch(function (e) {
-            var message = e.message || '';
-            var stack = e.stack || '';
-            console.error(results.failure, message, stack);
-            reply(results.failure + message).code(500);
-        });
-    };
-    PostgresQueries.prototype.dbGetUnmatchedRiders = function (pool, fnGetString, reply, results) {
-        var queryString = fnGetString();
-        pool.query(queryString)
-            .then(function (result) {
-            var firstRowAsString = "";
-            var rowsToSend = [];
-            if (result !== undefined && result.rows !== undefined) {
-                result.rows.forEach(function (val) {
-                    rowsToSend.push(val);
-                });
-            }
-            console.log("unmatched riders: ", rowsToSend);
-            reply(rowsToSend);
-        })
-            .catch(function (e) {
-            var message = e.message || '';
-            var stack = e.stack || '';
-            console.error(results.failure, message, stack);
-            reply(results.failure + message).code(500);
-        });
-    };
-    PostgresQueries.prototype.dbGetMatchesData = function (pool, fnGetString, reply, results) {
-        var queryString = fnGetString();
-        pool.query(queryString)
-            .then(function (result) {
-            var firstRowAsString = "";
-            if (result !== undefined && result.rows !== undefined) {
-                result.rows.forEach(function (val) {
+                result.rows.forEach(val => {
                     firstRowAsString += JSON.stringify(val);
                 });
                 console.log(JSON.stringify(result.rows[0]));
             }
             reply(results.success + firstRowAsString);
         })
-            .catch(function (e) {
+            .catch(e => {
             var message = e.message || '';
             var stack = e.stack || '';
             console.error(results.failure, message, stack);
             reply(results.failure + message).code(500);
         });
-    };
-    PostgresQueries.prototype.dbGetMatchSpecificData = function (pool, fnGetString, uuid, reply, results) {
+    }
+    dbGetMatchSpecificData(pool, fnGetString, uuid, reply, results) {
         var queryString = fnGetString(uuid);
         console.log('match rider query: ' + queryString);
-        pool.query(queryString)
-            .then(function (result) {
-            var firstRowAsString = "";
+        pool
+            .query(queryString)
+            .then(result => {
+            var firstRowAsString = '';
             if (result !== undefined && result.rows !== undefined) {
-                result.rows.forEach(function (val) {
+                result.rows.forEach(val => {
                     firstRowAsString += JSON.stringify(val);
                 });
                 console.log(JSON.stringify(result.rows[0]));
             }
             reply(results.success + firstRowAsString);
         })
-            .catch(function (e) {
+            .catch(e => {
             var message = e.message || '';
             var stack = e.stack || '';
             console.error(results.failure, message, stack);
             reply(results.failure + message).code(500);
         });
-    };
-    PostgresQueries.prototype.dbInsertData = function (payload, pool, fnInsertString, fnPayloadArray, req, reply, results) {
+    }
+    dbInsertData(payload, pool, fnInsertString, fnPayloadArray, req, reply, results) {
         var insertString = fnInsertString();
-        pool.query(insertString, fnPayloadArray(req, payload))
-            .then(function (result) {
+        pool
+            .query(insertString, fnPayloadArray(req, payload))
+            .then(result => {
             var displayResult = result || '';
-            var uuid = "";
+            var uuid = '';
             try {
                 displayResult = JSON.stringify(result);
                 uuid = result.rows[0].UUID;
@@ -169,23 +214,54 @@ var PostgresQueries = (function () {
                 reply(results.success + ': ' + uuid);
             }
         })
-            .catch(function (e) {
+            .catch(e => {
             var message = e.message || '';
             var stack = e.stack || '';
             console.error('query error: ', message, stack);
             reply(results.failure + ': ' + message).code(500);
         });
-    };
-    PostgresQueries.prototype.dbExecuteCarpoolAPIFunction_Insert = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
+    }
+    async dbInsertDataInternal(payload, pool, fnInsertString, fnPayloadArray, req, reply, results) {
+        var insertString = fnInsertString();
+        try {
+            const result = await pool.query(insertString, fnPayloadArray(req, payload));
+            let displayResult = result || '';
+            let uuid = '';
+            try {
+                displayResult = JSON.stringify(result);
+                uuid = result.rows[0].UUID;
+                console.error('row: ' + JSON.stringify(result.rows[0]));
+            }
+            catch (err) {
+                console.error('no uuid returned');
+            }
+            console.log('insert: ', uuid + ' ' + displayResult);
+            if (payload._redirect) {
+                // reply.redirect(payload._redirect + '?uuid=' + uuid.toString());
+            }
+            else {
+                return uuid;
+                // reply(results.success + ': ' + uuid);
+            }
+        }
+        catch (e) {
+            var message = e.message || '';
+            var stack = e.stack || '';
+            console.error('query error: ', message, stack);
+            // reply(results.failure + ': ' + message).code(500);
+        }
+    }
+    dbExecuteCarpoolAPIFunction_Insert(payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
-        console.log("executeFunctionString Insert: " + queryString);
-        pool.query(queryString, fnPayloadArray(req, payload))
+        console.log('executeFunctionString Insert: ' + queryString);
+        pool
+            .query(queryString, fnPayloadArray(req, payload))
             .then(function (result) {
-            var firstRow = "";
+            var firstRow = '';
             var displayResult = result || '';
-            var uuid = "";
-            var code = "";
-            var info = "";
+            var uuid = '';
+            var code = '';
+            var info = '';
             try {
                 displayResult = JSON.stringify(result);
                 uuid = result.rows[0].out_uuid;
@@ -199,11 +275,11 @@ var PostgresQueries = (function () {
             if (result !== undefined && result.rows !== undefined) {
                 // result.rows.forEach( val => console.log(val));
                 result.rows.forEach(function (val) {
-                    return console.log("exec fn: " + val);
+                    return console.log('exec fn: ' + val);
                 });
                 firstRow = result.rows[0];
             }
-            console.error("executed fn: " + firstRow);
+            console.error('executed fn: ' + firstRow);
             if (payload._redirect && uuid != undefined) {
                 var reply_url = payload._redirect + '&uuid=' + uuid.toString();
                 if (code != undefined) {
@@ -216,7 +292,8 @@ var PostgresQueries = (function () {
             }
             else {
                 // reply(results.success + ': ' + uuid);
-                reply(//results.success + 
+                reply(
+                //results.success +
                 firstRow);
             }
         })
@@ -224,90 +301,94 @@ var PostgresQueries = (function () {
             var message = e.message || '';
             var stack = e.stack || '';
             console.error(
-            // results.failure, 
+            // results.failure,
             message, stack);
             reply(results.failure + message).code(500);
         });
-    };
-    PostgresQueries.prototype.dbExecuteCarpoolAPIFunction = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
+    }
+    dbExecuteCarpoolAPIFunction(payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
-        console.log("executeFunctionString: " + queryString);
-        pool.query(queryString, fnPayloadArray(req, payload))
+        console.log('executeFunctionString: ' + queryString);
+        pool
+            .query(queryString, fnPayloadArray(req, payload))
             .then(function (result) {
-            var firstRow = "";
+            var firstRow = '';
             if (result !== undefined && result.rows !== undefined) {
                 // result.rows.forEach( val => console.log(val));
                 result.rows.forEach(function (val) {
-                    return console.log("exec fn: " + val);
+                    return console.log('exec fn: ' + val);
                 });
                 firstRow = result.rows[0];
             }
-            console.error("executed fn: " + firstRow);
-            reply(//results.success + 
+            console.error('executed fn: ' + firstRow);
+            reply(
+            //results.success +
             firstRow);
         })
             .catch(function (e) {
             var message = e.message || '';
             var stack = e.stack || '';
             console.error(
-            // results.failure, 
+            // results.failure,
             message, stack);
             reply(results.failure + message).code(500);
         });
-    };
-    PostgresQueries.prototype.dbExecuteFunction = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
+    }
+    dbExecuteFunction(payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
-        console.log("executeFunctionString: " + queryString);
-        pool.query(queryString, fnPayloadArray(req, payload))
+        console.log('executeFunctionString: ' + queryString);
+        pool
+            .query(queryString, fnPayloadArray(req, payload))
             .then(function (result) {
-            var firstRowAsString = "";
+            var firstRowAsString = '';
             if (result !== undefined && result.rows !== undefined) {
                 // result.rows.forEach( val => console.log(val));
                 result.rows.forEach(function (val) {
-                    return console.log("exec fn: " + JSON.stringify(val));
+                    return console.log('exec fn: ' + JSON.stringify(val));
                 });
                 firstRowAsString = JSON.stringify(result.rows[0]);
             }
-            console.error("executed fn: " + firstRowAsString);
-            reply(//results.success + 
+            console.error('executed fn: ' + firstRowAsString);
+            reply(
+            //results.success +
             firstRowAsString);
         })
             .catch(function (e) {
             var message = e.message || '';
             var stack = e.stack || '';
             console.error(
-            // results.failure, 
+            // results.failure,
             message, stack);
             reply(results.failure + message).code(500);
         });
-    };
-    PostgresQueries.prototype.dbExecuteFunctionMultipleResults = function (payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
+    }
+    dbExecuteFunctionMultipleResults(payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
-        console.log("executeFunctionMultipleResultsString: " + queryString);
-        pool.query(queryString, fnPayloadArray(req, payload))
+        console.log('executeFunctionMultipleResultsString: ' + queryString);
+        pool
+            .query(queryString, fnPayloadArray(req, payload))
             .then(function (result) {
-            var firstRowAsString = "";
+            var firstRowAsString = '';
             var rowsToSend = [];
             if (result !== undefined && result.rows !== undefined) {
                 // result.rows.forEach( val => console.log(val));
                 result.rows.forEach(function (val) {
                     rowsToSend.push(val);
                 });
-                console.log("multiple results: ", rowsToSend);
+                console.log('multiple results: ', rowsToSend);
             }
-            console.error("executed fn multiple results: " + firstRowAsString);
+            console.error('executed fn multiple results: ' + firstRowAsString);
             reply(rowsToSend);
         })
             .catch(function (e) {
             var message = e.message || '';
             var stack = e.stack || '';
             console.error(
-            // results.failure, 
+            // results.failure,
             message, stack);
             reply(results.failure + message).code(500);
         });
-    };
-    return PostgresQueries;
-}());
+    }
+}
 exports.PostgresQueries = PostgresQueries;
 //# sourceMappingURL=postgresQueries.js.map

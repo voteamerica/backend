@@ -54,7 +54,7 @@ class DbQueriesPosts {
   dbGetSubmitRiderString(): string {
     return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsSubmits.SUBMIT_RIDER_FN)
         + ' ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, '
-        + '        $13, $14, $15, $16, $17, $18, $19, $20 )';  /* TODO add $21 for new a_RiderCollectionStreetNumber when form is ready */
+        + '        $13, $14, $15, $16, $17, $18, $19, $20, $21, $22 )';  /* TODO add $21 for new a_RiderCollectionStreetNumber when form is ready */
     /* 
     a_IPAddress character varying,
       a_RiderFirstName character varying,
@@ -77,8 +77,9 @@ class DbQueriesPosts {
       a_RiderCollectionStreetNumber character varying,  --- 4/30: this is new field on the API, see backend issue #105
       a_RiderCollectionAddress character varying,
       a_RiderDestinationAddress character varying,
-    */
-		
+      a_RidingOnBehalfOfOrganization boolean,
+      a_RidingOBOOrganizationName character varying,
+    */		
   }
 
   dbGetSubmitHelperString(): string {
@@ -91,5 +92,17 @@ class DbQueriesPosts {
       a_helpercapability character varying[],
     */
 		
+  }
+
+   dbGetSubmitUserString(): string {
+    return dbQueriesHelpers.dbSelectFromString(dbDefsSchema.SCHEMA_NAME, dbDefsSubmits.SUBMIT_USER_FN)
+        + ' ($1, $2, $3, $4)';
+	
+    /*	
+    email character varying,
+    username character varying,
+    password character varying,
+    is_admin boolean
+    */
   }
 }

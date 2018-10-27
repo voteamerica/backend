@@ -97,6 +97,8 @@ CREATE OR REPLACE FUNCTION carpoolvote.submit_new_rider(
 	a_RiderCollectionStreetNumber character varying,
     a_RiderCollectionAddress character varying,
     a_RiderDestinationAddress character varying,
+	a_RidingOnBehalfOfOrganization boolean,
+	a_RidingOBOOrganizationName character varying,
 	OUT out_uuid character varying,
 	OUT out_error_code INTEGER,
 	OUT out_error_text TEXT) AS
@@ -108,6 +110,7 @@ DECLARE
 	rider_time text;
 	start_ride_time timestamp without time zone;
 	end_ride_time timestamp without time zone;
+    uuid_organization character varying(50);
 
 	a_ip inet;
 BEGIN	
@@ -168,10 +171,27 @@ BEGIN
 			out_error_text := 'Invalid TotalPartySize: ' || a_TotalPartySize;
 			RETURN;
 		END IF;
-		
+
 		v_step := 'S7';
-		-- Preferred contact method validation
-		-- skipped
+		IF a_RidingOnBehalfOfOrganization IS NOT NULL and a_RidingOnBehalfOfOrganization IS TRUE
+		THEN 
+			IF a_RidingOBOOrganizationName IS NOT NULL and EXISTS (SELECT 1 FROM carpoolvote.organization o WHERE o."OrganizationName" = a_RidingOBOOrganizationName)
+			THEN
+				SELECT "UUID" FROM carpoolvote.organization o WHERE o."OrganizationName" = a_RidingOBOOrganizationName into uuid_organization;
+			ELSE
+				IF a_RidingOBOOrganizationName IS NULL 
+				THEN
+					out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
+					out_error_text := 'Invalid RidingOBOOrganizationName';
+					RETURN;
+				ELSE 
+					out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
+					out_error_text := 'Not Found RidingOBOOrganizationName:' || a_RidingOBOOrganizationName;
+					RETURN;
+				END IF;
+			END IF;
+		END IF;	
+
 		
 		v_step := 'S8';
 		out_uuid := carpoolvote.gen_random_uuid();
@@ -179,12 +199,12 @@ BEGIN
 		"UUID", "IPAddress", "RiderFirstName", "RiderLastName", "RiderEmail", "RiderPhone", "RiderCollectionZIP",
 		"RiderDropOffZIP", "AvailableRideTimesLocal", "TotalPartySize", "TwoWayTripNeeded", "RiderIsVulnerable",
 		"RiderWillNotTalkPolitics", "PleaseStayInTouch", "NeedWheelchair", "RiderPreferredContact",
-		"RiderAccommodationNotes", "RiderLegalConsent", "RiderWillBeSafe", "RiderCollectionStreetNumber", "RiderCollectionAddress", "RiderDestinationAddress")
+		"RiderAccommodationNotes", "RiderLegalConsent", "RiderWillBeSafe", "RiderCollectionStreetNumber", "RiderCollectionAddress", "RiderDestinationAddress", "uuid_organization")
 		VALUES (
 		out_uuid, a_IPAddress, a_RiderFirstName, a_RiderLastName, a_RiderEmail, a_RiderPhone, a_RiderCollectionZIP,
 		a_RiderDropOffZIP, a_AvailableRideTimesLocal, a_TotalPartySize, a_TwoWayTripNeeded, a_RiderIsVulnerable,
 		a_RiderWillNotTalkPolitics, a_PleaseStayInTouch, a_NeedWheelchair, a_RiderPreferredContact,
-		a_RiderAccommodationNotes, a_RiderLegalConsent, a_RiderWillBeSafe, a_RiderCollectionStreetNumber, a_RiderCollectionAddress, a_RiderDestinationAddress);
+		a_RiderAccommodationNotes, a_RiderLegalConsent, a_RiderWillBeSafe, a_RiderCollectionStreetNumber, a_RiderCollectionAddress, a_RiderDestinationAddress, uuid_organization);
 
 		v_step := 'S9';
 		SELECT * FROM carpoolvote.notify_new_rider(out_uuid) INTO out_error_code, out_error_text;
@@ -209,21 +229,21 @@ ALTER FUNCTION carpoolvote.submit_new_rider(character varying,
     character varying, character varying, character varying, character varying,
     character varying, integer, boolean, boolean, boolean, boolean, boolean,
     character varying, character varying, boolean, boolean, character varying, character varying,
-    character varying,out character varying, out integer, out text)
+    character varying, boolean, character varying, out character varying, out integer, out text)
   OWNER TO carpool_admins;
 GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider(	character varying,
     character varying, character varying,
     character varying, character varying, character varying, character varying,
     character varying, integer, boolean, boolean, boolean, boolean, boolean,
     character varying, character varying, boolean, boolean, character varying, character varying,
-    character varying,out character varying, out integer, out text) TO carpool_web_role;
+    character varying, boolean, character varying, out character varying, out integer, out text) TO carpool_web_role;
 	
 GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider( character varying,
     character varying, character varying,
     character varying, character varying, character varying, character varying,
     character varying, integer, boolean, boolean, boolean, boolean, boolean,
     character varying, character varying, boolean, boolean, character varying, character varying,
-    character varying,out character varying, out integer, out text) TO carpool_role;
+    character varying, boolean, character varying, out character varying, out integer, out text) TO carpool_role;
 
 
 -- 
@@ -254,6 +274,8 @@ CREATE OR REPLACE FUNCTION carpoolvote.submit_new_rider(
     a_RiderWillBeSafe boolean,
     a_RiderCollectionAddress character varying,
     a_RiderDestinationAddress character varying,
+	a_RidingOnBehalfOfOrganization boolean,
+	a_RidingOBOOrganizationName character varying,
 	OUT out_uuid character varying,
 	OUT out_error_code INTEGER,
 	OUT out_error_text TEXT) AS
@@ -281,7 +303,9 @@ SELECT * FROM carpoolvote.submit_new_rider(
     a_RiderWillBeSafe,
 	NULL,  -- the street number
     a_RiderCollectionAddress,
-    a_RiderDestinationAddress) INTO 
+    a_RiderDestinationAddress,
+	a_RidingOnBehalfOfOrganization,
+	a_RidingOBOOrganizationName) INTO
 	out_uuid,
 	out_error_code,
 	out_error_text;
@@ -297,21 +321,21 @@ ALTER FUNCTION carpoolvote.submit_new_rider(character varying,
     character varying, character varying, character varying, character varying,
     character varying, integer, boolean, boolean, boolean, boolean, boolean,
     character varying, character varying, boolean, boolean, character varying,
-    character varying,out character varying, out integer, out text)
+    character varying, boolean, character varying, out character varying, out integer, out text)
   OWNER TO carpool_admins;
 GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider(	character varying,
     character varying, character varying,
     character varying, character varying, character varying, character varying,
     character varying, integer, boolean, boolean, boolean, boolean, boolean,
     character varying, character varying, boolean, boolean, character varying,
-    character varying,out character varying, out integer, out text) TO carpool_web_role;
+    character varying, boolean, character varying, out character varying, out integer, out text) TO carpool_web_role;
 	
 GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_rider( character varying,
     character varying, character varying,
     character varying, character varying, character varying, character varying,
     character varying, integer, boolean, boolean, boolean, boolean, boolean,
     character varying, character varying, boolean, boolean, character varying,
-    character varying,out character varying, out integer, out text) TO carpool_role;
+    character varying, boolean, character varying, out character varying, out integer, out text) TO carpool_role;
 	
 
 -- 
@@ -347,6 +371,8 @@ CREATE OR REPLACE FUNCTION carpoolvote.submit_new_driver(
 $BODY$
 DECLARE
 	v_step character varying(200);
+    uuid_organization character varying(50);
+	
 	a_ip inet;
 BEGIN	
 	
@@ -406,8 +432,24 @@ BEGIN
 		END IF;
 		
 		v_step := 'S7';
-		-- Preferred contact method validation
-		-- skipped
+		IF a_DrivingOnBehalfOfOrganization IS NOT NULL and a_DrivingOnBehalfOfOrganization IS TRUE
+		THEN 
+			IF a_DrivingOBOOrganizationName IS NOT NULL and EXISTS (SELECT 1 FROM carpoolvote.organization o WHERE o."OrganizationName" = a_DrivingOBOOrganizationName)
+			THEN
+				SELECT "UUID" FROM carpoolvote.organization o WHERE o."OrganizationName" = a_DrivingOBOOrganizationName into uuid_organization;
+			ELSE
+				IF a_DrivingOBOOrganizationName IS NULL 
+				THEN
+					out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
+					out_error_text := 'Invalid DrivingOBOOrganizationName';
+					RETURN;
+				ELSE 
+					out_error_code := carpoolvote.f_INPUT_VAL_ERROR();
+					out_error_text := 'Not Found DrivingOBOOrganizationName:' || a_DrivingOBOOrganizationName;
+					RETURN;
+				END IF;
+			END IF;
+		END IF;	
 		
 		
 		v_step := 'S8';
@@ -417,14 +459,14 @@ BEGIN
 		"DriverCanLoadRiderWithWheelchair", "SeatCount", "DriverLicenseNumber", 
 		"DriverFirstName", "DriverLastName", "DriverEmail", "DriverPhone",
 		"DrivingOnBehalfOfOrganization", "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails",
-		"DriverWillNotTalkPolitics", "PleaseStayInTouch", "DriverPreferredContact", "DriverWillTakeCare")
+		"DriverWillNotTalkPolitics", "PleaseStayInTouch", "DriverPreferredContact", "DriverWillTakeCare", "uuid_organization")
 		VALUES (
 		out_uuid, 
 		a_IPAddress, a_DriverCollectionZIP, a_DriverCollectionRadius, a_AvailableDriveTimesLocal, 
 		a_DriverCanLoadRiderWithWheelchair, a_SeatCount, a_DriverLicenseNumber, 
 		a_DriverFirstName, a_DriverLastName, a_DriverEmail, a_DriverPhone,
 		a_DrivingOnBehalfOfOrganization, a_DrivingOBOOrganizationName, a_RidersCanSeeDriverDetails,
-		a_DriverWillNotTalkPolitics, a_PleaseStayInTouch, a_DriverPreferredContact, a_DriverWillTakeCare
+		a_DriverWillNotTalkPolitics, a_PleaseStayInTouch, a_DriverPreferredContact, a_DriverWillTakeCare, uuid_organization
 		);
 		
 		v_step := 'S9';
@@ -1887,3 +1929,81 @@ GRANT EXECUTE ON FUNCTION carpoolvote.driver_update_match_details(character vary
 GRANT EXECUTE ON FUNCTION carpoolvote.driver_update_match_details(character varying, character varying, character varying, text,
 	out integer, out text) TO carpool_role;
 
+
+-- 
+-- 
+-- submit_new_user
+-- return codes : 
+-- -1 : ERROR - Generic Error
+-- 0  : SUCCESS
+-- 1  : ERROR - Input is disabled
+-- 2  : ERROR - Input validation
+CREATE OR REPLACE FUNCTION carpoolvote.submit_new_user(
+    email character varying,
+    username character varying,
+    userpassword character varying,
+    userIsAdmin boolean,
+	OUT out_uuid character varying,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT) AS
+$BODY$
+DECLARE
+	v_step character varying(200);
+	a_ip inet;
+BEGIN	
+	
+	out_uuid := '';
+	out_error_code := 0;
+	out_error_text := '';
+
+-- validation steps
+
+	BEGIN			
+		out_uuid := carpoolvote.gen_random_uuid();
+		
+		INSERT INTO carpoolvote.tb_user(
+		"UUID", email, username, password, is_admin)
+		VALUES (
+		out_uuid, email, username, userpassword, userIsAdmin
+		);
+			
+		RETURN;
+	EXCEPTION WHEN OTHERS
+	THEN
+		out_uuid := '';
+		out_error_code := carpoolvote.f_EXECUTION_ERROR();
+		out_error_text := 'Unexpected exception in submit_new_user, ' || v_step || ' (' || SQLSTATE || ')' || SQLERRM;
+		RETURN;
+	END;
+	
+END  
+
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION carpoolvote.submit_new_user(
+    email character varying,
+    username character varying,
+    userpassword character varying,
+    userIsAdmin boolean,
+	OUT out_uuid character varying,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT)
+  OWNER TO carpool_admins;
+GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_user(
+    email character varying,
+    username character varying,
+    userpassword character varying,
+    userIsAdmin boolean,
+	OUT out_uuid character varying,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT) TO carpool_web_role;
+GRANT EXECUTE ON FUNCTION carpoolvote.submit_new_user(
+    email character varying,
+    username character varying,
+    userpassword character varying,
+    userIsAdmin boolean,
+	OUT out_uuid character varying,
+	OUT out_error_code INTEGER,
+	OUT out_error_text TEXT) TO carpool_role;
+	
