@@ -8,10 +8,16 @@ import rp = require('request-promise');
 import minimist = require('minimist');
 import { map as pMap } from 'p-iteration';
 
+const urlDomain = process.env.CSV_LOCAL
+  ? 'http://localhost:8000/'
+  : 'https://api.carpoolvote.com/live/';
+
 // const riderUrl = 'http://localhost:8000/rider';
 // const driverUrl = 'http://localhost:8000/driver';
-const riderUrl = 'https://api.carpoolvote.com/live/rider';
-const driverUrl = 'https://api.carpoolvote.com/live/driver';
+// const riderUrl = 'https://api.carpoolvote.com/live/rider';
+// const driverUrl = 'https://api.carpoolvote.com/live/driver';
+const riderUrl = urlDomain + 'rider';
+const driverUrl = urlDomain + 'driver';
 
 const createItem = (row, isRider, orgUuid) => {
   let adjustedItem = { ...row };
