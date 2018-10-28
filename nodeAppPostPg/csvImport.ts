@@ -64,25 +64,25 @@ const createItem = (row, isRider, orgUuid) => {
     return newRow;
   };
 
-  if (isRider === true) {
-    adjustedItem = removeFalseProp('TwoWayTripNeeded', adjustedItem);
-    adjustedItem = removeFalseProp('RiderIsVulnrable', adjustedItem);
-    adjustedItem = removeFalseProp('RiderWillNotTalkPolitics', adjustedItem);
-    adjustedItem = removeFalseProp('PleaseStayInTouch', adjustedItem);
-    adjustedItem = removeFalseProp('NeedWheelchair', adjustedItem);
-    adjustedItem = removeFalseProp('RiderLegalConsent', adjustedItem);
-    adjustedItem = removeFalseProp('RiderWillBeSafe', adjustedItem);
+  const handleAlternativeAvailableDateTimeFormat = (
+    availableTimesFieldName,
+    dateFieldName,
+    startTimeFieldName,
+    endTimeFieldName,
+    rowData
+  ) => {
+    debugger;
 
     if (
-      fieldExists('RideRequestDate', adjustedItem) &&
-      fieldExists('RideRequestStartTime', adjustedItem) &&
-      fieldExists('RideRequestEndTime', adjustedItem)
+      fieldExists(dateFieldName, rowData) &&
+      fieldExists(startTimeFieldName, rowData) &&
+      fieldExists(endTimeFieldName, rowData)
     ) {
-      adjustedItem = removeProp('AvailableRideTimesJSON', adjustedItem);
+      rowData = removeProp(availableTimesFieldName, rowData);
 
-      const rideDate = getPropValue('RideRequestDate', adjustedItem);
-      const rideStartTime = getPropValue('RideRequestStartTime', adjustedItem);
-      const rideEndTime = getPropValue('RideRequestEndTime', adjustedItem);
+      const rideDate = getPropValue(dateFieldName, rowData);
+      const rideStartTime = getPropValue(startTimeFieldName, rowData);
+      const rideEndTime = getPropValue(endTimeFieldName, rowData);
 
       debugger;
 
@@ -96,12 +96,32 @@ const createItem = (row, isRider, orgUuid) => {
 
       console.log('fmtd date', JSONdate);
 
-      // adjustedItem = { ...adjustedItem, AvailableRideTimesJSON: JSONdate };
+      rowData = { ...rowData, [availableTimesFieldName]: JSONdate };
 
-      adjustedItem = removeProp('RideRequestDate', adjustedItem);
-      adjustedItem = removeProp('RideRequestStartTime', adjustedItem);
-      adjustedItem = removeProp('RideRequestEndTime', adjustedItem);
+      rowData = removeProp(dateFieldName, rowData);
+      rowData = removeProp(startTimeFieldName, rowData);
+      rowData = removeProp(endTimeFieldName, rowData);
     }
+
+    return rowData;
+  };
+
+  if (isRider === true) {
+    adjustedItem = removeFalseProp('TwoWayTripNeeded', adjustedItem);
+    adjustedItem = removeFalseProp('RiderIsVulnrable', adjustedItem);
+    adjustedItem = removeFalseProp('RiderWillNotTalkPolitics', adjustedItem);
+    adjustedItem = removeFalseProp('PleaseStayInTouch', adjustedItem);
+    adjustedItem = removeFalseProp('NeedWheelchair', adjustedItem);
+    adjustedItem = removeFalseProp('RiderLegalConsent', adjustedItem);
+    adjustedItem = removeFalseProp('RiderWillBeSafe', adjustedItem);
+
+    adjustedItem = handleAlternativeAvailableDateTimeFormat(
+      'AvailableRideTimesJSON',
+      'RideRequestDate',
+      'RideRequestStartTime',
+      'RideRequestEndTime',
+      adjustedItem
+    );
 
     adjustedItem.RidingOnBehalfOfOrganization = true;
     adjustedItem.RidingOBOOrganizationName = orgUuid;
@@ -119,21 +139,13 @@ const createItem = (row, isRider, orgUuid) => {
     adjustedItem = removeFalseProp('DriverWillTakeCare', adjustedItem);
     adjustedItem = removeFalseProp('RiderWillBeSafe', adjustedItem);
 
-    if (
-      fieldExists('DriveOfferDate', adjustedItem) &&
-      fieldExists('DriveOfferStartTime', adjustedItem) &&
-      fieldExists('DriveOfferEndTime', adjustedItem)
-    ) {
-      adjustedItem = removeProp('AvailableDriveTimesJSON', adjustedItem);
-
-      const driveDate = getPropValue('DriveOfferDate', adjustedItem);
-      const driveStartTime = getPropValue('DriveOfferStartTime', adjustedItem);
-      const driveEndTime = getPropValue('DriveOfferEndTime', adjustedItem);
-
-      adjustedItem = removeProp('DriveOfferDate', adjustedItem);
-      adjustedItem = removeProp('DriveOfferStartTime', adjustedItem);
-      adjustedItem = removeProp('DriveOfferEndTime', adjustedItem);
-    }
+    adjustedItem = handleAlternativeAvailableDateTimeFormat(
+      'AvailableDriveTimesJSON',
+      'DriveOfferDate',
+      'DriveOfferStartTime',
+      'DriveOfferEndTime',
+      adjustedItem
+    );
 
     adjustedItem.DrivingOnBehalfOfOrganization = true;
     adjustedItem.DrivingOBOOrganizationName = orgUuid;
@@ -302,67 +314,9 @@ function uploadRidersOrDrivers(fileData, orgUuid, callback) {
 
 /**
  *
- * Functions below taken from the excellent front-end date/time input handling features.
+ * Functions below are copied from the excellent front-end date/time input handling features.
  *
  */
-
-/**
- * When the form is submitted, we need to send the date and time values
- * in a useful format for the API. This function gets this data and adds it
- * to a hidden input so that it can be sent with the rest of the form data.
- * @param  {object} $availableTimes - The jQuery container node
- */
-function updateHiddenJSONTimes($availableTimes) {
-  var timeData = getDateTimeValues($availableTimes);
-  $availableTimes.siblings('.hiddenJSONTimes').val(timeData);
-}
-
-/**
- * When submitting a form, retrieve the date, start time and end time
- * of all the available-time rows in the form.
- * Note: Date-times are in ISO 8601 format, e.g. 2017-01-01T06:00.
- * Start times and end-times in a single availability slot are
- * separated with the '/' character, while each availability slot is
- * separated with the '|' character.
- * e.g: 2017-01-01T06:00/2017-01-01T22:00|2017-01-01T06:00/2017-01-01T22:00
- * @param  {object} $availableTimes - The jQuery container node
- * @return {string} A formatted, stringified list of date-time values
- */
-function getDateTimeValues(availableTimes) {
-  // var datetimeClasses = [
-  //   '.input--date',
-  //   '.input--time-start',
-  //   '.input--time-end'
-  // ];
-  // return availableTimes;
-  // .find('.available-times__row')
-  // .get()
-  // .map(function(row) {
-  //   var $row = $(row);
-  // if (!Modernizr.inputtypes.date) {
-  //   $row.find('.input--date').val(getDateFallbackValues($row));
-  // }
-  // var inputValues = datetimeClasses.map(function(c) {
-  //   return $row.find(c).val();
-  // });
-  // return formatAvailabilityPeriod.apply(this, inputValues);
-  // })
-  // .join('|');
-}
-
-/**
- * If the date input is not supported, we're using text/number inputs instead,
- * so retrieve the values from the 3 fallback inputs, and format them
- * @param  {object} $row - The jQuery element for the row
- * @return {string} A formatted date string
- */
-// function getDateFallbackValues($row) {
-//   var dateFallbackClasses = ['.input--year', '.input--month', '.input--day'];
-//   var dateValues = dateFallbackClasses.map(function(dateClass) {
-//     return $row.find(dateClass).val();
-//   });
-//   return dateToYYYYMMDD(new Date(dateValues));
-// }
 
 /**
  * Convert a single Availability Time row into a joined datetime string.
