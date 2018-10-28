@@ -57,6 +57,7 @@ services:
       - PGPASSWORD=pwd
       - PGHOST=10.5.0.6
       - JWT_SECRET=test_weak_secret
+      - CSV_LOCAL=true
     ports:
       - "8000:8000"
     links:
