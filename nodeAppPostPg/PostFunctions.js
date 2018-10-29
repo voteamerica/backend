@@ -71,25 +71,29 @@ class PostFunctions {
             payload.DriverCollectionZIP,
             payload.DriverCollectionRadius,
             payload.AvailableDriveTimesJSON,
-            (payload.DriverCanLoadRiderWithWheelchair ? 'true' : 'false'),
+            payload.DriverCanLoadRiderWithWheelchair ? 'true' : 'false',
             payload.SeatCount,
             payload.DriverLicenceNumber,
             payload.DriverFirstName,
             payload.DriverLastName,
             payload.DriverEmail,
             payload.DriverPhone,
-            (payload.DrivingOnBehalfOfOrganization ? 'true' : 'false'),
+            payload.DrivingOnBehalfOfOrganization ? 'true' : 'false',
             payload.DrivingOBOOrganizationName,
-            (payload.RidersCanSeeDriverDetails ? 'true' : 'false'),
-            (payload.DriverWillNotTalkPolitics ? 'true' : 'false'),
-            (payload.PleaseStayInTouch ? 'true' : 'false'),
-            payload.DriverPreferredContact.toString(),
-            (payload.DriverWillTakeCare ? 'true' : 'false')
+            payload.RidersCanSeeDriverDetails ? 'true' : 'false',
+            payload.DriverWillNotTalkPolitics ? 'true' : 'false',
+            payload.PleaseStayInTouch ? 'true' : 'false',
+            payload.DriverPreferredContact
+                ? payload.DriverPreferredContact.toString()
+                : 'Email,Phone,SMS',
+            payload.DriverWillTakeCare ? 'true' : 'false'
         ];
     }
     getHelperPayloadAsArray(self, req, payload) {
         return [
-            payload.Name, payload.Email, payload.Capability
+            payload.Name,
+            payload.Email,
+            payload.Capability
             // 1, moment().toISOString()
         ];
     }
@@ -103,23 +107,24 @@ class PostFunctions {
             payload.RiderPhone,
             payload.RiderCollectionZIP,
             payload.RiderDropOffZIP,
-            payload.AvailableRideTimesJSON // this one should be in local time as passed along by the forms
-            ,
+            payload.AvailableRideTimesJSON,
             payload.TotalPartySize,
-            (payload.TwoWayTripNeeded ? 'true' : 'false'),
-            (payload.RiderIsVulnrable ? 'true' : 'false'),
-            (payload.RiderWillNotTalkPolitics ? 'true' : 'false'),
-            (payload.PleaseStayInTouch ? 'true' : 'false'),
-            (payload.NeedWheelchair ? 'true' : 'false'),
-            payload.RiderPreferredContact.toString(),
+            payload.TwoWayTripNeeded ? 'true' : 'false',
+            payload.RiderIsVulnrable ? 'true' : 'false',
+            payload.RiderWillNotTalkPolitics ? 'true' : 'false',
+            payload.PleaseStayInTouch ? 'true' : 'false',
+            payload.NeedWheelchair ? 'true' : 'false',
+            payload.RiderPreferredContact
+                ? payload.RiderPreferredContact.toString()
+                : 'Email,Phone,SMS',
             payload.RiderAccommodationNotes,
-            (payload.RiderLegalConsent ? 'true' : 'false'),
-            (payload.RiderWillBeSafe ? 'true' : 'false'),
+            payload.RiderLegalConsent ? 'true' : 'false',
+            payload.RiderWillBeSafe ? 'true' : 'false',
             payload.RiderCollectionAddress,
             payload.RiderDestinationAddress,
             payload.RidingOnBehalfOfOrganization ? 'true' : 'false',
             payload.RidingOBOOrganizationName
-        ];
+        ]; // this one should be in local time as passed along by the forms
         return payloadAsArray;
     }
     getUserPayloadAsArray(self, req, payload) {
