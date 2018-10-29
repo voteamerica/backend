@@ -59,6 +59,19 @@ const createItem = (row, isRider, orgUuid) => {
         }
         return newRow;
     };
+    const handlePreferredContactFormat = (preferredContactFieldName, rowData) => {
+        debugger;
+        if (fieldExists(preferredContactFieldName, rowData)) {
+            const contactPreferences = getPropValue(preferredContactFieldName, rowData);
+            debugger;
+            rowData = removeProp(preferredContactFieldName, rowData);
+            const contactPreferencesItems = contactPreferences.split(';');
+            const contactPreferencesItemsAdjusted = contactPreferencesItems.map(item => (item.toUpperCase() === 'TEXT' ? 'SMS' : item));
+            const adjustedContactPreferences = contactPreferencesItemsAdjusted.join(',');
+            rowData = Object.assign({}, rowData, { [preferredContactFieldName]: adjustedContactPreferences });
+        }
+        return rowData;
+    };
     const handleAlternativeAvailableDateTimeFormat = (availableTimesFieldName, dateFieldName, startTimeFieldName, endTimeFieldName, rowData) => {
         debugger;
         if (fieldExists(dateFieldName, rowData) &&
@@ -87,6 +100,7 @@ const createItem = (row, isRider, orgUuid) => {
         adjustedItem = removeFalseProp('NeedWheelchair', adjustedItem);
         adjustedItem = removeFalseProp('RiderLegalConsent', adjustedItem);
         adjustedItem = removeFalseProp('RiderWillBeSafe', adjustedItem);
+        adjustedItem = handlePreferredContactFormat('RiderPreferredContact', adjustedItem);
         adjustedItem = handleAlternativeAvailableDateTimeFormat('AvailableRideTimesJSON', 'RideRequestDate', 'RideRequestStartTime', 'RideRequestEndTime', adjustedItem);
         adjustedItem.RidingOnBehalfOfOrganization = true;
         adjustedItem.RidingOBOOrganizationName = orgUuid;
@@ -100,6 +114,7 @@ const createItem = (row, isRider, orgUuid) => {
         adjustedItem = removeFalseProp('RidersCanSeeDriverDetails', adjustedItem);
         adjustedItem = removeFalseProp('DriverWillTakeCare', adjustedItem);
         adjustedItem = removeFalseProp('RiderWillBeSafe', adjustedItem);
+        adjustedItem = handlePreferredContactFormat('DriverPreferredContact', adjustedItem);
         adjustedItem = handleAlternativeAvailableDateTimeFormat('AvailableDriveTimesJSON', 'DriveOfferDate', 'DriveOfferStartTime', 'DriveOfferEndTime', adjustedItem);
         adjustedItem.DrivingOnBehalfOfOrganization = true;
         adjustedItem.DrivingOBOOrganizationName = orgUuid;
