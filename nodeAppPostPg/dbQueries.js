@@ -196,14 +196,16 @@ INNER JOIN
   FROM carpoolvote.driver
   INNER JOIN carpoolvote.organization ON (("DrivingOnBehalfOfOrganization" is TRUE and "DrivingOBOOrganizationName" = "OrganizationName") or ("DrivingOnBehalfOfOrganization" is FALSE and 'None' = "OrganizationName"))
   INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip
-  WHERE driver."UUID" not in (SELECT uuid_driver as "UUID" FROM carpoolvote.match
-  INNER JOIN carpoolvote.driver ON uuid_driver = carpoolvote.driver."UUID"
-  WHERE match.status = 'MatchConfirmed'
-) 
+  WHERE driver.status != 'MatchConfirmed'
 )
 ) drivers
 
    `;
+    /*
+      driver."UUID" not in (SELECT uuid_driver as "UUID" FROM carpoolvote.match
+    INNER JOIN carpoolvote.driver ON uuid_driver = carpoolvote.driver."UUID"
+    WHERE match.status = 'MatchConfirmed'
+      */
     const queryString = username === 'andrea2'
         ? baseQueryString
         : baseQueryString +
