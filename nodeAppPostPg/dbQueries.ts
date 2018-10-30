@@ -257,28 +257,72 @@ function dbGetRidersAndOrganizationQueryString(): () => string {
 function dbGetDriversByUserOrganizationQueryString(
   username: string
 ): () => string {
-  const baseQueryString = `SELECT carpoolvote.driver."UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", 
+  // This is a union query - the first half relates to any drivers with a confirmed match. For these drivers, it generates info on seats available, min round trips etc. There is a group by subquery that does this.
+  // The second half handles the drivers who don't have a confirmed match. It generates default values for the info calculated in the first half. The subquery checks for drivers with a confirmed match, so these drivers are excluded.
+  const baseQueryString = ` SELECT 
+  drivers."UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", 
        "AvailableDriveTimesLocal", "DriverCanLoadRiderWithWheelchair", 
        "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", 
        "DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization", 
        "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics", 
        "ReadyToMatch", "PleaseStayInTouch", status, created_ts, last_updated_ts, 
        status_info, "DriverPreferredContact", "DriverWillTakeCare", 
-       uuid_organization, city, state, full_state, timezone
+       uuid_organization, city, state, full_state, timezone,
+       "MatchCount", "TotalRiders", "Overflow", "SeatsAvailable", "minimumTripCount" 
+  from ( (SELECT carpoolvote.driver."UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", 
+       "AvailableDriveTimesLocal", "DriverCanLoadRiderWithWheelchair", 
+       "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", 
+       "DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization", 
+       "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics", 
+       "ReadyToMatch", "PleaseStayInTouch", status, created_ts, last_updated_ts, 
+       status_info, "DriverPreferredContact", "DriverWillTakeCare", 
+       uuid_organization, city, state, full_state, timezone,
+       "MatchCount", "TotalRiders", "Overflow", "SeatsAvailable", "minimumTripCount"
+  FROM carpoolvote.driver
+INNER JOIN 
+(SELECT uuid_driver, count(*) as "MatchCount", sum("TotalPartySize") as "TotalRiders", sum("TotalPartySize")> "SeatCount" as "Overflow", "SeatCount" - sum("TotalPartySize") as "SeatsAvailable", (div(sum("TotalPartySize"), "SeatCount") + (case when (mod(sum("TotalPartySize"), "SeatCount") = 0) then 0 else 1 end)) as "minimumTripCount"
+  FROM carpoolvote.match
+  INNER JOIN carpoolvote.rider ON uuid_rider = carpoolvote.rider."UUID"
+  INNER JOIN carpoolvote.driver ON uuid_driver = carpoolvote.driver."UUID"
+  where match.status = 'MatchConfirmed'
+  group by uuid_driver, "DriverFirstName", "DriverLastName", "SeatCount"
+  ) matchInfo on "UUID" = uuid_driver
+  INNER JOIN carpoolvote.organization ON (("DrivingOnBehalfOfOrganization" is TRUE and "DrivingOBOOrganizationName" = "OrganizationName") or ("DrivingOnBehalfOfOrganization" is FALSE and 'None' = "OrganizationName"))
+  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip)
+  union
+(  SELECT carpoolvote.driver."UUID", "IPAddress", "DriverCollectionZIP", "DriverCollectionRadius", 
+       "AvailableDriveTimesLocal", "DriverCanLoadRiderWithWheelchair", 
+       "SeatCount", "DriverLicenseNumber", "DriverFirstName", "DriverLastName", 
+       "DriverEmail", "DriverPhone", "DrivingOnBehalfOfOrganization", 
+       "DrivingOBOOrganizationName", "RidersCanSeeDriverDetails", "DriverWillNotTalkPolitics", 
+       "ReadyToMatch", "PleaseStayInTouch", status, created_ts, last_updated_ts, 
+       status_info, "DriverPreferredContact", "DriverWillTakeCare", 
+       uuid_organization, city, state, full_state, timezone,
+       0 as "MatchCount", 0 as "TotalRiders", false as "Overflow", "SeatCount" as "SeatsAvailable",0 as "minimumTripCount"
   FROM carpoolvote.driver
   INNER JOIN carpoolvote.organization ON (("DrivingOnBehalfOfOrganization" is TRUE and "DrivingOBOOrganizationName" = "OrganizationName") or ("DrivingOnBehalfOfOrganization" is FALSE and 'None' = "OrganizationName"))
-  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip `;
+  INNER JOIN carpoolvote.zip_codes ON "DriverCollectionZIP" = zip
+  WHERE driver."UUID" not in (SELECT uuid_driver as "UUID" FROM carpoolvote.match
+  INNER JOIN carpoolvote.driver ON uuid_driver = carpoolvote.driver."UUID"
+  WHERE match.status = 'MatchConfirmed'
+) 
+)
+) drivers
+
+   `;
 
   const queryString =
     username === 'andrea2'
       ? baseQueryString
       : baseQueryString +
-        ` INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = carpoolvote.organization."UUID"
+        ` INNER JOIN carpoolvote.tb_user ON carpoolvote.tb_user."UUID_organization" = uuid_organization
         WHERE carpoolvote.tb_user.username = '` +
         username +
         "'";
 
   const dbQueryFn = () => queryString;
+
+  debugger;
 
   return dbQueryFn;
 }
