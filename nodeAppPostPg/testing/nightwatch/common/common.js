@@ -34,7 +34,7 @@ function createChainableTest (testFunction) {
 var testObject = {
   'currentClient' : undefined,
 
-  'dates' : ['2018-10-30', '2018-11-30', '2018-12-30'],
+  'dates' : ['2019-10-30', '2019-11-30', '2019-12-30'],
 
   'currentDateIndex' : 0,
 
