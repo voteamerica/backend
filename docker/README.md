@@ -135,7 +135,9 @@ sh ./start-compose-local-fullstack.sh
 
 That's it, you are up and running! Head to http://localhost:4000 in your browser to see the running app.
 
-Ctrl-C to finish, then tidy up with this command
+Ctrl-C to finish. The same command will resume the environment.
+
+When you want to refresh the setup (for clearing the database etc.), then tidy up with this command
 
 ```
 docker-compose -f ./compose/full-stack-local/docker-compose-local-fullstack.yml down
