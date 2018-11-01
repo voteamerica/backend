@@ -769,3 +769,6 @@ INSERT INTO carpoolvote.organization("OrganizationName", "UUID") VALUES ('AAPD',
 INSERT INTO carpoolvote.organization("OrganizationName", "UUID") VALUES ('PPC', '53ddcbc4-78b0-449b-ad00-612eae939bf1');
 INSERT INTO carpoolvote.organization("OrganizationName", "UUID") VALUES ('MDCC', 'ede64456-4fa6-4e72-a695-a0857d496857');
 INSERT INTO carpoolvote.organization("OrganizationName", "UUID") VALUES ('MarchOn', '91b628d6-e149-4323-97a3-fe862450d858');
+INSERT INTO carpoolvote.organization("OrganizationName", "UUID") VALUES ('CenterCG', '8a93bd05-bd36-4646-80a9-7b9699da32f7');
+INSERT INTO carpoolvote.organization("OrganizationName", "UUID") VALUES ('PDAction', 'd10aaa2d-e427-4aac-b947-c58677fca64a');
+INSERT INTO carpoolvote.organization("OrganizationName", "UUID") VALUES ('DailyKos', 'bac413a1-0b0f-4e26-84a1-9e3874870462');
