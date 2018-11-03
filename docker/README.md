@@ -49,13 +49,13 @@ The default value for the front-end folder is `voteUSfrontend`. This can be chan
 
 It is assumed that you already have a a local clone of the frontend repo, but if not, create one:
 
-`git clone https://github.com/voteamerica/voteamerica.github.io voteUSfrontend`
+`git clone https://github.com/your-fork-name-here/voteamerica.github.io voteUSfrontend`
 
 **Back-end code folder**
 
 If it does not already exist, clone the backend git repo. It can be named however you wish. Here it is called `voteUSbackend`.
 
-`git clone https://github.com/voteamerica/backend voteUSbackend`
+`git clone https://github.com/your-fork-name-here/backend voteUSbackend`
 
 #### Create specific machines (if required)
 
@@ -67,7 +67,7 @@ Example params to these scripts
 
 `R` force rebuild
 
-`https://github.com/voteamerica/backend` repo name
+`https://github.com/your-fork-name-here/backend` repo name
 
 `master` branch name
 
