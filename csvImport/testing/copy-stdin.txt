@@ -1,0 +1,24 @@
+NOTE: TURN OFF MATCHING ENGINE BEFORE RESTORE - otherwise matches will conflict with or duplicate loaded matches
+
+
+from json, generate csv (use json2csv)
+
+in lib office, remove redundant fields
+
+    riders - city, state, org name, timezone
+
+    drivers - city, state, full_state,	timezone, MatchCount, TotalRiders, Overflow, SeatsAvailable, minimumTripCount
+
+    matches - city, state, full_state, DriverCollectionZIP, AvailableDriveTimesLocal, SeatCount, DriverLicenseNumber, DrivingOBOOrganizationName, DriverFirstName, DriverLastName, RiderFirstName, RiderEmail, RiderLastName, RiderPhone, RiderCollectionZIP, RiderDropOffZIP, AvailableRideTimesLocal, RiderCollectionStreetNumber,RiderCollectionAddress, RiderDestinationAddress
+
+
+copy csv to backup file
+  remove header line
+
+add copy stdin header to backup (from copy-stdin.csv) (fields from pgadmin select script for table, adds necessary quotes)
+  add \.
+  and blank line
+
+
+
+NOTE: seem to be duplicate drivers (same uuid)
