@@ -171,6 +171,7 @@ DECLARE
 	a_time_elem text;
 	start_time timestamp without time zone;
 	end_time timestamp without time zone;
+	time_now_pst timestamp without time zone;
 	b_all_times_expired boolean := TRUE;
 BEGIN
 
@@ -205,7 +206,9 @@ BEGIN
 					out_error_text := 'Invalid value in AvailableDriveTimes:' || a_time_elem;
 					RETURN;
 				ELSE
-					IF end_time > now()   ----   --[NOW]--[S]--[E]   : not expired
+					SELECT now() AT TIME ZONE 'PST' into time_now_pst;
+
+					IF end_time > time_now_pst   ----   --[NOW]--[S]--[E]   : not expired
 					THEN                        ----   --[S]---[NOW]--[E]  : not expired
 					   							       --[S]--[E]----[NOW] : expired
 						b_all_times_expired := FALSE;

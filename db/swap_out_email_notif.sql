@@ -1435,6 +1435,7 @@ start_ride_time timestamp without time zone;
 end_ride_time timestamp without time zone;
 start_drive_time timestamp without time zone;
 end_drive_time timestamp without time zone;
+time_now_pst timestamp without time zone;
 
 zip_origin carpoolvote.zip_codes%ROWTYPE;  -- Driver's origin
 zip_pickup carpoolvote.zip_codes%ROWTYPE;  -- Rider's pickup
@@ -1658,9 +1659,10 @@ BEGIN
 								WHERE "UUID"=drive_offer_row."UUID";
 				
 								b_driver_validated := FALSE;
-							ELSE
+							ELSE							
+								SELECT now() AT TIME ZONE 'PST' into time_now_pst;
 							
-								IF end_drive_time > now()   ----   --[NOW]--[S]--[E]   : not expired
+								IF end_drive_time > time_now_pst   ----   --[NOW]--[S]--[E]  : not expired
 								THEN                       ----   --[S]---[NOW]--[E]  : not expired
 													      --[S]--[E]----[NOW] : expired
 									b_driver_all_times_expired := FALSE;
