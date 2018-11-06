@@ -191,9 +191,9 @@ function createConfirmCancelFn(resultStringText, consoleText, dbQueryFn, payload
         // var payload = req.payload;
         var payload = req.query;
         var results = postFunctions.getExecResultStrings(resultStringText);
-        console.log('createConfirmCancelFn-payload: ', payload);
+        // console.log('createConfirmCancelFn-payload: ', payload);
         // req.log();
-        console.log(consoleText + JSON.stringify(payload, null, 4));
+        // console.log(consoleText + JSON.stringify(payload, null, 4));
         postgresQueries.dbExecuteFunction(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
     }
     return execFn;
@@ -203,9 +203,9 @@ function createMultipleResultsFn(resultStringText, consoleText, dbQueryFn, paylo
         // var payload = req.payload;
         var payload = req.query;
         var results = postFunctions.getExecResultStrings(resultStringText);
-        console.log('createMultipleResultsFn-payload: ', payload);
+        // console.log('createMultipleResultsFn-payload: ', payload);
         // req.log();
-        console.log(consoleText + JSON.stringify(payload, null, 4));
+        // console.log(consoleText + JSON.stringify(payload, null, 4));
         postgresQueries.dbExecuteFunctionMultipleResults(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
     }
     return execFn;
