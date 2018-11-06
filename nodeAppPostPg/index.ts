@@ -213,7 +213,7 @@ server.route({
       failure: 'GET matches: '
     };
 
-    req.log(['request']);
+    // req.log(['request']);
 
     postgresQueries.dbGetMatchesData(
       pool,
@@ -233,7 +233,7 @@ server.route({
       failure: 'GET match-rider: '
     };
 
-    req.log(['request']);
+    // req.log(['request']);
 
     postgresQueries.dbGetMatchSpecificData(
       pool,
@@ -254,7 +254,7 @@ server.route({
       failure: 'GET match-driver: '
     };
 
-    req.log(['request']);
+    // req.log(['request']);
 
     postgresQueries.dbGetMatchSpecificData(
       pool,

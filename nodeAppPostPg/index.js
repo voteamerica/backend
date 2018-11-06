@@ -155,7 +155,7 @@ server.route({
             success: 'GET matches: ',
             failure: 'GET matches: '
         };
-        req.log(['request']);
+        // req.log(['request']);
         postgresQueries.dbGetMatchesData(pool, dbQueries.dbGetMatchesQueryString, reply, results);
     }
 });
@@ -167,7 +167,7 @@ server.route({
             success: 'GET match-rider: ',
             failure: 'GET match-rider: '
         };
-        req.log(['request']);
+        // req.log(['request']);
         postgresQueries.dbGetMatchSpecificData(pool, dbQueries.dbGetMatchRiderQueryString, req.params.uuid, reply, results);
     }
 });
@@ -179,7 +179,7 @@ server.route({
             success: 'GET match-driver: ',
             failure: 'GET match-driver: '
         };
-        req.log(['request']);
+        // req.log(['request']);
         postgresQueries.dbGetMatchSpecificData(pool, dbQueries.dbGetMatchDriverQueryString, req.params.uuid, reply, results);
     }
 });

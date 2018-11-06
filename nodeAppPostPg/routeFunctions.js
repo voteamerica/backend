@@ -20,7 +20,7 @@ function getAnon(req, reply) {
         success: 'GET carpool: ',
         failure: 'GET error: '
     };
-    req.log();
+    // req.log();
     postgresQueries.dbGetData(rfPool, dbQueries.dbGetDriversQueryString, reply, results);
 }
 function getUsers(req, reply) {
@@ -28,7 +28,7 @@ function getUsers(req, reply) {
         success: 'GET users: ',
         failure: 'GET users error: '
     };
-    req.log();
+    // req.log();
     postgresQueries.dbGetData(rfPool, dbQueries.dbGetUsersQueryString, reply, results);
 }
 const mapDbUserToNodeAppUser = dbData => {
@@ -48,7 +48,7 @@ async function getUsersInternal(req, reply, payload) {
         success: 'GET users internal: ',
         failure: 'GET users internal error: '
     };
-    req.log();
+    // req.log();
     const [userName, email, ...info] = userPayloadAsArray(req, payload);
     const queryPlusWhere = queryFn => () => queryFn() + ` WHERE username = '${userName}' OR email = '${email}' `;
     const dbData = await postgresQueries.dbGetDataInternal(rfPool, queryPlusWhere(dbQueries.dbGetUsersQueryString), reply, results);
@@ -63,7 +63,7 @@ async function getUsersListInternal(req, reply, payload) {
         success: 'GET users list internal: ',
         failure: 'GET users list internal error: '
     };
-    req.log();
+    // req.log();
     const dbData = await postgresQueries.dbGetDataListInternal(rfPool, dbQueries.dbGetUsersQueryString, reply, results);
     return dbData;
 }
@@ -74,7 +74,7 @@ async function getDriversListInternal(req, reply, payload) {
     };
     // debugger;
     // console.log('drivers list int');
-    req.log();
+    // req.log();
     const dbData = await postgresQueries.dbGetDataListInternal(rfPool, 
     // dbQueries.dbGetDriversQueryString,
     dbQueries.dbGetDriversByUserOrganizationQueryString(req.auth.credentials.username), reply, results);
@@ -85,7 +85,7 @@ async function getRidersListInternal(req, reply, payload) {
         success: 'GET riders list internal: ',
         failure: 'GET riders list internal error: '
     };
-    req.log();
+    // req.log();
     const dbData = await postgresQueries.dbGetDataListInternal(rfPool, dbQueries.dbGetRidersAndOrganizationQueryString(), reply, results);
     return dbData;
 }
@@ -94,7 +94,7 @@ async function getMatchesListInternal(req, reply, payload) {
         success: 'GET matches list internal: ',
         failure: 'GET matches list internal error: '
     };
-    req.log();
+    // req.log();
     const dbData = await postgresQueries.dbGetDataListInternal(rfPool, 
     // dbQueries.dbGetMatchesQueryString,
     dbQueries.dbGetMatchesByUserOrganizationQueryString(req.auth.credentials.username), reply, results);
@@ -105,7 +105,7 @@ async function getMatchesOtherDriverListInternal(req, reply, payload) {
         success: 'GET matches other list internal: ',
         failure: 'GET matches other list internal error: '
     };
-    req.log();
+    // req.log();
     const dbData = await postgresQueries.dbGetDataListInternal(rfPool, dbQueries.dbGetMatchesByRiderOrganizationQueryString(req.auth.credentials.username), reply, results);
     return dbData;
 }
@@ -114,7 +114,7 @@ async function getUserOrganizationInternal(req, reply, payload) {
         success: 'GET user organization internal: ',
         failure: 'GET user organization internal error: '
     };
-    req.log();
+    // req.log();
     const dbData = await postgresQueries.dbGetDataListInternal(rfPool, dbQueries.dbGetUserOrganizationQueryString(req.auth.credentials.username), reply, results);
     return dbData;
 }
@@ -123,7 +123,7 @@ async function addUserInternal(req, reply, payload) {
         success: 'POST user internal: ',
         failure: 'POST user internal error: '
     };
-    req.log();
+    // req.log();
     const insertPlusValues = queryFn => () => queryFn() +
         ' ("username", "email", "password", "is_admin") ' +
         ' values ($1, $2, $3, $4) returning ' +
@@ -136,7 +136,7 @@ function getUnmatchedDrivers(req, reply) {
         success: 'GET unmatched drivers: ',
         failure: 'GET unmatched drivers error: '
     };
-    req.log();
+    // req.log();
     postgresQueries.dbGetUnmatchedDrivers(rfPool, dbQueries.dbGetUnmatchedDriversQueryString, reply, results);
 }
 function getDriversDetails(req, reply) {
@@ -144,7 +144,7 @@ function getDriversDetails(req, reply) {
         success: 'GET drivers details: ',
         failure: 'GET drivers details error: '
     };
-    req.log();
+    // req.log();
     postgresQueries.dbGetDriversDetails(rfPool, dbQueries.dbGetDriversDetailssQueryString, reply, results);
 }
 function getDriverMatchesDetails(req, reply) {
@@ -152,7 +152,7 @@ function getDriverMatchesDetails(req, reply) {
         success: 'GET driver matches details: ',
         failure: 'GET driver matches details error: '
     };
-    req.log();
+    // req.log();
     postgresQueries.dbGetDriverMatchesDetails(rfPool, dbQueries.dbGetDriverMatchesDetailsQueryString, reply, results);
 }
 function getUnmatchedRiders(req, reply) {
@@ -160,7 +160,7 @@ function getUnmatchedRiders(req, reply) {
         success: 'GET unmatched riders: ',
         failure: 'GET unmatched riders error: '
     };
-    req.log();
+    // req.log();
     postgresQueries.dbGetUnmatchedRiders(rfPool, dbQueries.dbGetUnmatchedRidersQueryString, reply, results);
 }
 var cancelRideRequest = createConfirmCancelFn('cancel ride request: ', 'get payload: ', dbQueriesCancels.dbCancelRideRequestFunctionString, getTwoRiderCancelConfirmPayloadAsArray
@@ -192,7 +192,7 @@ function createConfirmCancelFn(resultStringText, consoleText, dbQueryFn, payload
         var payload = req.query;
         var results = postFunctions.getExecResultStrings(resultStringText);
         console.log('createConfirmCancelFn-payload: ', payload);
-        req.log();
+        // req.log();
         console.log(consoleText + JSON.stringify(payload, null, 4));
         postgresQueries.dbExecuteFunction(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
     }
@@ -204,7 +204,7 @@ function createMultipleResultsFn(resultStringText, consoleText, dbQueryFn, paylo
         var payload = req.query;
         var results = postFunctions.getExecResultStrings(resultStringText);
         console.log('createMultipleResultsFn-payload: ', payload);
-        req.log();
+        // req.log();
         console.log(consoleText + JSON.stringify(payload, null, 4));
         postgresQueries.dbExecuteFunctionMultipleResults(payload, rfPool, dbQueryFn, payloadFn, req, reply, results);
     }

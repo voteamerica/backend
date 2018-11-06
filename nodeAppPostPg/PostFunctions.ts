@@ -70,7 +70,7 @@ class PostFunctions {
     }
 
   logPost (req: any) {
-    req.log();
+    // req.log();
   }
 
   constructor () {
@@ -234,13 +234,13 @@ class PostFunctions {
     console.log('driver payload: ' + JSON.stringify(payload, null, 4));
     console.log('driver zip: ' + payload.DriverCollectionZIP);
 
-    req.log();
+    // req.log();
   }
 
   logPostHelper(self: PostFunctions, req: any) {
     var payload = req.payload;
 
-    req.log();
+    // req.log();
 
     console.log('helper payload: ' + JSON.stringify(payload, null, 4));
   }
@@ -252,7 +252,7 @@ class PostFunctions {
     self.sanitiseRider(payload);
     //console.log("rider state2 : " + payload.RiderVotingState);
 
-    req.log();
+    // req.log();
 
     console.log("rider payload: " + JSON.stringify(payload, null, 4));
     console.log("rider zip: " + payload.RiderCollectionZIP);
@@ -263,7 +263,7 @@ class PostFunctions {
 
     // self.sanitiseRider(payload);
 
-    req.log();
+    // req.log();
 
     console.log("user payload: " + JSON.stringify(payload, null, 4));
   }
