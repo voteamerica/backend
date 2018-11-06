@@ -19,6 +19,7 @@ add copy stdin header to backup (from copy-stdin.csv) (fields from pgadmin selec
   add \.
   and blank line
 
+load into db with plugin psql console
 
 
 NOTE: seem to be duplicate drivers (same uuid)
