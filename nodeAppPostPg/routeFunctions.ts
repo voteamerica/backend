@@ -31,7 +31,7 @@ function getAnon(req: any, reply: any) {
     failure: 'GET error: '
   };
 
-  req.log();
+  // req.log();
 
   postgresQueries.dbGetData(
     rfPool,
@@ -47,7 +47,7 @@ function getUsers(req: any, reply: any) {
     failure: 'GET users error: '
   };
 
-  req.log();
+  // req.log();
 
   postgresQueries.dbGetData(
     rfPool,
@@ -79,7 +79,7 @@ async function getUsersInternal(req: any, reply: any, payload: UserType) {
     failure: 'GET users internal error: '
   };
 
-  req.log();
+  // req.log();
 
   const [userName, email, ...info] = userPayloadAsArray(req, payload);
 
@@ -108,7 +108,7 @@ async function getUsersListInternal(req: any, reply: any, payload: UserType) {
     failure: 'GET users list internal error: '
   };
 
-  req.log();
+  // req.log();
 
   const dbData = await postgresQueries.dbGetDataListInternal(
     rfPool,
@@ -130,7 +130,7 @@ async function getDriversListInternal(req: any, reply: any, payload: UserType) {
 
   // console.log('drivers list int');
 
-  req.log();
+  // req.log();
 
   const dbData = await postgresQueries.dbGetDataListInternal(
     rfPool,
@@ -151,7 +151,7 @@ async function getRidersListInternal(req: any, reply: any, payload: UserType) {
     failure: 'GET riders list internal error: '
   };
 
-  req.log();
+  // req.log();
 
   const dbData = await postgresQueries.dbGetDataListInternal(
     rfPool,
@@ -169,7 +169,7 @@ async function getMatchesListInternal(req: any, reply: any, payload: UserType) {
     failure: 'GET matches list internal error: '
   };
 
-  req.log();
+  // req.log();
 
   const dbData = await postgresQueries.dbGetDataListInternal(
     rfPool,
@@ -194,7 +194,7 @@ async function getMatchesOtherDriverListInternal(
     failure: 'GET matches other list internal error: '
   };
 
-  req.log();
+  // req.log();
 
   const dbData = await postgresQueries.dbGetDataListInternal(
     rfPool,
@@ -218,7 +218,7 @@ async function getUserOrganizationInternal(
     failure: 'GET user organization internal error: '
   };
 
-  req.log();
+  // req.log();
 
   const dbData = await postgresQueries.dbGetDataListInternal(
     rfPool,
@@ -236,7 +236,7 @@ async function addUserInternal(req: any, reply: any, payload: [any]) {
     failure: 'POST user internal error: '
   };
 
-  req.log();
+  // req.log();
 
   const insertPlusValues = queryFn => () =>
     queryFn() +
@@ -263,7 +263,7 @@ function getUnmatchedDrivers(req: any, reply: any) {
     failure: 'GET unmatched drivers error: '
   };
 
-  req.log();
+  // req.log();
 
   postgresQueries.dbGetUnmatchedDrivers(
     rfPool,
@@ -279,7 +279,7 @@ function getDriversDetails(req: any, reply: any) {
     failure: 'GET drivers details error: '
   };
 
-  req.log();
+  // req.log();
 
   postgresQueries.dbGetDriversDetails(
     rfPool,
@@ -295,7 +295,7 @@ function getDriverMatchesDetails(req: any, reply: any) {
     failure: 'GET driver matches details error: '
   };
 
-  req.log();
+  // req.log();
 
   postgresQueries.dbGetDriverMatchesDetails(
     rfPool,
@@ -310,7 +310,9 @@ function getUnmatchedRiders(req: any, reply: any) {
     success: 'GET unmatched riders: ',
     failure: 'GET unmatched riders error: '
   };
-  req.log();
+
+  // req.log();
+  
   postgresQueries.dbGetUnmatchedRiders(
     rfPool,
     dbQueries.dbGetUnmatchedRidersQueryString,
@@ -435,7 +437,7 @@ function createConfirmCancelFn(
 
     console.log('createConfirmCancelFn-payload: ', payload);
 
-    req.log();
+    // req.log();
 
     console.log(consoleText + JSON.stringify(payload, null, 4));
 
@@ -467,7 +469,7 @@ function createMultipleResultsFn(
 
     console.log('createMultipleResultsFn-payload: ', payload);
 
-    req.log();
+    // req.log();
 
     console.log(consoleText + JSON.stringify(payload, null, 4));
 

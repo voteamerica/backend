@@ -28,7 +28,7 @@ class PostFunctions {
             this.createPostFn(routeNamesAddDriverRider.USER_ROUTE, dbQueriesPosts.dbGetSubmitUserString, this.createPayloadFn(this.getUserPayloadAsArray), this.logPostUser);
     }
     logPost(req) {
-        req.log();
+        // req.log();
     }
     createResultStringFn(successText, failureText) {
         function getResultStrings(tableName) {
@@ -140,36 +140,36 @@ class PostFunctions {
     getClientAddress(req) {
         // See http://stackoverflow.com/questions/10849687/express-js-how-to-get-remote-client-address
         // and http://stackoverflow.com/questions/19266329/node-js-get-clients-ip/19267284
-        return (req.headers['x-forwarded-for'] || '').split(',')[0]
-            || req.connection.remoteAddress;
+        return ((req.headers['x-forwarded-for'] || '').split(',')[0] ||
+            req.connection.remoteAddress);
     }
     logPostDriver(self, req) {
         var payload = req.payload;
-        console.log("driver radius1 : " + payload.DriverCollectionRadius);
+        console.log('driver radius1 : ' + payload.DriverCollectionRadius);
         self.sanitiseDriver(payload);
-        console.log("driver radius2 : " + payload.DriverCollectionRadius);
-        console.log("driver payload: " + JSON.stringify(payload, null, 4));
-        console.log("driver zip: " + payload.DriverCollectionZIP);
-        req.log();
+        console.log('driver radius2 : ' + payload.DriverCollectionRadius);
+        console.log('driver payload: ' + JSON.stringify(payload, null, 4));
+        console.log('driver zip: ' + payload.DriverCollectionZIP);
+        // req.log();
     }
     logPostHelper(self, req) {
         var payload = req.payload;
-        req.log();
-        console.log("helper payload: " + JSON.stringify(payload, null, 4));
+        // req.log();
+        console.log('helper payload: ' + JSON.stringify(payload, null, 4));
     }
     logPostRider(self, req) {
         var payload = req.payload;
         //console.log("rider state1 : " + payload.RiderVotingState);
         self.sanitiseRider(payload);
         //console.log("rider state2 : " + payload.RiderVotingState);
-        req.log();
+        // req.log();
         console.log("rider payload: " + JSON.stringify(payload, null, 4));
         console.log("rider zip: " + payload.RiderCollectionZIP);
     }
     logPostUser(self, req) {
         var payload = req.payload;
         // self.sanitiseRider(payload);
-        req.log();
+        // req.log();
         console.log("user payload: " + JSON.stringify(payload, null, 4));
     }
     sanitiseRider(payload) {
