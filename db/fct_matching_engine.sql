@@ -78,9 +78,11 @@ BEGIN
 		THEN
 			DELETE FROM match_notifications_buffer;
 		END;
-	
+
+		SELECT now() AT TIME ZONE 'PST' into time_now_pst;
+							
 		-- Initialize Counters
-		v_start_ts := now();
+		v_start_ts := time_now_pst;
 		v_evaluated_pairs := 0;
 		v_proposed_count := 0;
 		v_error_count := 0;
@@ -165,8 +167,7 @@ BEGIN
 				
 						b_rider_validated := FALSE;
 					ELSE
-					
-						IF end_ride_time > now()   ----   --[NOW]--[S]--[E]   : not expired
+						IF end_ride_time > time_now_pst   ----   --[NOW]--[S]--[E]   : not expired
 						THEN                       ----   --[S]---[NOW]--[E]  : not expired
 													      --[S]--[E]----[NOW] : expired
 							b_rider_all_times_expired := FALSE;
@@ -261,8 +262,6 @@ BEGIN
 				
 								b_driver_validated := FALSE;
 							ELSE
-								SELECT now() AT TIME ZONE 'PST' into time_now_pst;
-							
 								IF end_drive_time > time_now_pst   ----   --[NOW]--[S]--[E]  : not expired
 								THEN                       ----   --[S]---[NOW]--[E]  : not expired
 													      --[S]--[E]----[NOW] : expired
@@ -499,8 +498,8 @@ BEGIN
 				RAISE NOTICE 'Error while generating notifications for uuid=% : %', v_record.uuid_driver, v_temp_error_text; 
 			END IF;
 		END LOOP;
-		
-		v_end_ts := now();
+
+		v_end_ts := time_now_pst;
 		-- Update activity log
 		INSERT INTO carpoolvote.match_engine_activity_log (
 				start_ts, end_ts , evaluated_pairs,
