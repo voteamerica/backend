@@ -72,7 +72,7 @@ class PostgresQueries {
                     rowsToSend.push(val);
                 });
             }
-            console.log('unmatched drivers: ', rowsToSend);
+            // console.log('unmatched drivers: ', rowsToSend);
             reply(rowsToSend);
         })
             .catch(e => {
@@ -94,7 +94,7 @@ class PostgresQueries {
                     rowsToSend.push(val);
                 });
             }
-            console.log('drivers details: ', rowsToSend);
+            // console.log('drivers details: ', rowsToSend);
             reply(rowsToSend);
         })
             .catch(e => {
@@ -116,7 +116,7 @@ class PostgresQueries {
                     rowsToSend.push(val);
                 });
             }
-            console.log('driver matches details: ', rowsToSend);
+            // console.log('driver matches details: ', rowsToSend);
             reply(rowsToSend);
         })
             .catch(e => {
@@ -138,7 +138,7 @@ class PostgresQueries {
                     rowsToSend.push(val);
                 });
             }
-            console.log('unmatched riders: ', rowsToSend);
+            // console.log('unmatched riders: ', rowsToSend);
             reply(rowsToSend);
         })
             .catch(function (e) {
@@ -158,7 +158,7 @@ class PostgresQueries {
                 result.rows.forEach(val => {
                     firstRowAsString += JSON.stringify(val);
                 });
-                console.log(JSON.stringify(result.rows[0]));
+                // console.log(JSON.stringify(result.rows[0]));
             }
             reply(results.success + firstRowAsString);
         })
@@ -171,7 +171,7 @@ class PostgresQueries {
     }
     dbGetMatchSpecificData(pool, fnGetString, uuid, reply, results) {
         var queryString = fnGetString(uuid);
-        console.log('match rider query: ' + queryString);
+        // console.log('match rider query: ' + queryString);
         pool
             .query(queryString)
             .then(result => {
@@ -180,7 +180,7 @@ class PostgresQueries {
                 result.rows.forEach(val => {
                     firstRowAsString += JSON.stringify(val);
                 });
-                console.log(JSON.stringify(result.rows[0]));
+                // console.log(JSON.stringify(result.rows[0]));
             }
             reply(results.success + firstRowAsString);
         })
@@ -206,7 +206,7 @@ class PostgresQueries {
             catch (err) {
                 console.error('no uuid returned');
             }
-            console.log('insert: ', uuid + ' ' + displayResult);
+            // console.log('insert: ', uuid + ' ' + displayResult);
             if (payload._redirect) {
                 reply.redirect(payload._redirect + '?uuid=' + uuid.toString());
             }
@@ -235,7 +235,7 @@ class PostgresQueries {
             catch (err) {
                 console.error('no uuid returned');
             }
-            console.log('insert: ', uuid + ' ' + displayResult);
+            // console.log('insert: ', uuid + ' ' + displayResult);
             if (payload._redirect) {
                 // reply.redirect(payload._redirect + '?uuid=' + uuid.toString());
             }
@@ -253,7 +253,7 @@ class PostgresQueries {
     }
     dbExecuteCarpoolAPIFunction_Insert(payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
-        console.log('executeFunctionString Insert: ' + queryString);
+        // console.log('executeFunctionString Insert: ' + queryString);
         pool
             .query(queryString, fnPayloadArray(req, payload))
             .then(function (result) {
@@ -308,7 +308,7 @@ class PostgresQueries {
     }
     dbExecuteCarpoolAPIFunction(payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
-        console.log('executeFunctionString: ' + queryString);
+        // console.log('executeFunctionString: ' + queryString);
         pool
             .query(queryString, fnPayloadArray(req, payload))
             .then(function (result) {
@@ -336,7 +336,7 @@ class PostgresQueries {
     }
     dbExecuteFunction(payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
-        console.log('executeFunctionString: ' + queryString);
+        // console.log('executeFunctionString: ' + queryString);
         pool
             .query(queryString, fnPayloadArray(req, payload))
             .then(function (result) {
@@ -364,7 +364,7 @@ class PostgresQueries {
     }
     dbExecuteFunctionMultipleResults(payload, pool, fnExecuteFunctionString, fnPayloadArray, req, reply, results) {
         var queryString = fnExecuteFunctionString();
-        console.log('executeFunctionMultipleResultsString: ' + queryString);
+        // console.log('executeFunctionMultipleResultsString: ' + queryString);
         pool
             .query(queryString, fnPayloadArray(req, payload))
             .then(function (result) {
@@ -375,7 +375,7 @@ class PostgresQueries {
                 result.rows.forEach(function (val) {
                     rowsToSend.push(val);
                 });
-                console.log('multiple results: ', rowsToSend);
+                // console.log('multiple results: ', rowsToSend);
             }
             console.error('executed fn multiple results: ' + firstRowAsString);
             reply(rowsToSend);

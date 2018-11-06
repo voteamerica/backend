@@ -254,8 +254,8 @@ class PostFunctions {
 
     // req.log();
 
-    console.log("rider payload: " + JSON.stringify(payload, null, 4));
-    console.log("rider zip: " + payload.RiderCollectionZIP);
+    // console.log("rider payload: " + JSON.stringify(payload, null, 4));
+    // console.log("rider zip: " + payload.RiderCollectionZIP);
   }
 
   logPostUser (self: PostFunctions, req: any) {
@@ -265,7 +265,7 @@ class PostFunctions {
 
     // req.log();
 
-    console.log("user payload: " + JSON.stringify(payload, null, 4));
+    // console.log("user payload: " + JSON.stringify(payload, null, 4));
   }
 
   sanitiseRider (payload: any) {

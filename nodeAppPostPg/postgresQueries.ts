@@ -144,7 +144,7 @@ class PostgresQueries implements DbQueries {
           });
         }
 
-        console.log('unmatched drivers: ', rowsToSend);
+        // console.log('unmatched drivers: ', rowsToSend);
 
         reply(rowsToSend);
       })
@@ -173,7 +173,7 @@ class PostgresQueries implements DbQueries {
           });
         }
 
-        console.log('drivers details: ', rowsToSend);
+        // console.log('drivers details: ', rowsToSend);
 
         reply(rowsToSend);
       })
@@ -202,7 +202,7 @@ class PostgresQueries implements DbQueries {
           });
         }
 
-        console.log('driver matches details: ', rowsToSend);
+        // console.log('driver matches details: ', rowsToSend);
 
         reply(rowsToSend);
       })
@@ -228,7 +228,7 @@ class PostgresQueries implements DbQueries {
             rowsToSend.push(val);
           });
         }
-        console.log('unmatched riders: ', rowsToSend);
+        // console.log('unmatched riders: ', rowsToSend);
         reply(rowsToSend);
       })
       .catch(function(e) {
@@ -252,7 +252,7 @@ class PostgresQueries implements DbQueries {
             firstRowAsString += JSON.stringify(val);
           });
 
-          console.log(JSON.stringify(result.rows[0]));
+          // console.log(JSON.stringify(result.rows[0]));
         }
 
         reply(results.success + firstRowAsString);
@@ -270,7 +270,7 @@ class PostgresQueries implements DbQueries {
   dbGetMatchSpecificData(pool, fnGetString, uuid, reply, results) {
     var queryString = fnGetString(uuid);
 
-    console.log('match rider query: ' + queryString);
+    // console.log('match rider query: ' + queryString);
 
     pool
       .query(queryString)
@@ -282,7 +282,7 @@ class PostgresQueries implements DbQueries {
             firstRowAsString += JSON.stringify(val);
           });
 
-          console.log(JSON.stringify(result.rows[0]));
+          // console.log(JSON.stringify(result.rows[0]));
         }
 
         reply(results.success + firstRowAsString);
@@ -322,7 +322,7 @@ class PostgresQueries implements DbQueries {
           console.error('no uuid returned');
         }
 
-        console.log('insert: ', uuid + ' ' + displayResult);
+        // console.log('insert: ', uuid + ' ' + displayResult);
 
         if (payload._redirect) {
           reply.redirect(payload._redirect + '?uuid=' + uuid.toString());
@@ -368,7 +368,7 @@ class PostgresQueries implements DbQueries {
         console.error('no uuid returned');
       }
 
-      console.log('insert: ', uuid + ' ' + displayResult);
+      // console.log('insert: ', uuid + ' ' + displayResult);
 
       if (payload._redirect) {
         // reply.redirect(payload._redirect + '?uuid=' + uuid.toString());
@@ -396,7 +396,7 @@ class PostgresQueries implements DbQueries {
     results
   ) {
     var queryString = fnExecuteFunctionString();
-    console.log('executeFunctionString Insert: ' + queryString);
+    // console.log('executeFunctionString Insert: ' + queryString);
     pool
       .query(queryString, fnPayloadArray(req, payload))
       .then(function(result) {
@@ -464,7 +464,7 @@ class PostgresQueries implements DbQueries {
     results
   ) {
     var queryString = fnExecuteFunctionString();
-    console.log('executeFunctionString: ' + queryString);
+    // console.log('executeFunctionString: ' + queryString);
     pool
       .query(queryString, fnPayloadArray(req, payload))
       .then(function(result) {
@@ -505,7 +505,7 @@ class PostgresQueries implements DbQueries {
   ) {
     var queryString = fnExecuteFunctionString();
 
-    console.log('executeFunctionString: ' + queryString);
+    // console.log('executeFunctionString: ' + queryString);
     pool
       .query(queryString, fnPayloadArray(req, payload))
       .then(function(result) {
@@ -551,7 +551,7 @@ class PostgresQueries implements DbQueries {
   ) {
     var queryString = fnExecuteFunctionString();
 
-    console.log('executeFunctionMultipleResultsString: ' + queryString);
+    // console.log('executeFunctionMultipleResultsString: ' + queryString);
     pool
       .query(queryString, fnPayloadArray(req, payload))
       .then(function(result: any) {
@@ -564,7 +564,7 @@ class PostgresQueries implements DbQueries {
             rowsToSend.push(val);
           });
 
-          console.log('multiple results: ', rowsToSend);
+          // console.log('multiple results: ', rowsToSend);
         }
         console.error('executed fn multiple results: ' + firstRowAsString);
 

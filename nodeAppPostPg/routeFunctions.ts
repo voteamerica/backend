@@ -435,11 +435,11 @@ function createConfirmCancelFn(
 
     var results = postFunctions.getExecResultStrings(resultStringText);
 
-    console.log('createConfirmCancelFn-payload: ', payload);
+    // console.log('createConfirmCancelFn-payload: ', payload);
 
     // req.log();
 
-    console.log(consoleText + JSON.stringify(payload, null, 4));
+    // console.log(consoleText + JSON.stringify(payload, null, 4));
 
     postgresQueries.dbExecuteFunction(
       payload,
@@ -467,11 +467,11 @@ function createMultipleResultsFn(
 
     var results = postFunctions.getExecResultStrings(resultStringText);
 
-    console.log('createMultipleResultsFn-payload: ', payload);
+    // console.log('createMultipleResultsFn-payload: ', payload);
 
     // req.log();
 
-    console.log(consoleText + JSON.stringify(payload, null, 4));
+    // console.log(consoleText + JSON.stringify(payload, null, 4));
 
     postgresQueries.dbExecuteFunctionMultipleResults(
       payload,

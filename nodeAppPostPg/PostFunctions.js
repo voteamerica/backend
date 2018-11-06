@@ -163,14 +163,14 @@ class PostFunctions {
         self.sanitiseRider(payload);
         //console.log("rider state2 : " + payload.RiderVotingState);
         // req.log();
-        console.log("rider payload: " + JSON.stringify(payload, null, 4));
-        console.log("rider zip: " + payload.RiderCollectionZIP);
+        // console.log("rider payload: " + JSON.stringify(payload, null, 4));
+        // console.log("rider zip: " + payload.RiderCollectionZIP);
     }
     logPostUser(self, req) {
         var payload = req.payload;
         // self.sanitiseRider(payload);
         // req.log();
-        console.log("user payload: " + JSON.stringify(payload, null, 4));
+        // console.log("user payload: " + JSON.stringify(payload, null, 4));
     }
     sanitiseRider(payload) {
         // if (payload.RiderVotingState === undefined) {
