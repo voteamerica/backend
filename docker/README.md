@@ -43,25 +43,25 @@ Carpool-vote is spread across two repos, one for front-end the other for backend
 
 **Front-end code folder**
 
-The default value for the front-end folder is `voteUSfrontend`. This can be changed by either editing the `COMPOSE_DEV_FE_DIR` variable in the `.env` file (in the docker folder) or by setting this as an environment variable.
-
-`export COMPOSE_DEV_FE_DIR=...` See the [docker documentation](https://docs.docker.com/compose/compose-file/compose-file-v2/#variable-substitution) for details.
-
 It is assumed that you already have a a local clone of the frontend repo, but if not, create one:
 
 `git clone https://github.com/your-fork-name-here/voteamerica.github.io voteUSfrontend`
 
+As in the example command above, the expected name for the front-end folder is `voteUSfrontend`. Alternate names can be supported by either editing the `COMPOSE_DEV_FE_DIR` variable in the `.env` file (in the docker folder) or by setting this as an environment variable.
+
+`export COMPOSE_DEV_FE_DIR=...` See the [docker documentation](https://docs.docker.com/compose/compose-file/compose-file-v2/#variable-substitution) for details.
+
 **Back-end code folder**
 
-If it does not already exist, clone the backend git repo. It can be named however you wish. Here it is called `voteUSbackend`.
+If it does not already exist, clone the backend git repo. It can be named however you wish. In the example command below, and in these instructions, it is called `voteUSbackend`.
 
 `git clone https://github.com/your-fork-name-here/backend voteUSbackend`
 
 #### Create specific machines (if required)
 
-This can be necessary for testing against a version of code that is under development or in a non-default branch and/or repo.
+This can be necessary for testing against a version of code that is under development or in a non-default branch and/or repo. If you are just starting with setting up the environment, then continue to the next section and refer back to these details later if necessary.
 
-Example params to these scripts
+Example params to these scripts:
 
 `cp-nodejs` the service name in the relevant docker-compose .yml file
 
@@ -74,6 +74,8 @@ Example params to these scripts
 More details below.
 
 ### 1) Front-end Development
+
+This set-up needs a little less work than the Full-stack version. However, that version is used more (so is more tested and documented), so if just starting, you may be better off with the the Full-stack version, even if there is a little more set-up involved.
 
 #### Go to the docker folder ...
 
@@ -111,7 +113,7 @@ docker-compose -f ./compose/full-stack-local/docker-compose-local-frontend.yml d
 
 This works directly from the files in the folders for your front and back-end repos.
 
-If you don't have a local clone of the front-end repo, create one as described above.
+If you have not gone through the initial steps and don't have a local clone of the front-end repo, create one as described above.
 
 #### Create specific machines (if required)
 
