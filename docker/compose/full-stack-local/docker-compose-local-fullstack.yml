@@ -39,6 +39,10 @@ services:
     volumes:
       - ../../../../${COMPOSE_DEV_FE_DIR:-voteUSfrontend}:/usr/src/app/frontend
 
+      # This volume is needed for node modules, so the packages installed  
+      # by the Dockerfile are visible when the container is started.
+      - front_end_node_modules:/usr/src/app/frontend/node_modules/
+
     networks:
       vpcbr:
         ipv4_address: 10.4.0.4
@@ -73,6 +77,9 @@ services:
       - cp-pg-server
     volumes:
       - ../../..:/usr/src/app/backend
+
+      # This volume is needed for node modules, so the packages installed  
+      # by the Dockerfile are visible when the container is started.
       - node_app_node_modules:/usr/src/app/backend/nodeAppPostPg/node_modules/
 
     networks:
@@ -133,3 +140,4 @@ networks:
 
 volumes:
   node_app_node_modules:
+  front_end_node_modules:

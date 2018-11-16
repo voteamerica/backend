@@ -47,10 +47,17 @@ RUN git fetch origin
 RUN git merge origin/$BRANCH_NAME
 
 # RUN npm install --only=dev
-# RUN npm install 
-# RUN yarn install --production=false
 
-# TEST  
+# This works, so will stick with npm for now. However, the yarn install sends a lot 
+# less info to the console when it builds the bs-platform. It would be handy to get 
+# npm to do the same.
+RUN npm install 
+# RUN yarn install --production=false
+# RUN yarn
+
+# WIP - maybe try these steps re global bsb on linux.
+# https://github.com/BuckleScript/bucklescript/issues/2051#issuecomment-331387417
+# For now, copy across the two reasonreact*.js files in the start script below.
 # RUN bsb -make-world
 
 # run webpack as background task
