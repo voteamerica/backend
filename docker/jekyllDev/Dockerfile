@@ -59,6 +59,7 @@ RUN npm install
 # https://github.com/BuckleScript/bucklescript/issues/2051#issuecomment-331387417
 # For now, copy across the two reasonreact*.js files in the start script below.
 # RUN bsb -make-world
+RUN npx bsb -make-world
 
 # run webpack as background task
 # RUN webpack --watch --progress --info-verbosity verbose &
