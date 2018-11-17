@@ -14,7 +14,7 @@ The environments below work on Windows, Linux and Mac machines. Having problems?
 
 ### Using Docker Toolbox on Windows
 
-This legacy environment works well. Follow the brief initial steps below to [setup the Virtualbox environment](/Using-Docker-Toolbox-on-Windows).
+This legacy environment works well. Follow the brief initial steps below to [setup the Virtualbox environment](#4-using-docker-toolbox-on-windows).
 
 ## Install docker compose (if not already installed)
 
