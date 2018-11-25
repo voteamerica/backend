@@ -32,4 +32,8 @@ webpack --watch --progress --info-verbosity verbose --config production-webpack.
 # Hide output
 # watch -n10 npx bsb -make-world & > /dev/null
 
+# Efforts with colour, from:
+# https://stackoverflow.com/a/40849490
+# while sleep 10; do clear; npx bsb -make-world; done
+
 /bin/bash

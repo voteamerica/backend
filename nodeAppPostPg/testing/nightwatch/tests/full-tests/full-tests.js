@@ -1,27 +1,42 @@
 var common = require('../../common/common.js');
 
 module.exports = {
-  'full-match-pause': function (client) {
+  'full-match-pause': function(client) {
+    // common.matchRiderDriver(client)
+    //   .driverCancelMatch()
 
-    common.matchRiderDriver(client)
-      .driverCancelMatch()
-      
-      .nextDate()
-      .addDriver()
+    //   .nextDate()
+    //   .addDriver()
+    //   .viewDriverSelfService()
+    //   .pauseDriverSelfService()
+    //   .cancelDriverSelfService()
+    //   .addRider()
+    //   .viewRiderSelfService()
+    //   .cancelRiderSelfService()
+
+    //   .nextDate()
+    //   .matchRiderDriver()
+    //   .viewRiderSelfService()
+    //   .viewRiderMatch()
+    //   .riderCancelMatch()
+
+    common
+      .loginOperatorPage(client)
+      .addDriverOperatorPage()
+      // .viewDriverSelfService()
+      .loginOperatorPage()
+      .addRiderOperatorPage()
+      // from match...()
       .viewDriverSelfService()
-      .pauseDriverSelfService()
-      .cancelDriverSelfService()
-      .addRider()
-      .viewRiderSelfService()
-      .cancelRiderSelfService()      
+      .viewProposedMatch()
+      .acceptMatch()
 
-      .nextDate()
-      .matchRiderDriver()
       .viewRiderSelfService()
       .viewRiderMatch()
       .riderCancelMatch()
-      
-      // .viewOperatorPage()
+
+      .loginOperatorPage()
+      // .logoutOperatorPage()
       .finish();
   }
 };

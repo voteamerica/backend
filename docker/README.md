@@ -195,7 +195,7 @@ sh ./start-compose-tests.sh match
 ##### e.g. to test a against a specific branch
 
 ```
-sh ./specific-machine-test-frontend.sh cp-nodejs R
+sh ./specific-machine-test-frontend.sh cp-nodejs R https://github.com/jkbits1/backend docker-test
 sh ./specific-machine-test-frontend.sh cp-test-runner R https://github.com/jkbits1/backend docker-test
 ```
 
