@@ -22,14 +22,24 @@ module.exports = {
 
     common
       .loginOperatorPage(client)
-      .addDriverOperatorPage()
-      // .viewDriverSelfService()
-      .loginOperatorPage()
       .addRiderOperatorPage()
-      // from match...()
+      .viewRiderSelfService()
+
+      .loginOperatorPage(client)
+      .addDriverOperatorPage()
+      // from matchriderdriver
       .viewDriverSelfService()
       .viewProposedMatch()
       .acceptMatch()
+
+      // .addDriverOperatorPage()
+      // .viewDriverSelfService()
+      // .loginOperatorPage()
+      // .addRiderOperatorPage()
+      // from match...()
+      // .viewDriverSelfService()
+      // .viewProposedMatch()
+      // .acceptMatch()
 
       .viewRiderSelfService()
       .viewRiderMatch()

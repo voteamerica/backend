@@ -519,12 +519,12 @@ var testObject = {
       .waitForElementVisible('form#need-ride', 3000)
       .assert.cssClassPresent('#RiderAvailableTimes', 'available-times')
 
-      .execute(
-        "document.getElementById('riderSetTestDateButton').style.display = 'block';"
-      )
+      // .execute(
+      //   "document.getElementById('riderSetTestDateButton').style.display = 'block';"
+      // )
       // .expect.element('#main').to.have.css('display').which.equals('block')
 
-      .click('button[id="riderSetTestDateButton"]')
+      // .click('button[id="riderSetTestDateButton"]')
 
       .pause(2000)
 
@@ -532,6 +532,21 @@ var testObject = {
       .execute(
         function(data) {
           var riderDateElement = document.getElementById('RiderDate0');
+
+          // https://stackoverflow.com/questions/23892547/what-is-the-best-way-to-trigger-onchange-event-in-react-js
+          var nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+            window.HTMLInputElement.prototype,
+            'value'
+          ).set;
+
+          nativeInputValueSetter.call(
+            riderDateElement,
+            arguments[0][arguments[1]]
+          );
+
+          var ev2 = new Event('input', { bubbles: true });
+          undefined;
+          riderDateElement.dispatchEvent(ev2);
 
           // console.log('addRider - passed args: ', arguments);
           // console.log('addRider - data: ', data);
@@ -622,7 +637,21 @@ var testObject = {
       .assert.containsText('h1#thanks-header', 'Congratulations')
 
       .waitForElementVisible('.self-service-url', 1000)
-      .assert.containsText('.self-service-url', 'self-service portal');
+      .assert.containsText('.self-service-url', 'self-service portal')
+
+      .getAttribute('.self-service-url', 'href', function(result) {
+        console.log('addRider - self service url: ', result);
+        // this.assert.equal(typeof result, "object");
+        // this.assert.equal(result.status, 0);
+        // this.assert.equal(result.value, "#home");
+
+        testObject.riderSelfServicePageUrl = result.value;
+
+        console.log(
+          'addRider - rider url: ',
+          testObject.riderSelfServicePageUrl
+        );
+      });
   }),
 
   addDriverOperatorPage: createChainableTest(function(client) {
@@ -646,7 +675,7 @@ var testObject = {
       )
       // .expect.element('#main').to.have.css('display').which.equals('block')
 
-      .click('button[id="driverSetTestDateButton"]')
+      // .click('button[id="driverSetTestDateButton"]')
 
       // .pause(10000)
 
@@ -660,6 +689,21 @@ var testObject = {
 
           // driverDateElement.value = arguments[testObject.currentDateIndex];
           // driverDateElement.value = arguments[0][arguments[1]];
+
+          // https://stackoverflow.com/questions/23892547/what-is-the-best-way-to-trigger-onchange-event-in-react-js
+          var nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+            window.HTMLInputElement.prototype,
+            'value'
+          ).set;
+
+          nativeInputValueSetter.call(
+            driverDateElement,
+            arguments[0][arguments[1]]
+          );
+
+          var ev2 = new Event('input', { bubbles: true });
+          undefined;
+          driverDateElement.dispatchEvent(ev2);
 
           return driverDateElement.value;
         },
