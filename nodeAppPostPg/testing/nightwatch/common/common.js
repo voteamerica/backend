@@ -670,10 +670,10 @@ var testObject = {
         console.log('form input attribute result: ', result);
       })
 
-      .execute(
-        "document.getElementById('driverSetTestDateButton').style.display = 'block';"
-      )
-      // .expect.element('#main').to.have.css('display').which.equals('block')
+      // .execute(
+      //   "document.getElementById('driverSetTestDateButton').style.display = 'block';"
+      // )
+      // // .expect.element('#main').to.have.css('display').which.equals('block')
 
       // .click('button[id="driverSetTestDateButton"]')
 
