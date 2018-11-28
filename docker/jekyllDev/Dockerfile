@@ -70,8 +70,14 @@ COPY ./_config-local-ip.yml /
 COPY ./expo-start.sh /
 RUN chmod +x /expo-start.sh
 
+COPY ./expo-start-ip.sh /
+RUN chmod +x /expo-start-ip.sh
+
 RUN echo "expo-start.sh"
 RUN more /expo-start.sh
+
+RUN echo "expo-start-ip.sh"
+RUN more /expo-start-ip.sh
 
 # ENTRYPOINT ["jekyll serve -H 0.0.0.0 --watch --config _config-dev.yml"]
 # ENTRYPOINT [""]
