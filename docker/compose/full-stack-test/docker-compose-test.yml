@@ -8,37 +8,42 @@ services:
     image: selenium/standalone-chrome-debug
     # image: selenium/standalone-firefox
 
-    ports: 
-      - "5900:5900"
+    ports:
+      - '5900:5900'
 
     depends_on:
       - cp-nodejs
       - cp-pg-server
     networks:
       vpcbr:
-        ipv4_address: 10.5.0.3 # may not be needed 
-    
+        ipv4_address: 10.5.0.3 # may not be needed
+
   cp-front-end:
     build:
-      context: ../../jekyll/
+      context: ../../jekyllDev/
       args:
         REPO: https://github.com/voteamerica/voteamerica.github.io
         BRANCH_NAME: master
 
-    ports: 
-      - "4000:4000"
+    # this setting causes /bin/bash to wait on input, not exit immediately
+    tty: true
+    ports:
+      - '4000:4000'
     depends_on:
       - cp-nodejs
       - cp-pg-server
 
+    # https://jekyllrb.com/docs/usage/
+    # NOTE: .yml file () needs to contain IP addresses for this network (not the usual localhost). Entrypoint script does this, too.
     # command: jekyll serve -H 0.0.0.0 --watch --config /_config-local-ip.yml
     # command: jekyll serve -H 0.0.0.0 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-ip.yml
     # command: jekyll serve -H 10.5.0.4 --watch --source /usr/src/app/frontend --destination /usr/src/app/frontend/_site --config /_config-local-ip.yml
-    command: jekyll serve --watch --source /usr/src/app/frontend --config /_config-local-ip.yml
+    # command: jekyll serve --watch --source /usr/src/app/frontend --config /_config-local-ip.yml
+    entrypoint: /expo-start-ip.sh
 
     networks:
       vpcbr:
-        ipv4_address: 10.5.0.4 # probably not needed, but keeps things in sync 
+        ipv4_address: 10.5.0.4 # probably not needed, but keeps things in sync
 
   cp-nodejs:
     build:
@@ -49,7 +54,7 @@ services:
     image: carpool
 
     depends_on:
-    - cp-pg-server
+      - cp-pg-server
     # command: bash
     stdin_open: true
     tty: true
@@ -59,7 +64,7 @@ services:
       - JWT_SECRET=test_weak_secret
       - CSV_LOCAL=true
     ports:
-      - "8000:8000"
+      - '8000:8000'
     links:
       - cp-pg-server
 
@@ -75,7 +80,7 @@ services:
         BRANCH_NAME: master
     image: pgres-cp
     ports:
-      - "5433:5432"
+      - '5433:5432'
 
     networks:
       vpcbr:
@@ -89,7 +94,7 @@ services:
         BRANCH_NAME: master
     image: pg-client
     depends_on:
-    - cp-pg-server
+      - cp-pg-server
 
     # command: bash
     stdin_open: true
@@ -114,7 +119,7 @@ services:
     image: nightwatch
 
     depends_on:
-    - cp-test
+      - cp-test
     # command: /bin/bash
     # command: /run-tests.sh match2
 
@@ -131,9 +136,6 @@ networks:
   vpcbr:
     driver: bridge
     ipam:
-     config:
-       - subnet: 10.5.0.0/16
-         gateway: 10.5.0.1
-
-volumes:
-  node_app_node_modules:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
