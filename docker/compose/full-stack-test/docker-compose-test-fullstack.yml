@@ -20,11 +20,13 @@ services:
     
   cp-front-end:
     build:
-      context: ../../jekyll/
+      # context: ../../jekyll/
+      context: ../../jekyllDev/
       args:
         REPO: https://github.com/voteamerica/voteamerica.github.io
         BRANCH_NAME: master
 
+    tty: true
     ports: 
       - "4000:4000"
     depends_on:
@@ -32,12 +34,14 @@ services:
       - cp-pg-server
 
     # https://jekyllrb.com/docs/usage/
-    # NOTE: .yml file needs to contain IP addresses for this network (not the usual localhost)
+    # NOTE: .yml file () needs to contain IP addresses for this network (not the usual localhost). Entrypoint script does this, too.
     # command: jekyll serve -H 0.0.0.0 --watch --config /_config-local-ip.yml
-    command: jekyll serve --watch --source /usr/src/app/frontend --config /_config-local-ip.yml
+    # command: jekyll serve --watch --source /usr/src/app/frontend --config /_config-local-ip.yml
+    entrypoint: /expo-start-ip.sh
 
     volumes:
-      - ../../../../voteUSfrontend:/usr/src/app/frontend
+      - ../../../../${COMPOSE_DEV_FE_DIR:-voteUSfrontend}:/usr/src/app/frontend
+      - front_end_node_modules:/usr/src/app/frontend/node_modules/
 
     networks:
       vpcbr:
@@ -157,3 +161,4 @@ networks:
 
 volumes:
   node_app_node_modules:
+  front_end_node_modules:

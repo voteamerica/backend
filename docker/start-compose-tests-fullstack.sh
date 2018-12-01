@@ -85,17 +85,17 @@ curl localhost:4000 | grep "Every American"
 $DOCKER exec -it $(docker ps | grep nigh | cut -c 1-4) /run-tests.sh $TEST_GROUP
 EXIT_CODE=$?
 
-$DOCKER logs fullstacktest_cp-test-runner_1
+$DOCKER logs full-stack-test_cp-test-runner_1
 
 if [[ $EXIT_CODE -ne 0 ]]
 then
     echo "tests failed - printing logs"
 
-    # docker logs fullstacktest_cp-nodejs_1
-    # docker logs fullstacktest_cp-pg-server_1
-    # docker logs fullstacktest_cp-pg-client_1
-    # docker logs fullstacktest_cp-front-end_1
-    # docker logs fullstacktest_cp-test_1   
+    # docker logs full-stack-test_cp-nodejs_1
+    # docker logs full-stack-test_cp-pg-server_1
+    # docker logs full-stack-test_cp-pg-client_1
+    # docker logs full-stack-test_cp-front-end_1
+    # docker logs full-stack-test_cp-test_1   
 fi
 
 $DOCKERCOMPOSE -f ./compose/full-stack-test/docker-compose-test-fullstack.yml down
