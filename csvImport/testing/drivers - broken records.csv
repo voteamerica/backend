@@ -1,4 +1,0 @@
-DriverFirstName, DriverLastName, DriverEmail, DriverPhone, DriverCollectionZIP, DriverCollectionRadius, AvailableDriveTimesJSON, SeatCount, DriverLicenceNumber, DriverWillNotTalkPolitics, PleaseStayInTouch, DriverCanLoadRiderWithWheelchair, RidersCanSeeDriverDetails, DriverPreferredContact, DriverWillTakeCare
-JIM,SAMPLE,jim.sample.testuser@test.com,999-999-9999,90210,1,2018-11-06T02:00/2018-11-06T03:00|2019-11-06T02:00/2019-11-06T03:00,2,1234,TRUE,TRUE,TRUE,TRUE,Email;Text;Phone,TRUE
-JIM2,SAMPLE,jim.sample.testuser@test.com,999-999-9999,90210,1,2018-11-06T02:00/2018-11-06T03:00|2019-11-06T02:00/2019-11-06T03:00,2,1234,TRUE,TRUE,TRUE,TRUE,Email;Text;Phone
-JIM3,SAMPLE,jim.sample.testuser@test.com,999-999-9999,90210,1,2018-11-06T02:00/2018-11-06T03:00|2019-11-06T02:00/2019-11-06T03:00,2,1234,TRUE,TRUE,TRUE,TRUE,Email;Text;Phone,TRUE

@@ -1,2 +1,0 @@
-DriverFirstName, DriverLastName, DriverEmail, DriverPhone, DriverCollectionZIP, DriverCollectionRadius, SeatCount, DriverLicenceNumber, DriverWillNotTalkPolitics, PleaseStayInTouch, DriverCanLoadRiderWithWheelchair, RidersCanSeeDriverDetails, DriverPreferredContact, DriverWillTakeCare,DriveOfferDate,DriveOfferStartTime,DriveOfferEndTime
-JIM,SAMPLE,jim.sample.testuser@test.com,999-999-9999,90210,1,2,1234,TRUE,TRUE,TRUE,TRUE,Email;Text;Phone,TRUE,November-06-2018,06:00,22:00
