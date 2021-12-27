@@ -1,6 +1,0 @@
-{
-  "globalDependencies": {
-    "hapi": "registry:dt/hapi#13.0.0+20161019130714",
-    "node": "registry:dt/node#6.0.0+20161019125345"
-  }
-}
